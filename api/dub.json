@@ -1,0 +1,12 @@
+{
+	"authors": [
+		"CodeMyst"
+	],
+	"copyright": "Copyright © 2022, CodeMyst",
+	"dependencies": {
+		"vibe-d": "~>0.9.4"
+	},
+	"description": "pastemyst v3 API",
+	"license": "MIT",
+	"name": "pastemyst-api"
+}
