@@ -4,6 +4,8 @@
 	],
 	"copyright": "Copyright © 2022, CodeMyst",
 	"dependencies": {
+		"dpq2": "~>1.0.24",
+		"poodinis": "~>8.1.1",
 		"vibe-d": "~>0.9.4"
 	},
 	"description": "pastemyst v3 API",
