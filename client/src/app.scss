@@ -1,1 +1,43 @@
-/* Write your global styles here, in SCSS syntax. Variables and mixins from the src/variables.scss file are available here without importing */
+@import "normalize.css";
+
+body {
+    background-color: $color-bg;
+    color: $color-fg;
+    font-family: $font-stack;
+    font-size: $fs-medium;
+}
+
+a {
+    color: $color-prim;
+    @include transition;
+
+    &:hover {
+        color: $color-sec;
+    }
+
+    &.no-dec {
+        text-decoration: none;
+    }
+}
+
+#container {
+    max-width: 90%;
+    width: 960px;
+    margin: 0 auto;
+}
+
+.flex {
+    display: flex;
+
+    &.inline {
+        flex-direction: row;
+    }
+
+    &.center {
+        align-items: center;
+    }
+
+    &.space-between {
+        justify-content: space-between;
+    }
+}
