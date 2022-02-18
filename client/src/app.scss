@@ -26,11 +26,24 @@ a {
     margin: 0 auto;
 }
 
+kbd {
+    background-color: $color-bg-1;
+    border: 1px solid $color-bg-2;
+    border-radius: $border-radius;
+    padding: 3px 6px;
+    font-size: $fs-small;
+    border-bottom: 3px solid $color-bg-2;
+}
+
 .flex {
     display: flex;
 
-    &.inline {
+    &.row {
         flex-direction: row;
+    }
+
+    &.col {
+        flex-direction: column;
     }
 
     &.center {
