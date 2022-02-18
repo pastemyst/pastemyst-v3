@@ -1,10 +1,14 @@
-<div id="header" class="flex inline center space-between">
-    <div class="flex inline center">
+<script lang="ts">
+    import { isCommandPaletteOpen } from "../stores";
+</script>
+
+<div id="header" class="flex row center space-between">
+    <div class="flex row center">
         <img src="/images/pastemyst.svg" alt="pastemyst logo">
         <h1><a href="/" class="no-dec">pastemyst</a></h1>
     </div>
 
-    <div class="flex inline center">
+    <div class="flex row center" on:click={() => isCommandPaletteOpen.set(true)}>
         <ion-icon name="person-circle" />
 
         <ion-icon name="menu" />
