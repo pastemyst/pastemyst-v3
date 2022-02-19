@@ -38,7 +38,8 @@ kbd {
 .flex {
     display: flex;
 
-    &.row {
+    &.row,
+    &.sm-row {
         flex-direction: row;
     }
 
@@ -52,5 +53,53 @@ kbd {
 
     &.space-between {
         justify-content: space-between;
+    }
+
+    @media screen and (max-width: $break-med) {
+        &.sm-row {
+            flex-direction: column;
+        }
+    }
+}
+
+.hidden {
+    display: none;
+}
+
+input[type="text"] {
+    background-color: $color-bg-1;
+    border: none;
+    color: $color-fg;
+    outline: none;
+    border-radius: $border-radius;
+    padding: 0.5rem 1rem;
+    box-sizing: border-box;
+    @include transition(background-color);
+
+    &:hover {
+        background-color: $color-bg-2;
+    }
+
+    &:focus {
+        background-color: rgba($color-prim, 0.2);
+    }
+}
+
+button {
+    background-color: $color-bg-1;
+    border: none;
+    color: $color-fg;
+    border-radius: $border-radius;
+    padding: 0.5rem 1rem;
+    box-sizing: border-box;
+    cursor: pointer;
+    @include transition(background-color);
+
+    &:hover {
+        background-color: $color-bg-2;
+    }
+
+    &:focus {
+        background-color: rgba($color-prim, 0.2);
     }
 }
