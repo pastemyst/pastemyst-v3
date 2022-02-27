@@ -1,4 +1,6 @@
 <script lang="ts">
+    import PasteOptions from "../components/paste/PasteOptions.svelte";
+
     let expiresIn = "never";
 </script>
 
@@ -7,6 +9,15 @@
     <input type="text" placeholder="title" id="paste-title" name="paste-title" />
 
     <button>expires in: {expiresIn}</button>
+</div>
+
+<div class="code-editor">
+    <!-- TODO: using a simple text area just for testing -->
+    <textarea name="paste-conents" id="paste-contents" rows="20" placeholder="paste contents" spellcheck="false"></textarea>
+</div>
+
+<div class="paste-options">
+    <PasteOptions />
 </div>
 
 <style lang="scss">
@@ -39,5 +50,18 @@
                 text-align: left;
             }
         }
+    }
+
+    .code-editor {
+        margin-top: 1rem;
+        
+        textarea {
+            width: 100%;
+            resize: vertical;
+        }
+    }
+
+    .paste-options {
+        margin-top: 1rem;
     }
 </style>

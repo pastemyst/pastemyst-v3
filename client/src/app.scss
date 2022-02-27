@@ -26,6 +26,31 @@ a {
     margin: 0 auto;
 }
 
+.material-icons {
+    font-family: "Material Icons";
+    font-weight: normal;
+    font-style: normal;
+    font-size: 24px; /* Preferred icon size */
+    display: inline-block;
+    line-height: 1;
+    text-transform: none;
+    letter-spacing: normal;
+    word-wrap: normal;
+    white-space: nowrap;
+    direction: ltr;
+
+    /* Support for all WebKit browsers. */
+    -webkit-font-smoothing: antialiased;
+    /* Support for Safari and Chrome. */
+    text-rendering: optimizeLegibility;
+
+    /* Support for Firefox. */
+    -moz-osx-font-smoothing: grayscale;
+
+    /* Support for IE. */
+    font-feature-settings: "liga";
+}
+
 kbd {
     background-color: $color-bg-1;
     border: 1px solid $color-bg-2;
@@ -43,11 +68,20 @@ kbd {
         flex-direction: row;
     }
 
+    &.sm-row-rev {
+        flex-direction: row-reverse;
+    }
+
     &.col {
         flex-direction: column;
     }
 
-    &.center {
+    &.col-rev {
+        flex-direction: column-reverse;
+    }
+
+    &.center,
+    &.sm-center {
         align-items: center;
     }
 
@@ -56,8 +90,17 @@ kbd {
     }
 
     @media screen and (max-width: $break-med) {
-        &.sm-row {
+        &.sm-row,
+        &.sm-row-rev {
             flex-direction: column;
+
+            &.center {
+                align-items: flex-start;
+            }
+        }
+
+        &.sm-center {
+            align-items: flex-start;
         }
     }
 }
@@ -66,7 +109,10 @@ kbd {
     display: none;
 }
 
-input[type="text"] {
+input[type="text"],
+input[type="password"],
+button,
+textarea {
     background-color: $color-bg-1;
     border: none;
     color: $color-fg;
@@ -86,20 +132,14 @@ input[type="text"] {
 }
 
 button {
-    background-color: $color-bg-1;
-    border: none;
-    color: $color-fg;
-    border-radius: $border-radius;
-    padding: 0.5rem 1rem;
-    box-sizing: border-box;
     cursor: pointer;
-    @include transition(background-color);
 
-    &:hover {
-        background-color: $color-bg-2;
-    }
+    &.btn-main {
+        background-color: $color-prim;
+        color: $color-bg;
 
-    &:focus {
-        background-color: rgba($color-prim, 0.2);
+        &:hover {
+            background-color: $color-sec;
+        }
     }
 }

@@ -72,22 +72,19 @@
 
     const githubCmd = new LinkCommand("github")
         .withUrl("https://github.com/")
-        .withIcon("logo-github")
         .withDescription("this one has a description")
         .addShortcut(["ctrl", "g"])
         .addShortcut(["ctrl", "p"]);
 
     const gitlabCmd = new LinkCommand("gitlab")
         .withUrl("https://gitlab.com/")
-        .withIcon("logo-gitlab")
         .addShortcut(["ctrl", "l"]);
 
     const bitbucketCmd = new LinkCommand("bitbucket")
         .withUrl("https://bitbucket.com/")
-        .withIcon("logo-bitbucket")
         .addShortcut(["ctrl", "b"]);
 
-    const gitmystCmd = new LinkCommand("gitmyst").withUrl("https://git.myst.rs/").withIcon("flask");
+    const gitmystCmd = new LinkCommand("gitmyst").withUrl("https://git.myst.rs/");
 
     const sourcehutCmd = new LinkCommand("sourcehut").withUrl("https://sr.ht/");
 
@@ -230,7 +227,7 @@
 <div role="dialog" aria-modal="true" class="palette" class:isOpen>
     <div class="wrapper">
         <div class="search flex row center">
-            <ion-icon name="search" />
+            <span class="material-icons">search</span>
 
             <!-- search -->
             <input
@@ -264,7 +261,7 @@
                     <div class="name flex row center">
                         <!-- icon -->
                         {#if cmd.icon}
-                            <ion-icon name={cmd.icon} />
+                            <span class="material-icons">{cmd.icon}</span>
                         {/if}
 
                         <!-- name -->
@@ -341,7 +338,7 @@
     .search {
         padding: 0.5rem;
 
-        ion-icon {
+        .material-icons {
             margin-right: 1rem;
         }
 
@@ -351,6 +348,7 @@
             outline: none;
             color: $color-fg;
             width: 100%;
+            padding: 0;
         }
     }
 
@@ -380,7 +378,7 @@
             .name {
                 margin-bottom: 0.25rem;
 
-                ion-icon {
+                .material-icons {
                     margin-right: 1rem;
                 }
             }

@@ -9,9 +9,9 @@
     </div>
 
     <div class="flex row center">
-        <ion-icon name="person-circle" />
+        <span class="material-icons">account_circle</span>
 
-        <ion-icon name="menu" on:click={() => isCommandPaletteOpen.set(true)} />
+        <span class="material-icons" on:click={() => isCommandPaletteOpen.set(true)}>menu</span>
     </div>
 </header>
 
@@ -30,7 +30,7 @@
         margin-top: -3px;
     }
 
-    ion-icon {
+    .material-icons {
         cursor: pointer;
         font-size: 1.75rem;
         @include transition;
