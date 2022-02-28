@@ -18,6 +18,7 @@
 <style lang="scss">
     header {
         margin-top: 1rem;
+        flex-shrink: 0;
     }
 
     img {
