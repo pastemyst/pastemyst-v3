@@ -1,5 +1,6 @@
 <script lang="ts">
     import Header from "../components/Header.svelte";
+    import Footer from "../components/Footer.svelte";
     import CommandPalette from "../components/CommandPalette.svelte";
     import { onMount } from "svelte";
     import { isCommandPaletteOpen } from "../stores";
@@ -22,7 +23,17 @@
 <div id="container">
     <Header />
 
-    <slot />
+    <main>
+        <slot />
+    </main>
+
+    <Footer />
 </div>
 
 <CommandPalette bind:this={commandPalette} />
+
+<style lang="scss">
+    main {
+        flex: 1 0 auto;
+    }
+</style>
