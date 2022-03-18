@@ -9,12 +9,17 @@ import vibe.data.json;
 public struct Config
 {
     public ushort port;
-    public string connectionInfo;
+
+    public string mongoConnectionString;
+
+    public string mongoDatabase;
 }
 
 public class ConfigService
 {
     public const Config config;
+
+    public alias config this;
 
     public this(string path)
     {

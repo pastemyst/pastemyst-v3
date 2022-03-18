@@ -1,8 +1,7 @@
 import vibe.d;
 import poodinis;
-import pastemyst.controllers.test;
-import pastemyst.services.config;
-import pastemyst.services.postgres;
+import pastemyst.controllers;
+import pastemyst.services;
 
 void main()
 {
@@ -10,12 +9,9 @@ void main()
 
     auto dependencies = new shared DependencyContainer();
     dependencies.register!ConfigService().existingInstance(configService);
-    dependencies.register!PostgresService();
-
-    dependencies.register!TestController();
+    dependencies.register!MongoService();
 
     auto router = new URLRouter();
-    router.registerRestInterface(dependencies.resolve!TestController());
 
     auto serverSettings = new HTTPServerSettings();
     serverSettings.bindAddresses = ["127.0.0.1"];
