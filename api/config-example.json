@@ -1,4 +1,5 @@
 {
     "port": 5000,
-    "connectionInfo": "postgresql://pastemyst:password@localhost:5432/pastemyst"
+    "mongoConnectionString": "mongodb+srv://user:pass@url.com/?retryWrites=true&w=majority",
+    "mongoDatabase": "database"
 }

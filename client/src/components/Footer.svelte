@@ -1,10 +1,10 @@
 <footer class="flex sm-row space-between center">
     <span>
-        © <a href="https://myst.rs/">codemyst</a> 2022
+        © <a href="https://myst.rs/" class="no-dec">codemyst</a> 2022
     </span>
 
     <span>v3.0.0-alpha</span>
-    
+
     <span>0 active pastes</span>
 </footer>
 
