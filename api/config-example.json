@@ -1,5 +1,12 @@
 {
     "port": 5000,
+    "host": "http://localhost:5000/",
+
     "mongoConnectionString": "mongodb+srv://user:pass@url.com/?retryWrites=true&w=majority",
-    "mongoDatabase": "database"
+    "mongoDatabase": "database",
+
+    "github": {
+        "clientId": "...",
+        "clientSecret": "..."
+    }
 }
