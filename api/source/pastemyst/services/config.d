@@ -10,9 +10,20 @@ public struct Config
 {
     public ushort port;
 
+    public string host;
+
     public string mongoConnectionString;
 
     public string mongoDatabase;
+
+    public GitHubConfig github;
+}
+
+public struct GitHubConfig
+{
+    public string clientId;
+
+    public string clientSecret;
 }
 
 public class ConfigService
