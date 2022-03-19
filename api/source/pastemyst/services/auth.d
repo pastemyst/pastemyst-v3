@@ -68,14 +68,14 @@ public class AuthService
     {
         githubProvider = OAuthProvider("GitHub", config.github.clientId, config.github.clientId,
             "https://github.com/login/oauth/authorize", "https://github.com/login/oauth/access_token",
-            "https://api.github.com/user", config.host ~ "api/v3/auth/github-callback",
+            "https://api.github.com/user", config.host ~ "api/v3/auth-web/login/github-callback",
             ["read:user"], "id", "login", "avatar_url");
     }
 
     /**
      * Returns the full authorization url for the provider.
      */
-    public string getAuthorizationUrl(const OAuthProvider provider) const
+    public string getAuthorizationUrl(const OAuthProvider provider, string state) const
     {
         import std.array : join;
         import std.uri : encodeComponent;
@@ -86,6 +86,6 @@ public class AuthService
             "?client_id=" ~ provider.clientId ~
             "&scope=" ~ scopes ~
             "&redirect_uri=" ~ encodeComponent(provider.redirectUrl) ~
-            "&state=test_state";
+            "&state=" ~ state;
     }
 }

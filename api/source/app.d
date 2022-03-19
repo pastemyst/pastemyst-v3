@@ -23,6 +23,8 @@ void main()
     auto serverSettings = new HTTPServerSettings();
     serverSettings.bindAddresses = ["127.0.0.1"];
     serverSettings.port = configService.config.port;
+    serverSettings.sessionOptions = SessionOption.noSameSiteStrict | SessionOption.httpOnly;
+    serverSettings.sessionStore = new MemorySessionStore();
 
     listenHTTP(serverSettings, router);
 
