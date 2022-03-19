@@ -28,7 +28,7 @@ public class AuthWebController
     }
 
     @path("login/github")
-    public void getGitHubLogin(HTTPServerRequest req, HTTPServerResponse res) @safe
+    public void getGitHubLogin(HTTPServerResponse res) @safe
     {
         import std.random : rndGen;
         import std.algorithm : map, filter;
@@ -43,8 +43,7 @@ public class AuthWebController
         Base64.encode(rndNums, apndr);
         auto state = apndr.data.filter!isAlphaNum().to!string();
 
-        auto session = req.session;
-        if (!session) session = res.startSession();
+        auto session = res.startSession();
         session.set("oauth_state", state);
 
         res.redirect(authService.getAuthorizationUrl(authService.githubProvider, state));
@@ -59,8 +58,33 @@ public class AuthWebController
                 "OAuth callback called but the session hasn't been started.");
         }
 
-        string sessionState = req.session.get!string("oauth_state");
+        const sessionState = req.session.get!string("oauth_state");
 
         if (state != sessionState) throw new HTTPStatusException(HTTPStatus.badRequest, "Invalid state code.");
+
+        const accessTokenUrl = authService.githubProvider.accessTokenUrl ~
+                               "?client_id=" ~ authService.githubProvider.clientId ~
+                               "&client_secret=" ~ authService.githubProvider.clientSecret ~
+                               "&code=" ~ code;
+
+        requestHTTP(accessTokenUrl,
+        (scope req)
+        {
+            req.headers.addField("Accept", "application/json");
+            req.method = HTTPMethod.POST;
+        },
+        (scope res)
+        {
+            try
+            {
+                const accessToken = parseJsonString(res.bodyReader.readAllUTF8())["access_token"].get!string();
+            }
+            catch (Exception e)
+            {
+                throw new HTTPStatusException(HTTPStatus.internalServerError, "Failed reading the access token.");
+            }
+        });
+
+        res.terminateSession();
     }
 }

@@ -66,7 +66,7 @@ public class AuthService
 
     public this(ConfigService config)
     {
-        githubProvider = OAuthProvider("GitHub", config.github.clientId, config.github.clientId,
+        githubProvider = OAuthProvider("GitHub", config.github.clientId, config.github.clientSecret,
             "https://github.com/login/oauth/authorize", "https://github.com/login/oauth/access_token",
             "https://api.github.com/user", config.host ~ "api/v3/auth-web/login/github-callback",
             ["read:user"], "id", "login", "avatar_url");
