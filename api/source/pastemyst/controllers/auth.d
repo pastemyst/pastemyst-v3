@@ -2,6 +2,7 @@ module pastemyst.controllers.auth;
 
 import vibe.d;
 import pastemyst.services;
+import pastemyst.models;
 
 @path("/api/v3/auth")
 public interface IAuthController
@@ -62,28 +63,12 @@ public class AuthWebController
 
         if (state != sessionState) throw new HTTPStatusException(HTTPStatus.badRequest, "Invalid state code.");
 
-        const accessTokenUrl = authService.githubProvider.accessTokenUrl ~
-                               "?client_id=" ~ authService.githubProvider.clientId ~
-                               "&client_secret=" ~ authService.githubProvider.clientSecret ~
-                               "&code=" ~ code;
+        const accessToken = authService.getAccessToken(authService.githubProvider, code);
 
-        requestHTTP(accessTokenUrl,
-        (scope req)
-        {
-            req.headers.addField("Accept", "application/json");
-            req.method = HTTPMethod.POST;
-        },
-        (scope res)
-        {
-            try
-            {
-                const accessToken = parseJsonString(res.bodyReader.readAllUTF8())["access_token"].get!string();
-            }
-            catch (Exception e)
-            {
-                throw new HTTPStatusException(HTTPStatus.internalServerError, "Failed reading the access token.");
-            }
-        });
+        const providerUser = authService.getProviderUser(authService.githubProvider, accessToken);
+
+        import std.stdio;
+        writeln(providerUser);
 
         res.terminateSession();
     }

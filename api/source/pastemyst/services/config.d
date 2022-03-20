@@ -12,6 +12,8 @@ public struct Config
 
     public string host;
 
+    public string secret;
+
     public string mongoConnectionString;
 
     public string mongoDatabase;
