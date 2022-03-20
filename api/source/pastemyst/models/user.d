@@ -2,7 +2,7 @@ module pastemyst.models.user;
 
 import vibe.d;
 
-public class User
+public struct User
 {
     @name("_id")
     public string id;

@@ -22,10 +22,12 @@ public class AuthController : IAuthController
 public class AuthWebController
 {
     private const AuthService authService;
+    private UserService userService;
 
-    public this(AuthService authService)
+    public this(AuthService authService, UserService userService)
     {
         this.authService = authService;
+        this.userService = userService;
     }
 
     @path("login/github")
@@ -67,9 +69,23 @@ public class AuthWebController
 
         const providerUser = authService.getProviderUser(authService.githubProvider, accessToken);
 
-        import std.stdio;
-        writeln(providerUser);
+        if (userService.existsByProviderId(authService.githubProvider.name, providerUser.id))
+        {
+            logInfo("User already exists");
+        }
+        else
+        {
+            User newUser = {
+                username: providerUser.username,
+                avatarUrl: providerUser.avatarUrl,
+                oauthProviderIds: [authService.githubProvider.name: providerUser.id]
+            };
+
+            userService.createUser(newUser);
+        }
 
         res.terminateSession();
+
+        res.redirect("/");
     }
 }
