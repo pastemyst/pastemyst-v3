@@ -1,6 +1,8 @@
 module pastemyst.controllers.auth;
 
+import std.datetime;
 import vibe.d;
+import hunt.jwt;
 import pastemyst.services;
 import pastemyst.models;
 
@@ -23,11 +25,13 @@ public class AuthWebController
 {
     private const AuthService authService;
     private UserService userService;
+    private ConfigService configService;
 
-    public this(AuthService authService, UserService userService)
+    public this(AuthService authService, UserService userService, ConfigService configService)
     {
         this.authService = authService;
         this.userService = userService;
+        this.configService = configService;
     }
 
     @path("login/github")
@@ -53,7 +57,7 @@ public class AuthWebController
     }
 
     @path("/login/github-callback")
-    public void getGithubCallback(HTTPServerRequest req, HTTPServerResponse res, string code, string state) @safe
+    public void getGithubCallback(HTTPServerRequest req, HTTPServerResponse res, string code, string state) @trusted
     {
         if (!req.session)
         {
@@ -69,20 +73,36 @@ public class AuthWebController
 
         const providerUser = authService.getProviderUser(authService.githubProvider, accessToken);
 
-        if (userService.existsByProviderId(authService.githubProvider.name, providerUser.id))
-        {
-            logInfo("User already exists");
-        }
-        else
-        {
-            User newUser = {
-                username: providerUser.username,
-                avatarUrl: providerUser.avatarUrl,
-                oauthProviderIds: [authService.githubProvider.name: providerUser.id]
-            };
+        auto user = userService.findByProviderId(authService.githubProvider.name, providerUser.id);
 
-            userService.createUser(newUser);
+        // create user if doesn't exists
+        if (user.isNull())
+        {
+            user = User(null,
+                        providerUser.username,
+                        [authService.githubProvider.name: providerUser.id],
+                        providerUser.avatarUrl);
+
+            userService.createUser(user.get());
         }
+
+        const timeInMonth = Clock.currTime() + 30.days;
+
+        auto jwtToken = new JwtToken(JwtAlgorithm.HS512);
+        jwtToken.claims.exp = timeInMonth.toUnixTime();
+        jwtToken.claims.set("id", user.get().id);
+        jwtToken.claims.set("username", user.get().username);
+
+        string encodedToken = jwtToken.encode(configService.secret);
+
+        // todo: make sure cookie is secure on https
+        auto cookie = new Cookie();
+        cookie.expire = dur!"days"(30);
+        cookie.path = "/";
+        cookie.value = encodedToken;
+        cookie.sameSite(Cookie.SameSite.strict);
+
+        res.cookies.addField("pastemyst", cookie);
 
         res.terminateSession();
 

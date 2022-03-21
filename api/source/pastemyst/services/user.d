@@ -1,5 +1,6 @@
 module pastemyst.services.user;
 
+import std.typecons;
 import pastemyst.services;
 import pastemyst.models;
 import pastemyst.encoding;
@@ -20,7 +21,15 @@ public class UserService
      */
     public bool existsByProviderId(const string provider, const string id)
     {
-        return !mongoService.findOne!User(["oauthProviderIds." ~ provider: id]).isNull();
+        return !findByProviderId(provider, id).isNull();
+    }
+
+    /**
+     * Finds a user with the provided OAtuh provider id.
+     */
+    public Nullable!User findByProviderId(const string provider, const string id)
+    {
+        return mongoService.findOne!User(["oauthProviderIds." ~ provider: id]);
     }
 
     /**
