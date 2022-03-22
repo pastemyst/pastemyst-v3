@@ -15,11 +15,13 @@ void main()
 
     dependencies.register!AuthController();
     dependencies.register!AuthWebController();
+    dependencies.register!UserController();
 
     auto router = new URLRouter();
     router.registerWebInterface(dependencies.resolve!AuthWebController());
 
     router.registerRestInterface(dependencies.resolve!AuthController());
+    router.registerRestInterface(dependencies.resolve!UserController());
 
     auto serverSettings = new HTTPServerSettings();
     serverSettings.bindAddresses = ["127.0.0.1"];
