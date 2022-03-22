@@ -32,6 +32,11 @@ public class UserService
         return mongoService.findOne!User(["oauthProviderIds." ~ provider: id]);
     }
 
+    public Nullable!User findByUsername(const string username)
+    {
+        return mongoService.findOne!User(["username": username]);
+    }
+
     /**
      * Inserts a user into the DB. Modifies the provided user's ID field with the generated one.
      */

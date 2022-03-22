@@ -75,37 +75,42 @@ public class AuthWebController
 
         auto user = userService.findByProviderId(authService.githubProvider.name, providerUser.id);
 
-        // create user if doesn't exists
-        if (user.isNull())
-        {
-            user = User(null,
-                        providerUser.username,
-                        [authService.githubProvider.name: providerUser.id],
-                        providerUser.avatarUrl);
-
-            userService.createUser(user.get());
-        }
-
         const timeInMonth = Clock.currTime() + 30.days;
-
         auto jwtToken = new JwtToken(JwtAlgorithm.HS512);
         jwtToken.claims.exp = timeInMonth.toUnixTime();
-        jwtToken.claims.set("id", user.get().id);
-        jwtToken.claims.set("username", user.get().username);
-
-        string encodedToken = jwtToken.encode(configService.secret);
 
         // todo: make sure cookie is secure on https
         auto cookie = new Cookie();
         cookie.expire = dur!"days"(30);
         cookie.path = "/";
-        cookie.value = encodedToken;
+        cookie.httpOnly = true;
         cookie.sameSite(Cookie.SameSite.strict);
 
-        res.cookies.addField("pastemyst", cookie);
-
+        // terminate the session that was only used for storing the OAuth state string
         res.terminateSession();
 
-        res.redirect("/");
+        // if user doesn't exist, create a jwt token that is used for registration purposes only
+        if (user.isNull())
+        {
+            jwtToken.claims.set("id", providerUser.id);
+            jwtToken.claims.set("username", providerUser.username);
+
+            cookie.value = jwtToken.encode(configService.secret);
+
+            res.cookies.addField("pastemyst-registration", cookie);
+
+            res.redirect("/create-account?username=" ~ providerUser.username);
+        }
+        else
+        {
+            jwtToken.claims.set("id", user.get().id);
+            jwtToken.claims.set("username", user.get().username);
+
+            cookie.value = jwtToken.encode(configService.secret);
+
+            res.cookies.addField("pastemyst", cookie);
+
+            res.redirect("/");
+        }
     }
 }

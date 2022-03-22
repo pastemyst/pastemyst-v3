@@ -15,6 +15,7 @@ public struct User
     /**
      * List of user IDs for different OAuth providers.
      */
+    // TODO: this should be ignored when sending the User object in rest interfaces.
     public string[string] oauthProviderIds;
 
     /**
