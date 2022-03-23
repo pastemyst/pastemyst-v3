@@ -138,6 +138,10 @@ form {
     span.required {
         color: $color-red;
     }
+
+    label {
+        font-weight: bold;
+    }
 }
 
 button {
