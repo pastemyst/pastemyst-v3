@@ -32,6 +32,11 @@ public class UserService
         return mongoService.findOne!User(["oauthProviderIds." ~ provider: id]);
     }
 
+    public bool existsByUsername(const string username)
+    {
+        return !findByUsername(username).isNull();
+    }
+
     public Nullable!User findByUsername(const string username)
     {
         return mongoService.findOne!User(["username": username]);
@@ -52,5 +57,27 @@ public class UserService
         user.id = id;
 
         mongoService.insert!User(user);
+    }
+
+    /**
+     * Checks if the provided username is valid. Usernames must be unique, can contain alphanumeric chars and these symbols: ., -, _
+     *
+     * It does check if the username is already taken.
+     *
+     * Returns: `null` if username is valid, otherwise returns an explanation message.
+     */
+    public string validateUsername(const string username)
+    {
+        import std.regex : ctRegex, matchFirst;
+
+        const rgx = ctRegex!(r"^[\w.-]+$");
+
+        if (existsByUsername(username)) return "Username is already taken.";
+
+        if (username.length == 0) return "Username can't be empty.";
+
+        if (matchFirst(username, rgx).empty) return "Username contains invalid symbols.";
+
+        return null;
     }
 }

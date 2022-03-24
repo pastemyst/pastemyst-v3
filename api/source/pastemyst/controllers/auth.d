@@ -1,6 +1,7 @@
 module pastemyst.controllers.auth;
 
 import std.datetime;
+import std.algorithm;
 import vibe.d;
 import hunt.jwt;
 import pastemyst.services;
@@ -9,12 +10,65 @@ import pastemyst.models;
 @path("/api/v3/auth")
 public interface IAuthController
 {
-
+    @path("register")
+    @headerParam("authorization", "Authorization")
+    @bodyParam("username", "username")
+    User postRegister(string authorization, string username) @safe;
 }
 
 public class AuthController : IAuthController
 {
+    private ConfigService configService;
+    private UserService userService;
 
+    public this(ConfigService configService, UserService userService)
+    {
+        this.configService = configService;
+        this.userService = userService;
+    }
+
+    public override User postRegister(string authorization, string username) @trusted
+    {
+        enforceHTTP(authorization.startsWith("Bearer "), HTTPStatus.badRequest,
+            "Invalid authorization scheme. The token must be provided as a Bearer token.");
+
+        const usernameErr = userService.validateUsername(username);
+
+        enforceHTTP(usernameErr is null, HTTPStatus.badRequest, usernameErr);
+
+        const encodedToken = authorization["Bearer ".length..$];
+
+        string providerName;
+        string providerId;
+        string avatarUrl;
+
+        try
+        {
+            auto token = JwtToken.decode(encodedToken, configService.secret);
+
+            providerName = token.claims.get("provider");
+            providerId = token.claims.get("id");
+            avatarUrl = token.claims.get("avatarUrl");
+        }
+        catch (Exception e)
+        {
+            logError("User tried to register with an invalid token. Exception: %s", e);
+            throw new HTTPStatusException(HTTPStatus.badRequest, "Provided token is not valid.");
+        }
+
+        enforceHTTP(!userService.existsByProviderId(providerName, providerId), HTTPStatus.badRequest,
+            "A user already exists with the same provider.");
+
+        User user = {
+            username: username,
+            [providerName: providerId],
+            avatarUrl: avatarUrl
+        };
+
+        userService.createUser(user);
+
+        return user;
+    }
 }
 
 /**
@@ -93,7 +147,8 @@ public class AuthWebController
         if (user.isNull())
         {
             jwtToken.claims.set("id", providerUser.id);
-            jwtToken.claims.set("username", providerUser.username);
+            jwtToken.claims.set("provider", authService.githubProvider.name);
+            jwtToken.claims.set("avatarUrl", providerUser.avatarUrl);
 
             cookie.value = jwtToken.encode(configService.secret);
 
