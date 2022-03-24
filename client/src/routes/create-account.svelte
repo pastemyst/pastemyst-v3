@@ -4,30 +4,56 @@
 
     let username = $page.url.searchParams.get("username");
     let usernameInput: HTMLInputElement;
-    let usernameTaken = false;
 
-    const onFormSubmit = async () => {
-        usernameTaken = (await getUser(username) !== null);
+    let usernameValid = true;
+    let usernameErrorMsg: string;
 
-        if (usernameTaken) usernameInput.focus();
+    const usernameRegex = /^[\w.-]+$/m;
+
+    const onUsernameInput = async () => {
+        await validateUsername();
+    };
+
+    const onFormSubmit = () => {
+        if (!usernameValid) usernameInput.focus();
+    };
+
+    const validateUsername = async () => {
+        if (await getUser(username) !== null) {
+            usernameValid = false;
+            usernameErrorMsg = "this username is already taken";
+        } else if (username.length === 0) {
+            usernameValid = false;
+            usernameErrorMsg = "the username can't be empty";
+        } else if (!usernameRegex.test(username)) {
+            usernameValid = false;
+            usernameErrorMsg = "the username contains invalid symbols";
+        } else {
+            usernameValid = true;
+            usernameErrorMsg = "";
+        }
     };
 </script>
 
 <section>
-    <h2>create a new account</h2>
+    <div class="wrapper">
+        <h2>create a new account</h2>
 
-    <form class="flex col" on:submit|preventDefault={onFormSubmit}>
-        <label for="username">
-            username:<span class="required">*</span>
+        <p>the username has to be unique, it can contain alphanumeric characters, and only the symbols: <code>.</code>, <code>-</code>, <code>_</code></p>
 
-            {#if usernameTaken}
-                <span class="error">username is taken</span>
-            {/if}
-        </label>
-        <input required type="text" name="username" id="username" placeholder="username..." bind:value={username} bind:this={usernameInput} />
+        <form class="flex col" on:submit|preventDefault={onFormSubmit}>
+            <label for="username">
+                username:<span class="required">*</span>
 
-        <button type="submit" class="btn-main">create account</button>
-    </form>
+                {#if !usernameValid}
+                    <span class="error">{usernameErrorMsg}</span>
+                {/if}
+            </label>
+            <input required type="text" name="username" id="username" placeholder="username..." bind:value={username} bind:this={usernameInput} on:input={onUsernameInput} />
+
+            <button type="submit" class="btn-main">create account</button>
+        </form>
+    </div>
 </section>
 
 <style lang="scss">
@@ -40,8 +66,12 @@
         }
     }
 
-    input,
-    button {
+    h2 {
+        text-align: center;
+    }
+
+    .wrapper {
+        margin: 0 auto;
         width: 50%;
     }
 
@@ -49,9 +79,14 @@
         margin-top: 2rem;
     }
 
+    label,
+    input,
+    button {
+        width: 100%;
+    }
+
     @media screen and (max-width: $break-med) {
-        input,
-        button {
+        .wrapper {
             width: 100%;
         }
     }

@@ -54,13 +54,18 @@ a {
     font-feature-settings: "liga";
 }
 
-kbd {
-    background-color: $color-bg-1;
+kbd,
+code {
+    background-color: $color-bg;
     border: 1px solid $color-bg-2;
     border-radius: $border-radius;
     padding: 3px 6px;
     font-size: $fs-small;
     border-bottom: 3px solid $color-bg-2;
+}
+
+code {
+    border-bottom: 1px solid $color-bg-2;
 }
 
 .flex {
