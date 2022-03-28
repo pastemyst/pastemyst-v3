@@ -57,31 +57,29 @@
     };
 </script>
 
-<section>
-    <div class="wrapper">
-        <h2>create a new account</h2>
+<section class="centered">
+    <h2>create a new account</h2>
 
-        <p>the username has to be unique, it can contain alphanumeric characters, and only the symbols: <code>.</code>, <code>-</code>, <code>_</code></p>
+    <p>the username has to be unique, it can contain alphanumeric characters, and only the symbols: <code>.</code>, <code>-</code>, <code>_</code></p>
 
-        <form class="flex col" on:submit|preventDefault={onFormSubmit}>
-            {#if createAccountError}
-                <p class="error-message">
-                    There was an issue creating the account. Please try again. If the issue persists please <a href="/contact">contact us</a>.
-                </p>
+    <form class="flex col" on:submit|preventDefault={onFormSubmit}>
+        {#if createAccountError}
+            <p class="error-message">
+                There was an issue creating the account. Please try again. If the issue persists please <a href="/contact">contact us</a>.
+            </p>
+        {/if}
+
+        <label for="username">
+            username:<span class="required">*</span>
+
+            {#if !usernameValid}
+                <span class="error">{usernameErrorMsg}</span>
             {/if}
+        </label>
+        <input required type="text" name="username" id="username" placeholder="username..." bind:value={username} bind:this={usernameInput} on:input={onUsernameInput} />
 
-            <label for="username">
-                username:<span class="required">*</span>
-
-                {#if !usernameValid}
-                    <span class="error">{usernameErrorMsg}</span>
-                {/if}
-            </label>
-            <input required type="text" name="username" id="username" placeholder="username..." bind:value={username} bind:this={usernameInput} on:input={onUsernameInput} />
-
-            <button type="submit" class="btn-main">create account</button>
-        </form>
-    </div>
+        <button type="submit" class="btn-main">create account</button>
+    </form>
 </section>
 
 <style lang="scss">
@@ -94,15 +92,6 @@
         }
     }
 
-    h2 {
-        text-align: center;
-    }
-
-    .wrapper {
-        margin: 0 auto;
-        width: 50%;
-    }
-
     button {
         margin-top: 2rem;
     }
@@ -111,11 +100,5 @@
     input,
     button {
         width: 100%;
-    }
-
-    @media screen and (max-width: $break-med) {
-        .wrapper {
-            width: 100%;
-        }
     }
 </style>

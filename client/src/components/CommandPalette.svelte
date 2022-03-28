@@ -227,7 +227,7 @@
 <div role="dialog" aria-modal="true" class="palette" class:isOpen>
     <div class="wrapper">
         <div class="search flex row center">
-            <span class="material-icons">search</span>
+            <ion-icon name="search" />
 
             <!-- search -->
             <input
@@ -261,7 +261,7 @@
                     <div class="name flex row center">
                         <!-- icon -->
                         {#if cmd.icon}
-                            <span class="material-icons">{cmd.icon}</span>
+                            <ion-icon name={cmd.icon} />
                         {/if}
 
                         <!-- name -->
@@ -338,8 +338,9 @@
     .search {
         padding: 0.5rem;
 
-        .material-icons {
+        ion-icon {
             margin-right: 1rem;
+            font-size: $fs-medium;
         }
 
         input {
@@ -378,7 +379,7 @@
             .name {
                 margin-bottom: 0.25rem;
 
-                .material-icons {
+                ion-icon {
                     margin-right: 1rem;
                 }
             }
