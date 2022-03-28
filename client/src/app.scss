@@ -181,3 +181,9 @@ section {
         background-color: $color-bg;
     }
 }
+
+.error-message {
+    padding: 1rem;
+    border: 2px solid $color-red;
+    border-radius: $border-radius;
+}

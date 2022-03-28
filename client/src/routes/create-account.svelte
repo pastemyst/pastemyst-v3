@@ -1,5 +1,8 @@
 <script lang="ts">
     import { page } from "$app/stores";
+    import { goto } from "$app/navigation";
+    import { deleteCookie, setCookie } from "../util/cookies";
+    import { createAccount } from "../api/auth";
     import { getUser } from "../api/user";
 
     let username = $page.url.searchParams.get("username");
@@ -10,12 +13,31 @@
 
     const usernameRegex = /^[\w.-]+$/m;
 
+    let createAccountError = false;
+
     const onUsernameInput = async () => {
         await validateUsername();
     };
 
-    const onFormSubmit = () => {
-        if (!usernameValid) usernameInput.focus();
+    const onFormSubmit = async () => {
+        await validateUsername();
+
+        if (!usernameValid) {
+            usernameInput.focus();
+            return;
+        }
+
+        const token = await createAccount(username);
+
+        if (token === null) {
+            createAccountError = true;
+            return;
+        }
+
+        setCookie("pastemyst", token, 30);
+        deleteCookie("pastemyst-registration");
+
+        goto("/");
     };
 
     const validateUsername = async () => {
@@ -42,6 +64,12 @@
         <p>the username has to be unique, it can contain alphanumeric characters, and only the symbols: <code>.</code>, <code>-</code>, <code>_</code></p>
 
         <form class="flex col" on:submit|preventDefault={onFormSubmit}>
+            {#if createAccountError}
+                <p class="error-message">
+                    There was an issue creating the account. Please try again. If the issue persists please <a href="/contact">contact us</a>.
+                </p>
+            {/if}
+
             <label for="username">
                 username:<span class="required">*</span>
 
