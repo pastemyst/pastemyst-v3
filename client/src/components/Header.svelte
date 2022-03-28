@@ -9,9 +9,13 @@
     </div>
 
     <div class="flex row center">
-        <span class="material-icons">account_circle</span>
+        <a href="/login" class="nav-item" aria-label="login/register">
+            <ion-icon name="person-circle" />
+        </a>
 
-        <span class="material-icons" on:click={() => isCommandPaletteOpen.set(true)}>menu</span>
+        <button class="nav-item" on:click={() => isCommandPaletteOpen.set(true)}>
+            <ion-icon name="menu" />
+        </button>
     </div>
 </header>
 
@@ -31,11 +35,18 @@
         margin-top: -3px;
     }
 
-    .material-icons {
+    button.nav-item {
+        padding: 0;
+        background-color: initial;
+        color: $color-prim;
+    }
+
+    .nav-item {
         cursor: pointer;
         font-size: 1.75rem;
         @include transition;
         margin-left: 1rem;
+        text-decoration: none;
 
         &:hover {
             color: $color-sec;

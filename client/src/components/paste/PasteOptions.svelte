@@ -1,16 +1,24 @@
 <div class="paste-options flex sm-row center space-between">
     <div class="options flex row center">
         <input type="checkbox" id="encrypt" />
-        <label for="encrypt" class="material-icons" aria-label="encrypt the paste with a password">key</label>
+        <label for="encrypt" aria-label="encrypt the paste with a password">
+            <ion-icon name="key" />
+        </label>
 
         <input type="checkbox" id="private" />
-        <label for="private" class="material-icons" aria-label="private paste, only visible by you">lock</label>
+        <label for="private" aria-label="private paste, only visible by you">
+            <ion-icon name="lock-closed" />
+        </label>
 
         <input type="checkbox" id="show-on-profile" />
-        <label for="show-on-profile" class="material-icons" aria-label="show on your public profile">person</label>
+        <label for="show-on-profile" aria-label="show on your public profile">
+            <ion-icon name="people" />
+        </label>
 
         <input type="checkbox" id="detach" />
-        <label for="detach" class="material-icons" aria-label="detach paste, won't be associated with your account" >fingerprint</label>
+        <label for="detach" aria-label="detach paste, won't be associated with your account">
+            <ion-icon name="finger-print" />
+        </label>
     </div>
 
     <button class="btn-main">create paste</button>
@@ -43,9 +51,15 @@
         cursor: pointer;
         @include transition();
         margin-right: 1rem;
+        display: flex;
+        align-items: center;
 
         &:hover {
             color: $color-sec;
+        }
+
+        ion-icon {
+            font-size: $fs-large;
         }
     }
 </style>
