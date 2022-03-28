@@ -13,7 +13,7 @@ public interface IAuthController
     @path("register")
     @headerParam("authorization", "Authorization")
     @bodyParam("username", "username")
-    User postRegister(string authorization, string username) @safe;
+    Json postRegister(string authorization, string username) @safe;
 }
 
 public class AuthController : IAuthController
@@ -27,7 +27,7 @@ public class AuthController : IAuthController
         this.userService = userService;
     }
 
-    public override User postRegister(string authorization, string username) @trusted
+    public override Json postRegister(string authorization, string username) @trusted
     {
         enforceHTTP(authorization.startsWith("Bearer "), HTTPStatus.badRequest,
             "Invalid authorization scheme. The token must be provided as a Bearer token.");
@@ -67,7 +67,13 @@ public class AuthController : IAuthController
 
         userService.createUser(user);
 
-        return user;
+        const timeInMonth = Clock.currTime() + 30.days;
+        auto jwtToken = new JwtToken(JwtAlgorithm.HS512);
+        jwtToken.claims.exp = timeInMonth.toUnixTime();
+        jwtToken.claims.set("id", user.id);
+        jwtToken.claims.set("username", user.username);
+
+        return Json(["token": Json(jwtToken.encode(configService.secret))]);
     }
 }
 
@@ -129,15 +135,12 @@ public class AuthWebController
 
         auto user = userService.findByProviderId(authService.githubProvider.name, providerUser.id);
 
-        const timeInMonth = Clock.currTime() + 30.days;
         auto jwtToken = new JwtToken(JwtAlgorithm.HS512);
-        jwtToken.claims.exp = timeInMonth.toUnixTime();
 
         // todo: make sure cookie is secure on https
         auto cookie = new Cookie();
-        cookie.expire = dur!"days"(30);
         cookie.path = "/";
-        cookie.httpOnly = true;
+        cookie.httpOnly = false;
         cookie.sameSite(Cookie.SameSite.strict);
 
         // terminate the session that was only used for storing the OAuth state string
@@ -146,10 +149,14 @@ public class AuthWebController
         // if user doesn't exist, create a jwt token that is used for registration purposes only
         if (user.isNull())
         {
+            const timeInHour = Clock.currTime() + 1.hours;
+            jwtToken.claims.exp = timeInHour.toUnixTime();
+
             jwtToken.claims.set("id", providerUser.id);
             jwtToken.claims.set("provider", authService.githubProvider.name);
             jwtToken.claims.set("avatarUrl", providerUser.avatarUrl);
 
+            cookie.expire = dur!"hours"(1);
             cookie.value = jwtToken.encode(configService.secret);
 
             res.cookies.addField("pastemyst-registration", cookie);
@@ -158,9 +165,12 @@ public class AuthWebController
         }
         else
         {
+            const timeInMonth = Clock.currTime() + 30.days;
+            jwtToken.claims.exp = timeInMonth.toUnixTime();
             jwtToken.claims.set("id", user.get().id);
             jwtToken.claims.set("username", user.get().username);
 
+            cookie.expire = dur!"days"(30);
             cookie.value = jwtToken.encode(configService.secret);
 
             res.cookies.addField("pastemyst", cookie);
