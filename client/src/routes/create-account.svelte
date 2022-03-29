@@ -41,7 +41,7 @@
     };
 
     const validateUsername = async () => {
-        if (await getUser(username) !== null) {
+        if ((await getUser(username)) !== null) {
             usernameValid = false;
             usernameErrorMsg = "this username is already taken";
         } else if (username.length === 0) {
@@ -60,12 +60,16 @@
 <section class="centered">
     <h2>create a new account</h2>
 
-    <p>the username has to be unique, it can contain alphanumeric characters, and only the symbols: <code>.</code>, <code>-</code>, <code>_</code></p>
+    <p>
+        the username has to be unique, it can contain alphanumeric characters, and only the symbols:
+        <code>.</code>, <code>-</code>, <code>_</code>
+    </p>
 
     <form class="flex col" on:submit|preventDefault={onFormSubmit}>
         {#if createAccountError}
             <p class="error-message">
-                There was an issue creating the account. Please try again. If the issue persists please <a href="/contact">contact us</a>.
+                There was an issue creating the account. Please try again. If the issue persists
+                please <a href="/contact">contact us</a>.
             </p>
         {/if}
 
@@ -76,7 +80,16 @@
                 <span class="error">{usernameErrorMsg}</span>
             {/if}
         </label>
-        <input required type="text" name="username" id="username" placeholder="username..." bind:value={username} bind:this={usernameInput} on:input={onUsernameInput} />
+        <input
+            required
+            type="text"
+            name="username"
+            id="username"
+            placeholder="username..."
+            bind:value={username}
+            bind:this={usernameInput}
+            on:input={onUsernameInput}
+        />
 
         <button type="submit" class="btn-main">create account</button>
     </form>
