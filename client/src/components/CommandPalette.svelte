@@ -159,22 +159,31 @@
 
     const onKeyDown = async (e: KeyboardEvent) => {
         switch (e.key) {
-            case "Enter": {
-                const index = filteredCommands.findIndex((e) => e === selectedCommand);
-                elements[index].click();
-            } break;
+            case "Enter":
+                {
+                    const index = filteredCommands.findIndex((e) => e === selectedCommand);
+                    elements[index].click();
+                }
+                break;
 
-            case "ArrowUp": {
-                e.preventDefault();
-                const index = filteredCommands.findIndex((e) => e === selectedCommand);
-                selectedCommand = index > 0 ? filteredCommands[index - 1] : filteredCommands[0];
-            } break;
+            case "ArrowUp":
+                {
+                    e.preventDefault();
+                    const index = filteredCommands.findIndex((e) => e === selectedCommand);
+                    selectedCommand = index > 0 ? filteredCommands[index - 1] : filteredCommands[0];
+                }
+                break;
 
-            case "ArrowDown": {
-                e.preventDefault();
-                const index = filteredCommands.findIndex((e) => e === selectedCommand);
-                selectedCommand = index < filteredCommands.length - 1 ? filteredCommands[index + 1] : filteredCommands[filteredCommands.length - 1];
-            } break;
+            case "ArrowDown":
+                {
+                    e.preventDefault();
+                    const index = filteredCommands.findIndex((e) => e === selectedCommand);
+                    selectedCommand =
+                        index < filteredCommands.length - 1
+                            ? filteredCommands[index + 1]
+                            : filteredCommands[filteredCommands.length - 1];
+                }
+                break;
         }
     };
 
@@ -192,8 +201,11 @@
     };
 
     const filter = () => {
-        filteredCommands = commands.filter(e => e.name.toLowerCase().indexOf(search.toLowerCase()) > -1 ||
-                                                e.description?.toLowerCase().indexOf(search.toLowerCase()) > -1);
+        filteredCommands = commands.filter(
+            (e) =>
+                e.name.toLowerCase().indexOf(search.toLowerCase()) > -1 ||
+                e.description?.toLowerCase().indexOf(search.toLowerCase()) > -1
+        );
         searchFound = filteredCommands.length > 0;
 
         if (searchFound) {
@@ -205,18 +217,22 @@
         for (const cmd of filteredCommands) {
             const chunks = [];
 
-            chunks.push(highlightWords({
-                text: cmd.name,
-                query: search,
-                matchExactly: true
-            }));
-
-            if (cmd.description) {
-                chunks.push(highlightWords({
-                    text: cmd.description,
+            chunks.push(
+                highlightWords({
+                    text: cmd.name,
                     query: search,
                     matchExactly: true
-                }));
+                })
+            );
+
+            if (cmd.description) {
+                chunks.push(
+                    highlightWords({
+                        text: cmd.description,
+                        query: search,
+                        matchExactly: true
+                    })
+                );
             }
 
             highlightedChunks.push(chunks);
@@ -257,7 +273,6 @@
                     class:selected={selectedCommand === cmd}
                     bind:this={elements[cmdIndex]}
                 >
-
                     <div class="name flex row center">
                         <!-- icon -->
                         {#if cmd.icon}
@@ -267,9 +282,11 @@
                         <!-- name -->
                         {#if search !== undefined && search !== ""}
                             {#each highlightedChunks[cmdIndex][0] as chunk (chunk.key)}
-                                <span aria-hidden="true" class:highlight={chunk.match}>{chunk.text}</span>
+                                <span aria-hidden="true" class:highlight={chunk.match}>
+                                    {chunk.text}
+                                </span>
                             {/each}
-                        {:else} 
+                        {:else}
                             {cmd.name}
                         {/if}
 
@@ -293,13 +310,15 @@
                     <!-- description -->
                     {#if cmd.description}
                         <div class="description">
-                        {#if search !== undefined && search !== ""}
-                            {#each highlightedChunks[cmdIndex][1] as chunk (chunk.key)}
-                                <span aria-hidden="true" class:highlight={chunk.match}>{chunk.text}</span>
-                            {/each}
-                        {:else}
-                            {cmd.description}
-                        {/if}
+                            {#if search !== undefined && search !== ""}
+                                {#each highlightedChunks[cmdIndex][1] as chunk (chunk.key)}
+                                    <span aria-hidden="true" class:highlight={chunk.match}>
+                                        {chunk.text}
+                                    </span>
+                                {/each}
+                            {:else}
+                                {cmd.description}
+                            {/if}
                         </div>
                     {/if}
                 </a>

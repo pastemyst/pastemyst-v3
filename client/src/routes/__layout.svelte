@@ -10,7 +10,7 @@
 
     const onKeyUp = async (e: KeyboardEvent) => {
         if (e.key === "Escape") {
-            isCommandPaletteOpen.update(open => !open);
+            isCommandPaletteOpen.update((open) => !open);
         }
     };
 

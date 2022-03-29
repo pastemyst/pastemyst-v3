@@ -13,7 +13,13 @@
 
 <div class="code-editor">
     <!-- TODO: using a simple text area just for testing -->
-    <textarea name="paste-conents" id="paste-contents" rows="20" placeholder="paste contents" spellcheck="false"></textarea>
+    <textarea
+        name="paste-conents"
+        id="paste-contents"
+        rows="20"
+        placeholder="paste contents"
+        spellcheck="false"
+    />
 </div>
 
 <div class="paste-options">
@@ -54,7 +60,7 @@
 
     .code-editor {
         margin-top: 1rem;
-        
+
         textarea {
             width: 100%;
             resize: vertical;

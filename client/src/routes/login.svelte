@@ -1,7 +1,11 @@
 <section class="centered">
     <h2>login / register</h2>
 
-    <p>here you can create a pastemyst account, or login to an existing one. accounts provide a lot of functionality, biggest ones are: viewing all your pastes (including tagging), private pastes, editing pastes and much more.</p>
+    <p>
+        here you can create a pastemyst account, or login to an existing one. accounts provide a lot
+        of functionality, biggest ones are: viewing all your pastes (including tagging), private
+        pastes, editing pastes and much more.
+    </p>
 
     <ul>
         <li>

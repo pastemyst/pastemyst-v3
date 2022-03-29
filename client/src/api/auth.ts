@@ -13,7 +13,7 @@ export const createAccount = async (username: string): Promise<string> => {
         body: JSON.stringify(data),
         headers: {
             "Content-Type": "application/json",
-            "Authorization": `Bearer ${token}`
+            Authorization: `Bearer ${token}`
         }
     });
 
@@ -32,7 +32,7 @@ export const getSelf = async (): Promise<User> => {
     const res = await fetch(`/api/v3/auth/self`, {
         headers: {
             "Content-Type": "application/json",
-            "Authorization": `Bearer ${token}`
+            Authorization: `Bearer ${token}`
         }
     });
 

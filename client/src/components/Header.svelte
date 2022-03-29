@@ -4,7 +4,7 @@
 
 <header class="flex row center space-between">
     <div class="flex row center">
-        <img src="/images/pastemyst.svg" alt="pastemyst logo">
+        <img src="/images/pastemyst.svg" alt="pastemyst logo" />
         <h1><a href="/" class="no-dec">pastemyst</a></h1>
     </div>
 
@@ -12,7 +12,10 @@
         {#if $currentUserStore != null}
             <a href="/user/profile" class="nav-item user">
                 {$currentUserStore.username}
-                <img src="{$currentUserStore.avatarUrl}" alt="{$currentUserStore.username}'s avatar">
+                <img
+                    src={$currentUserStore.avatarUrl}
+                    alt="{$currentUserStore.username}'s avatar"
+                />
             </a>
         {:else}
             <a href="/login" class="nav-item" aria-label="login/register">

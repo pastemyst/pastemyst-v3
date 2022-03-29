@@ -1,7 +1,5 @@
 export const getCookie = (name: string): string => {
-    const cookie = document.cookie
-        .split("; ")
-        .find(r => r.startsWith(`${name}=`));
+    const cookie = document.cookie.split("; ").find((r) => r.startsWith(`${name}=`));
 
     if (cookie === undefined) return null;
 
@@ -10,7 +8,7 @@ export const getCookie = (name: string): string => {
 
 export const setCookie = (name: string, value: string, days: number) => {
     const date = new Date();
-    date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
+    date.setTime(date.getTime() + days * 24 * 60 * 60 * 1000);
 
     document.cookie = `${name}=${value}; expires=${date.toUTCString()}; path=/; samesite=strict; secure;`;
 };
