@@ -29,38 +29,18 @@ a {
     flex-direction: column;
 }
 
-.material-icons {
-    font-family: "Material Icons";
-    font-weight: normal;
-    font-style: normal;
-    font-size: 24px; /* Preferred icon size */
-    display: inline-block;
-    line-height: 1;
-    text-transform: none;
-    letter-spacing: normal;
-    word-wrap: normal;
-    white-space: nowrap;
-    direction: ltr;
-
-    /* Support for all WebKit browsers. */
-    -webkit-font-smoothing: antialiased;
-    /* Support for Safari and Chrome. */
-    text-rendering: optimizeLegibility;
-
-    /* Support for Firefox. */
-    -moz-osx-font-smoothing: grayscale;
-
-    /* Support for IE. */
-    font-feature-settings: "liga";
-}
-
-kbd {
-    background-color: $color-bg-1;
+kbd,
+code {
+    background-color: $color-bg;
     border: 1px solid $color-bg-2;
     border-radius: $border-radius;
     padding: 3px 6px;
     font-size: $fs-small;
     border-bottom: 3px solid $color-bg-2;
+}
+
+code {
+    border-bottom: 1px solid $color-bg-2;
 }
 
 .flex {
@@ -134,6 +114,16 @@ textarea {
     }
 }
 
+form {
+    span.required {
+        color: $color-red;
+    }
+
+    label {
+        font-weight: bold;
+    }
+}
+
 button {
     cursor: pointer;
 
@@ -144,5 +134,41 @@ button {
         &:hover {
             background-color: $color-sec;
         }
+    }
+}
+
+section {
+    background-color: $color-bg-1;
+    border-radius: $border-radius;
+    padding: 1rem;
+    margin-top: 2rem;
+    margin-bottom: 2rem;
+
+    h2:first-child {
+        margin-top: 0;
+    }
+
+
+    input[type="text"],
+    input[type="password"],
+    button,
+    textarea {
+        background-color: $color-bg;
+    }
+}
+
+.error-message {
+    padding: 1rem;
+    border: 2px solid $color-red;
+    border-radius: $border-radius;
+}
+
+section.centered {
+    padding-left: 20%;
+    padding-right: 20%;
+
+    @media screen and (max-width: $break-med) {
+        padding-left: 1rem;
+        padding-right: 1rem;
     }
 }

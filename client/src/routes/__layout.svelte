@@ -3,11 +3,10 @@
     import Footer from "../components/Footer.svelte";
     import CommandPalette from "../components/CommandPalette.svelte";
     import { onMount } from "svelte";
-    import { isCommandPaletteOpen } from "../stores";
+    import { currentUserStore, isCommandPaletteOpen } from "../stores";
+    import { getSelf } from "../api/auth";
 
     import "../app.scss";
-
-    let commandPalette: CommandPalette;
 
     const onKeyUp = async (e: KeyboardEvent) => {
         if (e.key === "Escape") {
@@ -15,8 +14,10 @@
         }
     };
 
-    onMount(() => {
+    onMount(async () => {
         document.addEventListener("keyup", onKeyUp);
+
+        $currentUserStore = await getSelf();
     });
 </script>
 
@@ -30,7 +31,7 @@
     <Footer />
 </div>
 
-<CommandPalette bind:this={commandPalette} />
+<CommandPalette />
 
 <style lang="scss">
     main {
