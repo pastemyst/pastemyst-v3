@@ -1,8 +1,11 @@
 export const getCookie = (name: string): string => {
-    return document.cookie
+    const cookie = document.cookie
         .split("; ")
-        .find(r => r.startsWith(`${name}=`))
-        .split("=")[1];
+        .find(r => r.startsWith(`${name}=`));
+
+    if (cookie === undefined) return null;
+
+    return cookie.split("=")[1];
 };
 
 export const setCookie = (name: string, value: string, days: number) => {

@@ -10,10 +10,12 @@ import pastemyst.models;
 @path("/api/v3/auth")
 public interface IAuthController
 {
-    @path("register")
     @headerParam("authorization", "Authorization")
     @bodyParam("username", "username")
     Json postRegister(string authorization, string username) @safe;
+
+    @headerParam("authorization", "Authorization")
+    User getSelf(string authorization) @safe;
 }
 
 public class AuthController : IAuthController
@@ -74,6 +76,30 @@ public class AuthController : IAuthController
         jwtToken.claims.set("username", user.username);
 
         return Json(["token": Json(jwtToken.encode(configService.secret))]);
+    }
+
+    public override User getSelf(string authorization) @trusted
+    {
+        enforceHTTP(authorization.startsWith("Bearer "), HTTPStatus.badRequest,
+            "Invalid authorization scheme. The token must be provided as a Bearer token.");
+
+        const encodedToken = authorization["Bearer ".length..$];
+
+        string id;
+
+        try
+        {
+            auto token = JwtToken.decode(encodedToken, configService.secret);
+
+            id = token.claims.get("id");
+        }
+        catch (Exception e)
+        {
+            logError("User tried calling an auth endpoint with an invalid token. Exception: %s", e);
+            throw new HTTPStatusException(HTTPStatus.badRequest, "Provided token is notr valid.");
+        }
+
+        return userService.findById(id).get();
     }
 }
 
