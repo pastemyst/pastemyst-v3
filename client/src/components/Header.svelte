@@ -1,5 +1,5 @@
 <script lang="ts">
-    import { isCommandPaletteOpen } from "../stores";
+    import { currentUserStore, isCommandPaletteOpen } from "../stores";
 </script>
 
 <header class="flex row center space-between">
@@ -9,9 +9,16 @@
     </div>
 
     <div class="flex row center">
-        <a href="/login" class="nav-item" aria-label="login/register">
-            <ion-icon name="person-circle" />
-        </a>
+        {#if $currentUserStore != null}
+            <a href="/user/profile" class="nav-item user">
+                {$currentUserStore.username}
+                <img src="{$currentUserStore.avatarUrl}" alt="{$currentUserStore.username}'s avatar">
+            </a>
+        {:else}
+            <a href="/login" class="nav-item" aria-label="login/register">
+                <ion-icon name="person-circle" />
+            </a>
+        {/if}
 
         <button class="nav-item" on:click={() => isCommandPaletteOpen.set(true)}>
             <ion-icon name="menu" />
@@ -47,9 +54,22 @@
         @include transition;
         margin-left: 1rem;
         text-decoration: none;
+        display: flex;
+        align-items: center;
 
         &:hover {
             color: $color-sec;
+        }
+
+        &.user {
+            font-size: $fs-normal;
+
+            img {
+                margin-left: 0.5rem;
+                margin-right: 0;
+                max-width: 35px;
+                border-radius: $border-radius;
+            }
         }
     }
 </style>

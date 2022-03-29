@@ -42,6 +42,11 @@ public class UserService
         return mongoService.findOne!User(["username": username]);
     }
 
+    public Nullable!User findById(const string id)
+    {
+        return mongoService.findOneById!User(id);
+    }
+
     /**
      * Inserts a user into the DB. Modifies the provided user's ID field with the generated one.
      */
