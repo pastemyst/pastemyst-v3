@@ -7,10 +7,14 @@ import pastemyst.models;
 
 @safe:
 
+/**
+ * Service for handling MongoDB stuff.
+ */
 public class MongoService
 {
     private MongoDatabase db;
 
+    ///
     public this(ConfigService config)
     {
         db = connectMongoDB(config.mongoConnectionString).getDatabase(config.mongoDatabase);
@@ -21,6 +25,9 @@ public class MongoService
         db["users"].createIndex(["username": 1], idxOpts);
     }
 
+    /**
+     * Resolves a type to a mongo collection name.
+     */
     private string getCollectionName(T)() const
     {
         static if (is(T == User))
@@ -33,6 +40,9 @@ public class MongoService
         }
     }
 
+    /**
+     * Finds one element based on the query.
+     */
     public Nullable!R findOne(R, T)(T query)
     {
         auto collection = db[getCollectionName!R()];
@@ -40,11 +50,17 @@ public class MongoService
         return collection.findOne!R(query);
     }
 
+    /**
+     * Finds one element based on the id. Same as `findOne(["_id": id])`
+     */
     public Nullable!R findOneById(R, T)(T id)
     {
         return findOne!R(["_id": id]);
     }
 
+    /**
+     * Inserts an element into the DB.
+     */
     public void insert(T)(T element)
     {
         auto collection = db[getCollectionName!T()];

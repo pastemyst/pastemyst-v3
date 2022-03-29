@@ -7,22 +7,39 @@ import hunt.jwt;
 import pastemyst.services;
 import pastemyst.models;
 
+/**
+ * API /api/v3/auth
+ */
 @path("/api/v3/auth")
 public interface IAuthController
 {
+    /**
+     * POST /api/v3/auth/register
+     *
+     * Creates a new account.
+     */
     @headerParam("authorization", "Authorization")
     @bodyParam("username", "username")
     Json postRegister(string authorization, string username) @safe;
 
+    /**
+     * GET /api/v3/auth/self
+     *
+     * Returns the authorized user from the provided token.
+     */
     @headerParam("authorization", "Authorization")
     User getSelf(string authorization) @safe;
 }
 
+/**
+ * API /api/v3/auth
+ */
 public class AuthController : IAuthController
 {
     private ConfigService configService;
     private UserService userService;
 
+    ///
     public this(ConfigService configService, UserService userService)
     {
         this.configService = configService;
@@ -113,6 +130,7 @@ public class AuthWebController
     private UserService userService;
     private ConfigService configService;
 
+    ///
     public this(AuthService authService, UserService userService, ConfigService configService)
     {
         this.authService = authService;
@@ -120,6 +138,11 @@ public class AuthWebController
         this.configService = configService;
     }
 
+    /**
+     * /api/v3/auth-web/login/github
+     *
+     * Initiates logging in with github.
+     */
     @path("login/github")
     public void getGitHubLogin(HTTPServerResponse res) @safe
     {
@@ -142,6 +165,9 @@ public class AuthWebController
         res.redirect(authService.getAuthorizationUrl(authService.githubProvider, state));
     }
 
+    /**
+     * This is an OAauth callback from github.
+     */
     @path("/login/github-callback")
     public void getGithubCallback(HTTPServerRequest req, HTTPServerResponse res, string code, string state) @trusted
     {

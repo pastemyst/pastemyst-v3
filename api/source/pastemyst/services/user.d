@@ -7,10 +7,14 @@ import pastemyst.encoding;
 
 @safe:
 
+/**
+ * Service for handling user stuff.
+ */
 public class UserService
 {
     private MongoService mongoService;
 
+    ///
     public this(MongoService mongoService)
     {
         this.mongoService = mongoService;
@@ -32,16 +36,19 @@ public class UserService
         return mongoService.findOne!User(["oauthProviderIds." ~ provider: id]);
     }
 
+    ///
     public bool existsByUsername(const string username)
     {
         return !findByUsername(username).isNull();
     }
 
+    ///
     public Nullable!User findByUsername(const string username)
     {
         return mongoService.findOne!User(["username": username]);
     }
 
+    ///
     public Nullable!User findById(const string id)
     {
         return mongoService.findOneById!User(id);
