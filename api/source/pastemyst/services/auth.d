@@ -16,8 +16,10 @@ public struct OAuthProvider
      */
     public string name;
 
+    ///
     public string clientId;
 
+    ///
     public string clientSecret;
 
     /**
@@ -61,10 +63,15 @@ public struct OAuthProvider
     public string avatarUrlJsonField;
 }
 
+/**
+ * Services used for handling anything OAuth related.
+ */
 public class AuthService
 {
+    ///
     public const OAuthProvider githubProvider;
 
+    ///
     public this(ConfigService config)
     {
         githubProvider = OAuthProvider("GitHub", config.github.clientId, config.github.clientSecret,

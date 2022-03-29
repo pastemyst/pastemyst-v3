@@ -5,9 +5,12 @@ module pastemyst.models.provider_user;
  */
 public struct ProviderUser
 {
+    ///
     public string id;
 
+    ///
     public string username;
 
+    ///
     public string avatarUrl;
 }
