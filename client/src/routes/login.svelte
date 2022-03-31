@@ -9,21 +9,21 @@
 
     <ul>
         <li>
-            <a href="/api/v3/auth-web/login/github" rel="external">
+            <a href="/api/v3/auth-web/login/github" rel="external" class="btn">
                 <ion-icon name="logo-github" />
                 <span>github</span>
             </a>
         </li>
 
         <li>
-            <a href="/api/v3/auth-web/login/gitlab" rel="external">
+            <a href="/api/v3/auth-web/login/gitlab" rel="external" class="btn">
                 <ion-icon name="logo-gitlab" />
                 <span>gitlab</span>
             </a>
         </li>
 
         <li>
-            <a href="/api/v3/auth-web/login/google" rel="external">
+            <a href="/api/v3/auth-web/login/google" rel="external" class="btn">
                 <ion-icon name="logo-google" />
                 <span>google</span>
             </a>
@@ -44,13 +44,14 @@
                 background-color: $color-bg;
                 padding: 1rem;
                 text-decoration: none;
-                display: flex;
                 flex-direction: row;
-                align-items: center;
-                border-radius: $border-radius;
                 margin: 0 auto;
                 justify-content: center;
                 gap: 1rem;
+
+                ion-icon {
+                    font-size: $fs-large;
+                }
             }
         }
     }

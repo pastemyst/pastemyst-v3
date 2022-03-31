@@ -10,7 +10,7 @@
 
     <div class="flex row center">
         {#if $currentUserStore != null}
-            <a href="/user/profile" class="nav-item user">
+            <a href="/user/profile" class="nav-item user btn">
                 {$currentUserStore.username}
                 <img
                     src={$currentUserStore.avatarUrl}
@@ -18,12 +18,12 @@
                 />
             </a>
         {:else}
-            <a href="/login" class="nav-item" aria-label="login/register">
+            <a href="/login" class="btn btn-square nav-item" aria-label="login/register">
                 <ion-icon name="person-circle" />
             </a>
         {/if}
 
-        <button class="nav-item" on:click={() => isCommandPaletteOpen.set(true)}>
+        <button class="nav-item btn-square" on:click={() => isCommandPaletteOpen.set(true)}>
             <ion-icon name="menu" />
         </button>
     </div>
@@ -45,32 +45,18 @@
         margin-top: -3px;
     }
 
-    button.nav-item {
-        padding: 0;
-        background-color: initial;
-        color: $color-prim;
-    }
-
     .nav-item {
-        cursor: pointer;
-        font-size: 1.75rem;
-        @include transition;
+        font-size: $fs-large;
         margin-left: 1rem;
-        text-decoration: none;
-        display: flex;
-        align-items: center;
-
-        &:hover {
-            color: $color-sec;
-        }
 
         &.user {
             font-size: $fs-normal;
+            text-decoration: none;
 
             img {
+                max-width: 24px;
+                margin: 0;
                 margin-left: 0.5rem;
-                margin-right: 0;
-                max-width: 35px;
                 border-radius: $border-radius;
             }
         }
