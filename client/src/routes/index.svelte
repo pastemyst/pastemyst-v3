@@ -40,6 +40,17 @@
             border-top-left-radius: 0;
             border-bottom-left-radius: 0;
             white-space: nowrap;
+            padding: 0.5rem 1rem;
+            border-left-color: $color-bg-1;
+
+            &:hover {
+                border-left-color: $color-bg-3;
+            }
+
+            &:focus,
+            &:active {
+                border-left-color: $color-prim;
+            }
         }
 
         @media screen and (max-width: $break-med) {
@@ -54,6 +65,17 @@
                 border-top-left-radius: 0;
                 border-top-right-radius: 0;
                 text-align: left;
+                border-left-color: $color-bg-2;
+                border-top-color: $color-bg-1;
+
+                &:hover {
+                    border-top-color: $color-bg-3;
+                }
+
+                &:focus,
+                &:active {
+                    border-top-color: $color-prim;
+                }
             }
         }
     }

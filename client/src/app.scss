@@ -94,23 +94,25 @@ code {
 
 input[type="text"],
 input[type="password"],
-button,
 textarea {
     background-color: $color-bg-1;
-    border: none;
+    border: 1px solid $color-bg-2;
     color: $color-fg;
     outline: none;
     border-radius: $border-radius;
     padding: 0.5rem 1rem;
     box-sizing: border-box;
-    @include transition(background-color);
+    @include transition();
 
     &:hover {
         background-color: $color-bg-2;
+        border-color: $color-bg-3;
     }
 
-    &:focus {
-        background-color: rgba($color-prim, 0.2);
+    &:focus,
+    &:active {
+        outline: none;
+        border-color: $color-prim;
     }
 }
 
@@ -124,21 +126,56 @@ form {
     }
 }
 
-button {
+button,
+.btn {
     cursor: pointer;
+    background-color: $color-bg-1;
+    display: flex;
+    align-items: center;
+    padding: 0.25rem 0.5rem;
+    border-radius: $border-radius;
+    border: 1px solid $color-bg-2;
+    color: $color-fg;
+    @include transition();
+
+    &.btn-square {
+        padding: 0.25rem;
+    }
+
+    &:hover {
+        background-color: $color-bg-2;
+        border-color: $color-bg-3;
+        color: $color-fg;
+    }
+
+    &:focus,
+    &:active {
+        outline: none;
+        border-color: $color-prim;
+    }
 
     &.btn-main {
         background-color: $color-prim;
         color: $color-bg;
+        border-color: $color-prim;
 
         &:hover {
             background-color: $color-sec;
+            border-color: $color-sec;
+        }
+
+        &:focus,
+        &:active {
+            outline: none;
+            background-color: $color-bg-1;
+            color: $color-fg;
         }
     }
 }
 
 section {
     background-color: $color-bg-1;
+    border: 1px solid $color-bg-2;
     border-radius: $border-radius;
     padding: 1rem;
     margin-top: 2rem;
@@ -154,20 +191,26 @@ section {
     textarea {
         background-color: $color-bg;
     }
+
+    &.centered {
+        padding-left: 20%;
+        padding-right: 20%;
+
+        @media screen and (max-width: $break-med) {
+            padding-left: 1rem;
+            padding-right: 1rem;
+        }
+    }
+}
+
+.block {
+    background-color: $color-bg-1;
+    border: 1px solid $color-bg-2;
+    border-radius: $border-radius;
 }
 
 .error-message {
     padding: 1rem;
     border: 2px solid $color-red;
     border-radius: $border-radius;
-}
-
-section.centered {
-    padding-left: 20%;
-    padding-right: 20%;
-
-    @media screen and (max-width: $break-med) {
-        padding-left: 1rem;
-        padding-right: 1rem;
-    }
 }
