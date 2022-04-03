@@ -6,6 +6,8 @@
     import { currentUserStore, isCommandPaletteOpen } from "../stores";
     import { getSelf } from "../api/auth";
 
+    import "tippy.js/dist/tippy.css";
+    import "tippy.js/dist/svg-arrow.css";
     import "../app.scss";
 
     const onKeyUp = async (e: KeyboardEvent) => {

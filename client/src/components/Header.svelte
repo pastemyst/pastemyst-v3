@@ -23,7 +23,7 @@
             </a>
         {/if}
 
-        <button class="nav-item btn-square" on:click={() => isCommandPaletteOpen.set(true)}>
+        <button class="nav-item btn-square" on:click={() => isCommandPaletteOpen.set(true)} aria-label="menu">
             <ion-icon name="menu" />
         </button>
     </div>
