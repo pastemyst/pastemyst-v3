@@ -11,7 +11,7 @@
 <style lang="scss">
     footer {
         flex-shrink: 0;
-        padding: 0.5rem 0rem;
+        padding: 1rem 0rem;
         margin-top: 2rem;
         font-size: $fs-small;
         border-top: 2px solid $color-bg-1;

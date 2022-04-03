@@ -3,10 +3,10 @@
 </script>
 
 <header class="flex row center space-between">
-    <div class="flex row center">
+    <a href="/" class="title btn">
         <img src="/images/pastemyst.svg" alt="pastemyst logo" />
-        <h1><a href="/" class="no-dec">pastemyst</a></h1>
-    </div>
+        <h1>pastemyst</h1>
+    </a>
 
     <div class="flex row center">
         {#if $currentUserStore != null}
@@ -35,14 +35,21 @@
         flex-shrink: 0;
     }
 
-    img {
-        width: 50px;
-        margin-right: 1rem;
-    }
+    .title {
+        text-decoration: none;
 
-    h1 {
-        margin: 0;
-        margin-top: -3px;
+        h1 {
+            font-size: $fs-normal;
+            font-weight: normal;
+            margin: 0;
+            color: $color-prim;
+        }
+
+        img {
+            max-width: 24px;
+            margin: 0;
+            margin-right: 0.5rem;
+        }
     }
 
     .nav-item {
