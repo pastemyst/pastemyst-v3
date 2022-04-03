@@ -136,10 +136,16 @@ button,
     border-radius: $border-radius;
     border: 1px solid $color-bg-2;
     color: $color-fg;
+    text-decoration: none;
     @include transition();
 
     &.btn-square {
         padding: 0.25rem;
+    }
+
+    &.btn-plain {
+        background-color: transparent;
+        border: 0;
     }
 
     &:hover {
@@ -157,18 +163,18 @@ button,
     &.btn-main {
         background-color: $color-prim;
         color: $color-bg;
-        border-color: $color-prim;
+        border-color: rgba(240, 246, 252, 0.1);
 
         &:hover {
             background-color: $color-sec;
-            border-color: $color-sec;
         }
 
         &:focus,
         &:active {
-            outline: none;
-            background-color: $color-bg-1;
+            background-color: transparent;
             color: $color-fg;
+            border-color: $color-prim;
+            outline: none;
         }
     }
 }
