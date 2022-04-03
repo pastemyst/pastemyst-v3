@@ -220,3 +220,23 @@ section {
     border: 2px solid $color-red;
     border-radius: $border-radius;
 }
+
+ion-icon {
+    pointer-events: none;
+}
+
+// tooltips themes
+
+.tippy-box[data-theme~="myst"] {
+    background-color: $color-bg-1;
+    border: 1px solid $color-bg-2;
+    border-radius: $border-radius;
+    color: $color-fg;
+    box-shadow: 0 1px 1px rgba(0, 0, 0, 0.12), 0 2px 2px rgba(0, 0, 0, 0.12),
+        0 4px 4px rgba(0, 0, 0, 0.12), 0 8px 8px rgba(0, 0, 0, 0.12),
+        0 16px 16px rgba(0, 0, 0, 0.12);
+}
+
+.tippy-box[data-theme~="myst"] > .tippy-svg-arrow {
+    fill: $color-bg-2;
+}
