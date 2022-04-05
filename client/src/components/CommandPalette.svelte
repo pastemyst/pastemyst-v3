@@ -128,9 +128,7 @@
         if (isOpen) {
             selectedCommand = filteredCommands[0];
 
-            await tick();
-
-            searchElement.focus();
+            searchElement?.focus();
             search = "";
         } else {
             commands = rootCommands;
@@ -170,7 +168,9 @@
                 {
                     e.preventDefault();
                     const index = filteredCommands.findIndex((e) => e === selectedCommand);
-                    selectedCommand = index > 0 ? filteredCommands[index - 1] : filteredCommands[0];
+                    let newIndex = index - 1;
+                    if (newIndex < 0) newIndex = filteredCommands.length - 1;
+                    selectedCommand = filteredCommands[newIndex];
                 }
                 break;
 
@@ -178,10 +178,8 @@
                 {
                     e.preventDefault();
                     const index = filteredCommands.findIndex((e) => e === selectedCommand);
-                    selectedCommand =
-                        index < filteredCommands.length - 1
-                            ? filteredCommands[index + 1]
-                            : filteredCommands[filteredCommands.length - 1];
+                    const newIndex = (index + 1) % filteredCommands.length;
+                    selectedCommand = filteredCommands[newIndex];
                 }
                 break;
         }
@@ -333,7 +331,6 @@
         position: absolute;
         top: 0;
         left: 0;
-        background-color: rgba(0, 0, 0, 0.5);
         width: 100vw;
         font-size: $fs-normal;
         opacity: 0;
@@ -350,12 +347,17 @@
         background-color: $color-bg;
         width: 40rem;
         margin: 0 auto;
-        margin-top: 1.5rem;
         border-radius: $border-radius;
+        border-top-left-radius: 0;
+        border-top-right-radius: 0;
+        border: 1px solid $color-bg-2;
+        border-top: 0;
+        @include shadow-big();
     }
 
     .search {
         padding: 0.5rem;
+        border-bottom: 1px solid $color-bg-1;
 
         ion-icon {
             margin-right: 1rem;
@@ -385,10 +387,8 @@
             &.selected,
             &:hover {
                 background-color: $color-bg-1;
-            }
-
-            span {
-                white-space: pre;
+                border-left: 2px solid $color-sec;
+                padding-left: 0.75rem;
             }
 
             .highlight {
@@ -406,6 +406,10 @@
             .description {
                 color: $color-bg-3;
                 font-size: $fs-small;
+
+                .highlight {
+                    display: inline-block;
+                }
             }
 
             .shortcuts {
