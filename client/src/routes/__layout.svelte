@@ -10,18 +10,19 @@
     import "tippy.js/dist/svg-arrow.css";
     import "../app.scss";
 
-    const onKeyUp = async (e: KeyboardEvent) => {
-        if (e.key === "Escape") {
+    const handleKeys = async (e: KeyboardEvent) => {
+        if (e.ctrlKey && e.key === "k") {
+            e.preventDefault();
             isCommandPaletteOpen.update((open) => !open);
         }
     };
 
     onMount(async () => {
-        document.addEventListener("keyup", onKeyUp);
-
         $currentUserStore = await getSelf();
     });
 </script>
+
+<svelte:window on:keydown={handleKeys} />
 
 <div id="container">
     <Header />
