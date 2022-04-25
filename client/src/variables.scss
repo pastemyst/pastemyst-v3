@@ -21,8 +21,19 @@ $font-stack: "Ubuntu Mono", monospace;
 
 $break-med: 620px;
 
-@mixin transition($property: all) {
-    transition: $property 0.1s ease-in-out;
+@mixin transition($properties...) {
+    $transition: ();
+    @each $property in $properties {
+        $transition: append(
+            $transition, ($property 0.1s ease-in-out), $separator: comma
+        );
+    }
+
+    @if length($properties) == 0 {
+        $transition: all 0.1s ease-in-out;
+    }
+
+    transition: $transition;
 }
 
 @mixin shadow() {

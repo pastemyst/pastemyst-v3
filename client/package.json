@@ -34,7 +34,9 @@
         "@codemirror/commands": "^0.19.8",
         "@codemirror/state": "^0.19.9",
         "@codemirror/view": "^0.19.47",
+        "@types/sortablejs": "^1.10.7",
         "highlight-words": "^1.2.0",
+        "sortablejs": "^1.15.0",
         "tippy.js": "^6.3.7"
     }
 }
