@@ -1,5 +1,6 @@
 <script lang="ts">
-    import PasteOptions from "../components/paste/PasteOptions.svelte";
+    import PasteOptions from "$lib/PasteOptions.svelte";
+    import TabbedEditor from "$lib/TabbedEditor.svelte";
 
     let expiresIn = "never";
 </script>
@@ -11,16 +12,7 @@
     <button>expires in: {expiresIn}</button>
 </div>
 
-<div class="code-editor">
-    <!-- TODO: using a simple text area just for testing -->
-    <textarea
-        name="paste-conents"
-        id="paste-contents"
-        rows="20"
-        placeholder="paste contents"
-        spellcheck="false"
-    />
-</div>
+<TabbedEditor />
 
 <div class="paste-options">
     <PasteOptions />
@@ -29,6 +21,7 @@
 <style lang="scss">
     .title-input {
         margin-top: 2rem;
+        margin-bottom: 2rem;
 
         input {
             width: 100%;
@@ -80,16 +73,7 @@
         }
     }
 
-    .code-editor {
-        margin-top: 1rem;
-
-        textarea {
-            width: 100%;
-            resize: vertical;
-        }
-    }
-
     .paste-options {
-        margin-top: 1rem;
+        margin-top: 2rem;
     }
 </style>
