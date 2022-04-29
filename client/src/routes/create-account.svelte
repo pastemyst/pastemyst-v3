@@ -1,9 +1,9 @@
 <script lang="ts">
     import { page } from "$app/stores";
     import { goto } from "$app/navigation";
-    import { deleteCookie, setCookie } from "../util/cookies";
-    import { createAccount } from "../api/auth";
-    import { getUser } from "../api/user";
+    import { deleteCookie, setCookie } from "$lib/util/cookies";
+    import { createAccount } from "$lib/api/auth";
+    import { getUser } from "$lib/api/user";
 
     let username = $page.url.searchParams.get("username");
     let usernameInput: HTMLInputElement;

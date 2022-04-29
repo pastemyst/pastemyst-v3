@@ -221,8 +221,10 @@ section {
     border-radius: $border-radius;
 }
 
-ion-icon {
-    pointer-events: none;
+.icon {
+    color: $color-fg;
+    max-width: 25px;
+    max-height: 25px;
 }
 
 // tooltips themes

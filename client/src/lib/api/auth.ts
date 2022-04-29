@@ -1,4 +1,4 @@
-import { getCookie } from "../util/cookies";
+import { getCookie } from "$lib/util/cookies";
 import type { User } from "./user";
 
 export const createAccount = async (username: string): Promise<string> => {
