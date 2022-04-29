@@ -1,10 +1,10 @@
 <script lang="ts">
-    import Header from "../components/Header.svelte";
-    import Footer from "../components/Footer.svelte";
-    import CommandPalette from "../components/CommandPalette.svelte";
+    import Header from "$lib/Header.svelte";
+    import Footer from "$lib/Footer.svelte";
+    import CommandPalette from "$lib/CommandPalette.svelte";
     import { onMount } from "svelte";
-    import { currentUserStore, isCommandPaletteOpen } from "../stores";
-    import { getSelf } from "../api/auth";
+    import { currentUserStore, isCommandPaletteOpen } from "$lib/stores";
+    import { getSelf } from "$lib/api/auth";
 
     import "tippy.js/dist/tippy.css";
     import "tippy.js/dist/svg-arrow.css";
