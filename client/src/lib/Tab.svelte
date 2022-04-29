@@ -109,6 +109,7 @@
 
         &.active {
             border-color: $color-prim;
+            z-index: 1;
         }
 
         .title {
