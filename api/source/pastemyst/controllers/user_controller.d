@@ -1,8 +1,8 @@
-module pastemyst.controllers.user;
+module pastemyst.controllers.user_controller;
 
-import vibe.d;
 import pastemyst.models;
 import pastemyst.services;
+import vibe.d;
 
 /**
  * API /api/v3/user

@@ -1,6 +1,7 @@
 module pastemyst.services;
 
-public import pastemyst.services.config;
-public import pastemyst.services.mongo;
-public import pastemyst.services.auth;
-public import pastemyst.services.user;
+public import pastemyst.services.auth_service;
+public import pastemyst.services.config_service;
+public import pastemyst.services.mongo_service;
+public import pastemyst.services.paste_service;
+public import pastemyst.services.user_service;
