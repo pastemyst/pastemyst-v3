@@ -1,4 +1,4 @@
-module pastemyst.encoding.base36;
+module pastemyst.utils.base36;
 
 @safe:
 

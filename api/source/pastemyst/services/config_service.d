@@ -1,4 +1,4 @@
-module pastemyst.services.config;
+module pastemyst.services.config_service;
 
 import std.file;
 import std.path;

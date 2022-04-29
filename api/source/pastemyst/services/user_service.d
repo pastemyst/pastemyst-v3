@@ -1,9 +1,9 @@
-module pastemyst.services.user;
+module pastemyst.services.user_service;
 
-import std.typecons;
-import pastemyst.services;
 import pastemyst.models;
-import pastemyst.encoding;
+import pastemyst.services;
+import pastemyst.utils;
+import std.typecons;
 
 @safe:
 
@@ -20,8 +20,20 @@ public class UserService
         this.mongoService = mongoService;
     }
 
+    ///
+    public Nullable!User findById(string id)
+    {
+        return mongoService.findOneById!User(id);
+    }
+
+    ///
+    public bool existsById(string id)
+    {
+        return !findById(id).isNull();
+    }
+
     /**
-     * Checks if a user exists with the provided OAtuh provider id.
+     * Checks if a user exists with the provided OAuth provider id.
      */
     public bool existsByProviderId(const string provider, const string id)
     {
@@ -29,7 +41,7 @@ public class UserService
     }
 
     /**
-     * Finds a user with the provided OAtuh provider id.
+     * Finds a user with the provided OAuth provider id.
      */
     public Nullable!User findByProviderId(const string provider, const string id)
     {
@@ -59,14 +71,7 @@ public class UserService
      */
     public void createUser(ref User user)
     {
-        // make sure there's no accidental overlap
-        string id;
-        do
-        {
-            id = randomBase36();
-        } while (!mongoService.findOneById!User(id).isNull());
-
-        user.id = id;
+        user.id = randomIdPred(&existsById);
 
         mongoService.insert!User(user);
     }

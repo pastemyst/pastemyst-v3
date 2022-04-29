@@ -1,9 +1,9 @@
-module pastemyst.services.mongo;
+module pastemyst.services.mongo_service;
 
+import pastemyst.models;
+import pastemyst.services;
 import std.typecons;
 import vibe.d;
-import pastemyst.services;
-import pastemyst.models;
 
 @safe:
 
@@ -33,6 +33,10 @@ public class MongoService
         static if (is(T == User))
         {
             return "users";
+        }
+        else static if (is(T == Paste))
+        {
+            return "pastes";
         }
         else
         {

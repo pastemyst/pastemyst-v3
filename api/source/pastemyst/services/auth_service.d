@@ -1,8 +1,8 @@
-module pastemyst.services.auth;
+module pastemyst.services.auth_service;
 
-import vibe.d;
-import pastemyst.services;
 import pastemyst.models;
+import pastemyst.services;
+import vibe.d;
 
 @safe:
 

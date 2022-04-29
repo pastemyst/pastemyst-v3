@@ -1,11 +1,11 @@
-module pastemyst.controllers.auth;
+module pastemyst.controllers.auth_controller;
 
-import std.datetime;
-import std.algorithm;
-import vibe.d;
 import hunt.jwt;
-import pastemyst.services;
 import pastemyst.models;
+import pastemyst.services;
+import std.algorithm;
+import std.datetime;
+import vibe.d;
 
 /**
  * API /api/v3/auth
@@ -146,12 +146,12 @@ public class AuthWebController
     @path("login/github")
     public void getGitHubLogin(HTTPServerResponse res) @safe
     {
-        import std.random : rndGen;
-        import std.algorithm : map, filter;
-        import std.range : take;
+        import std.algorithm : filter, map;
         import std.array : appender;
-        import std.base64 : Base64;
         import std.ascii : isAlphaNum;
+        import std.base64 : Base64;
+        import std.random : rndGen;
+        import std.range : take;
 
         // generate a random state string for oauth
         auto rndNums = rndGen().map!(a => cast(ubyte) a)().take(32);
