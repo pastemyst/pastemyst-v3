@@ -1,5 +1,12 @@
 <script lang="ts">
     import { tooltip } from "$lib/tooltips";
+    import { createEventDispatcher } from "svelte";
+
+    let dispatcher = createEventDispatcher();
+
+    const onCreatePaste = () => {
+        dispatcher("create");
+    };
 </script>
 
 <div class="paste-options block flex sm-row center space-between">
@@ -115,7 +122,7 @@
         </label>
     </div>
 
-    <button class="btn-main">create paste</button>
+    <button class="btn-main" on:click={onCreatePaste}>create paste</button>
 </div>
 
 <style lang="scss">

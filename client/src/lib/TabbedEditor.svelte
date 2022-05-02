@@ -3,19 +3,7 @@
     import Sortable, { SortableEvent } from "sortablejs";
     import Tab from "./Tab.svelte";
     import Editor from "./Editor.svelte";
-
-    class TabData {
-        id: number;
-        title: string;
-        isInRenamingState: boolean = false;
-        editor: Editor;
-
-        constructor(id: number, title: string, editor: Editor) {
-            this.id = id;
-            this.title = title;
-            this.editor = editor;
-        }
-    }
+    import TabData from "./TabData";
 
     export let tabs: TabData[] = new Array<TabData>();
 

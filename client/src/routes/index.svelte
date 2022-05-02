@@ -1,21 +1,45 @@
 <script lang="ts">
+    import { createPaste, PasteSkeleton, PastySkeleton } from "$lib/api/paste";
     import PasteOptions from "$lib/PasteOptions.svelte";
     import TabbedEditor from "$lib/TabbedEditor.svelte";
+    import type TabData from "$lib/TabData";
 
     let expiresIn = "never";
+
+    let title: string;
+
+    let tabs: TabData[];
+
+    const onCreatePaste = async () => {
+        let pasties: PastySkeleton[] = [];
+
+        for (const tab of tabs) {
+            pasties.push({
+                title: tab.title,
+                content: tab.editor.getContent()
+            });
+        }
+
+        const pasteSkeleton: PasteSkeleton = {
+            title: title,
+            pasties: pasties
+        };
+
+        await createPaste(pasteSkeleton);
+    };
 </script>
 
 <div class="title-input flex sm-row">
     <label class="hidden" for="paste-title">paste title</label>
-    <input type="text" placeholder="title" id="paste-title" name="paste-title" />
+    <input type="text" placeholder="title" id="paste-title" name="paste-title" bind:value={title} />
 
     <button>expires in: {expiresIn}</button>
 </div>
 
-<TabbedEditor />
+<TabbedEditor bind:tabs />
 
 <div class="paste-options">
-    <PasteOptions />
+    <PasteOptions on:create={onCreatePaste} />
 </div>
 
 <style lang="scss">
