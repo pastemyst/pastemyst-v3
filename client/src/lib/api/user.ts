@@ -1,13 +1,14 @@
+import { apiBase } from "./api";
 import { fetcherGet } from "./fetcher";
 
 export interface User {
-    id: string;
+    _id: string;
     username: string;
     avatarUrl: string;
 }
 
 export const getUser = async (username: string): Promise<User> => {
-    const res = await fetcherGet<User>(`/api/v3/user/${username}`);
+    const res = await fetcherGet<User>(`${apiBase}/user/${username}`);
 
     if (!res.ok) return null;
 

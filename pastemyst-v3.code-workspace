@@ -1,0 +1,14 @@
+{
+	"folders": [
+		{
+			"path": "client"
+		},
+		{
+			"path": "api"
+		},
+		{
+			"path": "db"
+		}
+	],
+	"settings": {}
+}
