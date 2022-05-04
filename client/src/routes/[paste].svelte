@@ -19,11 +19,23 @@
 </script>
 
 <script lang="ts">
+    import Tab from "$lib/Tab.svelte";
+
     export let paste: Paste;
+
+    let activePastyId: string = paste.pasties[0]._id;
+
+    const setActiveTab = (id: string) => {
+        activePastyId = id;
+    };
 </script>
 
+<svelte:head>
+    <title>pastemyst | {paste.title || "untitled"}</title>
+</svelte:head>
+
 <section class="paste-header flex column center space-between">
-    <h2>{paste.title}</h2>
+    <h2>{paste.title || "untitled"}</h2>
 
     <div class="options flex row center">
         <div class="btn stars" aria-label="stars" use:tooltip>
@@ -54,9 +66,27 @@
     <div class="lang java" aria-label="Java 50%" use:tooltip></div>
 </div>
 
+<div class="pasties">
+    <div class="tabs flex row center">
+        <div class="tabgroup flex row">
+            {#each paste.pasties as pasty, i}
+                <Tab
+                    id={pasty._id}
+                    isReadonly
+                    title={pasty.title}
+                    isActive={pasty._id === activePastyId}
+                    on:click={() => setActiveTab(pasty._id)}
+                />
+            {/each}
+        </div>
+    </div>
+
+    <pre class="content"><code>{paste.pasties.find(p => p._id === activePastyId).content}</code></pre>
+</div>
+
 <style lang="scss">
     .paste-header {
-        padding: 0.75rem 1rem;
+        padding: 0.5rem 1rem;
         margin-bottom: 0;
         border-bottom-left-radius: 0;
         border-bottom-right-radius: 0;
@@ -90,6 +120,7 @@
 
     .lang-stats {
         height: 5px;
+        margin-bottom: 2rem;
 
         .lang {
             border-right: 2px solid $color-bg;
@@ -112,6 +143,42 @@
         .java {
             width: 50%;
             background-color: #b07219;
+        }
+    }
+
+    .pasties {
+        .tabs {
+            width: 100%;
+            box-sizing: border-box;
+            background-color: $color-bg-2;
+            border-radius: $border-radius $border-radius 0 0;
+            border-bottom: 1px solid $color-bg-2;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+
+            .tabgroup {
+                flex-wrap: wrap;
+            }
+        }
+
+        .content {
+            background-color: $color-bg-1;
+            padding: 0.5rem;
+            border-bottom-left-radius: $border-radius;
+            border-bottom-right-radius: $border-radius;
+            border: 1px solid $color-bg-2;
+            border-top: none;
+            margin: 0;
+            overflow-x: auto;
+
+            code {
+                border: none;
+                background-color: transparent;
+                font-size: $fs-small;
+                padding: 0;
+                border-radius: 0;
+            }
         }
     }
 
