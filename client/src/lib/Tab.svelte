@@ -1,7 +1,7 @@
 <script lang="ts">
     import { createEventDispatcher, tick } from "svelte";
 
-    export let id: number;
+    export let id: string;
     export let isActive: boolean = false;
     export let title: string = "untitled";
     export let isInRenamingState: boolean = false;

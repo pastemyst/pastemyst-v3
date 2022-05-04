@@ -5,8 +5,6 @@
     import { indentWithTab } from "@codemirror/commands";
     import { myst } from "./codemirror-myst-theme";
 
-    type Unit = "spaces" | "tabs";
-
     export let hidden = false;
 
     let editorElement: HTMLElement;

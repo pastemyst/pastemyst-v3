@@ -30,7 +30,7 @@
             }
         });
 
-        await onTabAdd();
+        await addTab();
     });
 
     const onTabClose = async (id: number) => {
@@ -68,7 +68,7 @@
         await setActiveTab(id);
     };
 
-    const onTabAdd = async () => {
+    const addTab = async () => {
         const name = tabs.length > 0 ? `untitled ${tabCounter}` : "untitled";
 
         let newtab = new TabData(tabCounter, name, new Editor({ target: editorTarget }));
@@ -108,7 +108,7 @@
     <div class="tabgroup flex row" bind:this={tabGroupElement}>
         {#each tabs as tab, i (tab.id)}
             <Tab
-                id={tab.id}
+                id={tab.id.toString()}
                 on:close={() => onTabClose(tab.id)}
                 on:click={(event) => onTabClick(tab.id, event)}
                 bind:isInRenamingState={tab.isInRenamingState}
@@ -119,7 +119,7 @@
         {/each}
     </div>
 
-    <div class="add-btn btn" on:click={onTabAdd}>
+    <div class="add-btn btn" on:click={addTab}>
         <svg
             width="24"
             height="24"
