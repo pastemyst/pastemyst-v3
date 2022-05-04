@@ -1,4 +1,5 @@
 <script lang="ts">
+    import { goto } from "$app/navigation";
     import { createPaste, PasteSkeleton, PastySkeleton } from "$lib/api/paste";
     import PasteOptions from "$lib/PasteOptions.svelte";
     import TabbedEditor from "$lib/TabbedEditor.svelte";
@@ -25,7 +26,9 @@
             pasties: pasties
         };
 
-        await createPaste(pasteSkeleton);
+        const paste = await createPaste(pasteSkeleton);
+
+        goto(`/${paste._id}`);
     };
 </script>
 

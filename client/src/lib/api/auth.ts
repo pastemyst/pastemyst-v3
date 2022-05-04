@@ -1,4 +1,5 @@
 import { getCookie } from "$lib/util/cookies";
+import { apiBase } from "./api";
 import { fetcherGet, fetcherPost } from "./fetcher";
 import type { User } from "./user";
 
@@ -13,7 +14,7 @@ export const createAccount = async (username: string): Promise<string> => {
 
     const token = getCookie("pastemyst-registration");
 
-    const res = await fetcherPost<RegistrationResponse>("/api/v3/auth/register", {
+    const res = await fetcherPost<RegistrationResponse>(`${apiBase}/auth/register`, {
         body: JSON.stringify(data),
         bearer: token
     });
