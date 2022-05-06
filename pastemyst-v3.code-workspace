@@ -5,9 +5,6 @@
 		},
 		{
 			"path": "api"
-		},
-		{
-			"path": "db"
 		}
 	],
 	"settings": {}
