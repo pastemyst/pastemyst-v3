@@ -17,6 +17,7 @@ void main()
     dependencies.register!AuthController();
     dependencies.register!AuthWebController();
     dependencies.register!UserController();
+    dependencies.register!MetaController();
     dependencies.register!PasteController();
 
     auto router = new URLRouter();
@@ -24,6 +25,7 @@ void main()
 
     router.registerRestInterface(dependencies.resolve!AuthController());
     router.registerRestInterface(dependencies.resolve!UserController());
+    router.registerRestInterface(dependencies.resolve!MetaController());
     router.registerRestInterface(dependencies.resolve!PasteController());
 
     auto serverSettings = new HTTPServerSettings();
