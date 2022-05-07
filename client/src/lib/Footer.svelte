@@ -1,6 +1,6 @@
 <script>
 
-import { getVersion } from "./api/meta";
+import { getActivePastes, getVersion } from "./api/meta";
 
 </script>
 <footer class="flex sm-row space-between center">
@@ -14,7 +14,9 @@ import { getVersion } from "./api/meta";
         <span>{version}</span>
     {/await}
 
-    <span><a href="/" class="no-dec">500 total pastes</a></span>
+    {#await getActivePastes() then count}
+        <span><a href="/" class="no-dec">{count} active pastes</a></span>
+    {/await}
 </footer>
 
 <style lang="scss">

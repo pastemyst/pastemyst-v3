@@ -71,4 +71,14 @@ public class MongoService
 
         collection.insert(element);
     }
+
+    /**
+     * Returns the count of document inside the specified collection.
+     */
+    public ulong getDocumentCount(T)()
+    {
+        auto collection = db[getCollectionName!T()];
+
+        return collection.find().count();
+    }
 }
