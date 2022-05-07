@@ -32,6 +32,12 @@ public class PasteService
         return !findById(id).isNull();
     }
 
+    ///
+    public ulong getNumActivePastes()
+    {
+        return mongoService.getDocumentCount!Paste();
+    }
+
     /**
      * Inserts a paste into the DB. Modifies the provided paste's and its pasties' IDs with the generated ones.
      */
