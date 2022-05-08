@@ -19,6 +19,13 @@ public interface IMetaController
     Json getVersion() @safe;
 
     /**
+     * GET /api/v3/meta/releases
+     *
+     * Returns the list of all releases.
+     */
+    Release[] getReleases() @safe;
+
+    /**
      * GET /api/v3/meta/active_pastes
      *
      * Returns the number of currently active (existing) pastes.
@@ -34,23 +41,23 @@ public interface IMetaController
 public class MetaController : IMetaController
 {
     private PasteService pasteService;
+    private ChangelogService changelogService;
 
     ///
-    public this(PasteService pasteService)
+    public this(PasteService pasteService, ChangelogService changelogService)
     {
         this.pasteService = pasteService;
+        this.changelogService = changelogService;
     }
 
     public override Json getVersion() @safe
     {
-        import std.process : executeShell;
-        import std.string : strip;
+        return Json(["version": Json(changelogService.ver)]);
+    }
 
-        // TODO: (#41) maybe cache this? not sure if caching this is gonna even improve the performance
-        // currently this runs in less than 6ms on my machine
-        const res = executeShell("git describe --tags --abbrev=0");
-
-        return Json(["version": Json(res.output.strip())]);
+    public override Release[] getReleases() @safe
+    {
+        return changelogService.releases;
     }
 
     public override Json getActivePastes() @safe
