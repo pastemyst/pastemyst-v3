@@ -24,7 +24,8 @@ unittest
 {
     int i = 0;
     import std.stdio;
-    auto id = randomIdPred((_) {
+    auto id = randomIdPred((_)
+    {
         if (i < 5)
         {
             i++;
