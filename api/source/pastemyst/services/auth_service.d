@@ -97,7 +97,7 @@ public class AuthService
             "&state=" ~ state;
     }
 
-    /** 
+    /**
      * Returns the access token from the provided code.
      */
     public string getAccessToken(const OAuthProvider provider, string code) const
