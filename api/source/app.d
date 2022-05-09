@@ -3,38 +3,45 @@ import pastemyst.services;
 import poodinis;
 import vibe.d;
 
-void main()
+version (unittest)
 {
-    auto configService = new ConfigService("config.json");
+}
+else
+{
+    void main()
+    {
+        auto configService = new ConfigService("config.json");
 
-    auto dependencies = new shared DependencyContainer();
-    dependencies.register!ConfigService().existingInstance(configService);
-    dependencies.register!MongoService();
-    dependencies.register!UserService();
-    dependencies.register!AuthService();
-    dependencies.register!PasteService();
+        auto dependencies = new shared DependencyContainer();
+        dependencies.register!ConfigService().existingInstance(configService);
+        dependencies.register!MongoService();
+        dependencies.register!UserService();
+        dependencies.register!AuthService();
+        dependencies.register!PasteService();
+        dependencies.register!ChangelogService();
 
-    dependencies.register!AuthController();
-    dependencies.register!AuthWebController();
-    dependencies.register!UserController();
-    dependencies.register!MetaController();
-    dependencies.register!PasteController();
+        dependencies.register!AuthController();
+        dependencies.register!AuthWebController();
+        dependencies.register!UserController();
+        dependencies.register!MetaController();
+        dependencies.register!PasteController();
 
-    auto router = new URLRouter();
-    router.registerWebInterface(dependencies.resolve!AuthWebController());
+        auto router = new URLRouter();
+        router.registerWebInterface(dependencies.resolve!AuthWebController());
 
-    router.registerRestInterface(dependencies.resolve!AuthController());
-    router.registerRestInterface(dependencies.resolve!UserController());
-    router.registerRestInterface(dependencies.resolve!MetaController());
-    router.registerRestInterface(dependencies.resolve!PasteController());
+        router.registerRestInterface(dependencies.resolve!AuthController());
+        router.registerRestInterface(dependencies.resolve!UserController());
+        router.registerRestInterface(dependencies.resolve!MetaController());
+        router.registerRestInterface(dependencies.resolve!PasteController());
 
-    auto serverSettings = new HTTPServerSettings();
-    serverSettings.bindAddresses = ["127.0.0.1"];
-    serverSettings.port = configService.config.port;
-    serverSettings.sessionOptions = SessionOption.noSameSiteStrict | SessionOption.httpOnly;
-    serverSettings.sessionStore = new MemorySessionStore();
+        auto serverSettings = new HTTPServerSettings();
+        serverSettings.bindAddresses = ["127.0.0.1"];
+        serverSettings.port = configService.config.port;
+        serverSettings.sessionOptions = SessionOption.noSameSiteStrict | SessionOption.httpOnly;
+        serverSettings.sessionStore = new MemorySessionStore();
 
-    listenHTTP(serverSettings, router);
+        listenHTTP(serverSettings, router);
 
-    runApplication();
+        runApplication();
+    }
 }

@@ -17,7 +17,7 @@ public struct Paste
     public string title;
 
     ///
-    public DateTime createdAt;
+    public SysTime createdAt;
 
     ///
     public Pasty[] pasties;

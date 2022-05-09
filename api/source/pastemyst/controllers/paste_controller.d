@@ -57,7 +57,7 @@ public class PasteController : IPasteController
         auto res = Paste();
 
         res.title = skeleton.title;
-        res.createdAt = cast(DateTime) Clock.currTime(UTC());
+        res.createdAt = Clock.currTime(UTC());
 
         foreach (pastySkel; skeleton.pasties)
         {
