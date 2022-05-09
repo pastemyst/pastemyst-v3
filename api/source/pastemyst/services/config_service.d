@@ -38,7 +38,7 @@ public struct Config
      */
     public string mongoDatabase;
 
-    /** 
+    /**
      * Settings for github OAuth provider.
      */
     public GitHubConfig github;

@@ -1,6 +1,14 @@
 import { apiBase } from "./api";
 import { fetcherGet } from "./fetcher";
 
+export interface Release {
+    url: string;
+    title: string;
+    content: string;
+    isPrerelease: boolean;
+    releasedAt: string;
+}
+
 export const getVersion = async (): Promise<string> => {
     interface VersionRes {
         version: string;
@@ -11,6 +19,14 @@ export const getVersion = async (): Promise<string> => {
     if (res.ok) return res.data.version;
 
     return "unknown version";
+};
+
+export const getReleases = async(): Promise<Release[]> => {
+    const res = await fetcherGet<Release[]>(`${apiBase}/meta/releases`);
+
+    if (res.ok) return res.data;
+
+    return [];
 };
 
 export const getActivePastes = async (): Promise<number> => {

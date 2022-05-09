@@ -1,0 +1,80 @@
+<script lang="ts">
+    import { getReleases } from "$lib/api/meta";
+    import SvelteMarkdown from "svelte-markdown";
+</script>
+
+<svelte:head>
+    <title>pastemyst | changelog</title>
+</svelte:head>
+
+<section>
+    <h1>changelog</h1>
+
+    <h3>list of all released versions of pastemyst, along with their changelogs.</h3>
+
+    {#await getReleases() then releases}
+        {#if releases.length === 0}
+            <p>There was an error fetching the changelog from the server. Try again later, or <a href="/contact">contact</a> the owner. You can also view the changelog <a href="https://github.com/pastemyst/pastemyst-v3" rel="external">on github</a>.</p>
+        {:else}
+            {#each releases as release}
+                <div class="release">
+                    <div class="flex row center space-between">
+                        <h4><a href="{release.url}" rel="external">{release.title}</a></h4>
+
+                        {#if release.isPrerelease}
+                            <span class="alpha">alpha-release</span>
+                        {/if}
+                    </div>
+
+                    <p class="published-on">Published on: {new Date(release.releasedAt).toDateString()}</p>
+
+                    <p class="content">
+                        <SvelteMarkdown source={release.content} />
+                    </p>
+                </div>
+            {/each}
+        {/if}
+    {/await}
+</section>
+
+<style lang="scss">
+    h1 {
+        margin-top: 0;
+    }
+
+    h3 {
+        font-weight: normal;
+        font-size: $fs-normal;
+    }
+
+    .release {
+        margin-top: 2rem;
+        background-color: $color-bg;
+        padding: 0.5rem 1rem;
+        border-radius: $border-radius;
+        border: 1px solid $color-bg-2;
+    }
+
+    h4 {
+        font-size: $fs-large;
+        font-weight: normal;
+        margin: 0;
+        margin-right: 2rem;
+    }
+
+    .alpha {
+        border: 1px solid $color-sec;
+        padding: 0.25rem 0.5rem;
+        border-radius: $border-radius;
+        font-size: $fs-small;
+    }
+
+    .published-on {
+        font-size: $fs-small;
+    }
+
+    .content {
+        margin-top: 1.5rem;
+        font-size: $fs-normal;
+    }
+</style>

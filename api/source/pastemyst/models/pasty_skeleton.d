@@ -12,5 +12,5 @@ public struct PastySkeleton
     public string title = "";
 
     ///
-    public string content; 
+    public string content;
 }
