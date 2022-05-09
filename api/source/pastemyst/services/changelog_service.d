@@ -101,7 +101,7 @@ public class ChangelogService
      */
     private void generateChangelog() @safe
     {
-        requestHTTP("https://api.github.com/repos/codemyst/pastemyst/releases",
+        requestHTTP("https://api.github.com/repos/pastemyst/pastemyst-v3/releases",
         (scope req)
         {
             req.headers.addField("Accept", "application/vnd.github.v3+json");
@@ -109,7 +109,11 @@ public class ChangelogService
         },
         (scope res)
         {
-            if (res.statusCode != HTTPStatus.ok) return;
+            if (res.statusCode != HTTPStatus.ok)
+            {
+                logError("Failed getting list of releases from GitHub. Got HTTP status: %d", res.statusCode);
+                return;
+            }
 
             const json = parseJsonString(res.bodyReader.readAllUTF8());
 
@@ -123,13 +127,14 @@ public class ChangelogService
 
                 string title = ghrel.title;
 
+                // if release doesn't have title, then use the tag
                 if (title == "")
                 {
-                    // if release doesn't have title, then use the tag
-                    // prepend with v if the tag doesn't have v in it
-                    if (ghrel.tag[0] != 'v') title = "v";
-                    title ~= ghrel.tag;
+                    title = ghrel.tag;
                 }
+
+                // prepend with v if the title doesn't have v in it
+                if (title[0] != 'v') title = "v" ~ title;
 
                 releases ~= Release(ghrel.url, title,
                                     ghrel.body, ghrel.prerelease,
