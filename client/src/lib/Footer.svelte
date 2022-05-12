@@ -11,7 +11,7 @@ import { getActivePastes, getVersion } from "./api/meta";
     </span>
 
     {#await getVersion() then version}
-        <span><a href="/changelog" class="no-dec">{version}</a></span>
+        <span><a href="/changelog" sveltekit:prefetch class="no-dec">{version}</a></span>
     {/await}
 
     {#await getActivePastes() then count}
