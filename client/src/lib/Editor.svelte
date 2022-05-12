@@ -11,10 +11,21 @@
 
     let editorView: EditorView;
 
+    let cursorLine = 0;
+    let cursorCol = 0;
+
     onMount(async () => {
+        const editorUpdateListener = EditorView.updateListener.of((update) => {
+            // get the current line
+            const line = update.state.doc.lineAt(update.state.selection.main.head);
+
+            cursorLine = line.number;
+            cursorCol = update.state.selection.main.head - line.from;
+        });
+
         editorView = new EditorView({
             state: EditorState.create({
-                extensions: [basicSetup, keymap.of([indentWithTab]), myst]
+                extensions: [basicSetup, keymap.of([indentWithTab]), myst, editorUpdateListener]
             }),
             parent: editorElement
         });
@@ -31,6 +42,16 @@
 
 <div class:hidden>
     <div class="editor" bind:this={editorElement} />
+
+    <div class="toolbar flex row center space-between">
+        <div></div>
+
+        <div class="flex row center">
+            <div class="line element">
+                ln {cursorLine} col {cursorCol}
+            </div>
+        </div>
+    </div>
 </div>
 
 <style lang="scss">
@@ -43,7 +64,6 @@
         position: relative;
 
         :global(.cm-editor) {
-            border-radius: 0 0 $border-radius $border-radius;
             border: 1px solid $color-bg-2;
             @include transition();
 
@@ -83,6 +103,17 @@
 
         :global(.cm-scroller) {
             overflow: auto;
+        }
+    }
+
+    .toolbar {
+        font-size: $fs-small;
+        background-color: $color-bg-2;
+        padding: 0.25rem 0.5rem;
+        border-radius: 0 0 $border-radius $border-radius;
+
+        .line {
+
         }
     }
 </style>
