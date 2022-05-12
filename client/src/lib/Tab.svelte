@@ -71,7 +71,7 @@
                 width="24"
                 height="24"
                 viewBox="0 0 24 24"
-                fill="none"
+                fill="currentColor"
                 xmlns="http://www.w3.org/2000/svg"
                 class="icon"
             >
@@ -87,7 +87,6 @@
 <style lang="scss">
     .tab {
         background-color: $color-bg-1;
-        padding: 0.5rem 1rem;
         cursor: pointer;
         user-select: none;
         white-space: nowrap;
@@ -114,20 +113,26 @@
 
         .title {
             font-size: $fs-normal;
+            margin: 0.5rem 1rem;
         }
 
         .close-icon {
-            margin-left: 0.5rem;
-            padding: 2px;
             border-radius: $border-radius;
+            height: 100%;
+            width: 2rem;
+            margin-right: 0.25rem;
+            margin-left: -1rem;
 
             .icon {
                 max-width: 15px;
                 max-height: 15px;
+                margin-left: auto;
+                margin-right: auto;
+                @include transition(color);
             }
 
-            &:hover {
-                background-color: $color-bg-1;
+            &:hover .icon {
+                color: $color-red;
             }
         }
 
