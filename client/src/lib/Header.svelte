@@ -1,5 +1,6 @@
 <script lang="ts">
     import { currentUserStore, isCommandPaletteOpen } from "./stores";
+    import { tooltip } from "./tooltips";
 </script>
 
 <header class="flex row center space-between">
@@ -18,7 +19,7 @@
                 />
             </a>
         {:else}
-            <a href="/login" class="btn btn-square nav-item" aria-label="login/register">
+            <a href="/login" class="btn btn-square nav-item" aria-label="login/register" use:tooltip>
                 <svg
                     width="24"
                     height="24"
@@ -27,6 +28,7 @@
                     xmlns="http://www.w3.org/2000/svg"
                     class="icon"
                 >
+                    <title>user icon</title>
                     <path
                         fill-rule="evenodd"
                         clip-rule="evenodd"
@@ -45,6 +47,8 @@
             class="nav-item btn-square"
             on:click={() => isCommandPaletteOpen.set(true)}
             aria-label="menu"
+            role="menu"
+            use:tooltip
         >
             <svg
                 width="24"
@@ -54,6 +58,7 @@
                 xmlns="http://www.w3.org/2000/svg"
                 class="icon"
             >
+                <title>menu icon</title>
                 <path
                     d="M2 6C2 5.44772 2.44772 5 3 5H21C21.5523 5 22 5.44772 22 6C22 6.55228 21.5523 7 21 7H3C2.44772 7 2 6.55228 2 6Z"
                     fill="currentColor"
