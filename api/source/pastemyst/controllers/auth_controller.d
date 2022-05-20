@@ -213,7 +213,7 @@ public class AuthWebController
 
             res.cookies.addField("pastemyst-registration", cookie);
 
-            res.redirect("/create-account?username=" ~ providerUser.username);
+            res.redirect(configService.clientHost ~ "create-account?username=" ~ providerUser.username);
         }
         else
         {
@@ -227,7 +227,7 @@ public class AuthWebController
 
             res.cookies.addField("pastemyst", cookie);
 
-            res.redirect("/");
+            res.redirect(configService.clientHost);
         }
     }
 }

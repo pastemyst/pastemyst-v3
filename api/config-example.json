@@ -1,6 +1,7 @@
 {
     "port": 5000,
     "host": "http://localhost:5000/",
+    "clientHost": "http://localhost:3000/",
 
     "secret": "supersecret",
 

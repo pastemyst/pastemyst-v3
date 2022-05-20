@@ -33,7 +33,7 @@ export const fetcherPost = async <T> (url: string, req: FetcherRequest = {}): Pr
     };
 };
 
-export const fetcher = async (url: string, method: string = "get", req: FetcherRequest): Promise<Response> => {
+export const fetcher = async (url: string, method = "get", req: FetcherRequest): Promise<Response> => {
     return await fetch(url, {
         method: method,
         headers: {

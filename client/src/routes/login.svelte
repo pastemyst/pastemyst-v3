@@ -1,3 +1,7 @@
+<script lang="ts">
+    import { apiBase } from "$lib/api/api";
+</script>
+
 <section class="centered">
     <h2>login / register</h2>
 
@@ -9,7 +13,7 @@
 
     <ul>
         <li>
-            <a href="/api/v3/auth-web/login/github" rel="external" class="btn">
+            <a href="{apiBase}/auth-web/login/github" rel="external" class="btn">
                 <svg
                     xmlns="http://www.w3.org/2000/svg"
                     width="64"
@@ -32,7 +36,7 @@
         </li>
 
         <li>
-            <a href="/api/v3/auth-web/login/gitlab" rel="external" class="btn">
+            <a href="{apiBase}/auth-web/login/gitlab" rel="external" class="btn">
                 <svg
                     width="32px"
                     height="32px"
@@ -50,7 +54,7 @@
         </li>
 
         <li>
-            <a href="/api/v3/auth-web/login/google" rel="external" class="btn">
+            <a href="{apiBase}/auth-web/login/google" rel="external" class="btn">
                 <svg
                     width="24"
                     height="24"
