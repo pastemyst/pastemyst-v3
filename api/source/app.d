@@ -35,7 +35,7 @@ else
         router.registerRestInterface(dependencies.resolve!PasteController());
 
         auto serverSettings = new HTTPServerSettings();
-        serverSettings.bindAddresses = ["127.0.0.1"];
+        serverSettings.bindAddresses = ["127.0.0.1", "localhost"];
         serverSettings.port = configService.config.port;
         serverSettings.sessionOptions = SessionOption.noSameSiteStrict | SessionOption.httpOnly;
         serverSettings.sessionStore = new MemorySessionStore();

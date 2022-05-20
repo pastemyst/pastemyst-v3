@@ -21,6 +21,11 @@ public struct Config
      */
     public string host;
 
+    /**
+     * On what host is the client app (frontend, svelte) hosted on.
+     */
+    public string clientHost;
+
     // TODO: maybe use a separate secret for JWT stuff and other stuff
 
     /**

@@ -29,7 +29,7 @@ export const getSelf = async (): Promise<User> => {
 
     if (token === null) return null;
 
-    const res = await fetcherGet<User>("/api/v3/auth/self", { bearer: token });
+    const res = await fetcherGet<User>(`${apiBase}/auth/self`, { bearer: token });
 
     if (res.ok) return res.data;
 
