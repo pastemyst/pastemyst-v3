@@ -167,7 +167,7 @@
     }
 
     .tabs .tabgroup :global(.sortable-drag) {
-        display: none;
+        opacity: 0;
     }
 
     .tabs .tabgroup :global(.sortable-chosen) {
