@@ -63,6 +63,7 @@
             on:input={onInput}
             on:keyup={onInputKeyup}
             bind:this={inputElement}
+            maxlength="50"
         />
     {:else}
         <span class="title">{title}</span>
