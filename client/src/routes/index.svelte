@@ -38,7 +38,7 @@
 
 <div class="title-input flex sm-row">
     <label class="hidden" for="paste-title">paste title</label>
-    <input type="text" placeholder="title" id="paste-title" name="paste-title" bind:value={title} />
+    <input type="text" placeholder="title" id="paste-title" name="paste-title" maxlength="128" bind:value={title} />
 
     <button>expires in: {expiresIn}</button>
 </div>

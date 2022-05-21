@@ -96,6 +96,7 @@
             margin: 0;
             font-weight: normal;
             font-size: $fs-medium;
+            word-break: break-word;
         }
 
         .options {
