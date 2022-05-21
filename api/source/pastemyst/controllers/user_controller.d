@@ -1,6 +1,7 @@
 module pastemyst.controllers.user_controller;
 
 import pastemyst.models;
+import pastemyst.serialization;
 import pastemyst.services;
 import vibe.d;
 
@@ -8,6 +9,7 @@ import vibe.d;
  * API /api/v3/user
  */
 @path("/api/v3/user")
+@serializationPolicy!(UserPolicy)
 public interface IUserController
 {
     /**
