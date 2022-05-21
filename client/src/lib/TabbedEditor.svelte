@@ -69,7 +69,7 @@
     };
 
     const addTab = async () => {
-        const name = tabs.length > 0 ? `untitled ${tabCounter}` : "untitled";
+        const name = "untitled";
 
         let newtab = new TabData(tabCounter, name, new Editor({ target: editorTarget }));
 
