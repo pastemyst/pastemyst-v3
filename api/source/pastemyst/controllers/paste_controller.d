@@ -67,6 +67,9 @@ public class PasteController : IPasteController
 
         foreach (pastySkel; skeleton.pasties)
         {
+            enforceHTTP(pastySkel.title.length <= maxPastyTitleLength, HTTPStatus.badRequest,
+                "the pasty title length must be less than or equal to " ~ maxPastyTitleLength.to!string);
+
             auto pasty = Pasty();
             pasty.title = pastySkel.title;
             pasty.content = pastySkel.content;
