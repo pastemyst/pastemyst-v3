@@ -1,5 +1,6 @@
 module pastemyst.services.user_service;
 
+import pastemyst.constants;
 import pastemyst.models;
 import pastemyst.services;
 import pastemyst.utils;
@@ -92,6 +93,9 @@ public class UserService
         if (existsByUsername(username)) return "Username is already taken.";
 
         if (username.length == 0) return "Username can't be empty.";
+
+        if (username.length > maxUsernameLength)
+            return "Username length must be less than or equal to " ~ maxUsernameLength ~ ".";
 
         if (matchFirst(username, rgx).empty) return "Username contains invalid symbols.";
 
