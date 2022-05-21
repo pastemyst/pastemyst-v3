@@ -29,6 +29,9 @@
 
     const onInputBlur = () => {
         isInRenamingState = false;
+
+        // don't allow empty pasty titles
+        if (title.length === 0) title = "untitled";
     };
 
     const onInput = () => {
@@ -60,6 +63,7 @@
             on:input={onInput}
             on:keyup={onInputKeyup}
             bind:this={inputElement}
+            maxlength="50"
         />
     {:else}
         <span class="title">{title}</span>
@@ -89,7 +93,6 @@
         background-color: $color-bg-1;
         cursor: pointer;
         user-select: none;
-        white-space: nowrap;
         flex-grow: 0.25;
         border: 1px solid $color-bg-2;
         border-bottom-color: transparent;
@@ -114,6 +117,7 @@
         .title {
             font-size: $fs-normal;
             margin: 0.5rem 1rem;
+            word-break: break-word;
         }
 
         .close-icon {
@@ -144,6 +148,7 @@
             outline: none;
             width: auto;
             padding: 0;
+            margin: 0.5rem 1rem;
             font-size: $fs-normal;
             transition: none;
         }

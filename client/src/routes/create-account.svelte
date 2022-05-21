@@ -89,6 +89,8 @@
             bind:value={username}
             bind:this={usernameInput}
             on:input={onUsernameInput}
+            maxlength="20"
+            minlength="1"
         />
 
         <button type="submit" class="btn-main">create account</button>

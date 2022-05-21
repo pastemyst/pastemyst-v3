@@ -106,6 +106,7 @@
         &.user {
             font-size: $fs-normal;
             text-decoration: none;
+            word-break: break-word;
 
             img {
                 max-width: 24px;

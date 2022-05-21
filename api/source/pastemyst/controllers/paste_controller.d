@@ -1,5 +1,6 @@
 module pastemyst.controllers.paste_controller;
 
+import pastemyst.constants;
 import pastemyst.models;
 import pastemyst.services;
 import std.datetime;
@@ -54,13 +55,21 @@ public class PasteController : IPasteController
 
     public override const(Paste) createPaste(PasteSkeleton skeleton) @safe
     {
+        import std.conv : to;
+
         auto res = Paste();
+
+        enforceHTTP(skeleton.title.length <= maxPasteTitleLength, HTTPStatus.badRequest,
+            "the paste title length must be less than or equal to " ~ maxPasteTitleLength.to!string);
 
         res.title = skeleton.title;
         res.createdAt = Clock.currTime(UTC());
 
         foreach (pastySkel; skeleton.pasties)
         {
+            enforceHTTP(pastySkel.title.length <= maxPastyTitleLength, HTTPStatus.badRequest,
+                "the pasty title length must be less than or equal to " ~ maxPastyTitleLength.to!string);
+
             auto pasty = Pasty();
             pasty.title = pastySkel.title;
             pasty.content = pastySkel.content;
