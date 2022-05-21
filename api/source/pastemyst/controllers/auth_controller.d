@@ -2,6 +2,7 @@ module pastemyst.controllers.auth_controller;
 
 import hunt.jwt;
 import pastemyst.models;
+import pastemyst.serialization;
 import pastemyst.services;
 import std.algorithm;
 import std.datetime;
@@ -11,6 +12,7 @@ import vibe.d;
  * API /api/v3/auth
  */
 @path("/api/v3/auth")
+@serializationPolicy!(UserPolicy)
 public interface IAuthController
 {
     /**
