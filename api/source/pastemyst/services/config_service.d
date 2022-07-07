@@ -3,6 +3,7 @@ module pastemyst.services.config_service;
 import std.file;
 import std.path;
 import vibe.data.json;
+import vibe.data.serialization;
 
 @safe:
 
@@ -26,12 +27,15 @@ public struct Config
      */
     public string clientHost;
 
-    // TODO: maybe use a separate secret for JWT stuff and other stuff
-
     /**
      * General purpose secret. Should be very strong.
      */
     public string secret;
+
+    /**
+     * Secret for JWT related things. Should be very strong.
+     */
+    @optional public string jwtSecret;
 
     /**
      * MongoDB connection string.
@@ -76,6 +80,11 @@ public class ConfigService
         if (!exists(path)) throw new Exception("Missing " ~ path);
 
         Json json = parseJsonString(readText(path));
+
+        if (json["jwtSecret"].type == Json.Type.null_ || json["jwtSecret"].type == Json.Type.undefined)
+        {
+            json["jwtSecret"] = json["secret"].to!string;
+        }
 
         config = deserializeJson!Config(json);
     }

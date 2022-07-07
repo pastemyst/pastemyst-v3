@@ -66,7 +66,7 @@ public class AuthController : IAuthController
 
         try
         {
-            auto token = verify(encodedToken, configService.secret, [JWTAlgorithm.HS512]);
+            auto token = verify(encodedToken, configService.jwtSecret, [JWTAlgorithm.HS512]);
 
             providerName = token.claims.get("provider");
             providerId = token.claims.get("id");
@@ -95,7 +95,7 @@ public class AuthController : IAuthController
         jwtToken.claims.set("id", user.id);
         jwtToken.claims.set("username", user.username);
 
-        return Json(["token": Json(jwtToken.encode(configService.secret))]);
+        return Json(["token": Json(jwtToken.encode(configService.jwtSecret))]);
     }
 
     public override User getSelf(string authorization) @trusted
@@ -109,7 +109,7 @@ public class AuthController : IAuthController
 
         try
         {
-            auto token = verify(encodedToken, configService.secret, [JWTAlgorithm.HS512]);
+            auto token = verify(encodedToken, configService.jwtSecret, [JWTAlgorithm.HS512]);
 
             id = token.claims.get("id");
         }
@@ -212,7 +212,7 @@ public class AuthWebController
             jwtToken.claims.set("avatarUrl", providerUser.avatarUrl);
 
             cookie.expire = dur!"hours"(1);
-            cookie.value = jwtToken.encode(configService.secret);
+            cookie.value = jwtToken.encode(configService.jwtSecret);
 
             res.cookies.addField("pastemyst-registration", cookie);
 
@@ -226,7 +226,7 @@ public class AuthWebController
             jwtToken.claims.set("username", user.get().username);
 
             cookie.expire = dur!"days"(30);
-            cookie.value = jwtToken.encode(configService.secret);
+            cookie.value = jwtToken.encode(configService.jwtSecret);
 
             res.cookies.addField("pastemyst", cookie);
 
