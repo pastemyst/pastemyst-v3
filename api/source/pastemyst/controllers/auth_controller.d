@@ -1,6 +1,7 @@
 module pastemyst.controllers.auth_controller;
 
-import hunt.jwt;
+import jwt.algorithms;
+import jwt.jwt;
 import pastemyst.models;
 import pastemyst.serialization;
 import pastemyst.services;
@@ -65,7 +66,7 @@ public class AuthController : IAuthController
 
         try
         {
-            auto token = JwtToken.decode(encodedToken, configService.secret);
+            auto token = verify(encodedToken, configService.secret, [JWTAlgorithm.HS512]);
 
             providerName = token.claims.get("provider");
             providerId = token.claims.get("id");
@@ -89,7 +90,7 @@ public class AuthController : IAuthController
         userService.createUser(user);
 
         const timeInMonth = Clock.currTime() + 30.days;
-        auto jwtToken = new JwtToken(JwtAlgorithm.HS512);
+        auto jwtToken = new Token(JWTAlgorithm.HS512);
         jwtToken.claims.exp = timeInMonth.toUnixTime();
         jwtToken.claims.set("id", user.id);
         jwtToken.claims.set("username", user.username);
@@ -108,7 +109,7 @@ public class AuthController : IAuthController
 
         try
         {
-            auto token = JwtToken.decode(encodedToken, configService.secret);
+            auto token = verify(encodedToken, configService.secret, [JWTAlgorithm.HS512]);
 
             id = token.claims.get("id");
         }
@@ -189,7 +190,7 @@ public class AuthWebController
 
         auto user = userService.findByProviderId(authService.githubProvider.name, providerUser.id);
 
-        auto jwtToken = new JwtToken(JwtAlgorithm.HS512);
+        auto jwtToken = new Token(JWTAlgorithm.HS512);
 
         // todo: make sure cookie is secure on https
         auto cookie = new Cookie();
