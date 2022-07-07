@@ -6,7 +6,7 @@
     "vibe-d": "~>0.9.5-beta.2",
     "silly": "~>1.1.1",
     "fluent-asserts": "~>0.14.0-alpha.13",
-	  "jwt": "~>0.4.0"
+    "jwt": "~>0.4.0"
   },
   "description": "pastemyst v3 API",
   "license": "MIT",
