@@ -18,12 +18,12 @@
 		"memutils": "1.0.4",
 		"mir-linux-kernel": "1.0.1",
 		"money": "3.0.2",
-		"openssl": "1.1.6+1.0.1g",
+		"openssl": "3.2.2",
 		"poodinis": "8.1.2",
 		"silly": "1.1.1",
 		"stdx-allocator": "2.77.5",
 		"taggedalgebraic": "0.11.22",
-		"vibe-core": "1.22.3",
-		"vibe-d": "0.9.4"
+		"vibe-core": "1.22.4",
+		"vibe-d": "0.9.5-beta.2"
 	}
 }

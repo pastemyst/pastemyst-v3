@@ -1,16 +1,14 @@
 {
-	"authors": [
-		"CodeMyst"
-	],
-	"copyright": "Copyright © 2022, CodeMyst",
-	"dependencies": {
-		"hunt-jwt": ">=0.2.0-beta.4 <0.3.0-0",
-		"poodinis": "~>8.1.1",
-		"vibe-d": "~>0.9.4",
-		"silly": "~>1.1.1",
-		"fluent-asserts": "~>0.14.0-alpha.13"
-	},
-	"description": "pastemyst v3 API",
-	"license": "MIT",
-	"name": "pastemyst-api"
+  "authors": ["CodeMyst"],
+  "copyright": "Copyright © 2022, CodeMyst",
+  "dependencies": {
+    "poodinis": "~>8.1.1",
+    "vibe-d": "~>0.9.5-beta.2",
+    "silly": "~>1.1.1",
+    "fluent-asserts": "~>0.14.0-alpha.13",
+	  "jwt": "~>0.4.0"
+  },
+  "description": "pastemyst v3 API",
+  "license": "MIT",
+  "name": "pastemyst-api"
 }
