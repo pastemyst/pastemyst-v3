@@ -40,7 +40,8 @@ else
         serverSettings.sessionOptions = SessionOption.noSameSiteStrict | SessionOption.httpOnly;
         serverSettings.sessionStore = new MemorySessionStore();
 
-        listenHTTP(serverSettings, router);
+        auto listener = listenHTTP(serverSettings, router);
+        scope (exit) listener.stopListening();
 
         runApplication();
     }
