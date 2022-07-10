@@ -4,6 +4,7 @@
     "clientHost": "http://localhost:3000/",
 
     "secret": "supersecret",
+    "jwtSecret": "othersupersecret",
 
     "mongoConnectionString": "mongodb+srv://user:pass@url.com/?retryWrites=true&w=majority",
     "mongoDatabase": "database",

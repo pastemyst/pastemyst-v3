@@ -13,3 +13,4 @@ pastemyst-v3-test-*
 *.o
 *.obj
 *.lst
+*/.vscode
