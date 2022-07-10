@@ -1,6 +1,10 @@
 <script lang="ts">
     import { currentUserStore, isCommandPaletteOpen } from "./stores";
     import { tooltip } from "./tooltips";
+
+    const onMenuClick = () => {
+        window.dispatchEvent(new CustomEvent("openCmd"));
+    };
 </script>
 
 <header class="flex row center space-between">
@@ -45,7 +49,7 @@
 
         <button
             class="nav-item btn-square"
-            on:click={() => isCommandPaletteOpen.set(true)}
+            on:click={onMenuClick}
             aria-label="menu"
             role="menu"
             use:tooltip

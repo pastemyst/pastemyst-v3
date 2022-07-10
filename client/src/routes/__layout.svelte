@@ -13,7 +13,7 @@
     const handleKeys = async (e: KeyboardEvent) => {
         if (e.ctrlKey && e.key === "k") {
             e.preventDefault();
-            isCommandPaletteOpen.update((open) => !open);
+            window.dispatchEvent(new CustomEvent("toggleCmd"));
         }
     };
 
