@@ -27,4 +27,3 @@ create table if not exists pasties
 
 alter table pasties
     owner to pastemyst;
-

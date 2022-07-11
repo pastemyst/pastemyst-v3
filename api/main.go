@@ -1,32 +1,50 @@
 package main
 
 import (
+	"context"
+	"database/sql"
 	"fmt"
-	"net/http"
 	"pastemyst-api/config"
+	"pastemyst-api/db"
 
-	"github.com/labstack/echo/v4"
-	"gorm.io/driver/postgres"
-	"gorm.io/gorm"
+	_ "github.com/lib/pq"
 )
 
 func main() {
+	ctx := context.Background()
+
 	cfg, err := config.LoadConfig()
 	if err != nil {
 		panic(err)
 	}
 
 	dsn := fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%s", cfg.DbHost, cfg.DbUser, cfg.DbPassword, cfg.DbName, cfg.DbPort)
-	_, err = gorm.Open(postgres.Open(dsn), &gorm.Config{})
+	pdb, err := sql.Open("postgres", dsn)
 	if err != nil {
 		panic(err)
 	}
 
-	e := echo.New()
+	queries := db.New(pdb)
 
-	e.GET("/ping", func(ctx echo.Context) error {
-		return ctx.String(http.StatusOK, "pong")
-	})
+	paste, err := queries.GetPaste(ctx, "1234567")
+	if err != nil {
+		panic(err)
+	}
 
-	e.Logger.Fatal(e.Start(":5000"))
+	fmt.Println(paste)
+
+	pasties, err := queries.GetPastePasties(ctx, paste.ID)
+	if err != nil {
+		panic(err)
+	}
+
+	fmt.Println(pasties)
+
+	// e := echo.New()
+
+	// e.GET("/ping", func(ctx echo.Context) error {
+	// 	return ctx.String(http.StatusOK, "pong")
+	// })
+
+	// e.Logger.Fatal(e.Start(":5000"))
 }
