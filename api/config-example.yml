@@ -1,0 +1,5 @@
+dbHost: localhost
+dbUser: pastemyst
+dbPassword: epikepik
+dbName: pastemyst
+dbPort: 5432
