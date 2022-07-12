@@ -88,6 +88,17 @@ func (q *Queries) GetPaste(ctx context.Context, id string) (Paste, error) {
 	return i, err
 }
 
+const getPasteCount = `-- name: GetPasteCount :one
+select count(*) from pastes
+`
+
+func (q *Queries) GetPasteCount(ctx context.Context) (int64, error) {
+	row := q.db.QueryRowContext(ctx, getPasteCount)
+	var count int64
+	err := row.Scan(&count)
+	return count, err
+}
+
 const getPastePasties = `-- name: GetPastePasties :many
 select id, paste_id, title, content from pasties
 where paste_id = $1

@@ -24,3 +24,6 @@ insert into pasties (
     $1, $2, $3, $4
 )
 returning *;
+
+-- name: GetPasteCount :one
+select count(*) from pastes;
