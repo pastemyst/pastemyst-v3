@@ -52,8 +52,9 @@ func CreatePasteHandler(ctx echo.Context) error {
 		return err
 	}
 
-	if len(createInfo.Pasties) == 0 {
-		return MessageResponse(ctx, http.StatusBadRequest, "At least one pasty is required.")
+	// validate paste
+	if err := ctx.Validate(createInfo); err != nil {
+		return err
 	}
 
 	paste := models.Paste{
@@ -82,7 +83,7 @@ func CreatePasteHandler(ctx echo.Context) error {
 	if err != nil {
 		ctx.Logger().Error("Tried to insert a paste into the DB, got error.")
 		ctx.Logger().Error(err)
-		return ctx.NoContent(http.StatusInternalServerError)
+		return echo.NewHTTPError(http.StatusInternalServerError)
 	}
 
 	// insert pasties into the DB
@@ -96,7 +97,7 @@ func CreatePasteHandler(ctx echo.Context) error {
 		if err != nil {
 			ctx.Logger().Error("Tried to insert a pasty into the DB, got error.")
 			ctx.Logger().Error(err)
-			return ctx.NoContent(http.StatusInternalServerError)
+			return echo.NewHTTPError(http.StatusInternalServerError)
 		}
 	}
 
