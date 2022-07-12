@@ -1,10 +1,15 @@
 package changelog
 
 import (
+	"encoding/json"
 	"fmt"
+	"net/http"
 	"os/exec"
+	"pastemyst-api/logging"
 	"strings"
 	"time"
+
+	"github.com/labstack/echo/v4"
 )
 
 // Information about a single app release.
@@ -41,6 +46,12 @@ func InitChangelog() error {
 	}
 	Version = ver
 
+	rels, err := generateChangelog()
+	if err != nil {
+		return err
+	}
+	Releases = rels
+
 	return nil
 }
 
@@ -53,4 +64,50 @@ func getVersion() (string, error) {
 	}
 
 	return fmt.Sprintf("v%s", strings.TrimSpace(string(stdout))), nil
+}
+
+func generateChangelog() ([]Release, error) {
+	res, err := http.Get("https://api.github.com/repos/pastemyst/pastemyst-v3/releases")
+	if err != nil {
+		return nil, err
+	}
+
+	defer res.Body.Close()
+
+	if res.StatusCode != http.StatusOK {
+		logging.Logger.Errorf("Failed getting the list of all GitHub releases. Got status: %s", res.Status)
+		return nil, echo.NewHTTPError(res.StatusCode)
+	}
+
+	ghReleases := []githubRelease{}
+	json.NewDecoder(res.Body).Decode(&ghReleases)
+
+	releases := make([]Release, 0, len(ghReleases))
+	for _, ghRel := range ghReleases {
+		// ignore drafts
+		if ghRel.Draft {
+			continue
+		}
+
+		// if it doesn't have a title use the tag as the title
+		title := ghRel.Title
+		if title == "" {
+			title = ghRel.Tag
+		}
+
+		// prepend with v if needed
+		if title[0] != 'v' {
+			title = "v" + title
+		}
+
+		releases = append(releases, Release{
+			URL:          ghRel.URL,
+			Title:        title,
+			Content:      ghRel.Body,
+			IsPrerelease: ghRel.Prerelease,
+			ReleasedAt:   ghRel.PublishedAt,
+		})
+	}
+
+	return releases, nil
 }

@@ -6,6 +6,7 @@ import (
 	"pastemyst-api/config"
 	"pastemyst-api/db"
 	"pastemyst-api/handlers"
+	"pastemyst-api/logging"
 	"pastemyst-api/validation"
 
 	"github.com/go-playground/validator/v10"
@@ -23,6 +24,12 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
+
+	err = logging.InitLogger()
+	if err != nil {
+		panic(err)
+	}
+	defer logging.CloseLogger()
 
 	err = changelog.InitChangelog()
 	if err != nil {
