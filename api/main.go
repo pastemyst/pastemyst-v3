@@ -42,6 +42,9 @@ func main() {
 
 	fmt.Printf("\nRunning pastemyst version %s\n", changelog.Version)
 
+	e.GET("/api/v3/meta/version", handlers.GetVersionHandler)
+	e.GET("/api/v3/meta/releases", handlers.GetReleasesHandler)
+
 	e.GET("/api/v3/paste/:id", handlers.GetPaseHandler)
 	e.POST("/api/v3/paste/", handlers.CreatePasteHandler)
 
