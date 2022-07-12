@@ -66,7 +66,7 @@ func CreatePasteHandler(ctx echo.Context) error {
 
 	paste := models.Paste{
 		Id:        randomPasteId(),
-		CreatedAt: time.Now(),
+		CreatedAt: time.Now().UTC(),
 		Title:     createInfo.Title,
 	}
 
