@@ -1,6 +1,6 @@
 package models
 
 type PasteCreateInfo struct {
-	Title   string            `json:"title"`
-	Pasties []PastyCreateInfo `json:"pasties"`
+	Title   string            `json:"title" validate:"max=128"`
+	Pasties []PastyCreateInfo `json:"pasties" validate:"required,dive,min=1"`
 }
