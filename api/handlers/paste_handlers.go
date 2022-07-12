@@ -10,15 +10,19 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
+// Gets a single paste.
+//
 // /api/v3/paste/:id
 func GetPaseHandler(ctx echo.Context) error {
 	id := ctx.Param("id")
 
+	// get paste from db
 	dbPaste, err := db.DBQueries.GetPaste(db.DBContext, id)
 	if err != nil {
 		return ctx.NoContent(http.StatusNotFound)
 	}
 
+	// get all pasties tied to this paste from db
 	dbPasties, err := db.DBQueries.GetPastePasties(db.DBContext, dbPaste.ID)
 	if err != nil {
 		ctx.Logger().Error("Tried to get all pasties of a paste, but got error.")
@@ -26,6 +30,7 @@ func GetPaseHandler(ctx echo.Context) error {
 		return ctx.NoContent(http.StatusInternalServerError)
 	}
 
+	// create proper models that can be returned
 	pasties := make([]models.Pasty, len(dbPasties))
 	for i := 0; i < len(dbPasties); i++ {
 		pasties[i] = models.Pasty{
@@ -45,6 +50,8 @@ func GetPaseHandler(ctx echo.Context) error {
 	return ctx.JSON(http.StatusOK, paste)
 }
 
+// Creates a new paste.
+//
 // /api/v3/paste/
 func CreatePasteHandler(ctx echo.Context) error {
 	var createInfo models.PasteCreateInfo

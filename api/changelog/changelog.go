@@ -33,6 +33,7 @@ var Releases []Release
 // Current app version.
 var Version string
 
+// Initializes the current version and changelog.
 func InitChangelog() error {
 	ver, err := getVersion()
 	if err != nil {
@@ -43,6 +44,7 @@ func InitChangelog() error {
 	return nil
 }
 
+// Gets the current version from git tags.
 func getVersion() (string, error) {
 	cmd := exec.Command("git", "describe", "--tags", "--abbrev=0")
 	stdout, err := cmd.CombinedOutput()
