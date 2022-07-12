@@ -9,14 +9,17 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
+// Custom validator for echo.
 type CustomValidator struct {
 	Validator *validator.Validate
 }
 
+// Runs custom validation of structs.
 func (cv *CustomValidator) Validate(i interface{}) error {
 	if err := cv.Validator.Struct(i); err != nil {
 		var sb strings.Builder
 
+		// If there were errors, go through each of them and convert it to a string.
 		for i, err := range err.(validator.ValidationErrors) {
 			if i != 0 {
 				sb.WriteString(" ")

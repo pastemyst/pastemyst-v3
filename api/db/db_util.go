@@ -10,9 +10,10 @@ import (
 // All declared DB queries as functions.
 var DBQueries *Queries
 
+// DB Context used for queries.
 var DBContext context.Context
 
-// Connects to the DB
+// Connects to the DB.
 func InitDb(cfg config.Config) error {
 	DBContext = context.Background()
 
