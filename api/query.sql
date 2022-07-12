@@ -6,11 +6,14 @@ where id = $1 limit 1;
 select * from pasties
 where paste_id = $1;
 
+-- name: ExistsPaste :one
+select exists(select 1 from pastes where id = $1);
+
 -- name: CreatePaste :one
 insert into pastes (
-    id, title
+    id, created_at, title
 ) values (
-    $1, $2
+    $1, $2, $3
 )
 returning *;
 
