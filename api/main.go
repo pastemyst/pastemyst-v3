@@ -1,6 +1,8 @@
 package main
 
 import (
+	"fmt"
+	"pastemyst-api/changelog"
 	"pastemyst-api/config"
 	"pastemyst-api/db"
 	"pastemyst-api/handlers"
@@ -22,9 +24,16 @@ func main() {
 		panic(err)
 	}
 
+	err = changelog.InitChangelog()
+	if err != nil {
+		panic(err)
+	}
+
 	e := echo.New()
 
 	e.Validator = &validation.CustomValidator{Validator: validator.New()}
+
+	fmt.Printf("\nRunning pastemyst version %s\n", changelog.Version)
 
 	e.GET("/api/v3/paste/:id", handlers.GetPaseHandler)
 	e.POST("/api/v3/paste/", handlers.CreatePasteHandler)
