@@ -25,6 +25,7 @@ func main() {
 	e := echo.New()
 
 	e.GET("/api/v3/paste/:id", handlers.GetPaseHandler)
+	e.POST("/api/v3/paste/", handlers.CreatePasteHandler)
 
 	e.Logger.Fatal(e.Start(":5000"))
 }

@@ -7,24 +7,26 @@ package db
 
 import (
 	"context"
+	"time"
 )
 
 const createPaste = `-- name: CreatePaste :one
 insert into pastes (
-    id, title
+    id, created_at, title
 ) values (
-    $1, $2
+    $1, $2, $3
 )
 returning id, created_at, title
 `
 
 type CreatePasteParams struct {
-	ID    string
-	Title string
+	ID        string
+	CreatedAt time.Time
+	Title     string
 }
 
 func (q *Queries) CreatePaste(ctx context.Context, arg CreatePasteParams) (Paste, error) {
-	row := q.db.QueryRowContext(ctx, createPaste, arg.ID, arg.Title)
+	row := q.db.QueryRowContext(ctx, createPaste, arg.ID, arg.CreatedAt, arg.Title)
 	var i Paste
 	err := row.Scan(&i.ID, &i.CreatedAt, &i.Title)
 	return i, err
@@ -61,6 +63,17 @@ func (q *Queries) CreatePasty(ctx context.Context, arg CreatePastyParams) (Pasty
 		&i.Content,
 	)
 	return i, err
+}
+
+const existsPaste = `-- name: ExistsPaste :one
+select exists(select 1 from pastes where id = $1)
+`
+
+func (q *Queries) ExistsPaste(ctx context.Context, id string) (bool, error) {
+	row := q.db.QueryRowContext(ctx, existsPaste, id)
+	var exists bool
+	err := row.Scan(&exists)
+	return exists, err
 }
 
 const getPaste = `-- name: GetPaste :one
