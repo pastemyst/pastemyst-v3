@@ -14,10 +14,12 @@ var DBQueries *Queries
 var DBContext context.Context
 
 // Connects to the DB.
-func InitDb(cfg config.Config) error {
+func InitDb() error {
 	DBContext = context.Background()
 
-	pdb, err := sql.Open("postgres", fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%s sslmode=disable", cfg.DbHost, cfg.DbUser, cfg.DbPassword, cfg.DbName, cfg.DbPort))
+	pdb, err := sql.Open("postgres", fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%s sslmode=disable",
+		config.Cfg.DbHost, config.Cfg.DbUser, config.Cfg.DbPassword, config.Cfg.DbName, config.Cfg.DbPort))
+
 	if err != nil {
 		return err
 	}

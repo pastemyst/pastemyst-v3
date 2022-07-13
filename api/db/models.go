@@ -20,3 +20,11 @@ type Pasty struct {
 	Title   string
 	Content string
 }
+
+type User struct {
+	ID         string
+	CreatedAt  time.Time
+	Username   string
+	AvatarUrl  string
+	ProviderID string
+}
