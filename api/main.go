@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"pastemyst-api/auth"
 	"pastemyst-api/changelog"
 	"pastemyst-api/config"
 	"pastemyst-api/db"
@@ -10,17 +11,19 @@ import (
 	"pastemyst-api/validation"
 
 	"github.com/go-playground/validator/v10"
+	"github.com/gorilla/sessions"
+	"github.com/labstack/echo-contrib/session"
 	"github.com/labstack/echo/v4"
 	_ "github.com/lib/pq"
 )
 
 func main() {
-	cfg, err := config.LoadConfig()
+	err := config.LoadConfig()
 	if err != nil {
 		panic(err)
 	}
 
-	err = db.InitDb(cfg)
+	err = db.InitDb()
 	if err != nil {
 		panic(err)
 	}
@@ -36,11 +39,17 @@ func main() {
 		panic(err)
 	}
 
+	auth.InitAuth()
+
 	e := echo.New()
 
 	e.Validator = &validation.CustomValidator{Validator: validator.New()}
 
-	fmt.Printf("\nRunning pastemyst version %s\n", changelog.Version)
+	// TODO: use proper secrets
+	e.Use(session.Middleware(sessions.NewCookieStore([]byte("secret"))))
+
+	e.GET("/api/v3/login/github", handlers.LoginGithubHandler)
+	e.GET("/api/v3/login/github-callback", handlers.CallbackGithubHandler)
 
 	e.GET("/api/v3/meta/version", handlers.GetVersionHandler)
 	e.GET("/api/v3/meta/releases", handlers.GetReleasesHandler)
@@ -48,6 +57,8 @@ func main() {
 
 	e.GET("/api/v3/paste/:id", handlers.GetPaseHandler)
 	e.POST("/api/v3/paste/", handlers.CreatePasteHandler)
+
+	fmt.Printf("\nRunning pastemyst version %s\n", changelog.Version)
 
 	e.Logger.Fatal(e.Start(":5000"))
 }
