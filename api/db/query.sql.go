@@ -76,6 +76,22 @@ func (q *Queries) ExistsPaste(ctx context.Context, id string) (bool, error) {
 	return exists, err
 }
 
+const existsUserByProvider = `-- name: ExistsUserByProvider :one
+select exists(select 1 from users where provider_name = $1 and provider_id = $2)
+`
+
+type ExistsUserByProviderParams struct {
+	ProviderName string
+	ProviderID   string
+}
+
+func (q *Queries) ExistsUserByProvider(ctx context.Context, arg ExistsUserByProviderParams) (bool, error) {
+	row := q.db.QueryRowContext(ctx, existsUserByProvider, arg.ProviderName, arg.ProviderID)
+	var exists bool
+	err := row.Scan(&exists)
+	return exists, err
+}
+
 const getPaste = `-- name: GetPaste :one
 select id, created_at, title from pastes
 where id = $1 limit 1
@@ -130,4 +146,28 @@ func (q *Queries) GetPastePasties(ctx context.Context, pasteID string) ([]Pasty,
 		return nil, err
 	}
 	return items, nil
+}
+
+const getUserByProvider = `-- name: GetUserByProvider :one
+select id, created_at, username, avatar_url, provider_name, provider_id from users
+where provider_name = $1 and provider_id = $2 limit 1
+`
+
+type GetUserByProviderParams struct {
+	ProviderName string
+	ProviderID   string
+}
+
+func (q *Queries) GetUserByProvider(ctx context.Context, arg GetUserByProviderParams) (User, error) {
+	row := q.db.QueryRowContext(ctx, getUserByProvider, arg.ProviderName, arg.ProviderID)
+	var i User
+	err := row.Scan(
+		&i.ID,
+		&i.CreatedAt,
+		&i.Username,
+		&i.AvatarUrl,
+		&i.ProviderName,
+		&i.ProviderID,
+	)
+	return i, err
 }

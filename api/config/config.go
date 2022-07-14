@@ -15,6 +15,8 @@ type Config struct {
 	DbName     string `yaml:"dbName"`
 	DbPort     string `yaml:"dbPort"`
 
+	JwtSecret string `yaml:"jwtSecret"`
+
 	GitHubClientId     string `yaml:"githubClientId"`
 	GitHubClientSecret string `yaml:"githubClientSecret"`
 }

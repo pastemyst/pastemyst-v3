@@ -25,6 +25,7 @@ create table if not exists users (
     created_at timestamp with time zone default now() not null,
     username text default '' :: text not null,
     avatar_url text default '' :: text not null,
+    provider_name text default '' :: text not null,
     provider_id text default '' :: text not null
 );
 
