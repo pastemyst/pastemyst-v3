@@ -27,3 +27,10 @@ returning *;
 
 -- name: GetPasteCount :one
 select count(*) from pastes;
+
+-- name: ExistsUserByProvider :one
+select exists(select 1 from users where provider_name = $1 and provider_id = $2);
+
+-- name: GetUserByProvider :one
+select * from users
+where provider_name = $1 and provider_id = $2 limit 1;

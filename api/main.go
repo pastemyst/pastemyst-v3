@@ -48,8 +48,8 @@ func main() {
 	// TODO: use proper secrets
 	e.Use(session.Middleware(sessions.NewCookieStore([]byte("secret"))))
 
-	e.GET("/api/v3/login/github", handlers.LoginGithubHandler)
-	e.GET("/api/v3/login/github-callback", handlers.CallbackGithubHandler)
+	e.GET("/api/v3/login/:provider", handlers.LoginHandler)
+	e.GET("/api/v3/login/:provider/callback", handlers.CallbackHandler)
 
 	e.GET("/api/v3/meta/version", handlers.GetVersionHandler)
 	e.GET("/api/v3/meta/releases", handlers.GetReleasesHandler)

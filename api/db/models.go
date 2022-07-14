@@ -22,9 +22,10 @@ type Pasty struct {
 }
 
 type User struct {
-	ID         string
-	CreatedAt  time.Time
-	Username   string
-	AvatarUrl  string
-	ProviderID string
+	ID           string
+	CreatedAt    time.Time
+	Username     string
+	AvatarUrl    string
+	ProviderName string
+	ProviderID   string
 }
