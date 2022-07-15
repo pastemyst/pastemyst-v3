@@ -1,15 +1,27 @@
 <script lang="ts">
     import { goto } from "$app/navigation";
     import { createPaste, PasteSkeleton, PastySkeleton } from "$lib/api/paste";
+    import { expiresSelect } from "$lib/cmdOptions";
     import PasteOptions from "$lib/PasteOptions.svelte";
+    import { isCommandPaletteOpen } from "$lib/stores";
     import TabbedEditor from "$lib/TabbedEditor.svelte";
     import type TabData from "$lib/TabData";
+    import { onMount } from "svelte";
 
     let expiresIn = "never";
 
     let title: string;
 
     let tabs: TabData[];
+
+    onMount(() => {
+        isCommandPaletteOpen.subscribe((open) => {
+            // on cmd pal close, update expires in
+            if (!open) {
+                expiresIn = expiresSelect.getSelected().name;
+            }
+        });
+    });
 
     const onCreatePaste = async () => {
         let pasties: PastySkeleton[] = [];
@@ -30,6 +42,11 @@
 
         goto(`/${paste.id}`);
     };
+
+    const openExpiresSelect = () => {
+        const evt = new CustomEvent("cmdShowOptions", { detail: expiresSelect });
+        window.dispatchEvent(evt);
+    };
 </script>
 
 <svelte:head>
@@ -38,9 +55,16 @@
 
 <div class="title-input flex sm-row">
     <label class="hidden" for="paste-title">paste title</label>
-    <input type="text" placeholder="title" id="paste-title" name="paste-title" maxlength="128" bind:value={title} />
+    <input
+        type="text"
+        placeholder="title"
+        id="paste-title"
+        name="paste-title"
+        maxlength="128"
+        bind:value={title}
+    />
 
-    <button>expires in: {expiresIn}</button>
+    <button on:click={openExpiresSelect}>expires in: {expiresIn}</button>
 </div>
 
 <TabbedEditor bind:tabs />

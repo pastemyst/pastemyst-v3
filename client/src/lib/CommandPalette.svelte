@@ -1,65 +1,14 @@
 <script lang="ts">
     import highlightWords, { HighlightWords } from "highlight-words";
-    import { onMount } from "svelte";
+    import {
+        Command,
+        DirCommand,
+        rootCommands,
+        SelectCommand,
+        SelectOptionCommand,
+        LinkCommand
+    } from "./cmdOptions";
     import { isCommandPaletteOpen } from "./stores";
-
-    class Command {
-        name: string;
-        icon?: string = null;
-        description?: string = null;
-        shortcuts?: string[][] = [];
-
-        constructor(name: string) {
-            this.name = name;
-        }
-
-        withName(name: string): Command {
-            this.name = name;
-            return this;
-        }
-
-        withIcon(icon: string): Command {
-            this.icon = icon;
-            return this;
-        }
-
-        withDescription(description: string): Command {
-            this.description = description;
-            return this;
-        }
-
-        addShortcut(shortcut: string[]): Command {
-            this.shortcuts.push(shortcut);
-            return this;
-        }
-    }
-
-    class LinkCommand extends Command {
-        url: string;
-
-        constructor(name: string) {
-            super(name);
-        }
-
-        withUrl(url: string): LinkCommand {
-            this.url = url;
-            return this;
-        }
-    }
-
-    class DirCommand extends Command {
-        subCommands: Command[];
-
-        constructor(name: string) {
-            super(name);
-        }
-
-        withCommands(commands: Command[]) {
-            this.subCommands = commands;
-            return this;
-        }
-    }
-
     export let isOpen: boolean = false;
 
     let searchElement: HTMLInputElement;
@@ -68,49 +17,6 @@
 
     let isCommandSelected: boolean = false;
 
-    const gitCommands: Command[] = [];
-
-    const githubCmd = new LinkCommand("github")
-        .withUrl("https://github.com/")
-        .withDescription("this one has a description")
-        .addShortcut(["ctrl", "g"])
-        .addShortcut(["ctrl", "p"]);
-
-    const gitlabCmd = new LinkCommand("gitlab")
-        .withUrl("https://gitlab.com/")
-        .addShortcut(["ctrl", "l"]);
-
-    const bitbucketCmd = new LinkCommand("bitbucket")
-        .withUrl("https://bitbucket.com/")
-        .addShortcut(["ctrl", "b"]);
-
-    const gitmystCmd = new LinkCommand("gitmyst").withUrl("https://git.myst.rs/");
-
-    const sourcehutCmd = new LinkCommand("sourcehut").withUrl("https://sr.ht/");
-
-    gitCommands.push(githubCmd);
-    gitCommands.push(gitlabCmd);
-    gitCommands.push(bitbucketCmd);
-    gitCommands.push(gitmystCmd);
-    gitCommands.push(sourcehutCmd);
-
-    const editorCommands: Command[] = [];
-
-    const vscodeCmd = new LinkCommand("vscode").withUrl("/");
-
-    const vimCmd = new LinkCommand("vim").withUrl("/");
-
-    const sublimeCmd = new LinkCommand("sublime").withUrl("/");
-
-    editorCommands.push(vscodeCmd);
-    editorCommands.push(vimCmd);
-    editorCommands.push(sublimeCmd);
-
-    const editorCommand = new DirCommand("editors").withCommands(editorCommands);
-    const gitCommand = new DirCommand("git services").withCommands(gitCommands);
-
-    const rootCommands: Command[] = [editorCommand, gitCommand];
-
     let commands: Command[] = rootCommands;
     let filteredCommands: Command[] = commands;
     let highlightedChunks: HighlightWords.Chunk[][][];
@@ -118,14 +24,48 @@
     let elements: HTMLElement[] = [];
     let selectedCommand: Command;
 
-    onMount(() => {
-        isCommandPaletteOpen.subscribe(async (open) => await setOpen(open, false));
-    });
+    let lastActiveElement: Element;
+
+    const onCmd = (e: MouseEvent | null, cmd: Command) => {
+        if (cmd instanceof DirCommand) {
+            e?.preventDefault();
+
+            commands = cmd.subCommands;
+            filteredCommands = commands;
+            selectedCommand = commands[0];
+            search = "";
+            searchElement.focus();
+        } else if (cmd instanceof SelectCommand) {
+            e?.preventDefault();
+
+            commands = cmd.options;
+            filteredCommands = commands;
+            selectedCommand = commands.find((c) => (c as SelectOptionCommand).selected);
+            search = "";
+            searchElement.focus();
+        } else if (cmd instanceof SelectOptionCommand) {
+            e?.preventDefault();
+
+            for (let opt of cmd.parent.options) {
+                opt.selected = false;
+            }
+
+            cmd.selected = true;
+
+            setOpen(false);
+        }
+    };
+
+    export const showOptions = (cmd: Command) => {
+        setOpen(true);
+
+        onCmd(null, cmd);
+    };
 
     const setOpen = async (v: boolean, updateStore = true) => {
-        isOpen = v;
+        if (v) {
+            lastActiveElement = document.activeElement;
 
-        if (isOpen) {
             selectedCommand = filteredCommands[0];
 
             searchElement?.focus();
@@ -133,11 +73,15 @@
         } else {
             commands = rootCommands;
             filteredCommands = commands;
+
+            (lastActiveElement as HTMLElement)?.focus();
         }
 
         if (updateStore) {
             isCommandPaletteOpen.set(v);
         }
+
+        isOpen = v;
     };
 
     const onSearchBlur = async () => {
@@ -159,6 +103,7 @@
         switch (e.key) {
             case "Enter":
                 {
+                    e.preventDefault();
                     const index = filteredCommands.findIndex((e) => e === selectedCommand);
                     elements[index].click();
                 }
@@ -183,19 +128,6 @@
                 }
                 break;
         }
-    };
-
-    const onDirClick = (e: MouseEvent, dir: DirCommand) => {
-        e.preventDefault();
-        changeDir(dir);
-    };
-
-    const changeDir = (dir: DirCommand) => {
-        commands = dir.subCommands;
-        filteredCommands = commands;
-        selectedCommand = commands[0];
-        search = "";
-        searchElement.focus();
     };
 
     const filter = () => {
@@ -238,6 +170,8 @@
     };
 </script>
 
+<svelte:window on:cmdShowOptions={(e) => showOptions(e.detail)} on:openCmd={() => setOpen(true)} on:toggleCmd={() => setOpen(!isOpen)} />
+
 <div role="dialog" aria-modal="true" class="palette" class:isOpen>
     <div class="wrapper">
         <div class="search flex row center">
@@ -279,10 +213,11 @@
                     href={cmd instanceof LinkCommand ? cmd.url : null}
                     class="command flex col no-dec"
                     target="_blank"
-                    on:click={cmd instanceof DirCommand ? (e) => onDirClick(e, cmd) : null}
+                    on:click={(e) => onCmd(e, cmd)}
                     on:mousedown={() => onCommandMouseDown(cmd)}
                     on:mouseup={onCommandMouseUp}
                     class:selected={selectedCommand === cmd}
+                    class:selected-option={cmd instanceof SelectOptionCommand && cmd.selected}
                     bind:this={elements[cmdIndex]}
                 >
                     <div class="name flex row center">
@@ -290,6 +225,24 @@
                         {#if cmd.icon}
                             <div class="icon flex row center">
                                 {@html cmd.icon}
+                            </div>
+                        {:else if cmd instanceof SelectOptionCommand && cmd.selected}
+                            <div class="icon flex row center">
+                                <svg
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    class="ionicon"
+                                    viewBox="0 0 512 512"
+                                >
+                                    <title>Checkmark</title>
+                                    <path
+                                        fill="none"
+                                        stroke="currentColor"
+                                        stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                        stroke-width="32"
+                                        d="M416 128L192 384l-96-96"
+                                    />
+                                </svg>
                             </div>
                         {/if}
 
@@ -403,7 +356,12 @@
             &.selected,
             &:hover {
                 background-color: $color-bg-1;
-                border-left: 2px solid $color-sec;
+                border-left: 2px solid $color-sec !important;
+                padding-left: 0.75rem;
+            }
+
+            &.selected-option {
+                border-left: 2px solid $color-prim;
                 padding-left: 0.75rem;
             }
 
@@ -413,9 +371,9 @@
 
             .name {
                 .icon {
-                    margin-right: 1rem;
+                    margin-right: 0.5rem;
                     color: $color-fg;
-                    max-width: 25px;
+                    max-width: 20px;
                 }
             }
 
