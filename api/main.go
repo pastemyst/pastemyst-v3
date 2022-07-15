@@ -46,14 +46,17 @@ func main() {
 
 	e.Validator = &validation.CustomValidator{Validator: validator.New()}
 
+	e.Pre(middleware.RemoveTrailingSlash())
+
 	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
 		AllowOrigins:     []string{"*"},
 		AllowHeaders:     []string{echo.HeaderOrigin, echo.HeaderAccept, echo.HeaderContentType, echo.HeaderAuthorization},
 		AllowCredentials: true,
 	}))
 
-	// TODO: use proper secrets
 	e.Use(session.Middleware(sessions.NewCookieStore([]byte(config.Cfg.SessionSecret))))
+
+	e.Use(auth.AuthMiddleware)
 
 	e.GET("/api/v3/login/:provider", handlers.LoginHandler)
 	e.GET("/api/v3/login/:provider/callback", handlers.CallbackHandler)
@@ -68,7 +71,7 @@ func main() {
 	e.GET("/api/v3/user/:username", handlers.GetUserHandler)
 
 	e.GET("/api/v3/paste/:id", handlers.GetPaseHandler)
-	e.POST("/api/v3/paste/", handlers.CreatePasteHandler)
+	e.POST("/api/v3/paste", handlers.CreatePasteHandler)
 
 	fmt.Printf("\nRunning pastemyst version %s\n", changelog.Version)
 

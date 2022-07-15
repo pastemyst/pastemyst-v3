@@ -8,7 +8,6 @@ import (
 	"pastemyst-api/config"
 	"pastemyst-api/db"
 	"pastemyst-api/logging"
-	"pastemyst-api/models"
 	"pastemyst-api/utils"
 	"pastemyst-api/validation"
 	"time"
@@ -287,36 +286,10 @@ func PostRegisterHandler(ctx echo.Context) error {
 //
 // /api/v3/auth/self
 func GetSelfHandler(ctx echo.Context) error {
-	cookie, err := ctx.Cookie("pastemyst")
-	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, "Trying to acces auth endpoint but missing cookie.")
-	}
+	user := ctx.Get("user")
 
-	claims := &auth.Claims{}
-
-	jwtToken, err := jwt.ParseWithClaims(cookie.Value, claims, func(t *jwt.Token) (interface{}, error) {
-		return []byte(config.Cfg.JwtSecret), nil
-	})
-	if err != nil {
-		logging.Logger.Errorf("User tried to authorize with an invalid JWT token: %s", err.Error())
-		return echo.NewHTTPError(http.StatusUnauthorized, "You tried to authorize with an invalid JWT token.")
-	}
-
-	if !jwtToken.Valid {
-		logging.Logger.Errorf("User tried to authorize with an invalid JWT token: %s", err.Error())
-		return echo.NewHTTPError(http.StatusUnauthorized, "You tried to authorize with an invalid JWT token.")
-	}
-
-	dbUser, err := db.DBQueries.GetUserById(db.DBContext, claims.Id)
-	if err != nil {
-		return echo.NewHTTPError(http.StatusNotFound)
-	}
-
-	user := models.User{
-		Id:        dbUser.ID,
-		CreatedAt: dbUser.CreatedAt,
-		Username:  dbUser.Username,
-		AvatarUrl: dbUser.AvatarUrl,
+	if user == nil {
+		return echo.NewHTTPError(http.StatusUnauthorized)
 	}
 
 	return ctx.JSON(http.StatusOK, user)
