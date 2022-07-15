@@ -53,7 +53,7 @@ func main() {
 	}))
 
 	// TODO: use proper secrets
-	e.Use(session.Middleware(sessions.NewCookieStore([]byte("secret"))))
+	e.Use(session.Middleware(sessions.NewCookieStore([]byte(config.Cfg.SessionSecret))))
 
 	e.GET("/api/v3/login/:provider", handlers.LoginHandler)
 	e.GET("/api/v3/login/:provider/callback", handlers.CallbackHandler)

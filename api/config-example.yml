@@ -7,6 +7,7 @@ dbPassword: epikepik
 dbName: pastemyst
 dbPort: 5432
 
+sessionSecret: anotherstronksecret
 jwtSecret: superepikstrongsecret
 
 githubClientId: id
