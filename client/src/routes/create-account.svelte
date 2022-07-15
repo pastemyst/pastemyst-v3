@@ -1,7 +1,6 @@
 <script lang="ts">
     import { page } from "$app/stores";
     import { goto } from "$app/navigation";
-    import { deleteCookie, setCookie } from "$lib/util/cookies";
     import { createAccount } from "$lib/api/auth";
     import { getUser } from "$lib/api/user";
 
@@ -13,7 +12,7 @@
 
     const usernameRegex = /^[\w.-]+$/m;
 
-    let createAccountError = false;
+    let createAccountErrorMsg = "";
 
     const onUsernameInput = async () => {
         await validateUsername();
@@ -27,15 +26,9 @@
             return;
         }
 
-        const token = await createAccount(username);
+        createAccountErrorMsg = await createAccount(username);
 
-        if (token === null) {
-            createAccountError = true;
-            return;
-        }
-
-        setCookie("pastemyst", token, 30);
-        deleteCookie("pastemyst-registration");
+        if (createAccountErrorMsg) return;
 
         goto("/");
     };
@@ -66,10 +59,12 @@
     </p>
 
     <form class="flex col" on:submit|preventDefault={onFormSubmit}>
-        {#if createAccountError}
+        {#if createAccountErrorMsg}
             <p class="error-message">
                 There was an issue creating the account. Please try again. If the issue persists
                 please <a href="/contact">contact us</a>.
+
+                Message: {createAccountErrorMsg}
             </p>
         {/if}
 
