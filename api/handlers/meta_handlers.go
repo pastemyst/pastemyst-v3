@@ -37,7 +37,7 @@ func GetReleasesHandler(ctx echo.Context) error {
 
 // Get the number of currently active (existing) pastes.
 //
-// /api/v3/meta/activePastes
+// /api/v3/meta/active_pastes
 func GetActivePastesHandler(ctx echo.Context) error {
 	count, err := db.DBQueries.GetPasteCount(db.DBContext)
 	if err != nil {
