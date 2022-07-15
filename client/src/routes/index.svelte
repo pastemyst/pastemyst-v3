@@ -28,7 +28,7 @@
 
         const paste = await createPaste(pasteSkeleton);
 
-        goto(`/${paste._id}`);
+        goto(`/${paste.id}`);
     };
 </script>
 

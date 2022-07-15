@@ -82,12 +82,14 @@ func InitAuth() {
 func GetProviderUser(providerCfg *ProviderConfig, token string) (*ProviderUser, error) {
 	httpClient := &http.Client{}
 
+	// make a request to the provider endpoint for the user
 	req, err := http.NewRequest(http.MethodGet, providerCfg.UserUrl, nil)
 	if err != nil {
 		logging.Logger.Errorf("Failed creating http.NewRequest: %s", err.Error())
 		return nil, echo.NewHTTPError(http.StatusInternalServerError)
 	}
 
+	// set proper headers
 	if providerCfg == GithubOauthConfig {
 		req.Header.Set("Accept", "application/vnd.github.v3+json")
 		req.Header.Set("Authorization", fmt.Sprintf("token %s", token))
@@ -104,6 +106,7 @@ func GetProviderUser(providerCfg *ProviderConfig, token string) (*ProviderUser, 
 
 	defer res.Body.Close()
 
+	// convert to json
 	var jsonUser map[string]interface{}
 	json.NewDecoder(res.Body).Decode(&jsonUser)
 
@@ -112,6 +115,7 @@ func GetProviderUser(providerCfg *ProviderConfig, token string) (*ProviderUser, 
 		AvatarUrl: jsonUser[providerCfg.AvatarUrlJsonField].(string),
 	}
 
+	// github's IDs are numbers (which for some reason have to be parsed like floats)
 	if providerCfg == GithubOauthConfig {
 		id := jsonUser[providerCfg.IdJsonField].(float64)
 		user.Id = fmt.Sprint(int(id))

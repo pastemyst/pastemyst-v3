@@ -65,12 +65,62 @@ func (q *Queries) CreatePasty(ctx context.Context, arg CreatePastyParams) (Pasty
 	return i, err
 }
 
+const createUser = `-- name: CreateUser :one
+insert into users (
+    id, created_at, username, avatar_url, provider_name, provider_id
+) values (
+    $1, $2, $3, $4, $5, $6
+)
+returning id, created_at, username, avatar_url, provider_name, provider_id
+`
+
+type CreateUserParams struct {
+	ID           string
+	CreatedAt    time.Time
+	Username     string
+	AvatarUrl    string
+	ProviderName string
+	ProviderID   string
+}
+
+func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (User, error) {
+	row := q.db.QueryRowContext(ctx, createUser,
+		arg.ID,
+		arg.CreatedAt,
+		arg.Username,
+		arg.AvatarUrl,
+		arg.ProviderName,
+		arg.ProviderID,
+	)
+	var i User
+	err := row.Scan(
+		&i.ID,
+		&i.CreatedAt,
+		&i.Username,
+		&i.AvatarUrl,
+		&i.ProviderName,
+		&i.ProviderID,
+	)
+	return i, err
+}
+
 const existsPaste = `-- name: ExistsPaste :one
 select exists(select 1 from pastes where id = $1)
 `
 
 func (q *Queries) ExistsPaste(ctx context.Context, id string) (bool, error) {
 	row := q.db.QueryRowContext(ctx, existsPaste, id)
+	var exists bool
+	err := row.Scan(&exists)
+	return exists, err
+}
+
+const existsUserById = `-- name: ExistsUserById :one
+select exists(select 1 from users where id = $1)
+`
+
+func (q *Queries) ExistsUserById(ctx context.Context, id string) (bool, error) {
+	row := q.db.QueryRowContext(ctx, existsUserById, id)
 	var exists bool
 	err := row.Scan(&exists)
 	return exists, err
@@ -87,6 +137,17 @@ type ExistsUserByProviderParams struct {
 
 func (q *Queries) ExistsUserByProvider(ctx context.Context, arg ExistsUserByProviderParams) (bool, error) {
 	row := q.db.QueryRowContext(ctx, existsUserByProvider, arg.ProviderName, arg.ProviderID)
+	var exists bool
+	err := row.Scan(&exists)
+	return exists, err
+}
+
+const existsUserByUsername = `-- name: ExistsUserByUsername :one
+select exists(select 1 from users where username = $1)
+`
+
+func (q *Queries) ExistsUserByUsername(ctx context.Context, username string) (bool, error) {
+	row := q.db.QueryRowContext(ctx, existsUserByUsername, username)
 	var exists bool
 	err := row.Scan(&exists)
 	return exists, err
@@ -148,6 +209,25 @@ func (q *Queries) GetPastePasties(ctx context.Context, pasteID string) ([]Pasty,
 	return items, nil
 }
 
+const getUserById = `-- name: GetUserById :one
+select id, created_at, username, avatar_url, provider_name, provider_id from users
+where id = $1 limit 1
+`
+
+func (q *Queries) GetUserById(ctx context.Context, id string) (User, error) {
+	row := q.db.QueryRowContext(ctx, getUserById, id)
+	var i User
+	err := row.Scan(
+		&i.ID,
+		&i.CreatedAt,
+		&i.Username,
+		&i.AvatarUrl,
+		&i.ProviderName,
+		&i.ProviderID,
+	)
+	return i, err
+}
+
 const getUserByProvider = `-- name: GetUserByProvider :one
 select id, created_at, username, avatar_url, provider_name, provider_id from users
 where provider_name = $1 and provider_id = $2 limit 1
@@ -160,6 +240,25 @@ type GetUserByProviderParams struct {
 
 func (q *Queries) GetUserByProvider(ctx context.Context, arg GetUserByProviderParams) (User, error) {
 	row := q.db.QueryRowContext(ctx, getUserByProvider, arg.ProviderName, arg.ProviderID)
+	var i User
+	err := row.Scan(
+		&i.ID,
+		&i.CreatedAt,
+		&i.Username,
+		&i.AvatarUrl,
+		&i.ProviderName,
+		&i.ProviderID,
+	)
+	return i, err
+}
+
+const getUserByUsername = `-- name: GetUserByUsername :one
+select id, created_at, username, avatar_url, provider_name, provider_id from users
+where username = $1 limit 1
+`
+
+func (q *Queries) GetUserByUsername(ctx context.Context, username string) (User, error) {
+	row := q.db.QueryRowContext(ctx, getUserByUsername, username)
 	var i User
 	err := row.Scan(
 		&i.ID,

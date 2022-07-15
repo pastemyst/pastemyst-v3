@@ -8,14 +8,22 @@ import (
 	"pastemyst-api/config"
 	"pastemyst-api/db"
 	"pastemyst-api/logging"
+	"pastemyst-api/models"
 	"pastemyst-api/utils"
+	"pastemyst-api/validation"
 	"time"
 
+	"github.com/go-playground/validator/v10"
 	"github.com/golang-jwt/jwt/v4"
 	"github.com/gorilla/sessions"
 	"github.com/labstack/echo-contrib/session"
 	"github.com/labstack/echo/v4"
 )
+
+// Struct used for receiving the username when creating an account.
+type registerData struct {
+	Username string `json:"username"`
+}
 
 // Initiates the OAuth2 flow.
 //
@@ -23,6 +31,7 @@ import (
 func LoginHandler(ctx echo.Context) error {
 	state := utils.RandomId()
 
+	// short lived session to persist the state used for OAuth
 	session, err := session.Get("pastemyst_oauth_state", ctx)
 	if err != nil {
 		logging.Logger.Error("Failed getting the session while starting the OAuth flow.")
@@ -31,7 +40,7 @@ func LoginHandler(ctx echo.Context) error {
 
 	session.Options = &sessions.Options{
 		Path:     "/",
-		MaxAge:   86400 * 7,
+		MaxAge:   300,
 		HttpOnly: true,
 	}
 
@@ -39,6 +48,7 @@ func LoginHandler(ctx echo.Context) error {
 
 	session.Save(ctx.Request(), ctx.Response())
 
+	// get the oauth url for the code and redirect to it
 	url := auth.OAuthProviders[ctx.Param("provider")].AuthCodeURL(state)
 
 	return ctx.Redirect(http.StatusTemporaryRedirect, url)
@@ -48,15 +58,16 @@ func LoginHandler(ctx echo.Context) error {
 //
 // /api/v3/login/:provider/callback
 func CallbackHandler(ctx echo.Context) error {
-	session, err := session.Get("pastemyst_oauth_state", ctx)
+	ses, err := session.Get("pastemyst_oauth_state", ctx)
 	if err != nil {
 		logging.Logger.Error("Failed getting the session while handling the OAuth callback.")
 		return echo.NewHTTPError(http.StatusInternalServerError)
 	}
 
-	sessionState := session.Values["state"]
-
-	session.Options.MaxAge = 0
+	// get the session, and set the maxage to -1 to delete it
+	sessionState := ses.Values["state"]
+	ses.Options.MaxAge = -1
+	ses.Save(ctx.Request(), ctx.Response())
 
 	state := ctx.FormValue("state")
 	code := ctx.FormValue("code")
@@ -68,6 +79,7 @@ func CallbackHandler(ctx echo.Context) error {
 
 	provider := auth.OAuthProviders[ctx.Param("provider")]
 
+	// get the access token from the provider
 	token, err := provider.Exchange(db.DBContext, code)
 	if err != nil {
 		logging.Logger.Errorf("Code exchange failed: %s", err.Error())
@@ -92,9 +104,11 @@ func CallbackHandler(ctx echo.Context) error {
 	cookie.Path = "/"
 	cookie.HttpOnly = true
 	cookie.SameSite = http.SameSiteStrictMode
+	// TODO: make it secure when using SSL
 
 	jwtToken := jwt.New(jwt.SigningMethodHS512)
 
+	// if the user already exists, create a jwt cookie and return it, redirect back to homepage
 	if exists {
 		expirationTime := time.Now().Add(30 * 24 * time.Hour)
 
@@ -118,6 +132,7 @@ func CallbackHandler(ctx echo.Context) error {
 		tokenString, err := jwtToken.SignedString([]byte(config.Cfg.JwtSecret))
 		if err != nil {
 			logging.Logger.Errorf("Failed to sign JWT token: %s", err.Error())
+			return echo.NewHTTPError(http.StatusInternalServerError)
 		}
 
 		cookie.Expires = expirationTime
@@ -126,8 +141,9 @@ func CallbackHandler(ctx echo.Context) error {
 
 		ctx.SetCookie(cookie)
 
-		return ctx.Redirect(http.StatusTemporaryRedirect, fmt.Sprintf("%s/handle-login", config.Cfg.ClientHost))
+		return ctx.Redirect(http.StatusTemporaryRedirect, config.Cfg.ClientHost)
 	} else {
+		// if user doesn't exist yet, redirect to the create account page with the temporary cookie
 		expirationTime := time.Now().Add(1 * time.Hour)
 
 		jwtToken.Claims = &auth.RegistrationClaims{
@@ -152,4 +168,164 @@ func CallbackHandler(ctx echo.Context) error {
 
 		return ctx.Redirect(http.StatusTemporaryRedirect, fmt.Sprintf("%s/create-account?username=%s", config.Cfg.ClientHost, url.QueryEscape(providerUser.Username)))
 	}
+}
+
+// Creates a new account.
+//
+// /api/v3/auth/register
+func PostRegisterHandler(ctx echo.Context) error {
+	cookie, err := ctx.Cookie("pastemyst-registration")
+	if err != nil {
+		logging.Logger.Errorf("Trying to register but couldn't get registration cookie: %s", err.Error())
+		return echo.NewHTTPError(http.StatusInternalServerError)
+	}
+
+	data := registerData{}
+	if err := ctx.Bind(&data); err != nil {
+		logging.Logger.Errorf("Failed to bind data: %s", err.Error())
+		return echo.NewHTTPError(http.StatusInternalServerError)
+	}
+
+	username := data.Username
+	if username == "" {
+		return echo.NewHTTPError(http.StatusBadRequest, "Missing username.")
+	}
+
+	validate := validator.New()
+	err = validate.Var(username, "required,max=20,containsany=abcdefghijklmnopqrstuvwxyz0123456789.-_")
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, validation.ValidationErrToMsg(err))
+	}
+
+	exists, err := db.DBQueries.ExistsUserByUsername(db.DBContext, username)
+	if err != nil {
+		logging.Logger.Errorf("Failed to check if user exists by username: %s", err.Error())
+		return echo.NewHTTPError(http.StatusInternalServerError)
+	}
+
+	if exists {
+		return echo.NewHTTPError(http.StatusBadRequest, "Username is taken.")
+	}
+
+	jwtClaims := &auth.RegistrationClaims{}
+	jwtToken, err := jwt.ParseWithClaims(cookie.Value, jwtClaims, func(t *jwt.Token) (interface{}, error) {
+		return []byte(config.Cfg.JwtSecret), nil
+	})
+	if err != nil {
+		logging.Logger.Errorf("User tried to create an account with an invalid JWT token: %s", err.Error())
+		return echo.NewHTTPError(http.StatusUnauthorized, "You tried to authorize with an invalid JWT token.")
+	}
+
+	if !jwtToken.Valid {
+		logging.Logger.Errorf("User tried to create an account with an invalid JWT token: %s", err.Error())
+		return echo.NewHTTPError(http.StatusUnauthorized, "You tried to authorize with an invalid JWT token.")
+	}
+
+	existsByProvider, err := db.DBQueries.ExistsUserByProvider(db.DBContext, db.ExistsUserByProviderParams{
+		ProviderName: jwtClaims.ProviderName,
+		ProviderID:   jwtClaims.ProviderId,
+	})
+	if err != nil {
+		logging.Logger.Errorf("Failed checking is user exists by provider: %s", err.Error())
+		return echo.NewHTTPError(http.StatusInternalServerError)
+	}
+
+	if existsByProvider {
+		return echo.NewHTTPError(http.StatusBadRequest, "A user already exists with the same provider.")
+	}
+
+	id := randomUserId()
+
+	_, err = db.DBQueries.CreateUser(db.DBContext, db.CreateUserParams{
+		ID:           id,
+		CreatedAt:    time.Now().UTC(),
+		Username:     username,
+		AvatarUrl:    jwtClaims.AvatarUrl,
+		ProviderName: jwtClaims.ProviderName,
+		ProviderID:   jwtClaims.ProviderId,
+	})
+	if err != nil {
+		logging.Logger.Errorf("Failed to insert user into DB: %s", err.Error())
+		return echo.NewHTTPError(http.StatusInternalServerError)
+	}
+
+	cookie.MaxAge = -1
+	ctx.SetCookie(cookie)
+
+	expirationTime := time.Now().Add(30 * 24 * time.Hour)
+
+	newJwt := jwt.New(jwt.SigningMethodHS512)
+	newJwt.Claims = &auth.Claims{
+		RegisteredClaims: jwt.RegisteredClaims{
+			ExpiresAt: jwt.NewNumericDate(expirationTime),
+		},
+		Id:       id,
+		Username: username,
+	}
+
+	tokenString, err := newJwt.SignedString([]byte(config.Cfg.JwtSecret))
+	if err != nil {
+		logging.Logger.Errorf("Failed to sign JWT token: %s", err.Error())
+		return echo.NewHTTPError(http.StatusInternalServerError)
+	}
+
+	newCookie := &http.Cookie{}
+	newCookie.Path = "/"
+	newCookie.HttpOnly = true
+	newCookie.SameSite = http.SameSiteStrictMode
+	newCookie.Expires = expirationTime
+	newCookie.Name = "pastemyst"
+	newCookie.Value = tokenString
+	// TODO: make it secure when using SSL
+
+	ctx.SetCookie(newCookie)
+
+	return ctx.NoContent(http.StatusOK)
+}
+
+// Returns the currently authorized user from the provided token.
+//
+// /api/v3/auth/self
+func GetSelfHandler(ctx echo.Context) error {
+	cookie, err := ctx.Cookie("pastemyst")
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, "Trying to acces auth endpoint but missing cookie.")
+	}
+
+	claims := &auth.Claims{}
+
+	jwtToken, err := jwt.ParseWithClaims(cookie.Value, claims, func(t *jwt.Token) (interface{}, error) {
+		return []byte(config.Cfg.JwtSecret), nil
+	})
+	if err != nil {
+		logging.Logger.Errorf("User tried to authorize with an invalid JWT token: %s", err.Error())
+		return echo.NewHTTPError(http.StatusUnauthorized, "You tried to authorize with an invalid JWT token.")
+	}
+
+	if !jwtToken.Valid {
+		logging.Logger.Errorf("User tried to authorize with an invalid JWT token: %s", err.Error())
+		return echo.NewHTTPError(http.StatusUnauthorized, "You tried to authorize with an invalid JWT token.")
+	}
+
+	dbUser, err := db.DBQueries.GetUserById(db.DBContext, claims.Id)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusNotFound)
+	}
+
+	user := models.User{
+		Id:        dbUser.ID,
+		CreatedAt: dbUser.CreatedAt,
+		Username:  dbUser.Username,
+		AvatarUrl: dbUser.AvatarUrl,
+	}
+
+	return ctx.JSON(http.StatusOK, user)
+}
+
+// Generates a random user ID, making sure that it's unique.
+func randomUserId() string {
+	return utils.RandomIdWhile(func(id string) bool {
+		exists, _ := db.DBQueries.ExistsUserById(db.DBContext, id)
+		return exists
+	})
 }
