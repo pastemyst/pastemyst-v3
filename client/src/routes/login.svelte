@@ -13,7 +13,7 @@
 
     <ul>
         <li>
-            <a href="{apiBase}/auth-web/login/github" rel="external" class="btn">
+            <a href="{apiBase}/login/github" rel="external" class="btn">
                 <svg
                     xmlns="http://www.w3.org/2000/svg"
                     width="64"
@@ -36,7 +36,7 @@
         </li>
 
         <li>
-            <a href="{apiBase}/auth-web/login/gitlab" rel="external" class="btn">
+            <a href="{apiBase}/login/gitlab" rel="external" class="btn">
                 <svg
                     width="32px"
                     height="32px"
@@ -54,7 +54,7 @@
         </li>
 
         <li>
-            <a href="{apiBase}/auth-web/login/google" rel="external" class="btn">
+            <a href="{apiBase}/login/google" rel="external" class="btn">
                 <svg
                     width="24"
                     height="24"

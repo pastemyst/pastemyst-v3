@@ -1,0 +1,14 @@
+host: http://localhost:5000
+clientHost: http://localhost:3000
+
+dbHost: localhost
+dbUser: pastemyst
+dbPassword: epikepik
+dbName: pastemyst
+dbPort: 5432
+
+sessionSecret: anotherstronksecret
+jwtSecret: superepikstrongsecret
+
+githubClientId: id
+githubClientSecret: secret

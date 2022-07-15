@@ -1,18 +1,22 @@
 <script lang="ts" context="module">
     import { apiBase } from "$lib/api/api";
-    import { fetcherGet } from "$lib/api/fetcher";
     import type { Paste } from "$lib/api/paste";
     import { tooltip } from "$lib/tooltips";
 
     export const router = false;
 
     export const load = async ({ params }) => {
-        const res = await fetcherGet<Paste>(`${apiBase}/paste/${params.paste}`);
+        const res = await fetch(`${apiBase}/paste/${params.paste}`, {
+            method: "get"
+        });
+
+        let paste: Paste = null;
+        if (res.ok) paste = await res.json();
 
         return {
             status: res.ok,
             props: {
-                paste: res.ok ? res.data : null
+                paste: paste
             }
         };
     };
@@ -23,7 +27,7 @@
 
     export let paste: Paste;
 
-    let activePastyId: string = paste.pasties[0]._id;
+    let activePastyId: string = paste.pasties[0].id;
 
     const setActiveTab = (id: string) => {
         activePastyId = id;
@@ -71,17 +75,17 @@
         <div class="tabgroup flex row">
             {#each paste.pasties as pasty, i}
                 <Tab
-                    id={pasty._id}
+                    id={pasty.id}
                     isReadonly
                     title={pasty.title}
-                    isActive={pasty._id === activePastyId}
-                    on:click={() => setActiveTab(pasty._id)}
+                    isActive={pasty.id === activePastyId}
+                    on:click={() => setActiveTab(pasty.id)}
                 />
             {/each}
         </div>
     </div>
 
-    <pre class="content"><code>{paste.pasties.find(p => p._id === activePastyId).content}</code></pre>
+    <pre class="content"><code>{paste.pasties.find(p => p.id === activePastyId).content}</code></pre>
 </div>
 
 <style lang="scss">

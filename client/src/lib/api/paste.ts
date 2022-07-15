@@ -1,15 +1,14 @@
 import { apiBase } from "./api";
-import { fetcherPost } from "./fetcher";
 
 export interface Paste {
-    _id: string;
+    id: string;
     title: string;
     createdAt: Date;
     pasties: Pasty[];
 }
 
 export interface Pasty {
-    _id: string;
+    id: string;
     title: string;
     content: string;
 }
@@ -25,11 +24,16 @@ export interface PastySkeleton {
 }
 
 export const createPaste = async (skeleton: PasteSkeleton): Promise<Paste> => {
-    const res = await fetcherPost<Paste>(`${apiBase}/paste/`, {
+    const res = await fetch(`${apiBase}/paste/`, {
+        method: "post",
+        credentials: "include",
+        headers: {
+            "Content-Type": "application/json"
+        },
         body: JSON.stringify(skeleton)
     });
 
-    if (res.ok) return res.data;
+    if (res.ok) return await res.json();
 
     // TODO: error handling
     return null;
