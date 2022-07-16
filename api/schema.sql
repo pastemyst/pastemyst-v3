@@ -1,6 +1,9 @@
+create type expires_in as enum ('never', '1h', '2h', '10h', '1d', '2d', '1w', '1m', '1y');
+
 create table if not exists pastes (
     id text not null constraint paste_pk primary key,
     created_at timestamp with time zone default now() not null,
+    expires_in expires_in not null default 'never',
     title text default '' :: text not null
 );
 

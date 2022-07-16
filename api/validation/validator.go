@@ -44,6 +44,8 @@ func ValidationErrToMsg(err error) string {
 			msg = "must contain only alphanumeric characters"
 		case "containsany":
 			msg = fmt.Sprintf("must contain only these characters: %s", err.Param())
+		case "oneof":
+			msg = fmt.Sprintf("must be one of these values: %s", err.Param())
 		}
 
 		sb.WriteString(fmt.Sprintf("%s: %s.", err.Namespace(), msg))

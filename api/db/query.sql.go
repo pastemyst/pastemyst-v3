@@ -12,23 +12,34 @@ import (
 
 const createPaste = `-- name: CreatePaste :one
 insert into pastes (
-    id, created_at, title
+    id, created_at, expires_in, title
 ) values (
-    $1, $2, $3
+    $1, $2, $3, $4
 )
-returning id, created_at, title
+returning id, created_at, expires_in, title
 `
 
 type CreatePasteParams struct {
 	ID        string
 	CreatedAt time.Time
+	ExpiresIn ExpiresIn
 	Title     string
 }
 
 func (q *Queries) CreatePaste(ctx context.Context, arg CreatePasteParams) (Paste, error) {
-	row := q.db.QueryRowContext(ctx, createPaste, arg.ID, arg.CreatedAt, arg.Title)
+	row := q.db.QueryRowContext(ctx, createPaste,
+		arg.ID,
+		arg.CreatedAt,
+		arg.ExpiresIn,
+		arg.Title,
+	)
 	var i Paste
-	err := row.Scan(&i.ID, &i.CreatedAt, &i.Title)
+	err := row.Scan(
+		&i.ID,
+		&i.CreatedAt,
+		&i.ExpiresIn,
+		&i.Title,
+	)
 	return i, err
 }
 
@@ -154,14 +165,19 @@ func (q *Queries) ExistsUserByUsername(ctx context.Context, username string) (bo
 }
 
 const getPaste = `-- name: GetPaste :one
-select id, created_at, title from pastes
+select id, created_at, expires_in, title from pastes
 where id = $1 limit 1
 `
 
 func (q *Queries) GetPaste(ctx context.Context, id string) (Paste, error) {
 	row := q.db.QueryRowContext(ctx, getPaste, id)
 	var i Paste
-	err := row.Scan(&i.ID, &i.CreatedAt, &i.Title)
+	err := row.Scan(
+		&i.ID,
+		&i.CreatedAt,
+		&i.ExpiresIn,
+		&i.Title,
+	)
 	return i, err
 }
 
