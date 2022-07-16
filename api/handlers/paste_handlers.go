@@ -43,6 +43,7 @@ func GetPaseHandler(ctx echo.Context) error {
 	paste := models.Paste{
 		Id:        dbPaste.ID,
 		CreatedAt: dbPaste.CreatedAt,
+		ExpiresIn: models.ExpiresIn(dbPaste.ExpiresIn),
 		Title:     dbPaste.Title,
 		Pasties:   pasties,
 	}
@@ -64,9 +65,14 @@ func CreatePasteHandler(ctx echo.Context) error {
 		return err
 	}
 
+	if createInfo.ExpiresIn == "" {
+		createInfo.ExpiresIn = models.ExpiresInNever
+	}
+
 	paste := models.Paste{
 		Id:        randomPasteId(),
 		CreatedAt: time.Now().UTC(),
+		ExpiresIn: createInfo.ExpiresIn,
 		Title:     createInfo.Title,
 	}
 
@@ -85,6 +91,7 @@ func CreatePasteHandler(ctx echo.Context) error {
 	_, err := db.DBQueries.CreatePaste(db.DBContext, db.CreatePasteParams{
 		ID:        paste.Id,
 		CreatedAt: time.Now(),
+		ExpiresIn: db.ExpiresIn(createInfo.ExpiresIn),
 		Title:     createInfo.Title,
 	})
 	if err != nil {
