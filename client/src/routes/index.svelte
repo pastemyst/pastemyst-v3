@@ -1,6 +1,6 @@
 <script lang="ts">
     import { goto } from "$app/navigation";
-    import { createPaste, PasteSkeleton, PastySkeleton } from "$lib/api/paste";
+    import { createPaste, expiresInFromString, PasteSkeleton, PastySkeleton } from "$lib/api/paste";
     import { expiresSelect } from "$lib/cmdOptions";
     import PasteOptions from "$lib/PasteOptions.svelte";
     import { isCommandPaletteOpen } from "$lib/stores";
@@ -35,6 +35,7 @@
 
         const pasteSkeleton: PasteSkeleton = {
             title: title,
+            expiresIn: expiresInFromString(expiresIn),
             pasties: pasties
         };
 
