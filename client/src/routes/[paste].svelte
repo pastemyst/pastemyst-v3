@@ -1,6 +1,6 @@
 <script lang="ts" context="module">
     import { apiBase } from "$lib/api/api";
-    import type { Paste } from "$lib/api/paste";
+    import { ExpiresIn, Paste } from "$lib/api/paste";
     import { tooltip } from "$lib/tooltips";
     import moment from "moment";
 
@@ -13,16 +13,21 @@
 
         let paste: Paste = null;
         let relativeCreatedAt: string;
+        let relativesExpiresIn: string;
         if (res.ok) {
             paste = await res.json();
             relativeCreatedAt = moment(paste.createdAt).fromNow();
+            if (paste.expiresIn != ExpiresIn.never) {
+                relativesExpiresIn = moment(paste.deletesAt).fromNow();
+            }
         }
 
         return {
             status: res.ok,
             props: {
                 paste: paste,
-                relativeCreatedAt: relativeCreatedAt
+                relativeCreatedAt: relativeCreatedAt,
+                relativesExpiresIn: relativesExpiresIn
             }
         };
     };
@@ -33,6 +38,7 @@
 
     export let paste: Paste;
     export let relativeCreatedAt: string;
+    export let relativesExpiresIn: string;
 
     let activePastyId: string = paste.pasties[0].id;
 
@@ -51,8 +57,10 @@
 
         <span class="dates flex row center">
             <span use:tooltip aria-label="{new Date(paste.createdAt).toString()}">{relativeCreatedAt}</span>
-            <span class="separator">-</span>
-            <span>expires in 3 days</span>
+            {#if paste.expiresIn != ExpiresIn.never}
+                <span class="separator">-</span>
+                <span use:tooltip aria-label={new Date(paste.deletesAt).toString()}>expires {relativesExpiresIn}</span>
+            {/if}
         </span>
     </div>
 
