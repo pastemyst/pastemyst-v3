@@ -5,6 +5,7 @@
 package db
 
 import (
+	"database/sql"
 	"fmt"
 	"time"
 )
@@ -39,6 +40,7 @@ type Paste struct {
 	ID        string
 	CreatedAt time.Time
 	ExpiresIn ExpiresIn
+	DeletesAt sql.NullTime
 	Title     string
 }
 
