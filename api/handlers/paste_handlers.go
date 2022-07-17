@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"database/sql"
 	"net/http"
 	"pastemyst-api/db"
 	"pastemyst-api/models"
@@ -44,6 +45,7 @@ func GetPaseHandler(ctx echo.Context) error {
 		Id:        dbPaste.ID,
 		CreatedAt: dbPaste.CreatedAt,
 		ExpiresIn: models.ExpiresIn(dbPaste.ExpiresIn),
+		DeletesAt: dbPaste.DeletesAt.Time,
 		Title:     dbPaste.Title,
 		Pasties:   pasties,
 	}
@@ -69,10 +71,13 @@ func CreatePasteHandler(ctx echo.Context) error {
 		createInfo.ExpiresIn = models.ExpiresInNever
 	}
 
+	now := time.Now().UTC()
+
 	paste := models.Paste{
 		Id:        randomPasteId(),
-		CreatedAt: time.Now().UTC(),
+		CreatedAt: now,
 		ExpiresIn: createInfo.ExpiresIn,
+		DeletesAt: expiresInToTime(now, createInfo.ExpiresIn),
 		Title:     createInfo.Title,
 	}
 
@@ -92,6 +97,7 @@ func CreatePasteHandler(ctx echo.Context) error {
 		ID:        paste.Id,
 		CreatedAt: time.Now(),
 		ExpiresIn: db.ExpiresIn(createInfo.ExpiresIn),
+		DeletesAt: sql.NullTime{Time: paste.DeletesAt, Valid: createInfo.ExpiresIn != models.ExpiresInNever},
 		Title:     createInfo.Title,
 	})
 	if err != nil {
@@ -137,4 +143,30 @@ func randomPastyId(pasties []models.Pasty) string {
 
 		return false
 	})
+}
+
+// Converts the current time and the expires in value to an exact date when the paste should expire.
+func expiresInToTime(start time.Time, expiresIn models.ExpiresIn) time.Time {
+	switch expiresIn {
+	case models.ExpiresInNever:
+		return time.Time{}
+	case models.ExpiresIn1h:
+		return start.Add(time.Hour)
+	case models.ExpiresIn2h:
+		return start.Add(2 * time.Hour)
+	case models.ExpiresIn10h:
+		return start.Add(10 * time.Hour)
+	case models.ExpiresIn1d:
+		return start.AddDate(0, 0, 1)
+	case models.ExpiresIn2d:
+		return start.AddDate(0, 0, 2)
+	case models.ExpiresIn1w:
+		return start.AddDate(0, 0, 7)
+	case models.ExpiresIn1m:
+		return start.AddDate(0, 1, 0)
+	case models.ExpiresIn1y:
+		return start.AddDate(1, 0, 0)
+	}
+
+	return time.Time{}
 }

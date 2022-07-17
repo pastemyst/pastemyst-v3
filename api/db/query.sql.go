@@ -7,22 +7,24 @@ package db
 
 import (
 	"context"
+	"database/sql"
 	"time"
 )
 
 const createPaste = `-- name: CreatePaste :one
 insert into pastes (
-    id, created_at, expires_in, title
+    id, created_at, expires_in, deletes_at, title
 ) values (
-    $1, $2, $3, $4
+    $1, $2, $3, $4, $5
 )
-returning id, created_at, expires_in, title
+returning id, created_at, expires_in, deletes_at, title
 `
 
 type CreatePasteParams struct {
 	ID        string
 	CreatedAt time.Time
 	ExpiresIn ExpiresIn
+	DeletesAt sql.NullTime
 	Title     string
 }
 
@@ -31,6 +33,7 @@ func (q *Queries) CreatePaste(ctx context.Context, arg CreatePasteParams) (Paste
 		arg.ID,
 		arg.CreatedAt,
 		arg.ExpiresIn,
+		arg.DeletesAt,
 		arg.Title,
 	)
 	var i Paste
@@ -38,6 +41,7 @@ func (q *Queries) CreatePaste(ctx context.Context, arg CreatePasteParams) (Paste
 		&i.ID,
 		&i.CreatedAt,
 		&i.ExpiresIn,
+		&i.DeletesAt,
 		&i.Title,
 	)
 	return i, err
@@ -165,7 +169,7 @@ func (q *Queries) ExistsUserByUsername(ctx context.Context, username string) (bo
 }
 
 const getPaste = `-- name: GetPaste :one
-select id, created_at, expires_in, title from pastes
+select id, created_at, expires_in, deletes_at, title from pastes
 where id = $1 limit 1
 `
 
@@ -176,6 +180,7 @@ func (q *Queries) GetPaste(ctx context.Context, id string) (Paste, error) {
 		&i.ID,
 		&i.CreatedAt,
 		&i.ExpiresIn,
+		&i.DeletesAt,
 		&i.Title,
 	)
 	return i, err
