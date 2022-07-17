@@ -4,6 +4,7 @@ create table if not exists pastes (
     id text not null constraint paste_pk primary key,
     created_at timestamp with time zone default now() not null,
     expires_in expires_in not null default 'never',
+    deletes_at timestamp with time zone,
     title text default '' :: text not null
 );
 

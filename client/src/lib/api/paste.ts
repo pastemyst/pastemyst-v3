@@ -14,8 +14,9 @@ export enum ExpiresIn {
 export interface Paste {
     id: string;
     title: string;
-    createdAt: Date;
+    createdAt: string;
     expiresIn: ExpiresIn;
+    deletesAt: string;
     pasties: Pasty[];
 }
 
