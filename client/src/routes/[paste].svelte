@@ -2,6 +2,7 @@
     import { apiBase } from "$lib/api/api";
     import type { Paste } from "$lib/api/paste";
     import { tooltip } from "$lib/tooltips";
+    import moment from "moment";
 
     export const router = false;
 
@@ -11,12 +12,17 @@
         });
 
         let paste: Paste = null;
-        if (res.ok) paste = await res.json();
+        let relativeCreatedAt: string;
+        if (res.ok) {
+            paste = await res.json();
+            relativeCreatedAt = moment(paste.createdAt).fromNow();
+        }
 
         return {
             status: res.ok,
             props: {
-                paste: paste
+                paste: paste,
+                relativeCreatedAt: relativeCreatedAt
             }
         };
     };
@@ -26,6 +32,7 @@
     import Tab from "$lib/Tab.svelte";
 
     export let paste: Paste;
+    export let relativeCreatedAt: string;
 
     let activePastyId: string = paste.pasties[0].id;
 
@@ -39,7 +46,15 @@
 </svelte:head>
 
 <section class="paste-header flex column center space-between">
-    <h2>{paste.title || "untitled"}</h2>
+    <div class="title flex col">
+        <h2>{paste.title || "untitled"}</h2>
+
+        <span class="dates flex row center">
+            <span use:tooltip aria-label="{new Date(paste.createdAt).toString()}">{relativeCreatedAt}</span>
+            <span class="separator">-</span>
+            <span>expires in 3 days</span>
+        </span>
+    </div>
 
     <div class="options flex row center">
         <div class="btn stars" aria-label="stars" use:tooltip>
@@ -96,11 +111,26 @@
         border-bottom-right-radius: 0;
         border-bottom: none;
 
-        h2 {
+        .title {
             margin: 0;
-            font-weight: normal;
-            font-size: $fs-medium;
-            word-break: break-word;
+
+            h2 {
+                font-weight: normal;
+                font-size: $fs-medium;
+                margin: 0;
+                margin-right: 1.5rem;
+                word-break: break-word;
+            }
+
+            .dates {
+                font-size: $fs-small;
+                color: $color-bg-3;
+                margin-top: 0.25rem;
+
+                .separator {
+                    margin: 0 0.5rem;
+                }
+            }
         }
 
         .options {
@@ -192,7 +222,7 @@
             flex-direction: column;
             align-items: baseline;
 
-            h2 {
+            .title {
                 margin-bottom: 1rem;
             }
 
