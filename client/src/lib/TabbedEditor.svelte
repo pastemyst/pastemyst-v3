@@ -39,6 +39,13 @@
 
         const idx = tabs.findIndex((t) => t.id === id);
 
+        // ask if it's okay to close a non empty tab
+        if (tabs[idx].editor.getContent().length > 0) {
+            if (!confirm("Are you sure you want to close a non-empty tab?")) {
+                return;
+            }
+        }
+
         // destroy editor element
         tabs[idx].editor.$destroy();
 
@@ -66,6 +73,12 @@
         if (event.detail.event.detail > 1) return;
 
         await setActiveTab(id);
+    };
+
+    const onTabFinishRenaming = (id: number) => {
+        const idx = tabs.findIndex((t) => t.id === id);
+
+        tabs[idx].editor.focus();
     };
 
     const addTab = async () => {
@@ -111,6 +124,7 @@
                 id={tab.id.toString()}
                 on:close={() => onTabClose(tab.id)}
                 on:click={(event) => onTabClick(tab.id, event)}
+                on:finishedRenaming={() => onTabFinishRenaming(tab.id)}
                 bind:isInRenamingState={tab.isInRenamingState}
                 bind:title={tab.title}
                 isActive={activeTabId === tab.id}
