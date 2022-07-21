@@ -14,11 +14,11 @@ import (
 
 // Information about a single app release.
 type Release struct {
-	URL          string    `json:"url"`           // Link to the GitHub release.
-	Title        string    `json:"title"`         // Release Title.
-	Content      string    `json:"content"`       // Markdown content.
-	IsPrerelease bool      `json:"is_prerelease"` // Whether it a pre-release (alpha).
-	ReleasedAt   time.Time `json:"released_at"`   // When the release was published.
+	URL          string    `json:"url"`          // Link to the GitHub release.
+	Title        string    `json:"title"`        // Release Title.
+	Content      string    `json:"content"`      // Markdown content.
+	IsPrerelease bool      `json:"isPrerelease"` // Whether it a pre-release (alpha).
+	ReleasedAt   time.Time `json:"releasedAt"`   // When the release was published.
 }
 
 // Data returned from GitHub when fetching all the releases.
