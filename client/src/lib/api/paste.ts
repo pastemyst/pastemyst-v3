@@ -42,20 +42,28 @@ export interface PastySkeleton {
  */
 export const expiresInFromString = (s: string): ExpiresIn => {
     switch (s) {
-        case "never": return ExpiresIn.never;
-        case "1 hour": return ExpiresIn.oneHour;
-        case "2 hours": return ExpiresIn.twoHours;
-        case "10 hours": return ExpiresIn.tenHours;
-        case "1 day": return ExpiresIn.oneDay;
-        case "2 days": return ExpiresIn.twoDays;
-        case "1 week": return ExpiresIn.oneWeek;
-        case "1 year": return ExpiresIn.oneYear;
+        case "never":
+            return ExpiresIn.never;
+        case "1 hour":
+            return ExpiresIn.oneHour;
+        case "2 hours":
+            return ExpiresIn.twoHours;
+        case "10 hours":
+            return ExpiresIn.tenHours;
+        case "1 day":
+            return ExpiresIn.oneDay;
+        case "2 days":
+            return ExpiresIn.twoDays;
+        case "1 week":
+            return ExpiresIn.oneWeek;
+        case "1 year":
+            return ExpiresIn.oneYear;
     }
 
     return ExpiresIn.never;
 };
 
-export const createPaste = async (skeleton: PasteSkeleton): Promise<Paste> => {
+export const createPaste = async (skeleton: PasteSkeleton): Promise<Paste | null> => {
     const res = await fetch(`${apiBase}/paste/`, {
         method: "post",
         credentials: "include",

@@ -18,7 +18,7 @@ export const getVersion = async (): Promise<string> => {
     return "unknown version";
 };
 
-export const getReleases = async(): Promise<Release[]> => {
+export const getReleases = async (): Promise<Release[]> => {
     const res = await fetch(`${apiBase}/meta/releases`, {
         method: "get"
     });

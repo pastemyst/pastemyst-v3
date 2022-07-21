@@ -1,5 +1,5 @@
 <script lang="ts">
-    import { currentUserStore, isCommandPaletteOpen } from "./stores";
+    import { currentUserStore } from "./stores";
     import { tooltip } from "./tooltips";
 
     const onMenuClick = () => {
@@ -23,7 +23,12 @@
                 />
             </a>
         {:else}
-            <a href="/login" class="btn btn-square nav-item" aria-label="login/register" use:tooltip>
+            <a
+                href="/login"
+                class="btn btn-square nav-item"
+                aria-label="login/register"
+                use:tooltip
+            >
                 <svg
                     width="24"
                     height="24"

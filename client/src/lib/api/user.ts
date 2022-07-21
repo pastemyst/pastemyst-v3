@@ -7,7 +7,7 @@ export interface User {
     createdAt: string;
 }
 
-export const getUser = async (username: string): Promise<User> => {
+export const getUser = async (username: string): Promise<User | null> => {
     const res = await fetch(`${apiBase}/user/${username}`, {
         method: "get"
     });
