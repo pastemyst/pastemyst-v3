@@ -407,6 +407,10 @@
                 color: $color-bg-3;
                 font-size: $fs-small;
 
+                span {
+                    display: inline-block;
+                }
+
                 .highlight {
                     display: inline-block;
                 }

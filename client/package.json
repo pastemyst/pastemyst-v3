@@ -35,6 +35,9 @@
     "dependencies": {
         "@codemirror/basic-setup": "^0.19.1",
         "@codemirror/commands": "^0.19.8",
+        "@codemirror/language": "^6.2.1",
+        "@codemirror/language-data": "^6.1.0",
+        "@codemirror/legacy-modes": "^6.1.0",
         "@codemirror/state": "^0.19.9",
         "@codemirror/view": "^0.19.47",
         "@types/sortablejs": "^1.10.7",
