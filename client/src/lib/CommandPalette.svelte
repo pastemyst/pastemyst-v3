@@ -1,5 +1,5 @@
 <script lang="ts">
-    import highlightWords, { HighlightWords } from "highlight-words";
+    import highlightWords, { type HighlightWords } from "highlight-words";
     import {
         Command,
         DirCommand,
@@ -26,7 +26,7 @@
     let elements: HTMLElement[] = [];
     let selectedCommand: Command;
 
-    let lastActiveElement: Element;
+    let lastActiveElement: Element | null;
 
     const onCmd = (e: MouseEvent | null, cmd: Command) => {
         if (cmd instanceof DirCommand) {
@@ -42,7 +42,7 @@
 
             commands = cmd.options;
             filteredCommands = commands;
-            selectedCommand = commands.find((c) => (c as SelectOptionCommand).selected);
+            selectedCommand = commands.find((c) => (c as SelectOptionCommand).selected)!;
             search = "";
             searchElement.focus();
         } else if (cmd instanceof SelectOptionCommand) {
@@ -140,7 +140,8 @@
                 {
                     e.preventDefault();
                     await setOpen(false);
-                } break;
+                }
+                break;
         }
     };
 
@@ -153,7 +154,7 @@
         filteredCommands = commands.filter(
             (e) =>
                 e.name.toLowerCase().indexOf(search.toLowerCase()) > -1 ||
-                e.description?.toLowerCase().indexOf(search.toLowerCase()) > -1
+                e.description?.toLowerCase().indexOf(search.toLowerCase())! > -1
         );
         searchFound = filteredCommands.length > 0;
 
@@ -189,7 +190,11 @@
     };
 </script>
 
-<svelte:window on:cmdShowOptions={(e) => showOptions(e.detail)} on:openCmd={() => setOpen(true)} on:toggleCmd={() => setOpen(!isOpen)} />
+<svelte:window
+    on:cmdShowOptions={(e) => showOptions(e.detail)}
+    on:openCmd={() => setOpen(true)}
+    on:toggleCmd={() => setOpen(!isOpen)}
+/>
 
 <div role="dialog" aria-modal="true" class="palette" class:isOpen>
     <div class="wrapper">

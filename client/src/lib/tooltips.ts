@@ -3,7 +3,7 @@ import tippy, { roundArrow } from "tippy.js";
 export const tooltip = (node: HTMLElement, params = {}) => {
     const title = node.title;
     const label = node.getAttribute("aria-label");
-    const content = title || label;
+    const content = label || title;
 
     const tip = tippy(node, { content, theme: "myst", arrow: roundArrow, ...params });
 

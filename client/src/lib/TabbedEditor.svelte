@@ -1,6 +1,6 @@
 <script lang="ts">
     import { onMount, tick } from "svelte";
-    import Sortable, { SortableEvent } from "sortablejs";
+    import Sortable, { type SortableEvent } from "sortablejs";
     import Tab from "./Tab.svelte";
     import Editor from "./Editor.svelte";
     import TabData from "./TabData";
@@ -23,9 +23,9 @@
 
             onEnd: (event: SortableEvent) => {
                 // once the reordering of tabs is done, replicate the reorder in the data array
-                const tab = tabs[event.oldIndex];
-                tabs.splice(event.oldIndex, 1);
-                tabs.splice(event.newIndex, 0, tab);
+                const tab = tabs[event.oldIndex!];
+                tabs.splice(event.oldIndex!, 1);
+                tabs.splice(event.newIndex!, 0, tab);
                 tabs = tabs;
             }
         });
@@ -103,7 +103,7 @@
         await tick();
         await tick();
 
-        let tab = tabs.find((t) => t.id === activeTabId);
+        let tab = tabs.find((t) => t.id === activeTabId)!;
 
         if (!tab.isInRenamingState) {
             tab.editor.focus();

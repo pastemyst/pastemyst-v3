@@ -1,7 +1,7 @@
 import { apiBase } from "./api";
 import type { User } from "./user";
 
-export const createAccount = async (username: string): Promise<string> => {
+export const createAccount = async (username: string): Promise<string | null> => {
     const data = {
         username: username
     };
@@ -20,7 +20,7 @@ export const createAccount = async (username: string): Promise<string> => {
     return null;
 };
 
-export const getSelf = async (): Promise<User> => {
+export const getSelf = async (): Promise<User | null> => {
     const res = await fetch(`${apiBase}/auth/self`, {
         method: "get",
         credentials: "include"

@@ -14,19 +14,26 @@
 
     {#await getReleases() then releases}
         {#if releases.length === 0}
-            <p>There was an error fetching the changelog from the server. Try again later, or <a href="/contact">contact</a> the owner. You can also view the changelog <a href="https://github.com/pastemyst/pastemyst-v3" rel="external">on github</a>.</p>
+            <p>
+                There was an error fetching the changelog from the server. Try again later, or
+                <a href="/contact">contact</a>
+                the owner. You can also view the changelog
+                <a href="https://github.com/pastemyst/pastemyst-v3" rel="external">on github</a>.
+            </p>
         {:else}
             {#each releases as release}
                 <div class="release">
                     <div class="flex row center space-between">
-                        <h4><a href="{release.url}" rel="external">{release.title}</a></h4>
+                        <h4><a href={release.url} rel="external">{release.title}</a></h4>
 
                         {#if release.isPrerelease}
                             <span class="alpha">alpha-release</span>
                         {/if}
                     </div>
 
-                    <p class="published-on">Published on: {new Date(release.releasedAt).toDateString()}</p>
+                    <p class="published-on">
+                        Published on: {new Date(release.releasedAt).toDateString()}
+                    </p>
 
                     <p class="content">
                         <SvelteMarkdown source={release.content} />

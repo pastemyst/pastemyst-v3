@@ -3,7 +3,7 @@
     import Footer from "$lib/Footer.svelte";
     import CommandPalette from "$lib/CommandPalette.svelte";
     import { onMount } from "svelte";
-    import { currentUserStore, isCommandPaletteOpen } from "$lib/stores";
+    import { currentUserStore } from "$lib/stores";
     import { getSelf } from "$lib/api/auth";
 
     import "tippy.js/dist/tippy.css";
