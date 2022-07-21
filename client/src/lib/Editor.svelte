@@ -111,9 +111,5 @@
         background-color: $color-bg-2;
         padding: 0.25rem 0.5rem;
         border-radius: 0 0 $border-radius $border-radius;
-
-        .line {
-
-        }
     }
 </style>
