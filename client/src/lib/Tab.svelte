@@ -32,6 +32,8 @@
 
         // don't allow empty pasty titles
         if (title.length === 0) title = "untitled";
+
+        dispatch("finishedRenaming");
     };
 
     const onInput = () => {

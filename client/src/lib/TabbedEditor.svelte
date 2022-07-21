@@ -75,6 +75,12 @@
         await setActiveTab(id);
     };
 
+    const onTabFinishRenaming = (id: number) => {
+        const idx = tabs.findIndex((t) => t.id === id);
+
+        tabs[idx].editor.focus();
+    };
+
     const addTab = async () => {
         const name = "untitled";
 
@@ -118,6 +124,7 @@
                 id={tab.id.toString()}
                 on:close={() => onTabClose(tab.id)}
                 on:click={(event) => onTabClick(tab.id, event)}
+                on:finishedRenaming={() => onTabFinishRenaming(tab.id)}
                 bind:isInRenamingState={tab.isInRenamingState}
                 bind:title={tab.title}
                 isActive={activeTabId === tab.id}
