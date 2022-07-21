@@ -1,6 +1,11 @@
 <script lang="ts">
     import { goto } from "$app/navigation";
-    import { createPaste, expiresInFromString, PasteSkeleton, PastySkeleton } from "$lib/api/paste";
+    import {
+        createPaste,
+        expiresInFromString,
+        type PasteSkeleton,
+        type PastySkeleton
+    } from "$lib/api/paste";
     import { expiresSelect } from "$lib/cmdOptions";
     import PasteOptions from "$lib/PasteOptions.svelte";
     import { isCommandPaletteOpen } from "$lib/stores";
@@ -18,7 +23,7 @@
         isCommandPaletteOpen.subscribe((open) => {
             // on cmd pal close, update expires in
             if (!open) {
-                expiresIn = expiresSelect.getSelected().name;
+                expiresIn = expiresSelect.getSelected()?.name ?? "never";
             }
         });
     });
@@ -41,7 +46,9 @@
 
         const paste = await createPaste(pasteSkeleton);
 
-        goto(`/${paste.id}`);
+        // TODO: handle if creating paste failed.
+
+        goto(`/${paste?.id}`);
     };
 
     const openExpiresSelect = () => {

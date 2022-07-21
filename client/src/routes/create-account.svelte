@@ -4,7 +4,7 @@
     import { createAccount } from "$lib/api/auth";
     import { getUser } from "$lib/api/user";
 
-    let username = $page.url.searchParams.get("username");
+    let username = $page.url.searchParams.get("username")!;
     let usernameInput: HTMLInputElement;
 
     let usernameValid = true;
@@ -12,7 +12,7 @@
 
     const usernameRegex = /^[\w.-]+$/m;
 
-    let createAccountErrorMsg = "";
+    let createAccountErrorMsg: string | null = null;
 
     const onUsernameInput = async () => {
         await validateUsername();
@@ -62,9 +62,7 @@
         {#if createAccountErrorMsg}
             <p class="error-message">
                 There was an issue creating the account. Please try again. If the issue persists
-                please <a href="/contact">contact us</a>.
-
-                Message: {createAccountErrorMsg}
+                please <a href="/contact">contact us</a>. Message: {createAccountErrorMsg}
             </p>
         {/if}
 

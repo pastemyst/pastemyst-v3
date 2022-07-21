@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { EditorView } from "@codemirror/view";
 import type { Extension } from "@codemirror/state";
 import { HighlightStyle, tags as t } from "@codemirror/highlight";
@@ -23,7 +24,7 @@ export const mystTheme = EditorView.theme(
 
         "&": {
             color: fg,
-            backgroundColor: bg,
+            backgroundColor: bg
         },
 
         ".cm-content": {

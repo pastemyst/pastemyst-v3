@@ -1,8 +1,8 @@
 export class Command {
     name: string;
-    icon?: string = null;
-    description?: string = null;
-    shortcuts?: string[][] = [];
+    icon?: string = undefined;
+    description?: string = undefined;
+    shortcuts: string[][] = [];
 
     constructor(name: string) {
         this.name = name;
@@ -30,7 +30,7 @@ export class Command {
 }
 
 export class LinkCommand extends Command {
-    url: string;
+    url!: string;
 
     constructor(name: string) {
         super(name);
@@ -43,7 +43,7 @@ export class LinkCommand extends Command {
 }
 
 export class DirCommand extends Command {
-    subCommands: Command[];
+    subCommands!: Command[];
 
     constructor(name: string) {
         super(name);
@@ -56,7 +56,7 @@ export class DirCommand extends Command {
 }
 
 export class SelectCommand extends Command {
-    options: SelectOptionCommand[];
+    options!: SelectOptionCommand[];
 
     constructor(name: string) {
         super(name);
@@ -81,7 +81,7 @@ export class SelectCommand extends Command {
 
 export class SelectOptionCommand extends Command {
     selected: boolean;
-    parent: SelectCommand;
+    parent!: SelectCommand;
 
     constructor(name: string, selected = false) {
         super(name);

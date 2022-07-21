@@ -1,17 +1,17 @@
 <script lang="ts" context="module">
     import { apiBase } from "$lib/api/api";
-    import { ExpiresIn, Paste } from "$lib/api/paste";
+    import { ExpiresIn, type Paste } from "$lib/api/paste";
     import { tooltip } from "$lib/tooltips";
     import moment from "moment";
 
     export const router = false;
 
-    export const load = async ({ params }) => {
+    export const load = async ({ params, fetch }: { params: any, fetch: any }) => {
         const res = await fetch(`${apiBase}/paste/${params.paste}`, {
             method: "get"
         });
 
-        let paste: Paste = null;
+        let paste: Paste;
         let relativeCreatedAt: string;
         let relativesExpiresIn: string;
         if (res.ok) {
@@ -23,7 +23,7 @@
         }
 
         return {
-            status: res.ok,
+            status: res.status,
             props: {
                 paste: paste,
                 relativeCreatedAt: relativeCreatedAt,
@@ -65,7 +65,7 @@
             <span use:tooltip aria-label={new Date(paste.createdAt).toString()}>
                 {relativeCreatedAt}
             </span>
-            {#if paste.expiresIn != ExpiresIn.never}
+            {#if paste?.expiresIn != ExpiresIn.never}
                 <span class="separator">-</span>
                 <span use:tooltip aria-label={new Date(paste.deletesAt).toString()}>
                     expires {relativesExpiresIn}
@@ -83,7 +83,7 @@
                 height="512"
                 viewBox="0 0 512 512"
             >
-                <title>ionicons-v5-e</title>
+                <title>star</title>
                 <path
                     fill="currentColor"
                     d="M394,480a16,16,0,0,1-9.39-3L256,383.76,127.39,477a16,16,0,0,1-24.55-18.08L153,310.35,23,221.2A16,16,0,0,1,32,192H192.38l48.4-148.95a16,16,0,0,1,30.44,0l48.4,149H480a16,16,0,0,1,9.05,29.2L359,310.35l50.13,148.53A16,16,0,0,1,394,480Z"
@@ -100,7 +100,7 @@
                 height="512"
                 viewBox="0 0 512 512"
             >
-                <title>ionicons-v5-n</title>
+                <title>edit</title>
                 <path
                     fill="currentColor"
                     d="M459.94,53.25a16.06,16.06,0,0,0-23.22-.56L424.35,65a8,8,0,0,0,0,11.31l11.34,11.32a8,8,0,0,0,11.34,0l12.06-12C465.19,69.54,465.76,59.62,459.94,53.25Z"
@@ -124,7 +124,7 @@
                 height="512"
                 viewBox="0 0 512 512"
             >
-                <title>ionicons-v5-o</title>
+                <title>copy link</title>
                 <path
                     stroke="currentColor"
                     d="M200.66,352H144a96,96,0,0,1,0-192h55.41"
@@ -154,7 +154,7 @@
                 height="512"
                 viewBox="0 0 512 512"
             >
-                <title>ionicons-v5-j</title>
+                <title>clone paste</title>
                 <path
                     fill="currentColor"
                     d="M408,112H184a72,72,0,0,0-72,72V408a72,72,0,0,0,72,72H408a72,72,0,0,0,72-72V184A72,72,0,0,0,408,112ZM375.55,312H312v63.55c0,8.61-6.62,16-15.23,16.43A16,16,0,0,1,280,376V312H216.45c-8.61,0-16-6.62-16.43-15.23A16,16,0,0,1,216,280h64V216.45c0-8.61,6.62-16,15.23-16.43A16,16,0,0,1,312,216v64h64a16,16,0,0,1,16,16.77C391.58,305.38,384.16,312,375.55,312Z"
@@ -174,7 +174,7 @@
                 height="512"
                 viewBox="0 0 512 512"
             >
-                <title>ionicons-v5-f</title>
+                <title>more options</title>
                 <circle fill="currentColor" cx="256" cy="256" r="48" />
                 <circle fill="currentColor" cx="416" cy="256" r="48" />
                 <circle fill="currentColor" cx="96" cy="256" r="48" />
@@ -266,7 +266,8 @@
             </div>
         </div>
 
-        <pre class="content"><code>{paste.pasties.find((p) => p.id === activePastyId).content}</code></pre>
+        <!-- prettier-ignore -->
+        <pre class="content"><code>{paste.pasties.find((p) => p.id === activePastyId)?.content}</code></pre>
     {/if}
 </div>
 

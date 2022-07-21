@@ -44,7 +44,7 @@
     <div class="editor" bind:this={editorElement} />
 
     <div class="toolbar flex row center space-between">
-        <div></div>
+        <div />
 
         <div class="flex row center">
             <div class="line element">
