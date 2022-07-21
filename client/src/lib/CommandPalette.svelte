@@ -1,5 +1,6 @@
 <script lang="ts">
     import highlightWords, { type HighlightWords } from "highlight-words";
+import { tick } from "svelte";
     import {
         Command,
         DirCommand,
@@ -28,7 +29,7 @@
 
     let lastActiveElement: Element | null;
 
-    const onCmd = (e: MouseEvent | null, cmd: Command) => {
+    const onCmd = async (e: MouseEvent | null, cmd: Command) => {
         if (cmd instanceof DirCommand) {
             e?.preventDefault();
 
@@ -37,6 +38,10 @@
             selectedCommand = commands[0];
             search = "";
             searchElement.focus();
+
+            await tick();
+
+            scrollSelectedIntoView();
         } else if (cmd instanceof SelectCommand) {
             e?.preventDefault();
 
@@ -45,6 +50,10 @@
             selectedCommand = commands.find((c) => (c as SelectOptionCommand).selected)!;
             search = "";
             searchElement.focus();
+
+            await tick();
+
+            scrollSelectedIntoView();
         } else if (cmd instanceof SelectOptionCommand) {
             e?.preventDefault();
 
@@ -72,6 +81,8 @@
 
             searchElement?.focus();
             search = "";
+
+            await tick();
 
             scrollSelectedIntoView();
         } else {

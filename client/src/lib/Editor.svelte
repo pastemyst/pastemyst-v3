@@ -4,6 +4,10 @@
     import { EditorView, keymap } from "@codemirror/view";
     import { indentWithTab } from "@codemirror/commands";
     import { myst } from "./codemirror-myst-theme";
+    import { languages } from "@codemirror/language-data";
+    import type { LanguageDescription } from "@codemirror/language";
+    import { langSelect } from "./cmdOptions";
+    import { isCommandPaletteOpen } from "./stores";
 
     export let hidden = false;
 
@@ -13,6 +17,10 @@
 
     let cursorLine = 0;
     let cursorCol = 0;
+
+    let selectedLanguage: LanguageDescription = languages.sort((a, b) =>
+        a.name.localeCompare(b.name)
+    )[0];
 
     onMount(async () => {
         const editorUpdateListener = EditorView.updateListener.of((update) => {
@@ -29,7 +37,24 @@
             }),
             parent: editorElement
         });
+
+        // if the current editor is focused and the command palette is closed, set the selected language
+        // also focus the editor back (by default it will focus the lang button)
+        isCommandPaletteOpen.subscribe((open) => {
+            if (open || hidden) return;
+
+            selectedLanguage = languages.find(l => l.name.toLowerCase() === langSelect.getSelected()?.name.toLowerCase())!;
+
+            focus();
+        });
     });
+
+    const onLanguageClick = () => {
+        langSelect.setSelected(selectedLanguage.name);
+
+        const evt = new CustomEvent("cmdShowOptions", { detail: langSelect });
+        window.dispatchEvent(evt);
+    };
 
     export const focus = (): void => {
         editorView.focus();
@@ -38,13 +63,25 @@
     export const getContent = (): string => {
         return editorView.state.doc.toString();
     };
+
+    export const getSelectedLang = (): LanguageDescription => {
+        return selectedLanguage;
+    };
+
+    export const setSelectedLang = (lang: LanguageDescription) => {
+        selectedLanguage = lang;
+    };
 </script>
 
 <div class:hidden>
     <div class="editor" bind:this={editorElement} />
 
     <div class="toolbar flex row center space-between">
-        <div />
+        <div class="flex row center">
+            <button on:click={onLanguageClick}
+                >language: {selectedLanguage.name}</button
+            >
+        </div>
 
         <div class="flex row center">
             <div class="line element">
