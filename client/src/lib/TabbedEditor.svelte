@@ -39,6 +39,13 @@
 
         const idx = tabs.findIndex((t) => t.id === id);
 
+        // ask if it's okay to close a non empty tab
+        if (tabs[idx].editor.getContent().length > 0) {
+            if (!confirm("Are you sure you want to close a non-empty tab?")) {
+                return;
+            }
+        }
+
         // destroy editor element
         tabs[idx].editor.$destroy();
 
