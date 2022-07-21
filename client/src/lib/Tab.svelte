@@ -32,10 +32,16 @@
 
         // don't allow empty pasty titles
         if (title.length === 0) title = "untitled";
+
+        dispatch("finishedRenaming");
     };
 
     const onInput = () => {
         inputElement.style.width = inputElement.value.length + "ch";
+
+        if (title.length === 0) {
+            inputElement.style.width = inputElement.placeholder.length + "ch";
+        }
     };
 
     const onInputKeyup = (event: KeyboardEvent) => {
@@ -63,6 +69,7 @@
             on:input={onInput}
             on:keyup={onInputKeyup}
             bind:this={inputElement}
+            placeholder="untitled"
             maxlength="50"
         />
     {:else}
