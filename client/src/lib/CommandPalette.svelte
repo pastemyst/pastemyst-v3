@@ -17,6 +17,8 @@
 
     let isCommandSelected: boolean = false;
 
+    let commandsElement: HTMLElement;
+
     let commands: Command[] = rootCommands;
     let filteredCommands: Command[] = commands;
     let highlightedChunks: HighlightWords.Chunk[][][];
@@ -70,6 +72,8 @@
 
             searchElement?.focus();
             search = "";
+
+            scrollSelectedIntoView();
         } else {
             commands = rootCommands;
             filteredCommands = commands;
@@ -116,6 +120,8 @@
                     let newIndex = index - 1;
                     if (newIndex < 0) newIndex = filteredCommands.length - 1;
                     selectedCommand = filteredCommands[newIndex];
+
+                    scrollSelectedIntoView();
                 }
                 break;
 
@@ -125,9 +131,22 @@
                     const index = filteredCommands.findIndex((e) => e === selectedCommand);
                     const newIndex = (index + 1) % filteredCommands.length;
                     selectedCommand = filteredCommands[newIndex];
+
+                    scrollSelectedIntoView();
                 }
                 break;
+
+            case "Escape":
+                {
+                    e.preventDefault();
+                    await setOpen(false);
+                } break;
         }
+    };
+
+    const scrollSelectedIntoView = () => {
+        const index = filteredCommands.findIndex((e) => e === selectedCommand);
+        commandsElement.scrollTop = elements[index].offsetTop - 100 - commandsElement.offsetTop;
     };
 
     const filter = () => {
@@ -207,7 +226,7 @@
         </div>
 
         <!-- list of commands -->
-        <div class="commands">
+        <div class="commands" bind:this={commandsElement}>
             {#each filteredCommands as cmd, cmdIndex}
                 <a
                     href={cmd instanceof LinkCommand ? cmd.url : null}
@@ -305,6 +324,7 @@
         opacity: 0;
         height: 0;
         overflow: hidden;
+        z-index: 9999;
 
         &.isOpen {
             opacity: 1;
@@ -346,7 +366,8 @@
     .commands {
         border-bottom-left-radius: $border-radius;
         border-bottom-right-radius: $border-radius;
-        overflow: hidden;
+        overflow-y: auto;
+        max-height: 275px;
 
         .command {
             color: $color-fg;
