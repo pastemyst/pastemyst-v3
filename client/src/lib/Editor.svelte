@@ -1,13 +1,15 @@
 <script lang="ts">
     import { onMount } from "svelte";
-    import { EditorState, basicSetup } from "@codemirror/basic-setup";
+    import { basicSetup } from "codemirror";
     import { EditorView, keymap } from "@codemirror/view";
     import { indentWithTab } from "@codemirror/commands";
-    import { myst } from "./codemirror-myst-theme";
+    import { mystTheme, mystHighlightStyle } from "./codemirror-myst-theme";
     import { languages } from "@codemirror/language-data";
     import type { LanguageDescription } from "@codemirror/language";
     import { langSelect } from "./cmdOptions";
     import { isCommandPaletteOpen } from "./stores";
+    import { Compartment, EditorState } from "@codemirror/state";
+    import { python } from "@codemirror/lang-python";
 
     export let hidden = false;
 
@@ -18,6 +20,7 @@
     let cursorLine = 0;
     let cursorCol = 0;
 
+    let langCompartment = new Compartment();
     let selectedLanguage: LanguageDescription = languages.sort((a, b) =>
         a.name.localeCompare(b.name)
     )[0];
@@ -33,17 +36,32 @@
 
         editorView = new EditorView({
             state: EditorState.create({
-                extensions: [basicSetup, keymap.of([indentWithTab]), myst, editorUpdateListener]
+                extensions: [
+                    basicSetup,
+                    keymap.of([indentWithTab]),
+                    mystTheme,
+                    mystHighlightStyle,
+                    editorUpdateListener,
+                    langCompartment.of([])
+                ]
             }),
             parent: editorElement
         });
 
         // if the current editor is focused and the command palette is closed, set the selected language
         // also focus the editor back (by default it will focus the lang button)
-        isCommandPaletteOpen.subscribe((open) => {
+        isCommandPaletteOpen.subscribe(async (open) => {
             if (open || hidden) return;
 
-            selectedLanguage = languages.find(l => l.name.toLowerCase() === langSelect.getSelected()?.name.toLowerCase())!;
+            selectedLanguage = languages.find(
+                (l) => l.name.toLowerCase() === langSelect.getSelected()?.name.toLowerCase()
+            )!;
+
+            let langSupport = await selectedLanguage.load();
+
+            editorView.dispatch({
+                effects: langCompartment.reconfigure(langSupport)
+            });
 
             focus();
         });
@@ -78,9 +96,7 @@
 
     <div class="toolbar flex row center space-between">
         <div class="flex row center">
-            <button on:click={onLanguageClick}
-                >language: {selectedLanguage.name}</button
-            >
+            <button on:click={onLanguageClick}>language: {selectedLanguage.name}</button>
         </div>
 
         <div class="flex row center">
