@@ -3,7 +3,7 @@
     import { basicSetup } from "codemirror";
     import { EditorView, keymap } from "@codemirror/view";
     import { indentWithTab } from "@codemirror/commands";
-    import { mystTheme, mystHighlightStyle } from "./codemirror-myst-theme";
+    import { mystCMTheme } from "./codemirror-myst-theme";
     import { languages } from "@codemirror/language-data";
     import { indentUnit, type LanguageDescription } from "@codemirror/language";
     import { indentSelect, langSelect, SelectCommand } from "./cmdOptions";
@@ -45,8 +45,7 @@
                 extensions: [
                     basicSetup,
                     keymap.of([indentWithTab]),
-                    mystTheme,
-                    mystHighlightStyle,
+                    mystCMTheme,
                     editorUpdateListener,
                     langCompartment.of([]),
                     indentUnitCompartment.of(
