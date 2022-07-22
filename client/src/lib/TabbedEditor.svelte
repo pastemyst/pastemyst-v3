@@ -86,6 +86,11 @@
 
         let newtab = new TabData(tabCounter, name, new Editor({ target: editorTarget }));
 
+        // if a tab already exists, set the new tab's language as the previous one
+        if (tabs.length > 0) {
+            newtab.editor.setSelectedLang(tabs[tabs.length - 1].editor.getSelectedLang());
+        }
+
         await tick();
 
         tabs = [...tabs, newtab];

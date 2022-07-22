@@ -1,7 +1,8 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { EditorView } from "@codemirror/view";
 import type { Extension } from "@codemirror/state";
-import { HighlightStyle, tags as t } from "@codemirror/highlight";
+import { HighlightStyle, syntaxHighlighting } from "@codemirror/language";
+import { tags as t } from "@lezer/highlight";
 
 const bg = "#1c1c1c",
     cl = "#282a2e",
@@ -16,7 +17,7 @@ const bg = "#1c1c1c",
     blue = "#81a2be",
     purple = "#b294bb";
 
-export const mystTheme = EditorView.theme(
+const mystTheme = EditorView.theme(
     {
         "*": {
             fontFamily: '"Ubuntu Mono", monospace'
@@ -104,7 +105,7 @@ export const mystTheme = EditorView.theme(
     { dark: true }
 );
 
-export const mystHighlightStyle = HighlightStyle.define([
+const mystHighlightStyle = HighlightStyle.define([
     {
         tag: t.keyword,
         color: purple
@@ -205,4 +206,4 @@ export const mystHighlightStyle = HighlightStyle.define([
     }
 ]);
 
-export const myst: Extension = [mystTheme, mystHighlightStyle];
+export const mystCMTheme: Extension = [mystTheme, syntaxHighlighting(mystHighlightStyle)];
