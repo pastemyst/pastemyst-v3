@@ -1,7 +1,8 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { EditorView } from "@codemirror/view";
 import type { Extension } from "@codemirror/state";
-import { HighlightStyle, tags as t } from "@codemirror/highlight";
+import { HighlightStyle, syntaxHighlighting } from "@codemirror/language";
+import { tags as t } from "@lezer/highlight";
 
 const bg = "#1c1c1c",
     cl = "#282a2e",
@@ -104,7 +105,7 @@ export const mystTheme = EditorView.theme(
     { dark: true }
 );
 
-export const mystHighlightStyle = HighlightStyle.define([
+export const mystHighlightStyle = syntaxHighlighting(HighlightStyle.define([
     {
         tag: t.keyword,
         color: purple
@@ -203,6 +204,4 @@ export const mystHighlightStyle = HighlightStyle.define([
         tag: t.invalid,
         color: "#ffffff"
     }
-]);
-
-export const myst: Extension = [mystTheme, mystHighlightStyle];
+]));

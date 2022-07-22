@@ -1,6 +1,6 @@
 <script lang="ts">
     import highlightWords, { type HighlightWords } from "highlight-words";
-import { tick } from "svelte";
+    import { tick } from "svelte";
     import {
         Command,
         DirCommand,
