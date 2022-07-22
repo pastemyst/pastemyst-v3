@@ -47,7 +47,7 @@
 
             commands = cmd.options;
             filteredCommands = commands;
-            selectedCommand = commands.find((c) => (c as SelectOptionCommand).selected)!;
+            selectedCommand = commands.find((c) => (c as SelectOptionCommand).selected) ?? commands[0];
             search = "";
             searchElement.focus();
 
@@ -158,6 +158,9 @@
 
     const scrollSelectedIntoView = () => {
         const index = filteredCommands.findIndex((e) => e === selectedCommand);
+
+        if (index === -1) return;
+
         commandsElement.scrollTop = elements[index].offsetTop - 100 - commandsElement.offsetTop;
     };
 
