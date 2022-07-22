@@ -63,6 +63,8 @@
 
             cmd.selected = true;
 
+            search = "";
+
             setOpen(false);
         }
     };

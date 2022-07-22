@@ -17,7 +17,7 @@ const bg = "#1c1c1c",
     blue = "#81a2be",
     purple = "#b294bb";
 
-export const mystTheme = EditorView.theme(
+const mystTheme = EditorView.theme(
     {
         "*": {
             fontFamily: '"Ubuntu Mono", monospace'
@@ -105,7 +105,7 @@ export const mystTheme = EditorView.theme(
     { dark: true }
 );
 
-export const mystHighlightStyle = syntaxHighlighting(HighlightStyle.define([
+const mystHighlightStyle = HighlightStyle.define([
     {
         tag: t.keyword,
         color: purple
@@ -204,4 +204,6 @@ export const mystHighlightStyle = syntaxHighlighting(HighlightStyle.define([
         tag: t.invalid,
         color: "#ffffff"
     }
-]));
+]);
+
+export const mystCMTheme: Extension = [mystTheme, syntaxHighlighting(mystHighlightStyle)];
