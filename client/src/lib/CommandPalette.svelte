@@ -1,5 +1,6 @@
 <script lang="ts">
     import highlightWords, { type HighlightWords } from "highlight-words";
+    import { tick } from "svelte";
     import {
         Command,
         DirCommand,
@@ -28,7 +29,7 @@
 
     let lastActiveElement: Element | null;
 
-    const onCmd = (e: MouseEvent | null, cmd: Command) => {
+    const onCmd = async (e: MouseEvent | null, cmd: Command) => {
         if (cmd instanceof DirCommand) {
             e?.preventDefault();
 
@@ -37,14 +38,22 @@
             selectedCommand = commands[0];
             search = "";
             searchElement.focus();
+
+            await tick();
+
+            scrollSelectedIntoView();
         } else if (cmd instanceof SelectCommand) {
             e?.preventDefault();
 
             commands = cmd.options;
             filteredCommands = commands;
-            selectedCommand = commands.find((c) => (c as SelectOptionCommand).selected)!;
+            selectedCommand = commands.find((c) => (c as SelectOptionCommand).selected) ?? commands[0];
             search = "";
             searchElement.focus();
+
+            await tick();
+
+            scrollSelectedIntoView();
         } else if (cmd instanceof SelectOptionCommand) {
             e?.preventDefault();
 
@@ -53,6 +62,8 @@
             }
 
             cmd.selected = true;
+
+            search = "";
 
             setOpen(false);
         }
@@ -72,6 +83,8 @@
 
             searchElement?.focus();
             search = "";
+
+            await tick();
 
             scrollSelectedIntoView();
         } else {
@@ -147,6 +160,9 @@
 
     const scrollSelectedIntoView = () => {
         const index = filteredCommands.findIndex((e) => e === selectedCommand);
+
+        if (index === -1) return;
+
         commandsElement.scrollTop = elements[index].offsetTop - 100 - commandsElement.offsetTop;
     };
 
@@ -406,6 +422,10 @@
             .description {
                 color: $color-bg-3;
                 font-size: $fs-small;
+
+                span {
+                    display: inline-block;
+                }
 
                 .highlight {
                     display: inline-block;
