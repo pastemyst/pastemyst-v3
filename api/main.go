@@ -7,6 +7,7 @@ import (
 	"pastemyst-api/config"
 	"pastemyst-api/db"
 	"pastemyst-api/handlers"
+	"pastemyst-api/language"
 	"pastemyst-api/logging"
 	"pastemyst-api/validation"
 
@@ -36,6 +37,11 @@ func main() {
 	defer logging.CloseLogger()
 
 	err = changelog.InitChangelog()
+	if err != nil {
+		panic(err)
+	}
+
+	err = language.LoadLanguages()
 	if err != nil {
 		panic(err)
 	}
