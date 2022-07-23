@@ -74,6 +74,8 @@ func main() {
 	e.GET("/api/v3/meta/releases", handlers.GetReleasesHandler)
 	e.GET("/api/v3/meta/active_pastes", handlers.GetActivePastesHandler)
 
+	e.GET("/api/v3/lang/all", handlers.GetAllLangs)
+
 	e.GET("/api/v3/user/:username", handlers.GetUserHandler)
 
 	e.GET("/api/v3/paste/:id", handlers.GetPaseHandler)
