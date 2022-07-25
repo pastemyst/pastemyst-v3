@@ -11,5 +11,8 @@ import (
 //
 // /api/v3/lang/all
 func GetAllLangs(ctx echo.Context) error {
+	// let browsers know this resource can be cached for a week max
+	ctx.Response().Header().Add("Cache-Control", "max-age=604800")
+
 	return ctx.JSON(http.StatusOK, language.Languages)
 }
