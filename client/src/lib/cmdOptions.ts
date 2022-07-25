@@ -1,4 +1,4 @@
-import { languages } from "@codemirror/language-data";
+import { langs } from "./api/lang";
 
 export class Command {
     name: string;
@@ -128,8 +128,8 @@ export const langSelect = new SelectCommand("set language")
     );
 
 const langOptions: SelectOptionCommand[] = [];
-for (const lang of languages.sort((a, b) => a.name.localeCompare(b.name))) {
-    langOptions.push(new SelectOptionCommand(lang.name).withDescription(lang.alias.join(", ")));
+for (const lang of langs) {
+    langOptions.push(new SelectOptionCommand(lang.name).withDescription(lang.aliases?.join(", ")));
 }
 langOptions[0].selected = true;
 
