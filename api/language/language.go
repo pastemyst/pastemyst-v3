@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"os"
 	"pastemyst-api/models"
+	"sort"
 
 	"gopkg.in/yaml.v3"
 )
@@ -54,6 +55,10 @@ func LoadLanguages() error {
 
 		i++
 	}
+
+	sort.Slice(Languages, func(i, j int) bool {
+		return Languages[i].Name < Languages[j].Name
+	})
 
 	return nil
 }
