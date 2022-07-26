@@ -6,7 +6,7 @@
 
     export const router = false;
 
-    export const load = async ({ params, fetch }: { params: any, fetch: any }) => {
+    export const load = async ({ params, fetch }: { params: any; fetch: any }) => {
         const res = await fetch(`${apiBase}/paste/${params.paste}`, {
             method: "get"
         });
@@ -14,11 +14,31 @@
         let paste: Paste;
         let relativeCreatedAt: string;
         let relativesExpiresIn: string;
+        const highlightedCode: string[] = [];
         if (res.ok) {
             paste = await res.json();
             relativeCreatedAt = moment(paste.createdAt).fromNow();
             if (paste.expiresIn != ExpiresIn.never) {
                 relativesExpiresIn = moment(paste.deletesAt).fromNow();
+            }
+
+            for (const pasty of paste.pasties) {
+                const res = await fetch("/internal/highlight", {
+                    method: "POST",
+                    body: JSON.stringify({
+                        content: pasty.content,
+                        // TODO: proper languages
+                        language: pasty.language.toLowerCase()
+                    })
+                });
+
+                // TODO: error handling
+                if (!res.ok)
+                    return {
+                        status: 500
+                    };
+
+                highlightedCode.push(await res.text());
             }
         }
 
@@ -27,7 +47,8 @@
             props: {
                 paste: paste,
                 relativeCreatedAt: relativeCreatedAt,
-                relativesExpiresIn: relativesExpiresIn
+                relativesExpiresIn: relativesExpiresIn,
+                highlightedCode: highlightedCode
             }
         };
     };
@@ -39,6 +60,7 @@
     export let paste: Paste;
     export let relativeCreatedAt: string;
     export let relativesExpiresIn: string;
+    export let highlightedCode: string[];
 
     let activePastyId: string = paste.pasties[0].id;
 
@@ -225,7 +247,7 @@
                     {/if}
                 </div>
 
-                <pre class="content"><code>{pasty.content}</code></pre>
+                {@html highlightedCode[i]}
             </div>
         {/each}
     {:else}
@@ -267,7 +289,7 @@
         </div>
 
         <!-- prettier-ignore -->
-        <pre class="content"><code>{paste.pasties.find((p) => p.id === activePastyId)?.content}</code></pre>
+        {@html highlightedCode[paste.pasties.findIndex((p) => p.id === activePastyId)]}
     {/if}
 </div>
 
@@ -400,25 +422,24 @@
                 }
             }
         }
+    }
 
-        .content {
-            background-color: $color-bg-1;
-            padding: 0.5rem;
-            border-bottom-left-radius: $border-radius;
-            border-bottom-right-radius: $border-radius;
-            border: 1px solid $color-bg-2;
-            border-top: none;
-            margin: 0;
-            overflow-x: auto;
+    :global(.shiki) {
+        padding: 0.5rem;
+        border-bottom-left-radius: $border-radius;
+        border-bottom-right-radius: $border-radius;
+        border: 1px solid $color-bg-2;
+        border-top: none;
+        margin: 0;
+        overflow-x: auto;
+    }
 
-            code {
-                border: none;
-                background-color: transparent;
-                font-size: $fs-small;
-                padding: 0;
-                border-radius: 0;
-            }
-        }
+    :global(.shiki code) {
+        border: none;
+        font-size: $fs-small;
+        padding: 0;
+        border-radius: 0;
+        background-color: transparent;
     }
 
     @media screen and (max-width: $break-med) {
