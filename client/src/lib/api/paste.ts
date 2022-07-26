@@ -24,6 +24,7 @@ export interface Pasty {
     id: string;
     title: string;
     content: string;
+    language: string;
 }
 
 export interface PasteSkeleton {
@@ -35,6 +36,7 @@ export interface PasteSkeleton {
 export interface PastySkeleton {
     title: string;
     content: string;
+    language: string;
 }
 
 /**
