@@ -436,10 +436,27 @@
 
     :global(.shiki code) {
         border: none;
-        font-size: $fs-small;
+        font-size: $fs-normal;
         padding: 0;
         border-radius: 0;
         background-color: transparent;
+    }
+
+    // TODO: temporary line numbers, they should be interactive and not style only
+    :global(.shiki code) {
+        counter-reset: step;
+        counter-increment: step 0;
+    }
+
+    :global(.shiki code .line::before) {
+        content: counter(step);
+        counter-increment: step;
+        width: 1rem;
+        margin-right: 1rem;
+        display: inline-block;
+        text-align: right;
+        color: $color-bg-3;
+        font-size: $fs-normal;
     }
 
     @media screen and (max-width: $break-med) {
