@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"net/http"
 	"pastemyst-api/db"
+	"pastemyst-api/language"
 	"pastemyst-api/models"
 	"pastemyst-api/utils"
 	"time"
@@ -35,9 +36,10 @@ func GetPaseHandler(ctx echo.Context) error {
 	pasties := make([]models.Pasty, len(dbPasties))
 	for i := 0; i < len(dbPasties); i++ {
 		pasties[i] = models.Pasty{
-			Id:      dbPasties[i].ID,
-			Title:   dbPasties[i].Title,
-			Content: dbPasties[i].Content,
+			Id:       dbPasties[i].ID,
+			Title:    dbPasties[i].Title,
+			Content:  dbPasties[i].Content,
+			Language: dbPasties[i].Language,
 		}
 	}
 
@@ -84,10 +86,18 @@ func CreatePasteHandler(ctx echo.Context) error {
 	// create pasties
 	pasties := make([]models.Pasty, 0, len(createInfo.Pasties))
 	for _, pasty := range createInfo.Pasties {
+		// find the lang, if not found set it to Text (plaintext)
+		lang, err := language.FindLanguage(pasty.Language)
+		langName := lang.Name
+		if err != nil {
+			langName = "Text"
+		}
+
 		pasties = append(pasties, models.Pasty{
-			Id:      randomPastyId(pasties),
-			Title:   pasty.Title,
-			Content: pasty.Content,
+			Id:       randomPastyId(pasties),
+			Title:    pasty.Title,
+			Content:  pasty.Content,
+			Language: langName,
 		})
 	}
 	paste.Pasties = pasties
@@ -109,10 +119,11 @@ func CreatePasteHandler(ctx echo.Context) error {
 	// insert pasties into the DB
 	for _, pasty := range pasties {
 		_, err := db.DBQueries.CreatePasty(db.DBContext, db.CreatePastyParams{
-			ID:      pasty.Id,
-			PasteID: paste.Id,
-			Title:   pasty.Title,
-			Content: pasty.Content,
+			ID:       pasty.Id,
+			PasteID:  paste.Id,
+			Title:    pasty.Title,
+			Content:  pasty.Content,
+			Language: pasty.Language,
 		})
 		if err != nil {
 			ctx.Logger().Error("Tried to insert a pasty into the DB, got error.")

@@ -1,11 +1,13 @@
 package language
 
 import (
+	"errors"
 	"io/ioutil"
 	"net/http"
 	"os"
 	"pastemyst-api/models"
 	"sort"
+	"strings"
 
 	"gopkg.in/yaml.v3"
 )
@@ -61,4 +63,48 @@ func LoadLanguages() error {
 	})
 
 	return nil
+}
+
+// Tries to find a language based on the name, it will search names, aliases and extensions.
+func FindLanguage(langName string) (models.Language, error) {
+	var foundLang models.Language
+	var found = false
+
+	for _, lang := range Languages {
+		// if name matches, return the lang
+		if strings.EqualFold(lang.Name, langName) {
+			return lang, nil
+		}
+
+		// check for aliases, if found, keep looping
+		// maybe in a next iteration we will find a better match by name
+		if !found && len(lang.Aliases) > 0 {
+			for _, alias := range lang.Aliases {
+				if strings.EqualFold(alias, langName) {
+					found = true
+					foundLang = lang
+					break
+				}
+			}
+		}
+
+		// check for extensions, if found, keep looping
+		// maybe in a next iteration we will find a better match by name
+		if !found && len(lang.Extensions) > 0 {
+			for _, ext := range lang.Extensions {
+				// ignore first dot in extension
+				if strings.EqualFold(ext[1:], langName) {
+					found = true
+					foundLang = lang
+					break
+				}
+			}
+		}
+	}
+
+	if found {
+		return foundLang, nil
+	} else {
+		return models.Language{}, errors.New("couldn't find the language")
+	}
 }
