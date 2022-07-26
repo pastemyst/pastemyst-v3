@@ -10,6 +10,7 @@
     import { isCommandPaletteOpen } from "./stores";
     import { Compartment, EditorState } from "@codemirror/state";
     import { langs, type Language } from "./api/lang";
+    import { tooltip } from "$lib/tooltips";
 
     type IndentUnit = "tabs" | "spaces";
 
@@ -29,6 +30,10 @@
     let indentWidthCompartment = new Compartment();
     let selectedIndentUnit: IndentUnit = "spaces";
     let selectedIndentWidth: number = 4;
+
+    let previewEnabled = false;
+    let currentPreviewContent: string;
+    let langSupported = false;
 
     onMount(async () => {
         const editorUpdateListener = EditorView.updateListener.of((update) => {
@@ -94,12 +99,17 @@
             );
 
             if (langDescription) {
+                langSupported = true;
+
                 let langSupport = await langDescription.load();
 
                 editorView.dispatch({
                     effects: langCompartment.reconfigure(langSupport)
                 });
             } else {
+                langSupported = false;
+                if (selectedLanguage.name === "Text") langSupported = true;
+
                 editorView.dispatch({
                     effects: langCompartment.reconfigure([])
                 });
@@ -165,6 +175,20 @@
         window.dispatchEvent(evt);
     };
 
+    const onPreviewClick = async () => {
+        const res = await fetch("/internal/highlight", {
+            method: "post",
+            body: JSON.stringify({
+                content: getContent(),
+                language: getSelectedLang().name
+            })
+        });
+
+        currentPreviewContent = await res.text();
+
+        previewEnabled = !previewEnabled;
+    };
+
     export const focus = (): void => {
         editorView.focus();
     };
@@ -183,13 +207,40 @@
 </script>
 
 <div class:hidden>
-    <div class="editor" bind:this={editorElement} />
+    {#if previewEnabled}
+        <div class="preview">
+            {@html currentPreviewContent}
+        </div>
+    {/if}
+
+    <div class="editor" bind:this={editorElement} class:hidden={previewEnabled}>
+        {#if !langSupported}
+            <div
+                class="lang-not-supported flex row center"
+                use:tooltip
+                aria-label="the language doesn't have highlighting support in the editor, but will have it in
+                the actual paste view when the paste is created. use the preview button to see the
+                final result."
+            >
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon" viewBox="0 0 512 512">
+                    <title>Information Circle</title>
+                    <path
+                        fill="currentColor"
+                        d="M256 56C145.72 56 56 145.72 56 256s89.72 200 200 200 200-89.72 200-200S366.28 56 256 56zm0 82a26 26 0 11-26 26 26 26 0 0126-26zm48 226h-88a16 16 0 010-32h28v-88h-16a16 16 0 010-32h32a16 16 0 0116 16v104h28a16 16 0 010 32z"
+                    />
+                </svg>
+                <p>limited language support</p>
+            </div>
+        {/if}
+    </div>
 
     <div class="toolbar flex sm-row center space-between">
-        <div class="flex row center">
+        <div class="flex sm-row center">
             <button on:click={onLanguageClick}>language: {selectedLanguage.name}</button>
 
             <button on:click={onIndentClick}>{selectedIndentUnit}: {selectedIndentWidth}</button>
+
+            <button on:click={onPreviewClick} class:enabled={previewEnabled}>preview</button>
         </div>
 
         <div class="flex row center">
@@ -208,6 +259,7 @@
     .editor {
         height: 50vh;
         position: relative;
+        font-size: $fs-normal;
 
         :global(.cm-editor) {
             border: 1px solid $color-bg-2;
@@ -252,6 +304,30 @@
         }
     }
 
+    .lang-not-supported {
+        position: absolute;
+        z-index: 100;
+        user-select: none;
+        font-size: $fs-small;
+        box-sizing: border-box;
+        bottom: 0;
+        right: 0;
+        background-color: $color-sec;
+        margin: 0.5rem;
+        padding: 0.25rem 0.5rem;
+        border-radius: $border-radius;
+        color: $color-bg-2;
+
+        .icon {
+            color: $color-bg-2;
+            margin-right: 0.25rem;
+        }
+
+        p {
+            margin: 0;
+        }
+    }
+
     .toolbar {
         font-size: $fs-small;
         background-color: $color-bg-2;
@@ -260,13 +336,65 @@
 
         button {
             margin-right: 0.5rem;
+
+            &.enabled {
+                color: $color-sec;
+                border-color: $color-sec;
+            }
         }
+    }
+
+    .preview {
+        height: 50vh;
+        border-bottom-left-radius: $border-radius;
+        border-bottom-right-radius: $border-radius;
+        border: 1px solid $color-bg-2;
+        border-top: none;
+        margin: 0;
+        overflow-x: auto;
+        padding: 0;
+        padding-top: 0.2rem;
+        padding-left: 0.05rem;
+    }
+
+    :global(.shiki) {
+        margin: 0;
+    }
+
+    :global(.shiki code) {
+        border: none;
+        font-size: $fs-normal;
+        padding: 0;
+        border-radius: 0;
+        background-color: transparent;
+    }
+
+    // TODO: temporary line numbers, they should be interactive and not style only
+    :global(.shiki code) {
+        counter-reset: step;
+        counter-increment: step 0;
+    }
+
+    :global(.shiki code .line::before) {
+        content: counter(step);
+        counter-increment: step;
+        width: 1rem;
+        margin-right: 1.1rem;
+        display: inline-block;
+        text-align: right;
+        color: $color-bg-3;
+        font-size: $fs-normal;
+        padding-left: 0.75rem;
     }
 
     @media screen and (max-width: 620px) {
         .toolbar .line {
             margin-top: 0.5rem;
             padding-left: 0.25rem;
+        }
+
+        .toolbar button {
+            margin-top: 0.5rem;
         }
     }
 </style>
