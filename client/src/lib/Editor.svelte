@@ -9,7 +9,7 @@
     import { indentSelect, langSelect, SelectCommand } from "./cmdOptions";
     import { isCommandPaletteOpen } from "./stores";
     import { Compartment, EditorState } from "@codemirror/state";
-    import { langs, type Language } from "./api/lang";
+    import { getLangs, type Language } from "./api/lang";
     import { tooltip } from "$lib/tooltips";
 
     type IndentUnit = "tabs" | "spaces";
@@ -24,7 +24,7 @@
     let cursorCol = 0;
 
     let langCompartment = new Compartment();
-    let selectedLanguage: Language = langs[0];
+    let selectedLanguage: Language;
 
     let indentUnitCompartment = new Compartment();
     let indentWidthCompartment = new Compartment();
@@ -36,6 +36,8 @@
     let langSupported = false;
 
     onMount(async () => {
+        selectedLanguage = (await getLangs())[0];
+
         const editorUpdateListener = EditorView.updateListener.of((update) => {
             // get the current line
             const line = update.state.doc.lineAt(update.state.selection.main.head);
@@ -90,7 +92,7 @@
                 return;
             }
 
-            selectedLanguage = langs.find(
+            selectedLanguage = (await getLangs()).find(
                 (l) => l.name.toLowerCase() === langSelect.getSelected()?.name.toLowerCase()
             )!;
 
@@ -236,7 +238,7 @@
 
     <div class="toolbar flex sm-row center space-between">
         <div class="flex sm-row center">
-            <button on:click={onLanguageClick}>language: {selectedLanguage.name}</button>
+            <button on:click={onLanguageClick}>language: {selectedLanguage?.name}</button>
 
             <button on:click={onIndentClick}>{selectedIndentUnit}: {selectedIndentWidth}</button>
 
