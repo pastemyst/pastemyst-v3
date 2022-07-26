@@ -32,6 +32,7 @@
     let selectedIndentWidth: number = 4;
 
     let previewEnabled = false;
+    let currentPreviewContent: string;
     let langSupported = false;
 
     onMount(async () => {
@@ -174,7 +175,17 @@
         window.dispatchEvent(evt);
     };
 
-    const onPreviewClick = () => {
+    const onPreviewClick = async () => {
+        const res = await fetch("/internal/highlight", {
+            method: "post",
+            body: JSON.stringify({
+                content: getContent(),
+                language: getSelectedLang().name
+            })
+        });
+
+        currentPreviewContent = await res.text();
+
         previewEnabled = !previewEnabled;
     };
 
@@ -196,14 +207,20 @@
 </script>
 
 <div class:hidden>
-    <div class="editor" bind:this={editorElement}>
+    {#if previewEnabled}
+        <div class="preview">
+            {@html currentPreviewContent}
+        </div>
+    {/if}
+
+    <div class="editor" bind:this={editorElement} class:hidden={previewEnabled}>
         {#if !langSupported}
             <div
                 class="lang-not-supported flex row center"
                 use:tooltip
                 aria-label="the language doesn't have highlighting support in the editor, but will have it in
-                    the actual paste view when the paste is created. use the preview button to see the
-                    final result."
+                the actual paste view when the paste is created. use the preview button to see the
+                final result."
             >
                 <svg xmlns="http://www.w3.org/2000/svg" class="icon" viewBox="0 0 512 512">
                     <title>Information Circle</title>
@@ -242,6 +259,7 @@
     .editor {
         height: 50vh;
         position: relative;
+        font-size: $fs-normal;
 
         :global(.cm-editor) {
             border: 1px solid $color-bg-2;
@@ -324,6 +342,49 @@
                 border-color: $color-sec;
             }
         }
+    }
+
+    .preview {
+        height: 50vh;
+        border-bottom-left-radius: $border-radius;
+        border-bottom-right-radius: $border-radius;
+        border: 1px solid $color-bg-2;
+        border-top: none;
+        margin: 0;
+        overflow-x: auto;
+        padding: 0;
+        padding-top: 0.2rem;
+        padding-left: 0.05rem;
+    }
+
+    :global(.shiki) {
+        margin: 0;
+    }
+
+    :global(.shiki code) {
+        border: none;
+        font-size: $fs-normal;
+        padding: 0;
+        border-radius: 0;
+        background-color: transparent;
+    }
+
+    // TODO: temporary line numbers, they should be interactive and not style only
+    :global(.shiki code) {
+        counter-reset: step;
+        counter-increment: step 0;
+    }
+
+    :global(.shiki code .line::before) {
+        content: counter(step);
+        counter-increment: step;
+        width: 1rem;
+        margin-right: 1.1rem;
+        display: inline-block;
+        text-align: right;
+        color: $color-bg-3;
+        font-size: $fs-normal;
+        padding-left: 0.75rem;
     }
 
     @media screen and (max-width: 620px) {
