@@ -34,7 +34,8 @@
         for (const tab of tabs) {
             pasties.push({
                 title: tab.title,
-                content: tab.editor.getContent()
+                content: tab.editor.getContent(),
+                language: tab.editor.getSelectedLang().name
             });
         }
 

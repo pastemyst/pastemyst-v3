@@ -49,18 +49,19 @@ func (q *Queries) CreatePaste(ctx context.Context, arg CreatePasteParams) (Paste
 
 const createPasty = `-- name: CreatePasty :one
 insert into pasties (
-    id, paste_id, title, content
+    id, paste_id, title, content, language
 ) values (
-    $1, $2, $3, $4
+    $1, $2, $3, $4, $5
 )
-returning id, paste_id, title, content
+returning id, paste_id, title, content, language
 `
 
 type CreatePastyParams struct {
-	ID      string
-	PasteID string
-	Title   string
-	Content string
+	ID       string
+	PasteID  string
+	Title    string
+	Content  string
+	Language string
 }
 
 func (q *Queries) CreatePasty(ctx context.Context, arg CreatePastyParams) (Pasty, error) {
@@ -69,6 +70,7 @@ func (q *Queries) CreatePasty(ctx context.Context, arg CreatePastyParams) (Pasty
 		arg.PasteID,
 		arg.Title,
 		arg.Content,
+		arg.Language,
 	)
 	var i Pasty
 	err := row.Scan(
@@ -76,6 +78,7 @@ func (q *Queries) CreatePasty(ctx context.Context, arg CreatePastyParams) (Pasty
 		&i.PasteID,
 		&i.Title,
 		&i.Content,
+		&i.Language,
 	)
 	return i, err
 }
@@ -198,7 +201,7 @@ func (q *Queries) GetPasteCount(ctx context.Context) (int64, error) {
 }
 
 const getPastePasties = `-- name: GetPastePasties :many
-select id, paste_id, title, content from pasties
+select id, paste_id, title, content, language from pasties
 where paste_id = $1
 `
 
@@ -216,6 +219,7 @@ func (q *Queries) GetPastePasties(ctx context.Context, pasteID string) ([]Pasty,
 			&i.PasteID,
 			&i.Title,
 			&i.Content,
+			&i.Language,
 		); err != nil {
 			return nil, err
 		}
