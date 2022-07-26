@@ -27,8 +27,7 @@
                     method: "POST",
                     body: JSON.stringify({
                         content: pasty.content,
-                        // TODO: proper languages
-                        language: pasty.language.toLowerCase()
+                        language: pasty.language
                     })
                 });
 
