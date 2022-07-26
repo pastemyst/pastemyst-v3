@@ -12,12 +12,14 @@ export interface Language {
     tmScope: string
 }
 
+let langs: Language[] = [];
+
 export const getLangs = async (): Promise<Language[]> => {
-    const res = await fetch(`${apiBase}/lang/all`);
+    if (langs.length === 0) {
+        const res = await fetch(`${apiBase}/lang/all`);
 
-    if (res.ok) return await res.json();
+        if (res.ok) langs = await res.json();
+    }
 
-    return [];
+    return langs;
 };
-
-export const langs: Language[] = await getLangs();
