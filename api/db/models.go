@@ -45,10 +45,11 @@ type Paste struct {
 }
 
 type Pasty struct {
-	ID      string
-	PasteID string
-	Title   string
-	Content string
+	ID       string
+	PasteID  string
+	Title    string
+	Content  string
+	Language string
 }
 
 type User struct {
