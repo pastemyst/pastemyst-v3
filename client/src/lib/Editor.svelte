@@ -4,11 +4,12 @@
     import { EditorView, keymap } from "@codemirror/view";
     import { indentWithTab } from "@codemirror/commands";
     import { mystCMTheme } from "./codemirror-myst-theme";
-    import { languages } from "@codemirror/language-data";
+    import { languages as cmLangs } from "@codemirror/language-data";
     import { indentUnit, type LanguageDescription } from "@codemirror/language";
     import { indentSelect, langSelect, SelectCommand } from "./cmdOptions";
     import { isCommandPaletteOpen } from "./stores";
     import { Compartment, EditorState } from "@codemirror/state";
+    import { langs, type Language } from "./api/lang";
 
     type IndentUnit = "tabs" | "spaces";
 
@@ -22,9 +23,7 @@
     let cursorCol = 0;
 
     let langCompartment = new Compartment();
-    let selectedLanguage: LanguageDescription = languages.sort((a, b) =>
-        a.name.localeCompare(b.name)
-    )[0];
+    let selectedLanguage: Language = langs[0];
 
     let indentUnitCompartment = new Compartment();
     let indentWidthCompartment = new Compartment();
@@ -72,7 +71,9 @@
                 const selectedIndent = indentSelect.subCommands.find(
                     (s) => s.name === selectedIndentUnit
                 ) as SelectCommand;
-                const otherIndent = indentSelect.subCommands.find((s) => s.name !== selectedIndentUnit) as SelectCommand;
+                const otherIndent = indentSelect.subCommands.find(
+                    (s) => s.name !== selectedIndentUnit
+                ) as SelectCommand;
 
                 selectedIndent.setSelected(selectedIndentWidth.toString());
 
@@ -84,15 +85,25 @@
                 return;
             }
 
-            selectedLanguage = languages.find(
+            selectedLanguage = langs.find(
                 (l) => l.name.toLowerCase() === langSelect.getSelected()?.name.toLowerCase()
             )!;
 
-            let langSupport = await selectedLanguage.load();
+            let langDescription = cmLangs.find(
+                (l) => selectedLanguage.name.toLowerCase() === l.name.toLowerCase()
+            );
 
-            editorView.dispatch({
-                effects: langCompartment.reconfigure(langSupport)
-            });
+            if (langDescription) {
+                let langSupport = await langDescription.load();
+
+                editorView.dispatch({
+                    effects: langCompartment.reconfigure(langSupport)
+                });
+            } else {
+                editorView.dispatch({
+                    effects: langCompartment.reconfigure([])
+                });
+            }
 
             focus();
 
@@ -162,11 +173,11 @@
         return editorView.state.doc.toString();
     };
 
-    export const getSelectedLang = (): LanguageDescription => {
+    export const getSelectedLang = (): Language => {
         return selectedLanguage;
     };
 
-    export const setSelectedLang = (lang: LanguageDescription) => {
+    export const setSelectedLang = (lang: Language) => {
         selectedLanguage = lang;
     };
 </script>

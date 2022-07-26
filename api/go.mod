@@ -12,6 +12,7 @@ require (
 	github.com/lib/pq v1.10.6
 	go.uber.org/zap v1.21.0
 	golang.org/x/oauth2 v0.0.0-20220630143837-2104d58473e0
+	gopkg.in/yaml.v3 v3.0.1
 )
 
 require (
@@ -42,6 +43,5 @@ require (
 	golang.org/x/net v0.0.0-20220624214902-1bab6f366d9e // indirect
 	golang.org/x/sys v0.0.0-20220520151302-bc2c85ada10a // indirect
 	golang.org/x/text v0.3.7 // indirect
-	gopkg.in/yaml.v3 v3.0.1 // indirect
 	olympos.io/encoding/edn v0.0.0-20201019073823-d3554ca0b0a3 // indirect
 )

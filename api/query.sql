@@ -19,9 +19,9 @@ returning *;
 
 -- name: CreatePasty :one
 insert into pasties (
-    id, paste_id, title, content
+    id, paste_id, title, content, language
 ) values (
-    $1, $2, $3, $4
+    $1, $2, $3, $4, $5
 )
 returning *;
 

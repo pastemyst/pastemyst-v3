@@ -18,6 +18,7 @@ create table if not exists pasties (
     paste_id text not null constraint pasties_pastes_id_fk references pastes,
     title text default '' :: text not null,
     content text default '' :: text not null,
+    language text default 'plaintext' :: text not null,
     constraint pasties_pk primary key (paste_id, id)
 );
 

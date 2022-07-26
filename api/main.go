@@ -7,6 +7,7 @@ import (
 	"pastemyst-api/config"
 	"pastemyst-api/db"
 	"pastemyst-api/handlers"
+	"pastemyst-api/language"
 	"pastemyst-api/logging"
 	"pastemyst-api/validation"
 
@@ -40,6 +41,11 @@ func main() {
 		panic(err)
 	}
 
+	err = language.LoadLanguages()
+	if err != nil {
+		panic(err)
+	}
+
 	auth.InitAuth()
 
 	e := echo.New()
@@ -67,6 +73,8 @@ func main() {
 	e.GET("/api/v3/meta/version", handlers.GetVersionHandler)
 	e.GET("/api/v3/meta/releases", handlers.GetReleasesHandler)
 	e.GET("/api/v3/meta/active_pastes", handlers.GetActivePastesHandler)
+
+	e.GET("/api/v3/lang/all", handlers.GetAllLangs)
 
 	e.GET("/api/v3/user/:username", handlers.GetUserHandler)
 
