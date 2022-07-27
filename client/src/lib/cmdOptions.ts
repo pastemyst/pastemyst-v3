@@ -129,10 +129,10 @@ export const langSelect = new SelectCommand("set language")
 
 (async () => {
     const langOptions: SelectOptionCommand[] = [];
-    for (const lang of await getLangs()) {
-        langOptions.push(new SelectOptionCommand(lang.name).withDescription(lang.aliases?.join(", ")));
+    const langs = await getLangs();
+    for (let i = 0; i < langs.length; i++) {
+        langOptions.push(new SelectOptionCommand(langs[i].name, i === 0).withDescription(langs[i].aliases?.join(", ")));
     }
-    langOptions[0].selected = true;
 
     langSelect.withOptions(langOptions);
 })();
