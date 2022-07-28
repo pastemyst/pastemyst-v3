@@ -146,6 +146,8 @@
 
             setEditorIndentation();
         });
+
+        focus();
     });
 
     const setEditorIndentation = () => {
@@ -192,7 +194,7 @@
     };
 
     export const focus = (): void => {
-        editorView.focus();
+        editorView?.focus();
     };
 
     export const getContent = (): string => {
