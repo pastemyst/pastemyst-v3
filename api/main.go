@@ -83,5 +83,5 @@ func main() {
 
 	fmt.Printf("\nRunning pastemyst version %s\n", changelog.Version)
 
-	e.Logger.Fatal(e.Start(":5000"))
+	e.Logger.Fatal(e.Start(fmt.Sprintf(":%d", config.Cfg.Port)))
 }

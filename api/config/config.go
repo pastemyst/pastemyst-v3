@@ -7,6 +7,7 @@ import (
 // Configuration for the application.
 type Config struct {
 	Host       string `yaml:"host"`
+	Port       uint16 `yaml:"port"`
 	ClientHost string `yaml:"clientHost"`
 
 	DbHost     string `yaml:"dbHost"`
