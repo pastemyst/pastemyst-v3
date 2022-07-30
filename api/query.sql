@@ -56,3 +56,8 @@ insert into users (
     $1, $2, $3, $4, $5, $6
 )
 returning *;
+
+-- name: DeleteExpiredPastes :one
+with deleted as
+    (delete from pastes where expires_in != 'never' and deletes_at < now() returning *)
+select count(*) from deleted;
