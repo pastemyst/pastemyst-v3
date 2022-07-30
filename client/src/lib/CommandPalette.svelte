@@ -76,13 +76,14 @@
     };
 
     const setOpen = async (v: boolean, updateStore = true) => {
+        search = "";
+
         if (v) {
             lastActiveElement = document.activeElement;
 
             selectedCommand = filteredCommands[0];
 
             searchElement?.focus();
-            search = "";
 
             await tick();
 
