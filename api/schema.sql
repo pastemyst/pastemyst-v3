@@ -15,7 +15,7 @@ create unique index if not exists paste_id_uindex on pastes (id);
 
 create table if not exists pasties (
     id text not null,
-    paste_id text not null constraint pasties_pastes_id_fk references pastes,
+    paste_id text not null constraint pasties_pastes_id_fk references pastes(id) on delete cascade,
     title text default '' :: text not null,
     content text default '' :: text not null,
     language text default 'plaintext' :: text not null,

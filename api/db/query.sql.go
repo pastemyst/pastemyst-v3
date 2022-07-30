@@ -122,6 +122,19 @@ func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (User, e
 	return i, err
 }
 
+const deleteExpiredPastes = `-- name: DeleteExpiredPastes :one
+with deleted as
+    (delete from pastes where expires_in != 'never' and deletes_at < now() returning id, created_at, expires_in, deletes_at, title)
+select count(*) from deleted
+`
+
+func (q *Queries) DeleteExpiredPastes(ctx context.Context) (int64, error) {
+	row := q.db.QueryRowContext(ctx, deleteExpiredPastes)
+	var count int64
+	err := row.Scan(&count)
+	return count, err
+}
+
 const existsPaste = `-- name: ExistsPaste :one
 select exists(select 1 from pastes where id = $1)
 `
