@@ -10,7 +10,9 @@ import (
 	"pastemyst-api/language"
 	"pastemyst-api/logging"
 	"pastemyst-api/validation"
+	"time"
 
+	"github.com/go-co-op/gocron"
 	"github.com/go-playground/validator/v10"
 	"github.com/gorilla/sessions"
 	"github.com/labstack/echo-contrib/session"
@@ -80,6 +82,25 @@ func main() {
 
 	e.GET("/api/v3/paste/:id", handlers.GetPaseHandler)
 	e.POST("/api/v3/paste", handlers.CreatePasteHandler)
+
+	// set cron to delete expired pastes every 5 seconds
+	scheduler := gocron.NewScheduler(time.UTC)
+	scheduler.Every(5).Seconds().Do(func() {
+		start := time.Now()
+
+		deletedCount, err := db.DBQueries.DeleteExpiredPastes(db.DBContext)
+		if err != nil {
+			logging.Logger.Errorf("Faield to delete expired pastes: %s", err.Error())
+			return
+		}
+
+		end := time.Now()
+
+		if deletedCount > 0 {
+			logging.Logger.Infof("Deleted %d paste(s) in %s", deletedCount, end.Sub(start))
+		}
+	})
+	scheduler.StartAsync()
 
 	fmt.Printf("\nRunning pastemyst version %s\n", changelog.Version)
 
