@@ -45,7 +45,7 @@
     export let isCurrentUser: boolean;
 </script>
 
-<div class="layout flex sm-row">
+<div class="flex sm-row">
     <section class="user-header flex sm-col center">
         <img class="avatar" src={user.avatarUrl} alt="${user.username}'s avatar" />
 
@@ -136,9 +136,6 @@
 </div>
 
 <style lang="scss">
-    .layout {
-    }
-
     .user-header {
         margin-bottom: 0;
 
