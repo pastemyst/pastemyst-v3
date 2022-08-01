@@ -89,7 +89,7 @@ insert into users (
 ) values (
     $1, $2, $3, $4, $5, $6
 )
-returning id, created_at, username, avatar_url, provider_name, provider_id
+returning id, created_at, username, avatar_url, contributor, supporter, provider_name, provider_id
 `
 
 type CreateUserParams struct {
@@ -116,6 +116,8 @@ func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (User, e
 		&i.CreatedAt,
 		&i.Username,
 		&i.AvatarUrl,
+		&i.Contributor,
+		&i.Supporter,
 		&i.ProviderName,
 		&i.ProviderID,
 	)
@@ -248,7 +250,7 @@ func (q *Queries) GetPastePasties(ctx context.Context, pasteID string) ([]Pasty,
 }
 
 const getUserById = `-- name: GetUserById :one
-select id, created_at, username, avatar_url, provider_name, provider_id from users
+select id, created_at, username, avatar_url, contributor, supporter, provider_name, provider_id from users
 where id = $1 limit 1
 `
 
@@ -260,6 +262,8 @@ func (q *Queries) GetUserById(ctx context.Context, id string) (User, error) {
 		&i.CreatedAt,
 		&i.Username,
 		&i.AvatarUrl,
+		&i.Contributor,
+		&i.Supporter,
 		&i.ProviderName,
 		&i.ProviderID,
 	)
@@ -267,7 +271,7 @@ func (q *Queries) GetUserById(ctx context.Context, id string) (User, error) {
 }
 
 const getUserByProvider = `-- name: GetUserByProvider :one
-select id, created_at, username, avatar_url, provider_name, provider_id from users
+select id, created_at, username, avatar_url, contributor, supporter, provider_name, provider_id from users
 where provider_name = $1 and provider_id = $2 limit 1
 `
 
@@ -284,6 +288,8 @@ func (q *Queries) GetUserByProvider(ctx context.Context, arg GetUserByProviderPa
 		&i.CreatedAt,
 		&i.Username,
 		&i.AvatarUrl,
+		&i.Contributor,
+		&i.Supporter,
 		&i.ProviderName,
 		&i.ProviderID,
 	)
@@ -291,7 +297,7 @@ func (q *Queries) GetUserByProvider(ctx context.Context, arg GetUserByProviderPa
 }
 
 const getUserByUsername = `-- name: GetUserByUsername :one
-select id, created_at, username, avatar_url, provider_name, provider_id from users
+select id, created_at, username, avatar_url, contributor, supporter, provider_name, provider_id from users
 where username = $1 limit 1
 `
 
@@ -303,6 +309,8 @@ func (q *Queries) GetUserByUsername(ctx context.Context, username string) (User,
 		&i.CreatedAt,
 		&i.Username,
 		&i.AvatarUrl,
+		&i.Contributor,
+		&i.Supporter,
 		&i.ProviderName,
 		&i.ProviderID,
 	)
