@@ -57,6 +57,8 @@ type User struct {
 	CreatedAt    time.Time
 	Username     string
 	AvatarUrl    string
+	Contributor  bool
+	Supporter    int32
 	ProviderName string
 	ProviderID   string
 }
