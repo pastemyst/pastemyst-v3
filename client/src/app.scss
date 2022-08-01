@@ -195,7 +195,8 @@ section {
     input[type="text"],
     input[type="password"],
     button,
-    textarea {
+    textarea,
+    .btn {
         background-color: $color-bg;
     }
 
