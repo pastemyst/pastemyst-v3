@@ -56,7 +56,8 @@ code {
         flex-direction: row-reverse;
     }
 
-    &.col {
+    &.col,
+    &.sm-col {
         flex-direction: column;
     }
 
@@ -81,6 +82,10 @@ code {
             &.center {
                 align-items: flex-start;
             }
+        }
+
+        &.sm-col {
+            flex-direction: row;
         }
 
         &.sm-center {
