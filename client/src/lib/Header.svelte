@@ -15,7 +15,7 @@
 
     <div class="flex row center">
         {#if $currentUserStore != null}
-            <a href="/user/profile" class="nav-item user btn">
+            <a href="/~{$currentUserStore.username}" class="nav-item user btn">
                 {$currentUserStore.username}
                 <img
                     src={$currentUserStore.avatarUrl}
