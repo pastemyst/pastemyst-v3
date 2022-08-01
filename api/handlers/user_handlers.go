@@ -20,10 +20,12 @@ func GetUserHandler(ctx echo.Context) error {
 	}
 
 	user := models.User{
-		Id:        dbUser.ID,
-		CreatedAt: dbUser.CreatedAt,
-		Username:  dbUser.Username,
-		AvatarUrl: dbUser.AvatarUrl,
+		Id:          dbUser.ID,
+		CreatedAt:   dbUser.CreatedAt,
+		Username:    dbUser.Username,
+		AvatarUrl:   dbUser.AvatarUrl,
+		Contributor: dbUser.Contributor,
+		Supporter:   uint32(dbUser.Supporter),
 	}
 
 	return ctx.JSON(http.StatusOK, user)
