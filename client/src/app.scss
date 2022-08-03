@@ -183,6 +183,17 @@ button,
             outline: none;
         }
     }
+
+    &.btn-danger {
+        color: $color-red;
+        border-color: rgba($color-red, 0.3);
+
+        &:hover,
+        &:focus,
+        &:active {
+            border-color: $color-red;
+        }
+    }
 }
 
 section {
