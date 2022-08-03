@@ -79,7 +79,7 @@ func CreatePasteHandler(ctx echo.Context) error {
 	now := time.Now().UTC()
 
 	owner := ""
-	if user != nil {
+	if !createInfo.Anonymous && user != nil {
 		owner = user.(models.User).Id
 	}
 
