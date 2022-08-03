@@ -103,7 +103,7 @@ func CallbackHandler(ctx echo.Context) error {
 	cookie.Path = "/"
 	cookie.HttpOnly = true
 	cookie.SameSite = http.SameSiteStrictMode
-	// TODO: make it secure when using SSL
+	cookie.Secure = config.Cfg.Https
 
 	jwtToken := jwt.New(jwt.SigningMethodHS512)
 
@@ -248,7 +248,13 @@ func PostRegisterHandler(ctx echo.Context) error {
 		return echo.NewHTTPError(http.StatusInternalServerError)
 	}
 
-	cookie.MaxAge = -1
+	cookie.Expires = time.Unix(0, 0)
+	cookie.Name = "pastemyst-registration"
+	cookie.Value = ""
+	cookie.Path = "/"
+	cookie.HttpOnly = true
+	cookie.SameSite = http.SameSiteStrictMode
+	cookie.Secure = config.Cfg.Https
 	ctx.SetCookie(cookie)
 
 	expirationTime := time.Now().Add(30 * 24 * time.Hour)
@@ -275,7 +281,7 @@ func PostRegisterHandler(ctx echo.Context) error {
 	newCookie.Expires = expirationTime
 	newCookie.Name = "pastemyst"
 	newCookie.Value = tokenString
-	// TODO: make it secure when using SSL
+	newCookie.Secure = config.Cfg.Https
 
 	ctx.SetCookie(newCookie)
 
@@ -310,6 +316,7 @@ func GetLogoutHandler(ctx echo.Context) error {
 	cookie.HttpOnly = true
 	cookie.SameSite = http.SameSiteStrictMode
 	cookie.Name = "pastemyst"
+	cookie.Secure = config.Cfg.Https
 
 	ctx.SetCookie(cookie)
 
