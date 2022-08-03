@@ -12,4 +12,5 @@ type Paste struct {
 	DeletesAt time.Time `json:"deletesAt"`
 	Title     string    `json:"title"`
 	Pasties   []Pasty   `json:"pasties"`
+	OwnerId   string    `json:"ownerId"`
 }
