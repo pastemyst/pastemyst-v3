@@ -295,6 +295,27 @@ func GetSelfHandler(ctx echo.Context) error {
 	return ctx.JSON(http.StatusOK, user)
 }
 
+// Logs the user out
+//
+// /api/v3/auth/logout
+func GetLogoutHandler(ctx echo.Context) error {
+	cookie, err := ctx.Cookie("pastemyst")
+	if err != nil {
+		return echo.NewHTTPError(http.StatusUnauthorized)
+	}
+
+	cookie.Value = ""
+	cookie.Expires = time.Unix(0, 0)
+	cookie.Path = "/"
+	cookie.HttpOnly = true
+	cookie.SameSite = http.SameSiteStrictMode
+	cookie.Name = "pastemyst"
+
+	ctx.SetCookie(cookie)
+
+	return ctx.Redirect(http.StatusTemporaryRedirect, config.Cfg.ClientHost)
+}
+
 // Generates a random user ID, making sure that it's unique.
 func randomUserId() string {
 	return utils.RandomIdWhile(func(id string) bool {
