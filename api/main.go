@@ -71,6 +71,7 @@ func main() {
 
 	e.POST("/api/v3/auth/register", handlers.PostRegisterHandler)
 	e.GET("/api/v3/auth/self", handlers.GetSelfHandler)
+	e.GET("/api/v3/auth/logout", handlers.GetLogoutHandler)
 
 	e.GET("/api/v3/meta/version", handlers.GetVersionHandler)
 	e.GET("/api/v3/meta/releases", handlers.GetReleasesHandler)
