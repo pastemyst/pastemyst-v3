@@ -13,11 +13,11 @@ import (
 
 const createPaste = `-- name: CreatePaste :one
 insert into pastes (
-    id, created_at, expires_in, deletes_at, title
+    id, created_at, expires_in, deletes_at, title, owner_id
 ) values (
-    $1, $2, $3, $4, $5
+    $1, $2, $3, $4, $5, $6
 )
-returning id, created_at, expires_in, deletes_at, title
+returning id, created_at, expires_in, deletes_at, title, owner_id
 `
 
 type CreatePasteParams struct {
@@ -26,6 +26,7 @@ type CreatePasteParams struct {
 	ExpiresIn ExpiresIn
 	DeletesAt sql.NullTime
 	Title     string
+	OwnerID   sql.NullString
 }
 
 func (q *Queries) CreatePaste(ctx context.Context, arg CreatePasteParams) (Paste, error) {
@@ -35,6 +36,7 @@ func (q *Queries) CreatePaste(ctx context.Context, arg CreatePasteParams) (Paste
 		arg.ExpiresIn,
 		arg.DeletesAt,
 		arg.Title,
+		arg.OwnerID,
 	)
 	var i Paste
 	err := row.Scan(
@@ -43,6 +45,7 @@ func (q *Queries) CreatePaste(ctx context.Context, arg CreatePasteParams) (Paste
 		&i.ExpiresIn,
 		&i.DeletesAt,
 		&i.Title,
+		&i.OwnerID,
 	)
 	return i, err
 }
@@ -126,7 +129,7 @@ func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (User, e
 
 const deleteExpiredPastes = `-- name: DeleteExpiredPastes :one
 with deleted as
-    (delete from pastes where expires_in != 'never' and deletes_at < now() returning id, created_at, expires_in, deletes_at, title)
+    (delete from pastes where expires_in != 'never' and deletes_at < now() returning id, created_at, expires_in, deletes_at, title, owner_id)
 select count(*) from deleted
 `
 
@@ -187,7 +190,7 @@ func (q *Queries) ExistsUserByUsername(ctx context.Context, username string) (bo
 }
 
 const getPaste = `-- name: GetPaste :one
-select id, created_at, expires_in, deletes_at, title from pastes
+select id, created_at, expires_in, deletes_at, title, owner_id from pastes
 where id = $1 limit 1
 `
 
@@ -200,6 +203,7 @@ func (q *Queries) GetPaste(ctx context.Context, id string) (Paste, error) {
 		&i.ExpiresIn,
 		&i.DeletesAt,
 		&i.Title,
+		&i.OwnerID,
 	)
 	return i, err
 }

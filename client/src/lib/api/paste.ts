@@ -18,6 +18,7 @@ export interface Paste {
     expiresIn: ExpiresIn;
     deletesAt: string;
     pasties: Pasty[];
+    ownerId: string;
 }
 
 export interface Pasty {

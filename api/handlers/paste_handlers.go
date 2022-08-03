@@ -50,6 +50,7 @@ func GetPaseHandler(ctx echo.Context) error {
 		DeletesAt: dbPaste.DeletesAt.Time,
 		Title:     dbPaste.Title,
 		Pasties:   pasties,
+		OwnerId:   dbPaste.OwnerID.String,
 	}
 
 	return ctx.JSON(http.StatusOK, paste)
@@ -59,6 +60,8 @@ func GetPaseHandler(ctx echo.Context) error {
 //
 // /api/v3/paste/
 func CreatePasteHandler(ctx echo.Context) error {
+	user := ctx.Get("user")
+
 	var createInfo models.PasteCreateInfo
 	if err := ctx.Bind(&createInfo); err != nil {
 		return err
@@ -75,12 +78,18 @@ func CreatePasteHandler(ctx echo.Context) error {
 
 	now := time.Now().UTC()
 
+	owner := ""
+	if user != nil {
+		owner = user.(models.User).Id
+	}
+
 	paste := models.Paste{
 		Id:        randomPasteId(),
 		CreatedAt: now,
 		ExpiresIn: createInfo.ExpiresIn,
 		DeletesAt: expiresInToTime(now, createInfo.ExpiresIn),
 		Title:     createInfo.Title,
+		OwnerId:   owner,
 	}
 
 	// create pasties
@@ -109,6 +118,7 @@ func CreatePasteHandler(ctx echo.Context) error {
 		ExpiresIn: db.ExpiresIn(createInfo.ExpiresIn),
 		DeletesAt: sql.NullTime{Time: paste.DeletesAt, Valid: createInfo.ExpiresIn != models.ExpiresInNever},
 		Title:     createInfo.Title,
+		OwnerID:   sql.NullString{String: paste.OwnerId, Valid: len(paste.OwnerId) != 0},
 	})
 	if err != nil {
 		ctx.Logger().Error("Tried to insert a paste into the DB, got error.")
