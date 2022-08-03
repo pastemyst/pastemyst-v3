@@ -42,6 +42,7 @@ type Paste struct {
 	ExpiresIn ExpiresIn
 	DeletesAt sql.NullTime
 	Title     string
+	OwnerID   sql.NullString
 }
 
 type Pasty struct {

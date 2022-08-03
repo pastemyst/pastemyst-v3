@@ -5,7 +5,8 @@ create table if not exists pastes (
     created_at timestamp with time zone default now() not null,
     expires_in expires_in not null default 'never',
     deletes_at timestamp with time zone,
-    title text default '' :: text not null
+    title text default '' :: text not null,
+    owner_id text constraint pastes_owner_id_fk references users(id)
 );
 
 alter table

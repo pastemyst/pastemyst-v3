@@ -441,7 +441,6 @@
         background-color: transparent;
     }
 
-    // TODO: temporary line numbers, they should be interactive and not style only
     :global(.shiki code) {
         counter-reset: step;
         counter-increment: step 0;
