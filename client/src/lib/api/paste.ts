@@ -32,6 +32,7 @@ export interface PasteSkeleton {
     title: string;
     expiresIn: ExpiresIn;
     pasties: PastySkeleton[];
+    anonymous: boolean;
 }
 
 export interface PastySkeleton {

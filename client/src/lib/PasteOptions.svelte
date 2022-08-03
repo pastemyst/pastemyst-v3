@@ -1,11 +1,48 @@
 <script lang="ts">
     import { tooltip } from "$lib/tooltips";
     import { createEventDispatcher } from "svelte";
+    import { currentUserStore } from "./stores";
+
+    export let encrypt: boolean = false;
+    export let isPrivate: boolean = false;
+    export let showOnProfile: boolean = false;
+    export let anonymous: boolean = false;
 
     let dispatcher = createEventDispatcher();
 
     const onCreatePaste = () => {
         dispatcher("create");
+    };
+
+    const onEncryptClick = () => {
+        encrypt = !encrypt;
+    };
+
+    const onPrivateClick = () => {
+        isPrivate = !isPrivate;
+
+        if (isPrivate) {
+            showOnProfile = false;
+            anonymous = false;
+        }
+    };
+
+    const onShowOnProfileClick = () => {
+        showOnProfile = !showOnProfile;
+
+        if (showOnProfile) {
+            isPrivate = false;
+            anonymous = false;
+        }
+    };
+
+    const onAnonymousClick = () => {
+        anonymous = !anonymous;
+
+        if (anonymous) {
+            isPrivate = false;
+            showOnProfile = false;
+        }
     };
 </script>
 
@@ -15,111 +52,76 @@
         <label
             for="encrypt"
             aria-label="encrypt the paste with a password"
-            class="btn btn-square btn-plain"
+            class="btn btn-square"
+            class:enabled={encrypt}
+            on:click={onEncryptClick}
             use:tooltip
         >
-            <svg
-                width="24"
-                height="24"
-                viewBox="0 0 24 24"
-                fill="none"
-                xmlns="http://www.w3.org/2000/svg"
-                class="icon"
-            >
+            <svg xmlns="http://www.w3.org/2000/svg" class="icon" viewBox="0 0 512 512">
+                <title>Key</title>
                 <path
-                    fill-rule="evenodd"
-                    clip-rule="evenodd"
-                    d="M6 8C4.34315 8 3 9.34315 3 11V13C3 14.6569 4.34315 16 6 16C7.65685 16 9 14.6569 9 13H15V15H17V13H18V15H20V11H9C9 9.34315 7.65685 8 6 8ZM7 13V11C7 10.4477 6.55228 10 6 10C5.44772 10 5 10.4477 5 11V13C5 13.5523 5.44772 14 6 14C6.55228 14 7 13.5523 7 13Z"
                     fill="currentColor"
+                    d="M218.1 167.17c0 13 0 25.6 4.1 37.4-43.1 50.6-156.9 184.3-167.5 194.5a20.17 20.17 0 00-6.7 15c0 8.5 5.2 16.7 9.6 21.3 6.6 6.9 34.8 33 40 28 15.4-15 18.5-19 24.8-25.2 9.5-9.3-1-28.3 2.3-36s6.8-9.2 12.5-10.4 15.8 2.9 23.7 3c8.3.1 12.8-3.4 19-9.2 5-4.6 8.6-8.9 8.7-15.6.2-9-12.8-20.9-3.1-30.4s23.7 6.2 34 5 22.8-15.5 24.1-21.6-11.7-21.8-9.7-30.7c.7-3 6.8-10 11.4-11s25 6.9 29.6 5.9c5.6-1.2 12.1-7.1 17.4-10.4 15.5 6.7 29.6 9.4 47.7 9.4 68.5 0 124-53.4 124-119.2S408.5 48 340 48s-121.9 53.37-121.9 119.17zM400 144a32 32 0 11-32-32 32 32 0 0132 32z"
                 />
             </svg>
         </label>
 
-        <input type="checkbox" id="private" />
-        <label
-            for="private"
-            aria-label="private paste, only visible by you"
-            class="btn btn-square btn-plain"
-            use:tooltip
-        >
-            <svg
-                width="24"
-                height="24"
-                viewBox="0 0 24 24"
-                fill="none"
-                xmlns="http://www.w3.org/2000/svg"
-                class="icon"
+        {#if $currentUserStore != null}
+            <input type="checkbox" id="private" />
+            <label
+                for="private"
+                aria-label="private paste, only visible by you"
+                class="btn btn-square"
+                class:enabled={isPrivate}
+                on:click={onPrivateClick}
+                use:tooltip
             >
-                <path
-                    fill-rule="evenodd"
-                    clip-rule="evenodd"
-                    d="M18 10.5C19.6569 10.5 21 11.8431 21 13.5V19.5C21 21.1569 19.6569 22.5 18 22.5H6C4.34315 22.5 3 21.1569 3 19.5V13.5C3 11.8431 4.34315 10.5 6 10.5V7.5C6 4.18629 8.68629 1.5 12 1.5C15.3137 1.5 18 4.18629 18 7.5V10.5ZM12 3.5C14.2091 3.5 16 5.29086 16 7.5V10.5H8V7.5C8 5.29086 9.79086 3.5 12 3.5ZM18 12.5H6C5.44772 12.5 5 12.9477 5 13.5V19.5C5 20.0523 5.44772 20.5 6 20.5H18C18.5523 20.5 19 20.0523 19 19.5V13.5C19 12.9477 18.5523 12.5 18 12.5Z"
-                    fill="currentColor"
-                />
-            </svg>
-        </label>
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon" viewBox="0 0 512 512">
+                    <title>Lock Closed</title>
+                    <path
+                        fill="currentColor"
+                        d="M368 192h-16v-80a96 96 0 10-192 0v80h-16a64.07 64.07 0 00-64 64v176a64.07 64.07 0 0064 64h224a64.07 64.07 0 0064-64V256a64.07 64.07 0 00-64-64zm-48 0H192v-80a64 64 0 11128 0z"
+                    />
+                </svg>
+            </label>
 
-        <input type="checkbox" id="show-on-profile" />
-        <label
-            for="show-on-profile"
-            aria-label="show on your public profile"
-            class="btn btn-square btn-plain"
-            use:tooltip
-        >
-            <svg
-                width="24"
-                height="24"
-                viewBox="0 0 24 24"
-                fill="none"
-                xmlns="http://www.w3.org/2000/svg"
-                class="icon"
+            <input type="checkbox" id="show-on-profile" />
+            <label
+                for="show-on-profile"
+                aria-label="show on your public profile"
+                class="btn btn-square"
+                class:enabled={showOnProfile}
+                on:click={onShowOnProfileClick}
+                use:tooltip
             >
-                <path
-                    fill-rule="evenodd"
-                    clip-rule="evenodd"
-                    d="M16 12C16 14.2091 14.2091 16 12 16C9.79086 16 8 14.2091 8 12C8 9.79086 9.79086 8 12 8C14.2091 8 16 9.79086 16 12ZM14 12C14 13.1046 13.1046 14 12 14C10.8954 14 10 13.1046 10 12C10 10.8954 10.8954 10 12 10C13.1046 10 14 10.8954 14 12Z"
-                    fill="currentColor"
-                />
-                <path
-                    fill-rule="evenodd"
-                    clip-rule="evenodd"
-                    d="M12 3C17.5915 3 22.2898 6.82432 23.6219 12C22.2898 17.1757 17.5915 21 12 21C6.40848 21 1.71018 17.1757 0.378052 12C1.71018 6.82432 6.40848 3 12 3ZM12 19C7.52443 19 3.73132 16.0581 2.45723 12C3.73132 7.94186 7.52443 5 12 5C16.4756 5 20.2687 7.94186 21.5428 12C20.2687 16.0581 16.4756 19 12 19Z"
-                    fill="currentColor"
-                />
-            </svg>
-        </label>
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon" viewBox="0 0 512 512">
+                    <title>Eye</title>
+                    <circle fill="currentColor" cx="256" cy="256" r="64" />
+                    <path
+                        fill="currentColor"
+                        d="M490.84 238.6c-26.46-40.92-60.79-75.68-99.27-100.53C349 110.55 302 96 255.66 96c-42.52 0-84.33 12.15-124.27 36.11-40.73 24.43-77.63 60.12-109.68 106.07a31.92 31.92 0 00-.64 35.54c26.41 41.33 60.4 76.14 98.28 100.65C162 402 207.9 416 255.66 416c46.71 0 93.81-14.43 136.2-41.72 38.46-24.77 72.72-59.66 99.08-100.92a32.2 32.2 0 00-.1-34.76zM256 352a96 96 0 1196-96 96.11 96.11 0 01-96 96z"
+                    />
+                </svg>
+            </label>
 
-        <input type="checkbox" id="detach" />
-        <label
-            for="detach"
-            aria-label="detach paste, won't be associated with your account"
-            class="btn btn-square btn-plain"
-            use:tooltip
-        >
-            <svg
-                width="24"
-                height="24"
-                viewBox="0 0 24 24"
-                fill="none"
-                xmlns="http://www.w3.org/2000/svg"
-                class="icon"
+            <input type="checkbox" id="detach" />
+            <label
+                for="anonymous"
+                aria-label="anonymous paste, won't be associated with your account"
+                class="btn btn-square"
+                class:enabled={anonymous}
+                on:click={onAnonymousClick}
+                use:tooltip
             >
-                <path
-                    d="M10.9759 9C10.9759 9.55228 10.5282 10 9.97589 10C9.42361 10 8.97589 9.55228 8.97589 9C8.97589 8.44771 9.42361 8 9.97589 8C10.5282 8 10.9759 8.44771 10.9759 9Z"
-                    fill="currentColor"
-                />
-                <path
-                    d="M13.9712 10C14.5235 10 14.9712 9.55228 14.9712 9C14.9712 8.44771 14.5235 8 13.9712 8C13.4189 8 12.9712 8.44771 12.9712 9C12.9712 9.55228 13.4189 10 13.9712 10Z"
-                    fill="currentColor"
-                />
-                <path
-                    fill-rule="evenodd"
-                    clip-rule="evenodd"
-                    d="M19 20.9999V10C19 6.13401 15.866 3 12 3C8.13401 3 5 6.13401 5 10V21L7.82846 21L9.24264 19.5858L10.6569 21L13.3433 21L14.7574 19.5858L16.1717 21L19 20.9999ZM17 10C17 7.23858 14.7614 5 12 5C9.23858 5 7 7.23858 7 10V19L9.24264 16.7573L12 19.5147L14.7574 16.7573L17 18.9999V10Z"
-                    fill="currentColor"
-                />
-            </svg>
-        </label>
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon" viewBox="0 0 512 512">
+                    <title>Glasses</title>
+                    <path
+                        fill="currentColor"
+                        d="M464 184h-10.9a78.72 78.72 0 00-16-7.18C419.5 171 396.26 168 368 168s-51.5 3-69.06 8.82c-14.06 4.69-20.25 9.86-22.25 11.87a47.94 47.94 0 00-41.36 0c-2-2-8.19-7.18-22.25-11.87C195.5 171 172.26 168 144 168s-51.5 3-69.06 8.82a78.72 78.72 0 00-16 7.18H48a16 16 0 000 32h.17c1 45.46 6.44 72.78 18.11 92.23a66.78 66.78 0 0031.92 28c12.23 5.24 27.22 7.79 45.8 7.79 24.15 0 58.48-3.71 77.72-35.77 9.68-16.14 15.09-37.69 17.21-70.52A16 16 0 00240 232a16 16 0 0132 0 16 16 0 001.07 5.71c2.12 32.83 7.53 54.38 17.21 70.52a66.78 66.78 0 0031.92 28c12.23 5.24 27.22 7.79 45.8 7.79 24.15 0 58.48-3.71 77.72-35.77 11.67-19.45 17.13-46.77 18.11-92.23h.17a16 16 0 000-32z"
+                    />
+                </svg>
+            </label>
+        {/if}
     </div>
 
     <button class="btn-main" on:click={onCreatePaste}>create paste</button>
@@ -127,7 +129,7 @@
 
 <style lang="scss">
     .paste-options {
-        padding: 0.5rem 1rem;
+        padding: 0.5rem;
     }
 
     @media screen and (max-width: $break-med) {
@@ -148,10 +150,23 @@
 
     label {
         margin-right: 1rem;
-        font-size: $fs-large;
+        background-color: $color-bg;
+        padding: 0.5rem;
 
         &:hover {
             background-color: $color-bg;
+        }
+
+        .icon {
+            max-width: 20px;
+        }
+
+        &.enabled {
+            border-color: $color-sec;
+
+            .icon {
+                color: $color-sec;
+            }
         }
     }
 
