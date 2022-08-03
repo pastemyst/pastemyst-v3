@@ -19,6 +19,8 @@
 
     let tabs: TabData[];
 
+    let anonymous: boolean;
+
     onMount(() => {
         isCommandPaletteOpen.subscribe((open) => {
             // on cmd pal close, update expires in
@@ -42,7 +44,8 @@
         const pasteSkeleton: PasteSkeleton = {
             title: title,
             expiresIn: expiresInFromString(expiresIn),
-            pasties: pasties
+            pasties: pasties,
+            anonymous: anonymous
         };
 
         const paste = await createPaste(pasteSkeleton);
@@ -79,7 +82,7 @@
 <TabbedEditor bind:tabs />
 
 <div class="paste-options">
-    <PasteOptions on:create={onCreatePaste} />
+    <PasteOptions on:create={onCreatePaste} bind:anonymous={anonymous} />
 </div>
 
 <style lang="scss">
