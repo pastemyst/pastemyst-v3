@@ -11,9 +11,9 @@ select exists(select 1 from pastes where id = $1);
 
 -- name: CreatePaste :one
 insert into pastes (
-    id, created_at, expires_in, deletes_at, title, owner_id
+    id, created_at, expires_in, deletes_at, title, owner_id, private
 ) values (
-    $1, $2, $3, $4, $5, $6
+    $1, $2, $3, $4, $5, $6, $7
 )
 returning *;
 

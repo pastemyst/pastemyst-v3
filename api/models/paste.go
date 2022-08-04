@@ -13,4 +13,5 @@ type Paste struct {
 	Title     string    `json:"title"`
 	Pasties   []Pasty   `json:"pasties"`
 	OwnerId   string    `json:"ownerId"`
+	Private   bool      `json:"private"`
 }
