@@ -20,7 +20,8 @@ create table if not exists pastes (
     expires_in expires_in not null default 'never',
     deletes_at timestamp with time zone,
     title text default '' :: text not null,
-    owner_id text constraint pastes_owner_id_fk references users(id)
+    owner_id text constraint pastes_owner_id_fk references users(id),
+    private boolean not null default false
 );
 
 alter table
