@@ -30,7 +30,9 @@
 
         if (createAccountErrorMsg) return;
 
-        goto("/");
+        // not using goto("/") becase the page needs to get refreshed
+        // so the current account gets updated
+        window.location.href = "/";
     };
 
     const validateUsername = async () => {

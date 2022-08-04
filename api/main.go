@@ -91,7 +91,7 @@ func main() {
 
 		deletedCount, err := db.DBQueries.DeleteExpiredPastes(db.DBContext)
 		if err != nil {
-			logging.Logger.Errorf("Faield to delete expired pastes: %s", err.Error())
+			logging.Logger.Errorf("Failed to delete expired pastes: %s", err.Error())
 			return
 		}
 

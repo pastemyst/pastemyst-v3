@@ -1,5 +1,19 @@
 create type expires_in as enum ('never', '1h', '2h', '10h', '1d', '2d', '1w', '1m', '1y');
 
+create table if not exists users (
+    id text not null constraint user_pk primary key,
+    created_at timestamp with time zone default now() not null,
+    username text default '' :: text not null,
+    avatar_url text default '' :: text not null,
+    contributor boolean default false not null,
+    supporter integer default 0 not null,
+    provider_name text default '' :: text not null,
+    provider_id text default '' :: text not null
+);
+
+alter table
+    users owner to pastemyst;
+
 create table if not exists pastes (
     id text not null constraint paste_pk primary key,
     created_at timestamp with time zone default now() not null,
@@ -25,17 +39,3 @@ create table if not exists pasties (
 
 alter table
     pasties owner to pastemyst;
-
-create table if not exists users (
-    id text not null constraint user_pk primary key,
-    created_at timestamp with time zone default now() not null,
-    username text default '' :: text not null,
-    avatar_url text default '' :: text not null,
-    contributor boolean default false not null,
-    supporter integer default 0 not null,
-    provider_name text default '' :: text not null,
-    provider_id text default '' :: text not null
-);
-
-alter table
-    users owner to pastemyst;
