@@ -10,13 +10,13 @@
         LinkCommand
     } from "./cmdOptions";
     import { isCommandPaletteOpen } from "./stores";
-    export let isOpen: boolean = false;
+    export let isOpen = false;
 
     let searchElement: HTMLInputElement;
     let search: string;
-    let searchFound: boolean = true;
+    let searchFound = true;
 
-    let isCommandSelected: boolean = false;
+    let isCommandSelected = false;
 
     let commandsElement: HTMLElement;
 
@@ -47,7 +47,8 @@
 
             commands = cmd.options;
             filteredCommands = commands;
-            selectedCommand = commands.find((c) => (c as SelectOptionCommand).selected) ?? commands[0];
+            selectedCommand =
+                commands.find((c) => (c as SelectOptionCommand).selected) ?? commands[0];
             search = "";
             searchElement.focus();
 
@@ -168,11 +169,17 @@
     };
 
     const filter = () => {
-        filteredCommands = commands.filter(
-            (e) =>
-                e.name.toLowerCase().indexOf(search.toLowerCase()) > -1 ||
-                e.description?.toLowerCase().indexOf(search.toLowerCase())! > -1
-        );
+        filteredCommands = commands.filter((e) => {
+            if (e.name.toLowerCase().indexOf(search.toLowerCase()) > -1) {
+                return e;
+            }
+
+            if (e.description) {
+                if (e.description.toLowerCase().indexOf(search.toLowerCase()) > -1) {
+                    return e;
+                }
+            }
+        });
         searchFound = filteredCommands.length > 0;
 
         if (searchFound) {

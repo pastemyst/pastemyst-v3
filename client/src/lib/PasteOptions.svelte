@@ -3,10 +3,10 @@
     import { createEventDispatcher } from "svelte";
     import { currentUserStore } from "./stores";
 
-    export let encrypt: boolean = false;
-    export let isPrivate: boolean = false;
-    export let showOnProfile: boolean = false;
-    export let anonymous: boolean = false;
+    export let encrypt = false;
+    export let isPrivate = false;
+    export let showOnProfile = false;
+    export let anonymous = false;
 
     let dispatcher = createEventDispatcher();
 

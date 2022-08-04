@@ -37,9 +37,7 @@ const initHighlighter = async () => {
             id: lang.name,
             scopeName: lang.tmScope,
             aliases: lang.aliases,
-            grammar: JSON.parse(
-                readFileSync(`./static/grammars/${lang.tmScope}.json`).toString()
-            )
+            grammar: JSON.parse(readFileSync(`./static/grammars/${lang.tmScope}.json`).toString())
         });
     }
 

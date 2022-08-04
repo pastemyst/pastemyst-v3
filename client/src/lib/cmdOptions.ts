@@ -131,7 +131,11 @@ export const langSelect = new SelectCommand("set language")
     const langOptions: SelectOptionCommand[] = [];
     const langs = await getLangs();
     for (let i = 0; i < langs.length; i++) {
-        langOptions.push(new SelectOptionCommand(langs[i].name, i === 0).withDescription(langs[i].aliases?.join(", ")));
+        langOptions.push(
+            new SelectOptionCommand(langs[i].name, i === 0).withDescription(
+                langs[i].aliases?.join(", ")
+            )
+        );
     }
 
     langSelect.withOptions(langOptions);
