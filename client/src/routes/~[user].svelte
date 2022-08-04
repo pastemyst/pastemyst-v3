@@ -6,7 +6,7 @@
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     export const load = async ({ params, fetch }: { params: any; fetch: any }) => {
-        const userRes = await fetch(`${apiBase}/user/${params.user}`, {
+        const userRes = await fetch(`${apiBase}/user/by_username/${params.user}`, {
             method: "get"
         });
 

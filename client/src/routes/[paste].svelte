@@ -16,6 +16,7 @@
         let paste: Paste;
         let relativeCreatedAt: string;
         let relativesExpiresIn: string;
+        let owner: User | null;
         const highlightedCode: string[] = [];
         if (res.ok) {
             paste = await res.json();
@@ -24,9 +25,23 @@
                 relativesExpiresIn = moment(paste.deletesAt).fromNow();
             }
 
+            if (paste.ownerId != "") {
+                const res = await fetch(`${apiBase}/user/by_id/${paste.ownerId}`, {
+                    method: "get"
+                });
+
+                // TODO: error handling
+                if (!res.ok)
+                    return {
+                        status: 500
+                    };
+
+                owner = await res.json();
+            }
+
             for (const pasty of paste.pasties) {
                 const res = await fetch("/internal/highlight", {
-                    method: "POST",
+                    method: "post",
                     body: JSON.stringify({
                         content: pasty.content,
                         language: pasty.language
@@ -49,7 +64,8 @@
                 paste: paste,
                 relativeCreatedAt: relativeCreatedAt,
                 relativesExpiresIn: relativesExpiresIn,
-                highlightedCode: highlightedCode
+                highlightedCode: highlightedCode,
+                owner: owner
             }
         };
     };
@@ -57,11 +73,13 @@
 
 <script lang="ts">
     import Tab from "$lib/Tab.svelte";
+    import type { User } from "$lib/api/user";
 
     export let paste: Paste;
     export let relativeCreatedAt: string;
     export let relativesExpiresIn: string;
     export let highlightedCode: string[];
+    export let owner: User | null;
 
     let activePastyId: string = paste.pasties[0].id;
 
@@ -98,10 +116,13 @@
             <h2>{paste.title || "untitled"}</h2>
         </div>
 
-        <span class="dates flex row center">
+        <span class="dates">
             <span use:tooltip aria-label={new Date(paste.createdAt).toString()}>
                 {relativeCreatedAt}
             </span>
+            {#if owner}
+                <span class="owner">by <a href="/~{owner.username}">{owner.username}</a></span>
+            {/if}
             {#if paste?.expiresIn != ExpiresIn.never}
                 <span class="separator">-</span>
                 <span use:tooltip aria-label={new Date(paste.deletesAt).toString()}>
@@ -337,8 +358,8 @@
                 color: $color-bg-3;
                 margin-top: 0.25rem;
 
-                .separator {
-                    margin: 0 0.5rem;
+                span:last-child {
+                    white-space: pre;
                 }
             }
         }
@@ -478,7 +499,20 @@
         font-size: $fs-normal;
     }
 
-    @media screen and (max-width: $break-med) {
+    @media screen and (max-width: 620px) {
+        .title {
+            .dates {
+                display: flex;
+                flex-direction: column;
+            }
+
+            .separator {
+                display: none;
+            }
+        }
+    }
+
+    @media screen and (max-width: 720px) {
         .paste-header {
             flex-direction: column;
             align-items: baseline;
