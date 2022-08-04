@@ -22,7 +22,7 @@ jobs:
       with:
         node-version: ${{ matrix.node-version }}
         cache: 'npm'
-    - run: cd client
+      working-directory: client
     - run: npm ci
     - run: npm run check
     - run: npm run lint
