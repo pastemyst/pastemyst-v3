@@ -24,7 +24,7 @@ export const getSelf = async (): Promise<User | null> => {
     const res = await fetch(`${apiBase}/auth/self`, {
         method: "get",
         credentials: "include"
-    })
+    });
 
     if (res.ok) return await res.json();
 

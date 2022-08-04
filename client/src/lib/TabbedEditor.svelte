@@ -13,7 +13,7 @@
     let tabGroupElement: HTMLElement;
     let editorTarget: HTMLElement;
 
-    let activeTabId: number = 0;
+    let activeTabId = 0;
 
     onMount(async () => {
         Sortable.create(tabGroupElement, {
@@ -23,10 +23,12 @@
 
             onEnd: (event: SortableEvent) => {
                 // once the reordering of tabs is done, replicate the reorder in the data array
-                const tab = tabs[event.oldIndex!];
-                tabs.splice(event.oldIndex!, 1);
-                tabs.splice(event.newIndex!, 0, tab);
-                tabs = tabs;
+                if (event.oldIndex && event.newIndex) {
+                    const tab = tabs[event.oldIndex];
+                    tabs.splice(event.oldIndex, 1);
+                    tabs.splice(event.newIndex, 0, tab);
+                    tabs = tabs;
+                }
             }
         });
 
@@ -63,6 +65,7 @@
         updateTabEditorVisibility();
     };
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const onTabClick = async (id: number, event: CustomEvent<any>) => {
         let target = event.detail.event.target as HTMLElement;
 
@@ -108,9 +111,9 @@
         await tick();
         await tick();
 
-        let tab = tabs.find((t) => t.id === activeTabId)!;
+        let tab = tabs.find((t) => t.id === activeTabId);
 
-        if (!tab.isInRenamingState) {
+        if (tab && !tab.isInRenamingState) {
             tab.editor.focus();
         }
     };
@@ -124,7 +127,7 @@
 
 <div class="tabs flex row center">
     <div class="tabgroup flex row" bind:this={tabGroupElement}>
-        {#each tabs as tab, i (tab.id)}
+        {#each tabs as tab, _ (tab.id)}
             <Tab
                 id={tab.id.toString()}
                 on:close={() => onTabClose(tab.id)}

@@ -5,7 +5,7 @@
     import { indentWithTab } from "@codemirror/commands";
     import { mystCMTheme } from "./codemirror-myst-theme";
     import { languages as cmLangs } from "@codemirror/language-data";
-    import { indentUnit, type LanguageDescription } from "@codemirror/language";
+    import { indentUnit } from "@codemirror/language";
     import { indentSelect, langSelect, SelectCommand } from "./cmdOptions";
     import { isCommandPaletteOpen } from "./stores";
     import { Compartment, EditorState } from "@codemirror/state";
@@ -29,7 +29,7 @@
     let indentUnitCompartment = new Compartment();
     let indentWidthCompartment = new Compartment();
     let selectedIndentUnit: IndentUnit = "spaces";
-    let selectedIndentWidth: number = 4;
+    let selectedIndentWidth = 4;
 
     let previewEnabled = false;
     let currentPreviewContent: string;
@@ -92,9 +92,11 @@
                 return;
             }
 
-            selectedLanguage = (await getLangs()).find(
+            const langSearch = (await getLangs()).find(
                 (l) => l.name.toLowerCase() === langSelect.getSelected()?.name.toLowerCase()
-            )!;
+            );
+
+            if (langSearch) selectedLanguage = langSearch;
 
             let langDescription = cmLangs.find(
                 (l) => selectedLanguage.name.toLowerCase() === l.name.toLowerCase()

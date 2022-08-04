@@ -2,11 +2,11 @@
     import { createEventDispatcher, tick } from "svelte";
 
     export let id: string;
-    export let isActive: boolean = false;
-    export let title: string = "untitled";
-    export let isInRenamingState: boolean = false;
-    export let isReadonly: boolean = false;
-    export let closeable: boolean = true;
+    export let isActive = false;
+    export let title = "untitled";
+    export let isInRenamingState = false;
+    export let isReadonly = false;
+    export let closeable = true;
 
     let dispatch = createEventDispatcher();
 

@@ -1,10 +1,9 @@
 <script lang="ts">
     import { page } from "$app/stores";
-    import { goto } from "$app/navigation";
     import { createAccount } from "$lib/api/auth";
     import { getUser } from "$lib/api/user";
 
-    let username = $page.url.searchParams.get("username")!;
+    let username = $page.url.searchParams.get("username");
     let usernameInput: HTMLInputElement;
 
     let usernameValid = true;
@@ -21,7 +20,7 @@
     const onFormSubmit = async () => {
         await validateUsername();
 
-        if (!usernameValid) {
+        if (!username || !usernameValid) {
             usernameInput.focus();
             return;
         }
@@ -36,6 +35,12 @@
     };
 
     const validateUsername = async () => {
+        if (!username) {
+            usernameValid = false;
+            usernameErrorMsg = "invalid username";
+            return;
+        }
+
         if ((await getUser(username)) !== null) {
             usernameValid = false;
             usernameErrorMsg = "this username is already taken";

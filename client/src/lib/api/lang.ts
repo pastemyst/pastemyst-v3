@@ -1,15 +1,15 @@
 import { apiBase } from "./api";
 
 export interface Language {
-    name: string,
-    type: string,
-    aliases: string[],
-    codemirrorMode: string,
-    codemirrorMimeType: string,
-    wrap: boolean,
-    extensions: string[],
-    color: string,
-    tmScope: string
+    name: string;
+    type: string;
+    aliases: string[];
+    codemirrorMode: string;
+    codemirrorMimeType: string;
+    wrap: boolean;
+    extensions: string[];
+    color: string;
+    tmScope: string;
 }
 
 let langs: Language[] = [];
