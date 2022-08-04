@@ -9,8 +9,18 @@ export interface User {
     supporter: number;
 }
 
-export const getUser = async (username: string): Promise<User | null> => {
-    const res = await fetch(`${apiBase}/user/${username}`, {
+export const getUserByUsername = async (username: string): Promise<User | null> => {
+    const res = await fetch(`${apiBase}/user/by_username/${username}`, {
+        method: "get"
+    });
+
+    if (res.ok) return await res.json();
+
+    return null;
+};
+
+export const getUserById = async (id: string): Promise<User | null> => {
+    const res = await fetch(`${apiBase}/user/by_id/${id}`, {
         method: "get"
     });
 

@@ -1,7 +1,7 @@
 <script lang="ts">
     import { page } from "$app/stores";
     import { createAccount } from "$lib/api/auth";
-    import { getUser } from "$lib/api/user";
+    import { getUserByUsername } from "$lib/api/user";
 
     let username = $page.url.searchParams.get("username");
     let usernameInput: HTMLInputElement;
@@ -41,7 +41,7 @@
             return;
         }
 
-        if ((await getUser(username)) !== null) {
+        if ((await getUserByUsername(username)) !== null) {
             usernameValid = false;
             usernameErrorMsg = "this username is already taken";
         } else if (username.length === 0) {
