@@ -9,7 +9,8 @@
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     export const load = async ({ params, fetch }: { params: any; fetch: any }) => {
         const res = await fetch(`${apiBase}/paste/${params.paste}`, {
-            method: "get"
+            method: "get",
+            credentials: "include"
         });
 
         let paste: Paste;
