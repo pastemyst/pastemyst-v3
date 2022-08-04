@@ -6,6 +6,7 @@
 
     export const router = false;
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     export const load = async ({ params, fetch }: { params: any; fetch: any }) => {
         const res = await fetch(`${apiBase}/paste/${params.paste}`, {
             method: "get"
@@ -252,7 +253,7 @@
     {:else}
         <div class="tabs flex row center">
             <div class="tabgroup flex row">
-                {#each paste.pasties as pasty, i}
+                {#each paste.pasties as pasty}
                     <Tab
                         id={pasty.id}
                         isReadonly

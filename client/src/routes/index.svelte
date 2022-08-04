@@ -82,7 +82,7 @@
 <TabbedEditor bind:tabs />
 
 <div class="paste-options">
-    <PasteOptions on:create={onCreatePaste} bind:anonymous={anonymous} />
+    <PasteOptions on:create={onCreatePaste} bind:anonymous />
 </div>
 
 <style lang="scss">
