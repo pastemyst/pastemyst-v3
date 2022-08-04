@@ -9,7 +9,8 @@
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     export const load = async ({ params, fetch }: { params: any; fetch: any }) => {
         const res = await fetch(`${apiBase}/paste/${params.paste}`, {
-            method: "get"
+            method: "get",
+            credentials: "include"
         });
 
         let paste: Paste;
@@ -81,7 +82,21 @@
 
 <section class="paste-header flex column center space-between">
     <div class="title flex col">
-        <h2>{paste.title || "untitled"}</h2>
+        <div class="flex row center">
+            {#if paste.private}
+                <div use:tooltip aria-label="private paste" class="flex row center private-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon" viewBox="0 0 512 512">
+                        <title>Lock Closed</title>
+                        <path
+                            fill="currentColor"
+                            d="M368 192h-16v-80a96 96 0 10-192 0v80h-16a64.07 64.07 0 00-64 64v176a64.07 64.07 0 0064 64h224a64.07 64.07 0 0064-64V256a64.07 64.07 0 00-64-64zm-48 0H192v-80a64 64 0 11128 0z"
+                        />
+                    </svg>
+                </div>
+            {/if}
+
+            <h2>{paste.title || "untitled"}</h2>
+        </div>
 
         <span class="dates flex row center">
             <span use:tooltip aria-label={new Date(paste.createdAt).toString()}>
@@ -303,6 +318,11 @@
 
         .title {
             margin: 0;
+
+            .private-icon {
+                max-width: 18px;
+                margin-right: 0.5rem;
+            }
 
             h2 {
                 font-weight: normal;

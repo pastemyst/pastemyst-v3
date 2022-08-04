@@ -43,6 +43,7 @@ type Paste struct {
 	DeletesAt sql.NullTime
 	Title     string
 	OwnerID   sql.NullString
+	Private   bool
 }
 
 type Pasty struct {
