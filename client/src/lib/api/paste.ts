@@ -19,6 +19,7 @@ export interface Paste {
     deletesAt: string;
     pasties: Pasty[];
     ownerId: string;
+    private: boolean;
 }
 
 export interface Pasty {
@@ -33,6 +34,7 @@ export interface PasteSkeleton {
     expiresIn: ExpiresIn;
     pasties: PastySkeleton[];
     anonymous: boolean;
+    private: boolean;
 }
 
 export interface PastySkeleton {

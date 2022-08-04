@@ -20,6 +20,7 @@
     let tabs: TabData[];
 
     let anonymous: boolean;
+    let isPrivate: boolean;
 
     onMount(() => {
         isCommandPaletteOpen.subscribe((open) => {
@@ -45,7 +46,8 @@
             title: title,
             expiresIn: expiresInFromString(expiresIn),
             pasties: pasties,
-            anonymous: anonymous
+            anonymous: anonymous,
+            private: isPrivate
         };
 
         const paste = await createPaste(pasteSkeleton);
@@ -82,7 +84,7 @@
 <TabbedEditor bind:tabs />
 
 <div class="paste-options">
-    <PasteOptions on:create={onCreatePaste} bind:anonymous />
+    <PasteOptions on:create={onCreatePaste} bind:anonymous bind:isPrivate />
 </div>
 
 <style lang="scss">
