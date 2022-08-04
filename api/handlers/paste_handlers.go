@@ -18,10 +18,17 @@ import (
 func GetPaseHandler(ctx echo.Context) error {
 	id := ctx.Param("id")
 
+	user := ctx.Get("user")
+
 	// get paste from db
 	dbPaste, err := db.DBQueries.GetPaste(db.DBContext, id)
 	if err != nil {
 		return ctx.NoContent(http.StatusNotFound)
+	}
+
+	if dbPaste.Private && user == nil {
+		// returning not found instead of unauthorized to not expose that this paste exists
+		return echo.NewHTTPError(http.StatusNotFound)
 	}
 
 	// get all pasties tied to this paste from db
@@ -51,6 +58,7 @@ func GetPaseHandler(ctx echo.Context) error {
 		Title:     dbPaste.Title,
 		Pasties:   pasties,
 		OwnerId:   dbPaste.OwnerID.String,
+		Private:   dbPaste.Private,
 	}
 
 	return ctx.JSON(http.StatusOK, paste)
@@ -76,6 +84,10 @@ func CreatePasteHandler(ctx echo.Context) error {
 		createInfo.ExpiresIn = models.ExpiresInNever
 	}
 
+	if createInfo.Private && user == nil {
+		return echo.NewHTTPError(http.StatusUnauthorized, "Can't create a private paste while unauthorized.")
+	}
+
 	now := time.Now().UTC()
 
 	owner := ""
@@ -90,6 +102,7 @@ func CreatePasteHandler(ctx echo.Context) error {
 		DeletesAt: expiresInToTime(now, createInfo.ExpiresIn),
 		Title:     createInfo.Title,
 		OwnerId:   owner,
+		Private:   createInfo.Private,
 	}
 
 	// create pasties
@@ -119,6 +132,7 @@ func CreatePasteHandler(ctx echo.Context) error {
 		DeletesAt: sql.NullTime{Time: paste.DeletesAt, Valid: createInfo.ExpiresIn != models.ExpiresInNever},
 		Title:     createInfo.Title,
 		OwnerID:   sql.NullString{String: paste.OwnerId, Valid: len(paste.OwnerId) != 0},
+		Private:   paste.Private,
 	})
 	if err != nil {
 		ctx.Logger().Error("Tried to insert a paste into the DB, got error.")
