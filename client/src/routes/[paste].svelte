@@ -2,7 +2,7 @@
     import { apiBase } from "$lib/api/api";
     import { ExpiresIn, type Paste } from "$lib/api/paste";
     import { tooltip } from "$lib/tooltips";
-    import moment from "moment";
+    import moment, { lang } from "moment";
 
     export const router = false;
 
@@ -16,6 +16,7 @@
         let paste: Paste;
         let relativeCreatedAt: string;
         let relativesExpiresIn: string;
+        let langStats: LangStat[];
         let owner: User | null;
         const highlightedCode: string[] = [];
         if (res.ok) {
@@ -37,6 +38,14 @@
                     };
 
                 owner = await res.json();
+            }
+
+            const langRes = await fetch(`${apiBase}/lang/${paste.id}`, {
+                method: "get"
+            });
+
+            if (langRes.ok) {
+                langStats = await langRes.json();
             }
 
             for (const pasty of paste.pasties) {
@@ -65,6 +74,7 @@
                 relativeCreatedAt: relativeCreatedAt,
                 relativesExpiresIn: relativesExpiresIn,
                 highlightedCode: highlightedCode,
+                langStats: langStats,
                 owner: owner
             }
         };
@@ -74,12 +84,14 @@
 <script lang="ts">
     import Tab from "$lib/Tab.svelte";
     import type { User } from "$lib/api/user";
+    import type { LangStat } from "$lib/api/lang";
 
     export let paste: Paste;
     export let relativeCreatedAt: string;
     export let relativesExpiresIn: string;
     export let highlightedCode: string[];
     export let owner: User | null;
+    export let langStats: LangStat[];
 
     let activePastyId: string = paste.pasties[0].id;
 
@@ -242,8 +254,9 @@
 </section>
 
 <div class="lang-stats flex">
-    <div class="lang d" aria-label="D 50%" use:tooltip />
-    <div class="lang java" aria-label="Java 50%" use:tooltip />
+    {#each langStats as lang}
+        <div class="lang" style="width:{lang.percentage}%; background-color:{lang.language.color};" use:tooltip aria-label="{lang.language.name} {lang.percentage.toFixed(2)}%"></div>
+    {/each}
 </div>
 
 <div class="pasties">
@@ -399,16 +412,6 @@
                 border-bottom-right-radius: $border-radius;
                 border-right: none;
             }
-        }
-
-        .d {
-            width: 50%;
-            background-color: #ba595e;
-        }
-
-        .java {
-            width: 50%;
-            background-color: #b07219;
         }
     }
 
