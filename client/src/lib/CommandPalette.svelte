@@ -347,8 +347,9 @@
         @include transition(opacity);
         position: absolute;
         top: 0;
-        left: 0;
-        width: 100vw;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 90%;
         font-size: $fs-normal;
         opacity: 0;
         height: 0;
@@ -363,7 +364,7 @@
 
     .wrapper {
         background-color: $color-bg;
-        width: 40rem;
+        max-width: 40rem;
         margin: 0 auto;
         border-radius: $border-radius;
         border-top-left-radius: 0;
