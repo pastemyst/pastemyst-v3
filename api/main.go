@@ -77,7 +77,8 @@ func main() {
 	e.GET("/api/v3/meta/releases", handlers.GetReleasesHandler)
 	e.GET("/api/v3/meta/active_pastes", handlers.GetActivePastesHandler)
 
-	e.GET("/api/v3/lang/all", handlers.GetAllLangs)
+	e.GET("/api/v3/lang/all", handlers.GetAllLangsHandler)
+	e.GET("/api/v3/lang/:id", handlers.GetLangStatsHandler)
 
 	e.GET("/api/v3/user/by_username/:username", handlers.GetUserByUsernameHandler)
 	e.GET("/api/v3/user/by_id/:id", handlers.GetUserByIdHandler)

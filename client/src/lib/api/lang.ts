@@ -12,6 +12,11 @@ export interface Language {
     tmScope: string;
 }
 
+export interface LangStat {
+    language: Language;
+    percentage: number;
+}
+
 let langs: Language[] = [];
 
 export const getLangs = async (): Promise<Language[]> => {
