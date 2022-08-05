@@ -298,6 +298,7 @@
                         <div class="name-text">
                             {#if search !== undefined && search !== "" && highlightedChunks}
                                 {#each highlightedChunks[cmdIndex][0] as chunk (chunk.key)}
+                                    <!-- prettier-ignore -->
                                     <span aria-hidden="true" class:highlight={chunk.match}>{chunk.text}</span>
                                 {/each}
                             {:else}
@@ -327,6 +328,7 @@
                         <div class="description">
                             {#if search !== undefined && search !== "" && highlightedChunks}
                                 {#each highlightedChunks[cmdIndex][1] as chunk (chunk.key)}
+                                    <!-- prettier-ignore -->
                                     <span aria-hidden="true" class:highlight={chunk.match}>{chunk.text}</span>
                                 {/each}
                             {:else}
