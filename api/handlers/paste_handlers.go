@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"pastemyst-api/db"
 	"pastemyst-api/language"
+	"pastemyst-api/logging"
 	"pastemyst-api/models"
 	"pastemyst-api/utils"
 	"time"
@@ -18,47 +19,19 @@ import (
 func GetPaseHandler(ctx echo.Context) error {
 	id := ctx.Param("id")
 
-	user := ctx.Get("user")
+	user, ok := ctx.Get("user").(models.User)
 
-	// get paste from db
-	dbPaste, err := db.DBQueries.GetPaste(db.DBContext, id)
+	var paste models.Paste
+	var err error
+
+	if ok {
+		paste, err = GetPaste(id, &user)
+	} else {
+		paste, err = GetPaste(id, nil)
+	}
+
 	if err != nil {
-		return ctx.NoContent(http.StatusNotFound)
-	}
-
-	if dbPaste.Private && user == nil {
-		// returning not found instead of unauthorized to not expose that this paste exists
-		return echo.NewHTTPError(http.StatusNotFound)
-	}
-
-	// get all pasties tied to this paste from db
-	dbPasties, err := db.DBQueries.GetPastePasties(db.DBContext, dbPaste.ID)
-	if err != nil {
-		ctx.Logger().Error("Tried to get all pasties of a paste, but got error.")
-		ctx.Logger().Error(err)
-		return ctx.NoContent(http.StatusInternalServerError)
-	}
-
-	// create proper models that can be returned
-	pasties := make([]models.Pasty, len(dbPasties))
-	for i := 0; i < len(dbPasties); i++ {
-		pasties[i] = models.Pasty{
-			Id:       dbPasties[i].ID,
-			Title:    dbPasties[i].Title,
-			Content:  dbPasties[i].Content,
-			Language: dbPasties[i].Language,
-		}
-	}
-
-	paste := models.Paste{
-		Id:        dbPaste.ID,
-		CreatedAt: dbPaste.CreatedAt,
-		ExpiresIn: models.ExpiresIn(dbPaste.ExpiresIn),
-		DeletesAt: dbPaste.DeletesAt.Time,
-		Title:     dbPaste.Title,
-		Pasties:   pasties,
-		OwnerId:   dbPaste.OwnerID.String,
-		Private:   dbPaste.Private,
+		return err
 	}
 
 	return ctx.JSON(http.StatusOK, paste)
@@ -157,6 +130,53 @@ func CreatePasteHandler(ctx echo.Context) error {
 	}
 
 	return ctx.JSON(http.StatusOK, paste)
+}
+
+// Returns the paste from the provided id.
+func GetPaste(id string, user *models.User) (models.Paste, error) {
+	// get paste from db
+	dbPaste, err := db.DBQueries.GetPaste(db.DBContext, id)
+	if err != nil {
+		return models.Paste{}, echo.NewHTTPError(http.StatusNotFound)
+	}
+
+	if dbPaste.Private {
+		if user == nil || user.Id != dbPaste.OwnerID.String {
+			// returning not found instead of unauthorized to not expose that this paste exists
+			return models.Paste{}, echo.NewHTTPError(http.StatusNotFound)
+		}
+	}
+
+	// get all pasties tied to this paste from db
+	dbPasties, err := db.DBQueries.GetPastePasties(db.DBContext, dbPaste.ID)
+	if err != nil {
+		logging.Logger.Errorf("Tried to get all pasties of a paste, but got error: %s", err)
+		return models.Paste{}, echo.NewHTTPError(http.StatusInternalServerError)
+	}
+
+	// create proper models that can be returned
+	pasties := make([]models.Pasty, len(dbPasties))
+	for i := 0; i < len(dbPasties); i++ {
+		pasties[i] = models.Pasty{
+			Id:       dbPasties[i].ID,
+			Title:    dbPasties[i].Title,
+			Content:  dbPasties[i].Content,
+			Language: dbPasties[i].Language,
+		}
+	}
+
+	paste := models.Paste{
+		Id:        dbPaste.ID,
+		CreatedAt: dbPaste.CreatedAt,
+		ExpiresIn: models.ExpiresIn(dbPaste.ExpiresIn),
+		DeletesAt: dbPaste.DeletesAt.Time,
+		Title:     dbPaste.Title,
+		Pasties:   pasties,
+		OwnerId:   dbPaste.OwnerID.String,
+		Private:   dbPaste.Private,
+	}
+
+	return paste, nil
 }
 
 // Generates a random paste ID, making sure that it's unique.
