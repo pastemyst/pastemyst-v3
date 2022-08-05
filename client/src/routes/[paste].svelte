@@ -1,6 +1,6 @@
 <script lang="ts" context="module">
     import { apiBase } from "$lib/api/api";
-    import { ExpiresIn, type Paste } from "$lib/api/paste";
+    import { ExpiresIn, type Paste, type Pasty } from "$lib/api/paste";
     import { tooltip } from "$lib/tooltips";
     import moment, { lang } from "moment";
 
@@ -85,6 +85,7 @@
     import Tab from "$lib/Tab.svelte";
     import type { User } from "$lib/api/user";
     import type { LangStat } from "$lib/api/lang";
+    import PastyMeta from "$lib/PastyMeta.svelte";
 
     export let paste: Paste;
     export let relativeCreatedAt: string;
@@ -94,6 +95,9 @@
     export let langStats: LangStat[];
 
     let activePastyId: string = paste.pasties[0].id;
+    let activePasty: Pasty = paste.pasties[0];
+
+    $: activePasty = paste.pasties.find((p) => p.id === activePastyId)!;
 
     let stackedView = false;
 
@@ -236,6 +240,29 @@
             </svg>
         </div>
 
+        <button
+            class="toggle-view btn"
+            on:click={togglePastiesView}
+            use:tooltip
+            aria-label="toggle stacked / tabbed view"
+        >
+            <svg xmlns="http://www.w3.org/2000/svg" class="icon" viewBox="0 0 512 512">
+                <title>Layers</title>
+                <path
+                    fill="currentColor"
+                    d="M256 256c-13.47 0-26.94-2.39-37.44-7.17l-148-67.49C63.79 178.26 48 169.25 48 152.24s15.79-26 22.58-29.12l149.28-68.07c20.57-9.4 51.61-9.4 72.19 0l149.37 68.07c6.79 3.09 22.58 12.1 22.58 29.12s-15.79 26-22.58 29.11l-148 67.48C282.94 253.61 269.47 256 256 256zm176.76-100.86z"
+                />
+                <path
+                    fill="currentColor"
+                    d="M441.36 226.81L426.27 220l-38.77 17.74-94 43c-10.5 4.8-24 7.19-37.44 7.19s-26.93-2.39-37.42-7.19l-94.07-43L85.79 220l-15.22 6.84C63.79 229.93 48 239 48 256s15.79 26.08 22.56 29.17l148 67.63C229 357.6 242.49 360 256 360s26.94-2.4 37.44-7.19l147.87-67.61c6.81-3.09 22.69-12.11 22.69-29.2s-15.77-26.07-22.64-29.19z"
+                />
+                <path
+                    fill="currentColor"
+                    d="M441.36 330.8l-15.09-6.8-38.77 17.73-94 42.95c-10.5 4.78-24 7.18-37.44 7.18s-26.93-2.39-37.42-7.18l-94.07-43L85.79 324l-15.22 6.84C63.79 333.93 48 343 48 360s15.79 26.07 22.56 29.15l148 67.59C229 461.52 242.54 464 256 464s26.88-2.48 37.38-7.27l147.92-67.57c6.82-3.08 22.7-12.1 22.7-29.16s-15.77-26.07-22.64-29.2z"
+                />
+            </svg>
+        </button>
+
         <div class="btn" aria-label="more options" use:tooltip>
             <svg
                 class="icon"
@@ -255,7 +282,12 @@
 
 <div class="lang-stats flex">
     {#each langStats as lang}
-        <div class="lang" style="width:{lang.percentage}%; background-color:{lang.language.color};" use:tooltip aria-label="{lang.language.name} {lang.percentage.toFixed(2)}%"></div>
+        <div
+            class="lang"
+            style="width:{lang.percentage}%; background-color:{lang.language.color};"
+            use:tooltip
+            aria-label="{lang.language.name} {lang.percentage.toFixed(2)}%"
+        />
     {/each}
 </div>
 
@@ -266,34 +298,9 @@
                 <div class="title flex row space-between center">
                     <span>{pasty.title}</span>
 
-                    {#if i === 0}
-                        <button
-                            class="toggle-view"
-                            on:click={togglePastiesView}
-                            use:tooltip
-                            aria-label="toggle stacked / tabbed view"
-                        >
-                            <svg
-                                xmlns="http://www.w3.org/2000/svg"
-                                class="icon"
-                                viewBox="0 0 512 512"
-                            >
-                                <title>Layers</title>
-                                <path
-                                    fill="currentColor"
-                                    d="M256 256c-13.47 0-26.94-2.39-37.44-7.17l-148-67.49C63.79 178.26 48 169.25 48 152.24s15.79-26 22.58-29.12l149.28-68.07c20.57-9.4 51.61-9.4 72.19 0l149.37 68.07c6.79 3.09 22.58 12.1 22.58 29.12s-15.79 26-22.58 29.11l-148 67.48C282.94 253.61 269.47 256 256 256zm176.76-100.86z"
-                                />
-                                <path
-                                    fill="currentColor"
-                                    d="M441.36 226.81L426.27 220l-38.77 17.74-94 43c-10.5 4.8-24 7.19-37.44 7.19s-26.93-2.39-37.42-7.19l-94.07-43L85.79 220l-15.22 6.84C63.79 229.93 48 239 48 256s15.79 26.08 22.56 29.17l148 67.63C229 357.6 242.49 360 256 360s26.94-2.4 37.44-7.19l147.87-67.61c6.81-3.09 22.69-12.11 22.69-29.2s-15.77-26.07-22.64-29.19z"
-                                />
-                                <path
-                                    fill="currentColor"
-                                    d="M441.36 330.8l-15.09-6.8-38.77 17.73-94 42.95c-10.5 4.78-24 7.18-37.44 7.18s-26.93-2.39-37.42-7.18l-94.07-43L85.79 324l-15.22 6.84C63.79 333.93 48 343 48 360s15.79 26.07 22.56 29.15l148 67.59C229 461.52 242.54 464 256 464s26.88-2.48 37.38-7.27l147.92-67.57c6.82-3.08 22.7-12.1 22.7-29.16s-15.77-26.07-22.64-29.2z"
-                                />
-                            </svg>
-                        </button>
-                    {/if}
+                    <div class="meta-stacked flex row center">
+                        <PastyMeta {pasty} {langStats} />
+                    </div>
                 </div>
 
                 {@html highlightedCode[i]}
@@ -311,30 +318,11 @@
                         on:click={() => setActiveTab(pasty.id)}
                     />
                 {/each}
-
-                <button
-                    class="toggle-view"
-                    on:click={togglePastiesView}
-                    aria-label="toggle stacked / tabbed view"
-                    use:tooltip
-                >
-                    <svg xmlns="http://www.w3.org/2000/svg" class="icon" viewBox="0 0 512 512">
-                        <title>Layers</title>
-                        <path
-                            fill="currentColor"
-                            d="M256 256c-13.47 0-26.94-2.39-37.44-7.17l-148-67.49C63.79 178.26 48 169.25 48 152.24s15.79-26 22.58-29.12l149.28-68.07c20.57-9.4 51.61-9.4 72.19 0l149.37 68.07c6.79 3.09 22.58 12.1 22.58 29.12s-15.79 26-22.58 29.11l-148 67.48C282.94 253.61 269.47 256 256 256zm176.76-100.86z"
-                        />
-                        <path
-                            fill="currentColor"
-                            d="M441.36 226.81L426.27 220l-38.77 17.74-94 43c-10.5 4.8-24 7.19-37.44 7.19s-26.93-2.39-37.42-7.19l-94.07-43L85.79 220l-15.22 6.84C63.79 229.93 48 239 48 256s15.79 26.08 22.56 29.17l148 67.63C229 357.6 242.49 360 256 360s26.94-2.4 37.44-7.19l147.87-67.61c6.81-3.09 22.69-12.11 22.69-29.2s-15.77-26.07-22.64-29.19z"
-                        />
-                        <path
-                            fill="currentColor"
-                            d="M441.36 330.8l-15.09-6.8-38.77 17.73-94 42.95c-10.5 4.78-24 7.18-37.44 7.18s-26.93-2.39-37.42-7.18l-94.07-43L85.79 324l-15.22 6.84C63.79 333.93 48 343 48 360s15.79 26.07 22.56 29.15l148 67.59C229 461.52 242.54 464 256 464s26.88-2.48 37.38-7.27l147.92-67.57c6.82-3.08 22.7-12.1 22.7-29.16s-15.77-26.07-22.64-29.2z"
-                        />
-                    </svg>
-                </button>
             </div>
+        </div>
+
+        <div class="meta-tabbed">
+            <PastyMeta pasty={activePasty} {langStats} />
         </div>
 
         <!-- prettier-ignore -->
@@ -434,10 +422,13 @@
                     flex-grow: 0;
                 }
             }
+        }
 
-            .toggle-view {
-                margin-left: auto;
-            }
+        .meta-tabbed {
+            background-color: $color-bg-1;
+            padding: 0.25rem;
+            border: 1px solid $color-bg-2;
+            border-top: none;
         }
 
         .pasty {
@@ -461,8 +452,8 @@
                     padding: 0.5rem 1rem;
                 }
 
-                button {
-                    background-color: $color-bg;
+                .meta-stacked {
+                    padding-right: 1rem;
                 }
             }
         }
