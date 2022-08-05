@@ -2,7 +2,7 @@
     import { apiBase } from "$lib/api/api";
     import { ExpiresIn, type Paste, type Pasty } from "$lib/api/paste";
     import { tooltip } from "$lib/tooltips";
-    import moment, { lang } from "moment";
+    import moment from "moment";
 
     export const router = false;
 
@@ -97,7 +97,10 @@
     let activePastyId: string = paste.pasties[0].id;
     let activePasty: Pasty = paste.pasties[0];
 
-    $: activePasty = paste.pasties.find((p) => p.id === activePastyId)!;
+    $: {
+        const p = paste.pasties.find((p) => p.id === activePastyId);
+        if (p) activePasty = p;
+    }
 
     let stackedView = false;
 
