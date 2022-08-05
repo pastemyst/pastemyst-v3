@@ -295,15 +295,16 @@
                         {/if}
 
                         <!-- name -->
-                        {#if search !== undefined && search !== ""}
-                            {#each highlightedChunks[cmdIndex][0] as chunk (chunk.key)}
-                                <span aria-hidden="true" class:highlight={chunk.match}>
-                                    {chunk.text}
-                                </span>
-                            {/each}
-                        {:else}
-                            {cmd.name}
-                        {/if}
+                        <div class="name-text">
+                            {#if search !== undefined && search !== "" && highlightedChunks}
+                                {#each highlightedChunks[cmdIndex][0] as chunk (chunk.key)}
+                                    <!-- prettier-ignore -->
+                                    <span aria-hidden="true" class:highlight={chunk.match}>{chunk.text}</span>
+                                {/each}
+                            {:else}
+                                {cmd.name}
+                            {/if}
+                        </div>
 
                         <!-- shortcuts -->
                         {#if cmd.shortcuts}
@@ -325,11 +326,10 @@
                     <!-- description -->
                     {#if cmd.description}
                         <div class="description">
-                            {#if search !== undefined && search !== ""}
+                            {#if search !== undefined && search !== "" && highlightedChunks}
                                 {#each highlightedChunks[cmdIndex][1] as chunk (chunk.key)}
-                                    <span aria-hidden="true" class:highlight={chunk.match}>
-                                        {chunk.text}
-                                    </span>
+                                    <!-- prettier-ignore -->
+                                    <span aria-hidden="true" class:highlight={chunk.match}>{chunk.text}</span>
                                 {/each}
                             {:else}
                                 {cmd.description}
@@ -403,6 +403,7 @@
             color: $color-fg;
             padding: 0.5rem;
             cursor: pointer;
+            white-space: pre;
 
             &.selected,
             &:hover {
@@ -425,6 +426,10 @@
                     margin-right: 0.5rem;
                     color: $color-fg;
                     max-width: 20px;
+                }
+
+                .name-text {
+                    white-space: pre;
                 }
             }
 
