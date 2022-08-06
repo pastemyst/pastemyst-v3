@@ -324,3 +324,48 @@ func (q *Queries) GetUserByUsername(ctx context.Context, username string) (User,
 	)
 	return i, err
 }
+
+const getUserPublicPastes = `-- name: GetUserPublicPastes :many
+select id, created_at, expires_in, deletes_at, title, owner_id, private from pastes
+where owner_id = $1 and private = false
+order by pastes.created_at desc
+limit $2
+offset $3
+`
+
+type GetUserPublicPastesParams struct {
+	OwnerID sql.NullString
+	Limit   int32
+	Offset  int32
+}
+
+func (q *Queries) GetUserPublicPastes(ctx context.Context, arg GetUserPublicPastesParams) ([]Paste, error) {
+	rows, err := q.db.QueryContext(ctx, getUserPublicPastes, arg.OwnerID, arg.Limit, arg.Offset)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []Paste
+	for rows.Next() {
+		var i Paste
+		if err := rows.Scan(
+			&i.ID,
+			&i.CreatedAt,
+			&i.ExpiresIn,
+			&i.DeletesAt,
+			&i.Title,
+			&i.OwnerID,
+			&i.Private,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
