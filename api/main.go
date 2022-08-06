@@ -80,8 +80,9 @@ func main() {
 	e.GET("/api/v3/lang/all", handlers.GetAllLangsHandler)
 	e.GET("/api/v3/lang/:id", handlers.GetLangStatsHandler)
 
-	e.GET("/api/v3/user/:username", handlers.GetUserHandler)
 	e.GET("/api/v3/user", handlers.GetUserHandler)
+	e.GET("/api/v3/user/:username", handlers.GetUserHandler)
+	e.GET("/api/v3/user/:username/pastes", handlers.GetUserPastesHandler)
 
 	e.GET("/api/v3/paste/:id", handlers.GetPaseHandler)
 	e.POST("/api/v3/paste", handlers.CreatePasteHandler)

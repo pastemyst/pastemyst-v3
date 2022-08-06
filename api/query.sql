@@ -64,6 +64,13 @@ order by pastes.created_at desc
 limit $2
 offset $3;
 
+-- name: GetUserAllPastes :many
+select * from pastes
+where owner_id = $1
+order by pastes.created_at desc
+limit $2
+offset $3;
+
 -- name: DeleteExpiredPastes :one
 with deleted as
     (delete from pastes where expires_in != 'never' and deletes_at < now() returning *)
