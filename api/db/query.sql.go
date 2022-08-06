@@ -257,6 +257,51 @@ func (q *Queries) GetPastePasties(ctx context.Context, pasteID string) ([]Pasty,
 	return items, nil
 }
 
+const getUserAllPastes = `-- name: GetUserAllPastes :many
+select id, created_at, expires_in, deletes_at, title, owner_id, private from pastes
+where owner_id = $1
+order by pastes.created_at desc
+limit $2
+offset $3
+`
+
+type GetUserAllPastesParams struct {
+	OwnerID sql.NullString
+	Limit   int32
+	Offset  int32
+}
+
+func (q *Queries) GetUserAllPastes(ctx context.Context, arg GetUserAllPastesParams) ([]Paste, error) {
+	rows, err := q.db.QueryContext(ctx, getUserAllPastes, arg.OwnerID, arg.Limit, arg.Offset)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []Paste
+	for rows.Next() {
+		var i Paste
+		if err := rows.Scan(
+			&i.ID,
+			&i.CreatedAt,
+			&i.ExpiresIn,
+			&i.DeletesAt,
+			&i.Title,
+			&i.OwnerID,
+			&i.Private,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const getUserById = `-- name: GetUserById :one
 select id, created_at, username, avatar_url, contributor, supporter, provider_name, provider_id from users
 where id = $1 limit 1
