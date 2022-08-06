@@ -57,6 +57,13 @@ insert into users (
 )
 returning *;
 
+-- name: GetUserPublicPastes :many
+select * from pastes
+where owner_id = $1 and private = false
+order by pastes.created_at desc
+limit $2
+offset $3;
+
 -- name: DeleteExpiredPastes :one
 with deleted as
     (delete from pastes where expires_in != 'never' and deletes_at < now() returning *)

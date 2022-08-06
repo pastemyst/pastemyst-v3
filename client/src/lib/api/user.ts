@@ -10,7 +10,7 @@ export interface User {
 }
 
 export const getUserByUsername = async (username: string): Promise<User | null> => {
-    const res = await fetch(`${apiBase}/user/by_username/${username}`, {
+    const res = await fetch(`${apiBase}/user/${username}`, {
         method: "get"
     });
 
@@ -20,7 +20,7 @@ export const getUserByUsername = async (username: string): Promise<User | null> 
 };
 
 export const getUserById = async (id: string): Promise<User | null> => {
-    const res = await fetch(`${apiBase}/user/by_id/${id}`, {
+    const res = await fetch(`${apiBase}/user?id=${id}`, {
         method: "get"
     });
 
