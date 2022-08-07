@@ -17,7 +17,7 @@
             credentials: "include"
         });
 
-        const userPastesRes = await fetch(`${apiBase}/user/${params.user}/pastes`, {
+        const userPastesRes = await fetch(`${apiBase}/user/${params.user}/pastes?page_size=5`, {
             method: "get",
             credentials: "include"
         });
@@ -62,12 +62,40 @@
     const getPasteLangs = (paste: Paste): string => {
         let langs: string[] = [];
         for (const pasty of paste.pasties) {
-            if (!langs.some(l => l === pasty.language)) {
+            if (!langs.some((l) => l === pasty.language)) {
                 langs.push(pasty.language);
             }
         }
 
         return langs.slice(0, 3).join(", ");
+    };
+
+    const fetchPastes = async (page: number) => {
+        const res = await fetch(
+            `${apiBase}/user/${user.username}/pastes?page=${page}&page_size=5`,
+            {
+                method: "get",
+                credentials: "include"
+            }
+        );
+
+        if (!res.ok) return;
+
+        if (res.ok) {
+            pastes = await res.json();
+        }
+    };
+
+    const onPrevPage = async () => {
+        if (pastes.page === 0) return;
+
+        await fetchPastes(pastes.page - 1);
+    };
+
+    const onNextPage = async () => {
+        if (pastes.page === pastes.totalPages - 1) return;
+
+        await fetchPastes(pastes.page + 1);
     };
 </script>
 
@@ -222,6 +250,28 @@
                     </div>
                 </a>
             {/each}
+
+            <div class="pager flex row center">
+                <button class="btn" on:click={onPrevPage}>
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon" viewBox="0 0 512 512">
+                        <title>Caret Back</title>
+                        <path
+                            fill="currentColor"
+                            d="M321.94 98L158.82 237.78a24 24 0 000 36.44L321.94 414c15.57 13.34 39.62 2.28 39.62-18.22v-279.6c0-20.5-24.05-31.56-39.62-18.18z"
+                        />
+                    </svg>
+                </button>
+                <span>{pastes.page + 1}/{pastes.totalPages}</span>
+                <button class="btn" on:click={onNextPage}>
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon" viewBox="0 0 512 512">
+                        <title>Caret Forward</title>
+                        <path
+                            fill="currentColor"
+                            d="M190.06 414l163.12-139.78a24 24 0 000-36.44L190.06 98c-15.57-13.34-39.62-2.28-39.62 18.22v279.6c0 20.5 24.05 31.56 39.62 18.18z"
+                        />
+                    </svg>
+                </button>
+            </div>
         {/if}
     </section>
 </div>
@@ -344,6 +394,22 @@
             span {
                 font-size: $fs-small;
                 color: $color-bg-3;
+            }
+        }
+
+        .pager {
+            justify-content: center;
+            margin-top: 1rem;
+            font-size: $fs-normal;
+
+            span {
+                margin: 0 0.5rem;
+            }
+
+            button {
+                .icon {
+                    max-width: 18px;
+                }
             }
         }
     }
