@@ -183,7 +183,17 @@
         searchFound = filteredCommands.length > 0;
 
         if (searchFound) {
+            // make sure exact matches are at the top
+            filteredCommands = filteredCommands.sort((a, b) => {
+                const a1: number = a.name.toLowerCase() === search.toLowerCase() ? -1 : 1;
+                const b1: number = b.name.toLowerCase() === search.toLowerCase() ? -1 : 1;
+
+                return Math.min(Math.max(a1 - b1, -1), 1);
+            });
+
             selectedCommand = filteredCommands[0];
+
+            commandsElement.scrollTop = 0;
         }
 
         highlightedChunks = [];
