@@ -3,10 +3,12 @@
     import type { User } from "$lib/api/user";
     import moment from "moment";
     import { tooltip } from "$lib/tooltips";
+    import type { Page } from "$lib/api/page";
+    import { ExpiresIn, type Paste } from "$lib/api/paste";
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     export const load = async ({ params, fetch }: { params: any; fetch: any }) => {
-        const userRes = await fetch(`${apiBase}/user/by_username/${params.user}`, {
+        const userRes = await fetch(`${apiBase}/user/${params.user}`, {
             method: "get"
         });
 
@@ -15,9 +17,15 @@
             credentials: "include"
         });
 
+        const userPastesRes = await fetch(`${apiBase}/user/${params.user}/pastes?page_size=5`, {
+            method: "get",
+            credentials: "include"
+        });
+
         let user: User;
         let relativeJoined: string;
         let isCurrentUser = false;
+        let pastes: Page<Paste>;
         if (userRes.ok) {
             user = await userRes.json();
             relativeJoined = moment(user.createdAt).fromNow();
@@ -27,6 +35,10 @@
 
                 isCurrentUser = loggedInUser.id === user.id;
             }
+
+            if (userPastesRes.ok) {
+                pastes = await userPastesRes.json();
+            }
         }
 
         return {
@@ -34,7 +46,8 @@
             props: {
                 user: user,
                 isCurrentUser: isCurrentUser,
-                relativeJoined: relativeJoined
+                relativeJoined: relativeJoined,
+                pastes: pastes
             }
         };
     };
@@ -44,7 +57,51 @@
     export let user: User;
     export let relativeJoined: string;
     export let isCurrentUser: boolean;
+    export let pastes: Page<Paste>;
+
+    const getPasteLangs = (paste: Paste): string => {
+        let langs: string[] = [];
+        for (const pasty of paste.pasties) {
+            if (!langs.some((l) => l === pasty.language)) {
+                langs.push(pasty.language);
+            }
+        }
+
+        return langs.slice(0, 3).join(", ");
+    };
+
+    const fetchPastes = async (page: number) => {
+        const res = await fetch(
+            `${apiBase}/user/${user.username}/pastes?page=${page}&page_size=5`,
+            {
+                method: "get",
+                credentials: "include"
+            }
+        );
+
+        if (!res.ok) return;
+
+        if (res.ok) {
+            pastes = await res.json();
+        }
+    };
+
+    const onPrevPage = async () => {
+        if (pastes.page === 0) return;
+
+        await fetchPastes(pastes.page - 1);
+    };
+
+    const onNextPage = async () => {
+        if (pastes.page === pastes.totalPages - 1) return;
+
+        await fetchPastes(pastes.page + 1);
+    };
 </script>
+
+<svelte:head>
+    <title>pastemyst | {user.username}</title>
+</svelte:head>
 
 <div class="flex sm-row">
     <section class="user-header flex sm-col center">
@@ -151,13 +208,78 @@
     <section class="public-pastes">
         <h3>public pastes</h3>
 
-        <p class="no-public-pastes">{user.username} doesn't have any public pastes yet.</p>
+        {#if pastes.items.length === 0}
+            <p class="no-public-pastes">{user.username} doesn't have any public pastes yet.</p>
+        {:else}
+            {#each pastes.items as paste}
+                <a href="/{paste.id}" class="paste btn" sveltekit:prefetch>
+                    <div class="flex row center space-between">
+                        <p class="title">{paste.title === "" ? "(untitled)" : paste.title}</p>
+
+                        <div>
+                            {#if paste.private}
+                                <div use:tooltip aria-label="private" class="flex">
+                                    <svg
+                                        xmlns="http://www.w3.org/2000/svg"
+                                        class="icon"
+                                        viewBox="0 0 512 512"
+                                    >
+                                        <title>Lock Closed</title>
+                                        <path
+                                            fill="currentColor"
+                                            d="M368 192h-16v-80a96 96 0 10-192 0v80h-16a64.07 64.07 0 00-64 64v176a64.07 64.07 0 0064 64h224a64.07 64.07 0 0064-64V256a64.07 64.07 0 00-64-64zm-48 0H192v-80a64 64 0 11128 0z"
+                                        />
+                                    </svg>
+                                </div>
+                            {/if}
+                        </div>
+                    </div>
+
+                    <div>
+                        <!-- prettier-ignore -->
+                        <span use:tooltip aria-label={new Date(paste.createdAt).toString()}>{moment(paste.createdAt).fromNow()}</span>
+
+                        {#if paste.expiresIn !== ExpiresIn.never}
+                            <!-- prettier-ignore -->
+                            <span use:tooltip aria-label={new Date(paste.deletesAt).toString()}> - expires {moment(paste.deletesAt).fromNow()}</span>
+                        {/if}
+                    </div>
+
+                    <div>
+                        <span>{getPasteLangs(paste)}</span>
+                    </div>
+                </a>
+            {/each}
+
+            <div class="pager flex row center">
+                <button class="btn" on:click={onPrevPage}>
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon" viewBox="0 0 512 512">
+                        <title>Caret Back</title>
+                        <path
+                            fill="currentColor"
+                            d="M321.94 98L158.82 237.78a24 24 0 000 36.44L321.94 414c15.57 13.34 39.62 2.28 39.62-18.22v-279.6c0-20.5-24.05-31.56-39.62-18.18z"
+                        />
+                    </svg>
+                </button>
+                <span>{pastes.page + 1}/{pastes.totalPages}</span>
+                <button class="btn" on:click={onNextPage}>
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon" viewBox="0 0 512 512">
+                        <title>Caret Forward</title>
+                        <path
+                            fill="currentColor"
+                            d="M190.06 414l163.12-139.78a24 24 0 000-36.44L190.06 98c-15.57-13.34-39.62-2.28-39.62 18.22v279.6c0 20.5 24.05 31.56 39.62 18.18z"
+                        />
+                    </svg>
+                </button>
+            </div>
+        {/if}
     </section>
 </div>
 
 <style lang="scss">
     .user-header {
         margin-bottom: 0;
+        height: 100%;
 
         .avatar {
             display: inline-block;
@@ -240,6 +362,55 @@
             text-align: center;
             margin: 0;
             font-size: $fs-normal;
+        }
+
+        .paste {
+            display: block;
+            background-color: $color-bg;
+            margin-top: 1rem;
+            border-radius: $border-radius;
+            padding: 0.5rem;
+            text-decoration: none;
+            font-size: $fs-medium;
+            border: 1px solid $color-bg-2;
+            color: $color-prim;
+
+            &:hover {
+                color: $color-sec;
+                background-color: $color-bg-2;
+                border-color: $color-bg-3;
+            }
+
+            p {
+                margin: 0;
+            }
+
+            .icon {
+                max-width: 18px;
+                max-height: 18px;
+                color: $color-bg-3;
+            }
+
+            span {
+                font-size: $fs-small;
+                color: $color-bg-3;
+            }
+        }
+
+        .pager {
+            justify-content: center;
+            margin-top: 1rem;
+            font-size: $fs-normal;
+
+            span {
+                margin: 0 0.5rem;
+            }
+
+            button {
+                .icon {
+                    max-width: 18px;
+                }
+            }
         }
     }
 

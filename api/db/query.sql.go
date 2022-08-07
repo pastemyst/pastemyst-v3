@@ -257,6 +257,63 @@ func (q *Queries) GetPastePasties(ctx context.Context, pasteID string) ([]Pasty,
 	return items, nil
 }
 
+const getUserAllPastes = `-- name: GetUserAllPastes :many
+select id, created_at, expires_in, deletes_at, title, owner_id, private from pastes
+where owner_id = $1
+order by pastes.created_at desc
+limit $2
+offset $3
+`
+
+type GetUserAllPastesParams struct {
+	OwnerID sql.NullString
+	Limit   int32
+	Offset  int32
+}
+
+func (q *Queries) GetUserAllPastes(ctx context.Context, arg GetUserAllPastesParams) ([]Paste, error) {
+	rows, err := q.db.QueryContext(ctx, getUserAllPastes, arg.OwnerID, arg.Limit, arg.Offset)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []Paste
+	for rows.Next() {
+		var i Paste
+		if err := rows.Scan(
+			&i.ID,
+			&i.CreatedAt,
+			&i.ExpiresIn,
+			&i.DeletesAt,
+			&i.Title,
+			&i.OwnerID,
+			&i.Private,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const getUserAllPastesCount = `-- name: GetUserAllPastesCount :one
+select count(*) from pastes
+where owner_id = $1
+`
+
+func (q *Queries) GetUserAllPastesCount(ctx context.Context, ownerID sql.NullString) (int64, error) {
+	row := q.db.QueryRowContext(ctx, getUserAllPastesCount, ownerID)
+	var count int64
+	err := row.Scan(&count)
+	return count, err
+}
+
 const getUserById = `-- name: GetUserById :one
 select id, created_at, username, avatar_url, contributor, supporter, provider_name, provider_id from users
 where id = $1 limit 1
@@ -323,4 +380,61 @@ func (q *Queries) GetUserByUsername(ctx context.Context, username string) (User,
 		&i.ProviderID,
 	)
 	return i, err
+}
+
+const getUserPublicPastes = `-- name: GetUserPublicPastes :many
+select id, created_at, expires_in, deletes_at, title, owner_id, private from pastes
+where owner_id = $1 and private = false
+order by pastes.created_at desc
+limit $2
+offset $3
+`
+
+type GetUserPublicPastesParams struct {
+	OwnerID sql.NullString
+	Limit   int32
+	Offset  int32
+}
+
+func (q *Queries) GetUserPublicPastes(ctx context.Context, arg GetUserPublicPastesParams) ([]Paste, error) {
+	rows, err := q.db.QueryContext(ctx, getUserPublicPastes, arg.OwnerID, arg.Limit, arg.Offset)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []Paste
+	for rows.Next() {
+		var i Paste
+		if err := rows.Scan(
+			&i.ID,
+			&i.CreatedAt,
+			&i.ExpiresIn,
+			&i.DeletesAt,
+			&i.Title,
+			&i.OwnerID,
+			&i.Private,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const getUserPublicPastesCount = `-- name: GetUserPublicPastesCount :one
+select count(*) from pastes
+where owner_id = $1 and private = false
+`
+
+func (q *Queries) GetUserPublicPastesCount(ctx context.Context, ownerID sql.NullString) (int64, error) {
+	row := q.db.QueryRowContext(ctx, getUserPublicPastesCount, ownerID)
+	var count int64
+	err := row.Scan(&count)
+	return count, err
 }
