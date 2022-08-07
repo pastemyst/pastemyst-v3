@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"database/sql"
+	"math"
 	"net/http"
 	"pastemyst-api/db"
 	"pastemyst-api/logging"
@@ -68,6 +69,7 @@ func GetUserPastesHandler(ctx echo.Context) error {
 	}
 
 	var dbPastes []db.Paste
+	var totalPastes int64
 
 	if hasCurrentUser && currentUser.Id == dbUser.ID {
 		dbPastes, err = db.DBQueries.GetUserAllPastes(db.DBContext, db.GetUserAllPastesParams{
@@ -75,12 +77,16 @@ func GetUserPastesHandler(ctx echo.Context) error {
 			Limit:   int32(pageSize),
 			Offset:  int32(page * pageSize),
 		})
+
+		totalPastes, _ = db.DBQueries.GetUserAllPastesCount(db.DBContext, sql.NullString{String: dbUser.ID, Valid: true})
 	} else {
 		dbPastes, err = db.DBQueries.GetUserPublicPastes(db.DBContext, db.GetUserPublicPastesParams{
 			OwnerID: sql.NullString{String: dbUser.ID, Valid: true},
 			Limit:   int32(pageSize),
 			Offset:  int32(page * pageSize),
 		})
+
+		totalPastes, _ = db.DBQueries.GetUserPublicPastesCount(db.DBContext, sql.NullString{String: dbUser.ID, Valid: true})
 	}
 
 	pastes := make([]models.Paste, 0)
@@ -119,5 +125,15 @@ func GetUserPastesHandler(ctx echo.Context) error {
 		})
 	}
 
-	return ctx.JSON(http.StatusOK, pastes)
+	totalPages := int64(math.Ceil(float64(totalPastes) / float64(pageSize)))
+
+	res := models.Page[models.Paste]{
+		Items:       pastes,
+		TotalPages:  totalPages,
+		Page:        int64(page),
+		PageSize:    int64(pageSize),
+		HasNextPage: page < int(totalPages-1),
+	}
+
+	return ctx.JSON(http.StatusOK, res)
 }

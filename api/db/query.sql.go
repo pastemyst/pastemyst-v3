@@ -302,6 +302,18 @@ func (q *Queries) GetUserAllPastes(ctx context.Context, arg GetUserAllPastesPara
 	return items, nil
 }
 
+const getUserAllPastesCount = `-- name: GetUserAllPastesCount :one
+select count(*) from pastes
+where owner_id = $1
+`
+
+func (q *Queries) GetUserAllPastesCount(ctx context.Context, ownerID sql.NullString) (int64, error) {
+	row := q.db.QueryRowContext(ctx, getUserAllPastesCount, ownerID)
+	var count int64
+	err := row.Scan(&count)
+	return count, err
+}
+
 const getUserById = `-- name: GetUserById :one
 select id, created_at, username, avatar_url, contributor, supporter, provider_name, provider_id from users
 where id = $1 limit 1
@@ -413,4 +425,16 @@ func (q *Queries) GetUserPublicPastes(ctx context.Context, arg GetUserPublicPast
 		return nil, err
 	}
 	return items, nil
+}
+
+const getUserPublicPastesCount = `-- name: GetUserPublicPastesCount :one
+select count(*) from pastes
+where owner_id = $1 and private = false
+`
+
+func (q *Queries) GetUserPublicPastesCount(ctx context.Context, ownerID sql.NullString) (int64, error) {
+	row := q.db.QueryRowContext(ctx, getUserPublicPastesCount, ownerID)
+	var count int64
+	err := row.Scan(&count)
+	return count, err
 }
