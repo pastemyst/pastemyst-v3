@@ -27,7 +27,7 @@
             }
 
             if (paste.ownerId != "") {
-                const res = await fetch(`${apiBase}/user/by_id/${paste.ownerId}`, {
+                const res = await fetch(`${apiBase}/user?id=${paste.ownerId}`, {
                     method: "get"
                 });
 
