@@ -4,8 +4,6 @@
     import { tooltip } from "$lib/tooltips";
     import moment from "moment";
 
-    export const router = false;
-
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     export const load = async ({ params, fetch }: { params: any; fetch: any }) => {
         const res = await fetch(`${apiBase}/paste/${params.paste}`, {
