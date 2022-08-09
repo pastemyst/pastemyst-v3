@@ -1,7 +1,7 @@
 <script lang="ts">
     import type { LangStat, Language } from "./api/lang";
     import type { Pasty, Stats } from "./api/paste";
-import { humanFileSize } from "./strings";
+    import { humanFileSize } from "./strings";
 
     export let pasty: Pasty;
     export let langStats: LangStat[];
@@ -40,12 +40,12 @@ import { humanFileSize } from "./strings";
     }
 
     span::after {
-        content: ' |';
+        content: " |";
         opacity: 0.3;
         font-size: $fs-medium;
     }
 
     span:last-child::after {
-        content: '';
+        content: "";
     }
 </style>

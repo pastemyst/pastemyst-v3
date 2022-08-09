@@ -20,7 +20,10 @@ export const getUserByUsername = async (username: string): Promise<User | null> 
     return null;
 };
 
-export const getUserById = async (fetchFunc: FetchFunc, id: string): Promise<[User | null, number]> => {
+export const getUserById = async (
+    fetchFunc: FetchFunc,
+    id: string
+): Promise<[User | null, number]> => {
     const res = await fetchFunc(`${apiBase}/user?id=${id}`, {
         method: "get"
     });
