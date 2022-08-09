@@ -9,6 +9,7 @@ import (
 	"pastemyst-api/models"
 	"pastemyst-api/strings"
 	"pastemyst-api/utils"
+	"sort"
 	"time"
 
 	"github.com/labstack/echo/v4"
@@ -73,6 +74,64 @@ func GetPasteStatsHandler(ctx echo.Context) error {
 	}
 
 	return ctx.JSON(http.StatusOK, res)
+}
+
+// Returns language statistics of the provided paste.
+//
+// /api/v3/paste/:id/langs
+func GetPasteLangStatsHandler(ctx echo.Context) error {
+	id := ctx.Param("id")
+
+	user, _ := ctx.Get("user").(models.User)
+
+	paste, err := GetPaste(id, &user)
+	if err != nil {
+		return err
+	}
+
+	var stats []models.LangStat
+
+	// go through each pasty and count it's length, and add the total for each language
+	charCount := make(map[string]int)
+	totalChars := 0
+
+	for _, pasty := range paste.Pasties {
+		_, exists := charCount[pasty.Language]
+
+		if !exists {
+			charCount[pasty.Language] = 0
+		}
+
+		charCount[pasty.Language] += len(pasty.Content)
+		totalChars += len(pasty.Content)
+	}
+
+	if totalChars == 0 {
+		return ctx.JSON(http.StatusOK, []models.LangStat{})
+	}
+
+	for lang, count := range charCount {
+		perc := (float32(count) / float32(totalChars)) * 100
+
+		if perc != 0 {
+			fullLang, err := language.FindLanguage(lang)
+			if err != nil {
+				logging.Logger.Errorf("Failed to find language when calculating stats: %s", err)
+				return echo.NewHTTPError(http.StatusInternalServerError, "Failed finding the language.")
+			}
+
+			stats = append(stats, models.LangStat{
+				Language:   fullLang,
+				Percentage: perc,
+			})
+		}
+	}
+
+	sort.Slice(stats, func(i, j int) bool {
+		return stats[i].Percentage > stats[j].Percentage
+	})
+
+	return ctx.JSON(http.StatusOK, stats)
 }
 
 // Creates a new paste.

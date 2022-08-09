@@ -1,79 +1,71 @@
 <script lang="ts" context="module">
-    import { apiBase } from "$lib/api/api";
-    import { ExpiresIn, type Paste, type Pasty } from "$lib/api/paste";
+    import {
+        ExpiresIn,
+        getPaste,
+        getPasteLangs,
+        getPasteStats,
+        type Paste,
+        type PasteStats,
+        type Pasty
+    } from "$lib/api/paste";
     import { tooltip } from "$lib/tooltips";
     import moment from "moment";
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    export const load = async ({ params, fetch }: { params: any; fetch: any }) => {
-        const res = await fetch(`${apiBase}/paste/${params.paste}`, {
-            method: "get",
-            credentials: "include"
-        });
+    export const load: Load = async ({ params, fetch }) => {
+        const [paste, pasteStatus] = await getPaste(fetch, params.paste);
 
-        let paste: Paste;
-        let relativeCreatedAt: string;
-        let relativesExpiresIn: string;
-        let langStats: LangStat[];
-        let owner: User | null;
+        if (!paste) {
+            // TODO: error handling
+            return {
+                status: pasteStatus
+            };
+        }
+
+        const relativeCreatedAt = moment(paste.createdAt).fromNow();
+        const relativesExpiresIn =
+            paste.expiresIn !== ExpiresIn.never ? moment(paste.deletesAt).fromNow() : "";
+        const pasteStats = await getPasteStats(fetch, paste.id);
+        const langStats = await getPasteLangs(fetch, paste.id);
+        const [owner, ownerStatus] =
+            paste.ownerId != "" ? await getUserById(fetch, paste.ownerId) : [null, 0];
+
+        if (!owner) {
+            // TODO: error handling
+            return {
+                status: ownerStatus
+            };
+        }
+
         const highlightedCode: string[] = [];
-        if (res.ok) {
-            paste = await res.json();
-            relativeCreatedAt = moment(paste.createdAt).fromNow();
-            if (paste.expiresIn != ExpiresIn.never) {
-                relativesExpiresIn = moment(paste.deletesAt).fromNow();
-            }
 
-            if (paste.ownerId != "") {
-                const res = await fetch(`${apiBase}/user?id=${paste.ownerId}`, {
-                    method: "get"
-                });
-
-                // TODO: error handling
-                if (!res.ok)
-                    return {
-                        status: 500
-                    };
-
-                owner = await res.json();
-            }
-
-            const langRes = await fetch(`${apiBase}/lang/${paste.id}`, {
-                method: "get"
+        for (const pasty of paste.pasties) {
+            const res = await fetch("/internal/highlight", {
+                method: "post",
+                body: JSON.stringify({
+                    content: pasty.content,
+                    language: pasty.language
+                })
             });
 
-            if (langRes.ok) {
-                langStats = await langRes.json();
-            }
+            // TODO: error handling
+            if (!res.ok)
+                return {
+                    status: 500
+                };
 
-            for (const pasty of paste.pasties) {
-                const res = await fetch("/internal/highlight", {
-                    method: "post",
-                    body: JSON.stringify({
-                        content: pasty.content,
-                        language: pasty.language
-                    })
-                });
-
-                // TODO: error handling
-                if (!res.ok)
-                    return {
-                        status: 500
-                    };
-
-                highlightedCode.push(await res.text());
-            }
+            highlightedCode.push(await res.text());
         }
 
         return {
-            status: res.status,
+            status: 200,
             props: {
                 paste: paste,
                 relativeCreatedAt: relativeCreatedAt,
                 relativesExpiresIn: relativesExpiresIn,
-                highlightedCode: highlightedCode,
                 langStats: langStats,
-                owner: owner
+                pasteStats: pasteStats,
+                owner: owner,
+                highlightedCode: highlightedCode
             }
         };
     };
@@ -81,9 +73,10 @@
 
 <script lang="ts">
     import Tab from "$lib/Tab.svelte";
-    import type { User } from "$lib/api/user";
+    import { getUserById, type User } from "$lib/api/user";
     import type { LangStat } from "$lib/api/lang";
     import PastyMeta from "$lib/PastyMeta.svelte";
+    import type { Load } from "@sveltejs/kit";
 
     export let paste: Paste;
     export let relativeCreatedAt: string;
@@ -91,6 +84,7 @@
     export let highlightedCode: string[];
     export let owner: User | null;
     export let langStats: LangStat[];
+    export let pasteStats: PasteStats;
 
     let activePastyId: string = paste.pasties[0].id;
     let activePasty: Pasty = paste.pasties[0];
@@ -300,7 +294,7 @@
                     <span>{pasty.title}</span>
 
                     <div class="meta-stacked flex row center">
-                        <PastyMeta {pasty} {langStats} />
+                        <PastyMeta {pasty} {langStats} stats={pasteStats.pasties[pasty.id]} />
                     </div>
                 </div>
 
@@ -323,7 +317,7 @@
         </div>
 
         <div class="meta-tabbed">
-            <PastyMeta pasty={activePasty} {langStats} />
+            <PastyMeta pasty={activePasty} {langStats} stats={pasteStats.pasties[activePastyId]} />
         </div>
 
         <!-- prettier-ignore -->
