@@ -7,6 +7,7 @@ import (
 	"pastemyst-api/language"
 	"pastemyst-api/logging"
 	"pastemyst-api/models"
+	"pastemyst-api/strings"
 	"pastemyst-api/utils"
 	"time"
 
@@ -19,22 +20,59 @@ import (
 func GetPaseHandler(ctx echo.Context) error {
 	id := ctx.Param("id")
 
-	user, ok := ctx.Get("user").(models.User)
+	user, _ := ctx.Get("user").(models.User)
 
-	var paste models.Paste
-	var err error
-
-	if ok {
-		paste, err = GetPaste(id, &user)
-	} else {
-		paste, err = GetPaste(id, nil)
-	}
-
+	paste, err := GetPaste(id, &user)
 	if err != nil {
 		return err
 	}
 
 	return ctx.JSON(http.StatusOK, paste)
+}
+
+// Gets various statistics of a paste.
+//
+// /api/v3/paste/:id/stats
+func GetPasteStatsHandler(ctx echo.Context) error {
+	id := ctx.Param("id")
+
+	user, _ := ctx.Get("user").(models.User)
+
+	paste, err := GetPaste(id, &user)
+	if err != nil {
+		return err
+	}
+
+	res := models.PasteStats{}
+	res.Pasties = make(map[string]models.Stats)
+
+	for _, pasty := range paste.Pasties {
+		lines, err := strings.CountLines(pasty.Content)
+		if err != nil {
+			logging.Logger.Errorf("Error counting number of lines in a pasty: %s", err.Error())
+			return echo.NewHTTPError(http.StatusInternalServerError, "Error counting number of lines in a pasty.")
+		}
+
+		words, err := strings.CountWords(pasty.Content)
+		if err != nil {
+			logging.Logger.Errorf("Error counting number of words in a pasty: %s", err.Error())
+			return echo.NewHTTPError(http.StatusInternalServerError, "Error counting number of words in a pasty.")
+		}
+
+		size := uint64(len(pasty.Content))
+
+		res.Pasties[pasty.Id] = models.Stats{
+			Lines: lines,
+			Words: words,
+			Size:  size,
+		}
+
+		res.Lines += lines
+		res.Words += words
+		res.Size += size
+	}
+
+	return ctx.JSON(http.StatusOK, res)
 }
 
 // Creates a new paste.
