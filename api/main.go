@@ -85,6 +85,7 @@ func main() {
 	e.GET("/api/v3/user/:username/pastes", handlers.GetUserPastesHandler)
 
 	e.GET("/api/v3/paste/:id", handlers.GetPaseHandler)
+	e.GET("/api/v3/paste/:id/stats", handlers.GetPasteStatsHandler)
 	e.POST("/api/v3/paste", handlers.CreatePasteHandler)
 
 	// set cron to delete expired pastes every 5 seconds
