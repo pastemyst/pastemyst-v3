@@ -1,4 +1,6 @@
 import { apiBase } from "./api";
+import type { FetchFunc } from "./fetch";
+import type { LangStat } from "./lang";
 
 export enum ExpiresIn {
     never = "never",
@@ -27,6 +29,19 @@ export interface Pasty {
     title: string;
     content: string;
     language: string;
+}
+
+export interface PasteStats {
+    lines: number;
+    words: number;
+    size: number;
+    pasties: { [id: string]: Stats };
+}
+
+export interface Stats {
+    lines: number;
+    words: number;
+    size: number;
 }
 
 export interface PasteSkeleton {
@@ -81,6 +96,44 @@ export const createPaste = async (skeleton: PasteSkeleton): Promise<Paste | null
 
     if (res.ok) return await res.json();
 
-    // TODO: error handling
     return null;
+};
+
+export const getPaste = async (
+    fetchFunc: FetchFunc,
+    id: string
+): Promise<[Paste | null, number]> => {
+    const res = await fetchFunc(`${apiBase}/paste/${id}`, {
+        method: "get",
+        credentials: "include"
+    });
+
+    if (res.ok) return [await res.json(), res.status];
+
+    return [null, res.status];
+};
+
+export const getPasteStats = async (
+    fetchFunc: FetchFunc,
+    id: string
+): Promise<PasteStats | null> => {
+    const res = await fetchFunc(`${apiBase}/paste/${id}/stats`, {
+        method: "get",
+        credentials: "include"
+    });
+
+    if (res.ok) return await res.json();
+
+    return null;
+};
+
+export const getPasteLangs = async (fetchFunc: FetchFunc, id: string): Promise<LangStat[]> => {
+    const res = await fetchFunc(`${apiBase}/paste/${id}/langs`, {
+        method: "get",
+        credentials: "include"
+    });
+
+    if (res.ok) return await res.json();
+
+    return [];
 };
