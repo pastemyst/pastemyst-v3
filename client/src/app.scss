@@ -194,6 +194,17 @@ button,
             border-color: $color-red;
         }
     }
+
+    &[disabled] {
+        cursor: not-allowed;
+        background-color: $color-bg-1;
+        border-color: $color-bg-2;
+        color: $color-bg-3;
+
+        .icon {
+            color: $color-bg-3;
+        }
+    }
 }
 
 section {
