@@ -194,6 +194,17 @@ button,
             border-color: $color-red;
         }
     }
+
+    &[disabled] {
+        cursor: not-allowed;
+        background-color: $color-bg-2;
+        border-color: $color-bg-2;
+        color: $color-bg-3;
+
+        .icon {
+            color: $color-bg-3;
+        }
+    }
 }
 
 section {
@@ -243,6 +254,7 @@ section {
     color: $color-fg;
     width: 25px;
     height: 25px;
+    pointer-events: none;
 }
 
 // tooltips themes
