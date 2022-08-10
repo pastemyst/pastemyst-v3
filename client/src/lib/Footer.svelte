@@ -1,5 +1,14 @@
-<script>
+<script lang="ts">
+    import { afterNavigate } from "$app/navigation";
     import { getActivePastes, getVersion } from "./api/meta";
+
+    let activePastes = 0;
+
+    // force update of current active pastes on page change
+    // so that the count will update after creating a paste
+    afterNavigate(async () => {
+        activePastes = await getActivePastes();
+    });
 </script>
 
 <footer class="flex sm-row space-between center">
@@ -13,9 +22,7 @@
         <span><a href="/changelog" sveltekit:prefetch class="no-dec">{version}</a></span>
     {/await}
 
-    {#await getActivePastes() then count}
-        <span><a href="/" class="no-dec">{count} active pastes</a></span>
-    {/await}
+    <span><a href="/" class="no-dec">{activePastes} active pastes</a></span>
 </footer>
 
 <style lang="scss">
