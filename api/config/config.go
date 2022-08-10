@@ -22,6 +22,12 @@ type Config struct {
 
 	GitHubClientId     string `yaml:"githubClientId"`
 	GitHubClientSecret string `yaml:"githubClientSecret"`
+
+	GitLabClientId     string `yaml:"gitlabClientId"`
+	GitLabClientSecret string `yaml:"gitlabClientSecret"`
+
+	GoogleClientId     string `yaml:"googleClientId"`
+	GoogleClientSecret string `yaml:"googleClientSecret"`
 }
 
 var Cfg Config

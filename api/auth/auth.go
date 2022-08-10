@@ -11,6 +11,8 @@ import (
 	"github.com/labstack/echo"
 	"golang.org/x/oauth2"
 	"golang.org/x/oauth2/github"
+	"golang.org/x/oauth2/gitlab"
+	"golang.org/x/oauth2/google"
 )
 
 // User representation of a OAuth provider user.
@@ -52,6 +54,12 @@ type RegistrationClaims struct {
 // Config for GitHub OAuth
 var GithubOauthConfig *ProviderConfig
 
+// Config for GitLab OAuth
+var GitlabOauthConfig *ProviderConfig
+
+// Config for Google OAuth
+var GoogleOauthConfig *ProviderConfig
+
 // List of all configurations of OAuth proivders as a map
 // for easy conversion of provider name to provider config.
 var OAuthProviders map[string]*ProviderConfig
@@ -73,8 +81,40 @@ func InitAuth() {
 		AvatarUrlJsonField: "avatar_url",
 	}
 
+	GitlabOauthConfig = &ProviderConfig{
+		Config: oauth2.Config{
+			ClientID:     config.Cfg.GitLabClientId,
+			ClientSecret: config.Cfg.GitLabClientSecret,
+			Endpoint:     gitlab.Endpoint,
+			RedirectURL:  fmt.Sprintf("%s/api/v3/login/gitlab/callback", config.Cfg.Host),
+			Scopes:       []string{"read_user"},
+		},
+		Name:               "GitLab",
+		UserUrl:            "https://gitlab.com/api/v4/user",
+		IdJsonField:        "id",
+		UsernameJsonField:  "username",
+		AvatarUrlJsonField: "avatar_url",
+	}
+
+	GoogleOauthConfig = &ProviderConfig{
+		Config: oauth2.Config{
+			ClientID:     config.Cfg.GoogleClientId,
+			ClientSecret: config.Cfg.GoogleClientSecret,
+			Endpoint:     google.Endpoint,
+			RedirectURL:  fmt.Sprintf("%s/api/v3/login/google/callback", config.Cfg.Host),
+			Scopes:       []string{"https://www.googleapis.com/auth/userinfo.profile"},
+		},
+		Name:               "Google",
+		UserUrl:            "https://www.googleapis.com/oauth2/v1/userinfo?alt=json",
+		IdJsonField:        "id",
+		UsernameJsonField:  "name",
+		AvatarUrlJsonField: "picture",
+	}
+
 	OAuthProviders = map[string]*ProviderConfig{
 		"github": GithubOauthConfig,
+		"gitlab": GitlabOauthConfig,
+		"google": GoogleOauthConfig,
 	}
 }
 
@@ -115,8 +155,8 @@ func GetProviderUser(providerCfg *ProviderConfig, token string) (*ProviderUser, 
 		AvatarUrl: jsonUser[providerCfg.AvatarUrlJsonField].(string),
 	}
 
-	// github's IDs are numbers (which for some reason have to be parsed like floats)
-	if providerCfg == GithubOauthConfig {
+	// github's and gitlab's IDs are numbers (which for some reason have to be parsed like floats)
+	if providerCfg == GithubOauthConfig || providerCfg == GitlabOauthConfig {
 		id := jsonUser[providerCfg.IdJsonField].(float64)
 		user.Id = fmt.Sprint(int(id))
 	} else {
