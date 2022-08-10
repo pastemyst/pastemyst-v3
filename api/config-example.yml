@@ -14,3 +14,7 @@ jwtSecret: superepikstrongsecret
 
 githubClientId: id
 githubClientSecret: secret
+
+gitlabClientId: id
+gitlabClientSecret: secret
+
