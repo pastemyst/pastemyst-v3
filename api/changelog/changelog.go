@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"os/exec"
 	"pastemyst-api/logging"
+	"regexp"
 	"strings"
 	"time"
 
@@ -46,11 +47,18 @@ func InitChangelog() error {
 	}
 	Version = ver
 
-	rels, err := generateChangelog()
+	v2Releases, err := generateChangelog("https://api.github.com/repos/codemyst/pastemyst/releases")
 	if err != nil {
 		return err
 	}
-	Releases = rels
+
+	v3Releases, err := generateChangelog("https://api.github.com/repos/pastemyst/pastemyst-v3/releases")
+	if err != nil {
+		return err
+	}
+
+	Releases = append(Releases, v3Releases...)
+	Releases = append(Releases, v2Releases...)
 
 	return nil
 }
@@ -66,8 +74,8 @@ func getVersion() (string, error) {
 	return fmt.Sprintf("v%s", strings.TrimSpace(string(stdout))), nil
 }
 
-func generateChangelog() ([]Release, error) {
-	res, err := http.Get("https://api.github.com/repos/pastemyst/pastemyst-v3/releases")
+func generateChangelog(releasesUrl string) ([]Release, error) {
+	res, err := http.Get(releasesUrl)
 	if err != nil {
 		return nil, err
 	}
@@ -100,10 +108,13 @@ func generateChangelog() ([]Release, error) {
 			title = "v" + title
 		}
 
+		// remove ## changelog from older releases
+		regex := regexp.MustCompile(`(?i)## changelog:?\r\n\r\n`)
+
 		releases = append(releases, Release{
 			URL:          ghRel.URL,
 			Title:        title,
-			Content:      ghRel.Body,
+			Content:      regex.ReplaceAllString(ghRel.Body, ""),
 			IsPrerelease: ghRel.Prerelease,
 			ReleasedAt:   ghRel.PublishedAt,
 		})
