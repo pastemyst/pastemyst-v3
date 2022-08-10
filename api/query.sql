@@ -32,7 +32,7 @@ select count(*) from pastes;
 select exists(select 1 from users where provider_name = $1 and provider_id = $2);
 
 -- name: ExistsUserByUsername :one
-select exists(select 1 from users where username = $1);
+select exists(select 1 from users where lower(username) = lower($1));
 
 -- name: ExistsUserById :one
 select exists(select 1 from users where id = $1);
@@ -43,7 +43,7 @@ where id = $1 limit 1;
 
 -- name: GetUserByUsername :one
 select * from users
-where username = $1 limit 1;
+where lower(username) = lower($1) limit 1;
 
 -- name: GetUserByProvider :one
 select * from users
