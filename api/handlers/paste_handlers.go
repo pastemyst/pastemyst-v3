@@ -7,7 +7,9 @@ import (
 	"pastemyst-api/language"
 	"pastemyst-api/logging"
 	"pastemyst-api/models"
+	"pastemyst-api/strings"
 	"pastemyst-api/utils"
+	"sort"
 	"time"
 
 	"github.com/labstack/echo/v4"
@@ -19,22 +21,117 @@ import (
 func GetPaseHandler(ctx echo.Context) error {
 	id := ctx.Param("id")
 
-	user, ok := ctx.Get("user").(models.User)
+	user, _ := ctx.Get("user").(models.User)
 
-	var paste models.Paste
-	var err error
-
-	if ok {
-		paste, err = GetPaste(id, &user)
-	} else {
-		paste, err = GetPaste(id, nil)
-	}
-
+	paste, err := GetPaste(id, &user)
 	if err != nil {
 		return err
 	}
 
 	return ctx.JSON(http.StatusOK, paste)
+}
+
+// Gets various statistics of a paste.
+//
+// /api/v3/paste/:id/stats
+func GetPasteStatsHandler(ctx echo.Context) error {
+	id := ctx.Param("id")
+
+	user, _ := ctx.Get("user").(models.User)
+
+	paste, err := GetPaste(id, &user)
+	if err != nil {
+		return err
+	}
+
+	res := models.PasteStats{}
+	res.Pasties = make(map[string]models.Stats)
+
+	for _, pasty := range paste.Pasties {
+		lines, err := strings.CountLines(pasty.Content)
+		if err != nil {
+			logging.Logger.Errorf("Error counting number of lines in a pasty: %s", err.Error())
+			return echo.NewHTTPError(http.StatusInternalServerError, "Error counting number of lines in a pasty.")
+		}
+
+		words, err := strings.CountWords(pasty.Content)
+		if err != nil {
+			logging.Logger.Errorf("Error counting number of words in a pasty: %s", err.Error())
+			return echo.NewHTTPError(http.StatusInternalServerError, "Error counting number of words in a pasty.")
+		}
+
+		size := uint64(len(pasty.Content))
+
+		res.Pasties[pasty.Id] = models.Stats{
+			Lines: lines,
+			Words: words,
+			Size:  size,
+		}
+
+		res.Lines += lines
+		res.Words += words
+		res.Size += size
+	}
+
+	return ctx.JSON(http.StatusOK, res)
+}
+
+// Returns language statistics of the provided paste.
+//
+// /api/v3/paste/:id/langs
+func GetPasteLangStatsHandler(ctx echo.Context) error {
+	id := ctx.Param("id")
+
+	user, _ := ctx.Get("user").(models.User)
+
+	paste, err := GetPaste(id, &user)
+	if err != nil {
+		return err
+	}
+
+	var stats []models.LangStat
+
+	// go through each pasty and count it's length, and add the total for each language
+	charCount := make(map[string]int)
+	totalChars := 0
+
+	for _, pasty := range paste.Pasties {
+		_, exists := charCount[pasty.Language]
+
+		if !exists {
+			charCount[pasty.Language] = 0
+		}
+
+		charCount[pasty.Language] += len(pasty.Content)
+		totalChars += len(pasty.Content)
+	}
+
+	if totalChars == 0 {
+		return ctx.JSON(http.StatusOK, []models.LangStat{})
+	}
+
+	for lang, count := range charCount {
+		perc := (float32(count) / float32(totalChars)) * 100
+
+		if perc != 0 {
+			fullLang, err := language.FindLanguage(lang)
+			if err != nil {
+				logging.Logger.Errorf("Failed to find language when calculating stats: %s", err)
+				return echo.NewHTTPError(http.StatusInternalServerError, "Failed finding the language.")
+			}
+
+			stats = append(stats, models.LangStat{
+				Language:   fullLang,
+				Percentage: perc,
+			})
+		}
+	}
+
+	sort.Slice(stats, func(i, j int) bool {
+		return stats[i].Percentage > stats[j].Percentage
+	})
+
+	return ctx.JSON(http.StatusOK, stats)
 }
 
 // Creates a new paste.
