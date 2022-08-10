@@ -182,11 +182,11 @@ func (q *Queries) ExistsUserByProvider(ctx context.Context, arg ExistsUserByProv
 }
 
 const existsUserByUsername = `-- name: ExistsUserByUsername :one
-select exists(select 1 from users where username = $1)
+select exists(select 1 from users where lower(username) = lower($1))
 `
 
-func (q *Queries) ExistsUserByUsername(ctx context.Context, username string) (bool, error) {
-	row := q.db.QueryRowContext(ctx, existsUserByUsername, username)
+func (q *Queries) ExistsUserByUsername(ctx context.Context, lower string) (bool, error) {
+	row := q.db.QueryRowContext(ctx, existsUserByUsername, lower)
 	var exists bool
 	err := row.Scan(&exists)
 	return exists, err
@@ -363,11 +363,11 @@ func (q *Queries) GetUserByProvider(ctx context.Context, arg GetUserByProviderPa
 
 const getUserByUsername = `-- name: GetUserByUsername :one
 select id, created_at, username, avatar_url, contributor, supporter, provider_name, provider_id from users
-where username = $1 limit 1
+where lower(username) = lower($1) limit 1
 `
 
-func (q *Queries) GetUserByUsername(ctx context.Context, username string) (User, error) {
-	row := q.db.QueryRowContext(ctx, getUserByUsername, username)
+func (q *Queries) GetUserByUsername(ctx context.Context, lower string) (User, error) {
+	row := q.db.QueryRowContext(ctx, getUserByUsername, lower)
 	var i User
 	err := row.Scan(
 		&i.ID,

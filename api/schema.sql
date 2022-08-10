@@ -11,6 +11,8 @@ create table if not exists users (
     provider_id text default '' :: text not null
 );
 
+create unique index username_unique on users (lower(username));
+
 alter table
     users owner to pastemyst;
 
