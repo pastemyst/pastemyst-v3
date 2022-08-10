@@ -1,4 +1,5 @@
 import { apiBase } from "./api";
+import type { FetchFunc } from "./fetch";
 
 export interface User {
     id: string;
@@ -19,12 +20,15 @@ export const getUserByUsername = async (username: string): Promise<User | null> 
     return null;
 };
 
-export const getUserById = async (id: string): Promise<User | null> => {
-    const res = await fetch(`${apiBase}/user?id=${id}`, {
+export const getUserById = async (
+    fetchFunc: FetchFunc,
+    id: string
+): Promise<[User | null, number]> => {
+    const res = await fetchFunc(`${apiBase}/user?id=${id}`, {
         method: "get"
     });
 
-    if (res.ok) return await res.json();
+    if (res.ok) return [await res.json(), res.status];
 
-    return null;
+    return [null, res.status];
 };
