@@ -251,27 +251,29 @@
                 </a>
             {/each}
 
-            <div class="pager flex row center">
-                <button class="btn" on:click={onPrevPage}>
-                    <svg xmlns="http://www.w3.org/2000/svg" class="icon" viewBox="0 0 512 512">
-                        <title>Caret Back</title>
-                        <path
-                            fill="currentColor"
-                            d="M321.94 98L158.82 237.78a24 24 0 000 36.44L321.94 414c15.57 13.34 39.62 2.28 39.62-18.22v-279.6c0-20.5-24.05-31.56-39.62-18.18z"
-                        />
-                    </svg>
-                </button>
-                <span>{pastes.page + 1}/{pastes.totalPages}</span>
-                <button class="btn" on:click={onNextPage}>
-                    <svg xmlns="http://www.w3.org/2000/svg" class="icon" viewBox="0 0 512 512">
-                        <title>Caret Forward</title>
-                        <path
-                            fill="currentColor"
-                            d="M190.06 414l163.12-139.78a24 24 0 000-36.44L190.06 98c-15.57-13.34-39.62-2.28-39.62 18.22v279.6c0 20.5 24.05 31.56 39.62 18.18z"
-                        />
-                    </svg>
-                </button>
-            </div>
+            {#if pastes.totalPages > 1}
+                <div class="pager flex row center">
+                    <button class="btn" disabled={pastes.page === 0} on:click={onPrevPage}>
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon" viewBox="0 0 512 512">
+                            <title>Caret Back</title>
+                            <path
+                                fill="currentColor"
+                                d="M321.94 98L158.82 237.78a24 24 0 000 36.44L321.94 414c15.57 13.34 39.62 2.28 39.62-18.22v-279.6c0-20.5-24.05-31.56-39.62-18.18z"
+                            />
+                        </svg>
+                    </button>
+                    <span>{pastes.page + 1}/{pastes.totalPages}</span>
+                    <button class="btn" disabled={!pastes.hasNextPage} on:click={onNextPage}>
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon" viewBox="0 0 512 512">
+                            <title>Caret Forward</title>
+                            <path
+                                fill="currentColor"
+                                d="M190.06 414l163.12-139.78a24 24 0 000-36.44L190.06 98c-15.57-13.34-39.62-2.28-39.62 18.22v279.6c0 20.5 24.05 31.56 39.62 18.18z"
+                            />
+                        </svg>
+                    </button>
+                </div>
+            {/if}
         {/if}
     </section>
 </div>
@@ -379,6 +381,12 @@
                 color: $color-sec;
                 background-color: $color-bg-2;
                 border-color: $color-bg-3;
+            }
+
+            &:focus {
+                color: $color-sec;
+                background-color: $color-bg-2;
+                border-color: $color-prim;
             }
 
             p {
