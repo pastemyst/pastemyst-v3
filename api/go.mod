@@ -3,6 +3,7 @@ module pastemyst-api
 go 1.18
 
 require (
+	github.com/go-co-op/gocron v1.15.1
 	github.com/go-playground/validator/v10 v10.11.0
 	github.com/golang-jwt/jwt/v4 v4.4.2
 	github.com/gorilla/sessions v1.2.1
@@ -16,8 +17,6 @@ require (
 )
 
 require (
-	cloud.google.com/go/compute v1.7.0 // indirect
-	github.com/go-co-op/gocron v1.15.1 // indirect
 	github.com/golang-jwt/jwt v3.2.2+incompatible // indirect
 	github.com/golang/protobuf v1.5.2 // indirect
 	github.com/gorilla/context v1.1.1 // indirect
