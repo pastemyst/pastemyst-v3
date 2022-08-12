@@ -27,9 +27,9 @@
         const pasteStats = await getPasteStats(fetch, paste.id);
         const langStats = await getPasteLangs(fetch, paste.id);
         const [owner, ownerStatus] =
-            paste.ownerId != "" ? await getUserById(fetch, paste.ownerId) : [null, 0];
+            paste.ownerId !== "" ? await getUserById(fetch, paste.ownerId) : [null, 0];
 
-        if (!owner) {
+        if (paste.ownerId !== "" && !owner) {
             // TODO: error handling
             return {
                 status: ownerStatus
