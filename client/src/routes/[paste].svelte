@@ -290,11 +290,13 @@
     {#if stackedView}
         {#each paste.pasties as pasty, i}
             <div class="pasty">
-                <div class="title flex row space-between center">
-                    <span>{pasty.title}</span>
+                <div class="sticky">
+                    <div class="title flex row space-between center">
+                        <span>{pasty.title}</span>
 
-                    <div class="meta-stacked flex row center">
-                        <PastyMeta {pasty} {langStats} stats={pasteStats.pasties[pasty.id]} />
+                        <div class="meta-stacked flex row center">
+                            <PastyMeta {pasty} {langStats} stats={pasteStats.pasties[pasty.id]} />
+                        </div>
                     </div>
                 </div>
 
@@ -302,22 +304,28 @@
             </div>
         {/each}
     {:else}
-        <div class="tabs flex row center">
-            <div class="tabgroup flex row">
-                {#each paste.pasties as pasty}
-                    <Tab
-                        id={pasty.id}
-                        isReadonly
-                        title={pasty.title}
-                        isActive={pasty.id === activePastyId}
-                        on:click={() => setActiveTab(pasty.id)}
-                    />
-                {/each}
+        <div class="sticky">
+            <div class="tabs flex row center">
+                <div class="tabgroup flex row">
+                    {#each paste.pasties as pasty}
+                        <Tab
+                            id={pasty.id}
+                            isReadonly
+                            title={pasty.title}
+                            isActive={pasty.id === activePastyId}
+                            on:click={() => setActiveTab(pasty.id)}
+                        />
+                    {/each}
+                </div>
             </div>
-        </div>
 
-        <div class="meta-tabbed">
-            <PastyMeta pasty={activePasty} {langStats} stats={pasteStats.pasties[activePastyId]} />
+            <div class="meta-tabbed">
+                <PastyMeta
+                    pasty={activePasty}
+                    {langStats}
+                    stats={pasteStats.pasties[activePastyId]}
+                />
+            </div>
         </div>
 
         <!-- prettier-ignore -->
@@ -405,9 +413,6 @@
             background-color: $color-bg-2;
             border-radius: $border-radius $border-radius 0 0;
             border-bottom: 1px solid $color-bg-2;
-            position: sticky;
-            top: 0;
-            z-index: 10;
 
             .tabgroup {
                 flex-wrap: wrap;
@@ -439,9 +444,6 @@
                 border-bottom: 1px solid $color-prim;
                 width: 100%;
                 box-sizing: border-box;
-                position: sticky;
-                top: 0;
-                z-index: 10;
 
                 span {
                     padding: 0.5rem 1rem;
@@ -452,6 +454,12 @@
                 }
             }
         }
+    }
+
+    .sticky {
+        position: sticky;
+        top: 0;
+        z-index: 10;
     }
 
     :global(.shiki) {
