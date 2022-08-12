@@ -7,6 +7,7 @@ import (
 	"pastemyst-api/logging"
 	"pastemyst-api/models"
 	"strings"
+	"time"
 
 	"github.com/golang-jwt/jwt/v4"
 	"github.com/labstack/echo/v4"
@@ -48,7 +49,21 @@ func AuthMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
 		// get the user and save it into the context
 		dbUser, err := db.DBQueries.GetUserById(db.DBContext, claims.Id)
 		if err != nil {
-			return echo.NewHTTPError(http.StatusNotFound)
+			// valid jwt, but the user doesn't exist anymore, delete the cookie
+			logging.Logger.Error("Got a valid JWT token, but the user doesn't exist anymore. Deleting the cookie and resuming the auth process.")
+
+			cookie := &http.Cookie{}
+			cookie.Name = "pastemyst"
+			cookie.Path = "/"
+			cookie.HttpOnly = true
+			cookie.SameSite = http.SameSiteStrictMode
+			cookie.Secure = config.Cfg.Https
+			cookie.Value = ""
+			cookie.Expires = time.Unix(0, 0)
+
+			ctx.SetCookie(cookie)
+
+			return next(ctx)
 		}
 
 		user := models.User{
