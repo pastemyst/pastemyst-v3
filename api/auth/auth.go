@@ -12,7 +12,6 @@ import (
 	"golang.org/x/oauth2"
 	"golang.org/x/oauth2/github"
 	"golang.org/x/oauth2/gitlab"
-	"golang.org/x/oauth2/google"
 )
 
 // User representation of a OAuth provider user.
@@ -57,9 +56,6 @@ var GithubOauthConfig *ProviderConfig
 // Config for GitLab OAuth
 var GitlabOauthConfig *ProviderConfig
 
-// Config for Google OAuth
-var GoogleOauthConfig *ProviderConfig
-
 // List of all configurations of OAuth proivders as a map
 // for easy conversion of provider name to provider config.
 var OAuthProviders map[string]*ProviderConfig
@@ -95,26 +91,9 @@ func InitAuth() {
 		UsernameJsonField:  "username",
 		AvatarUrlJsonField: "avatar_url",
 	}
-
-	GoogleOauthConfig = &ProviderConfig{
-		Config: oauth2.Config{
-			ClientID:     config.Cfg.GoogleClientId,
-			ClientSecret: config.Cfg.GoogleClientSecret,
-			Endpoint:     google.Endpoint,
-			RedirectURL:  fmt.Sprintf("%s/api/v3/login/google/callback", config.Cfg.Host),
-			Scopes:       []string{"https://www.googleapis.com/auth/userinfo.profile"},
-		},
-		Name:               "Google",
-		UserUrl:            "https://www.googleapis.com/oauth2/v1/userinfo?alt=json",
-		IdJsonField:        "id",
-		UsernameJsonField:  "name",
-		AvatarUrlJsonField: "picture",
-	}
-
 	OAuthProviders = map[string]*ProviderConfig{
 		"github": GithubOauthConfig,
 		"gitlab": GitlabOauthConfig,
-		"google": GoogleOauthConfig,
 	}
 }
 
