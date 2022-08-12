@@ -33,7 +33,7 @@ func LoginHandler(ctx echo.Context) error {
 	// short lived session to persist the state used for OAuth
 	session, err := session.Get("pastemyst_oauth_state", ctx)
 	if err != nil {
-		logging.Logger.Error("Failed getting the session while starting the OAuth flow.")
+		logging.Logger.Error("Failed starting the session while starting the OAuth flow.")
 		return echo.NewHTTPError(http.StatusInternalServerError)
 	}
 
