@@ -156,7 +156,7 @@
     </div>
 
     <div class="options flex row center">
-        <div class="btn stars" aria-label="stars" use:tooltip>
+        <button class="stars" aria-label="stars" use:tooltip>
             <svg
                 class="icon"
                 xmlns="http://www.w3.org/2000/svg"
@@ -171,9 +171,9 @@
                 />
             </svg>
             <p>54</p>
-        </div>
+        </button>
 
-        <div class="btn" aria-label="edit" use:tooltip>
+        <button aria-label="edit" use:tooltip>
             <svg
                 class="icon"
                 xmlns="http://www.w3.org/2000/svg"
@@ -195,10 +195,9 @@
                     d="M386.34,193.66,264.45,315.79A41.08,41.08,0,0,1,247.58,326l-25.9,8.67a35.92,35.92,0,0,1-44.33-44.33l8.67-25.9a41.08,41.08,0,0,1,10.19-16.87L318.34,125.66A8,8,0,0,0,312.69,112H104a56,56,0,0,0-56,56V408a56,56,0,0,0,56,56H344a56,56,0,0,0,56-56V199.31A8,8,0,0,0,386.34,193.66Z"
                 />
             </svg>
-        </div>
+        </button>
 
-        <div
-            class="btn"
+        <button
             aria-label="copy link"
             use:tooltip={{
                 content: linkCopied ? "copied" : "copy link",
@@ -233,9 +232,9 @@
                     style="fill:none;stroke-linecap:round;stroke-linejoin:round;stroke-width:48px"
                 />
             </svg>
-        </div>
+        </button>
 
-        <div class="btn" aria-label="clone paste" use:tooltip>
+        <button aria-label="clone paste" use:tooltip>
             <svg
                 class="icon"
                 xmlns="http://www.w3.org/2000/svg"
@@ -253,10 +252,10 @@
                     d="M395.88,80A72.12,72.12,0,0,0,328,32H104a72,72,0,0,0-72,72V328a72.12,72.12,0,0,0,48,67.88V160a80,80,0,0,1,80-80Z"
                 />
             </svg>
-        </div>
+        </button>
 
         <button
-            class="toggle-view btn"
+            class="toggle-view"
             on:click={togglePastiesView}
             use:tooltip
             aria-label="toggle stacked / tabbed view"
@@ -278,7 +277,7 @@
             </svg>
         </button>
 
-        <div class="btn" aria-label="more options" use:tooltip>
+        <button aria-label="more options" use:tooltip>
             <svg
                 class="icon"
                 xmlns="http://www.w3.org/2000/svg"
@@ -291,7 +290,7 @@
                 <circle fill="currentColor" cx="416" cy="256" r="48" />
                 <circle fill="currentColor" cx="96" cy="256" r="48" />
             </svg>
-        </div>
+        </button>
     </div>
 </section>
 
@@ -389,7 +388,7 @@
         }
 
         .options {
-            .btn {
+            button {
                 background-color: $color-bg;
                 margin-left: 0.5rem;
 
@@ -539,7 +538,7 @@
             }
 
             .options {
-                .btn:first-child {
+                button:first-child {
                     margin-left: 0;
                 }
             }
