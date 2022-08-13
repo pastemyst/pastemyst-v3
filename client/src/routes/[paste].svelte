@@ -89,6 +89,8 @@
     let activePastyId: string = paste.pasties[0].id;
     let activePasty: Pasty = paste.pasties[0];
 
+    let linkCopied = false;
+
     $: {
         const p = paste.pasties.find((p) => p.id === activePastyId);
         if (p) activePasty = p;
@@ -102,6 +104,16 @@
 
     const togglePastiesView = () => {
         stackedView = !stackedView;
+    };
+
+    const onCopyLink = async () => {
+        await navigator.clipboard.writeText(location.href);
+
+        linkCopied = true;
+
+        setTimeout(() => {
+            linkCopied = false;
+        }, 1000);
     };
 </script>
 
@@ -185,7 +197,15 @@
             </svg>
         </div>
 
-        <div class="btn" aria-label="copy link" use:tooltip>
+        <div
+            class="btn"
+            aria-label="copy link"
+            use:tooltip={{
+                content: linkCopied ? "copied" : "copy link",
+                hideOnClick: false
+            }}
+            on:click={onCopyLink}
+        >
             <svg
                 class="icon"
                 xmlns="http://www.w3.org/2000/svg"
