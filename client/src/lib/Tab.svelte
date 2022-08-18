@@ -24,6 +24,7 @@
         await tick();
 
         inputElement.focus();
+        inputElement.select();
         onInput();
     };
 
