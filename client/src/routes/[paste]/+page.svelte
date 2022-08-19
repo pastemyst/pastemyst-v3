@@ -1,98 +1,19 @@
-<script lang="ts" context="module">
-    import {
-        ExpiresIn,
-        getPaste,
-        getPasteLangs,
-        getPasteStats,
-        type Paste,
-        type PasteStats,
-        type Pasty
-    } from "$lib/api/paste";
-    import { tooltip } from "$lib/tooltips";
-    import moment from "moment";
-
-    export const load: Load = async ({ params, fetch }) => {
-        const [paste, pasteStatus] = await getPaste(fetch, params.paste);
-
-        if (!paste) {
-            // TODO: error handling
-            return {
-                status: pasteStatus
-            };
-        }
-
-        const relativeCreatedAt = moment(paste.createdAt).fromNow();
-        const relativesExpiresIn =
-            paste.expiresIn !== ExpiresIn.never ? moment(paste.deletesAt).fromNow() : "";
-        const pasteStats = await getPasteStats(fetch, paste.id);
-        const langStats = await getPasteLangs(fetch, paste.id);
-        const [owner, ownerStatus] =
-            paste.ownerId !== "" ? await getUserById(fetch, paste.ownerId) : [null, 0];
-
-        if (paste.ownerId !== "" && !owner) {
-            // TODO: error handling
-            return {
-                status: ownerStatus
-            };
-        }
-
-        const highlightedCode: string[] = [];
-
-        for (const pasty of paste.pasties) {
-            const res = await fetch("/internal/highlight", {
-                method: "post",
-                body: JSON.stringify({
-                    content: pasty.content,
-                    language: pasty.language
-                })
-            });
-
-            // TODO: error handling
-            if (!res.ok)
-                return {
-                    status: 500
-                };
-
-            highlightedCode.push(await res.text());
-        }
-
-        return {
-            status: 200,
-            props: {
-                paste: paste,
-                relativeCreatedAt: relativeCreatedAt,
-                relativesExpiresIn: relativesExpiresIn,
-                langStats: langStats,
-                pasteStats: pasteStats,
-                owner: owner,
-                highlightedCode: highlightedCode
-            }
-        };
-    };
-</script>
-
 <script lang="ts">
+    import type { PageData } from "./$types";
     import Tab from "$lib/Tab.svelte";
-    import { getUserById, type User } from "$lib/api/user";
-    import type { LangStat } from "$lib/api/lang";
     import PastyMeta from "$lib/PastyMeta.svelte";
-    import type { Load } from "@sveltejs/kit";
+    import { ExpiresIn, type Pasty } from "$lib/api/paste";
+    import { tooltip } from "$lib/tooltips";
 
-    export let paste: Paste;
-    export let relativeCreatedAt: string;
-    export let relativesExpiresIn: string;
-    export let highlightedCode: string[];
-    export let owner: User | null;
-    export let langStats: LangStat[];
-    export let pasteStats: PasteStats;
+    export let data: PageData;
 
-    let activePastyId: string = paste.pasties[0].id;
-    let activePasty: Pasty = paste.pasties[0];
+    let activePastyId: string = data.paste.pasties[0].id;
+    let activePasty: Pasty = data.paste.pasties[0];
 
     let linkCopied = false;
 
     $: {
-        const p = paste.pasties.find((p) => p.id === activePastyId);
+        const p = data.paste.pasties.find((p) => p.id === activePastyId);
         if (p) activePasty = p;
     }
 
@@ -118,13 +39,13 @@
 </script>
 
 <svelte:head>
-    <title>pastemyst | {paste.title || "untitled"}</title>
+    <title>pastemyst | {data.paste.title || "untitled"}</title>
 </svelte:head>
 
 <section class="paste-header flex column center space-between">
     <div class="title flex col">
         <div class="flex row center">
-            {#if paste.private}
+            {#if data.paste.private}
                 <div use:tooltip aria-label="private paste" class="flex row center private-icon">
                     <svg xmlns="http://www.w3.org/2000/svg" class="icon" viewBox="0 0 512 512">
                         <title>Lock Closed</title>
@@ -136,20 +57,22 @@
                 </div>
             {/if}
 
-            <h2>{paste.title || "untitled"}</h2>
+            <h2>{data.paste.title || "untitled"}</h2>
         </div>
 
         <span class="dates">
-            <span use:tooltip aria-label={new Date(paste.createdAt).toString()}>
-                {relativeCreatedAt}
+            <span use:tooltip aria-label={new Date(data.paste.createdAt).toString()}>
+                {data.relativeCreatedAt}
             </span>
-            {#if owner}
-                <span class="owner">by <a href="/~{owner.username}">{owner.username}</a></span>
+            {#if data.owner}
+                <span class="owner"
+                    >by <a href="/~{data.owner.username}">{data.owner.username}</a></span
+                >
             {/if}
-            {#if paste?.expiresIn != ExpiresIn.never}
+            {#if data.paste.expiresIn != ExpiresIn.never}
                 <span class="separator">-</span>
-                <span use:tooltip aria-label={new Date(paste.deletesAt).toString()}>
-                    expires {relativesExpiresIn}
+                <span use:tooltip aria-label={new Date(data.paste.deletesAt).toString()}>
+                    expires {data.relativesExpiresIn}
                 </span>
             {/if}
         </span>
@@ -295,7 +218,7 @@
 </section>
 
 <div class="lang-stats flex">
-    {#each langStats as lang}
+    {#each data.langStats as lang}
         <div
             class="lang"
             style="width:{lang.percentage}%; background-color:{lang.language.color};"
@@ -307,26 +230,32 @@
 
 <div class="pasties">
     {#if stackedView}
-        {#each paste.pasties as pasty, i}
+        {#each data.paste.pasties as pasty, i}
             <div class="pasty">
                 <div class="sticky">
                     <div class="title flex row space-between center">
                         <span>{pasty.title}</span>
 
-                        <div class="meta-stacked flex row center">
-                            <PastyMeta {pasty} {langStats} stats={pasteStats.pasties[pasty.id]} />
-                        </div>
+                        {#if data.pasteStats}
+                            <div class="meta-stacked flex row center">
+                                <PastyMeta
+                                    {pasty}
+                                    langStats={data.langStats}
+                                    stats={data.pasteStats.pasties[pasty.id]}
+                                />
+                            </div>
+                        {/if}
                     </div>
                 </div>
 
-                {@html highlightedCode[i]}
+                {@html data.highlightedCode[i]}
             </div>
         {/each}
     {:else}
         <div class="sticky">
             <div class="tabs flex row center">
                 <div class="tabgroup flex row">
-                    {#each paste.pasties as pasty}
+                    {#each data.paste.pasties as pasty}
                         <Tab
                             id={pasty.id}
                             isReadonly
@@ -338,17 +267,19 @@
                 </div>
             </div>
 
-            <div class="meta-tabbed">
-                <PastyMeta
-                    pasty={activePasty}
-                    {langStats}
-                    stats={pasteStats.pasties[activePastyId]}
-                />
-            </div>
+            {#if data.pasteStats}
+                <div class="meta-tabbed">
+                    <PastyMeta
+                        pasty={activePasty}
+                        langStats={data.langStats}
+                        stats={data.pasteStats.pasties[activePastyId]}
+                    />
+                </div>
+            {/if}
         </div>
 
         <!-- prettier-ignore -->
-        {@html highlightedCode[paste.pasties.findIndex((p) => p.id === activePastyId)]}
+        {@html data.highlightedCode[data.paste.pasties.findIndex((p) => p.id === activePastyId)]}
     {/if}
 </div>
 
