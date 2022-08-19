@@ -1,63 +1,11 @@
-<script lang="ts" context="module">
-    import { apiBase } from "$lib/api/api";
-    import type { User } from "$lib/api/user";
-    import moment from "moment";
-    import { tooltip } from "$lib/tooltips";
-    import type { Page } from "$lib/api/page";
-    import { ExpiresIn, type Paste } from "$lib/api/paste";
-
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    export const load = async ({ params, fetch }: { params: any; fetch: any }) => {
-        const userRes = await fetch(`${apiBase}/user/${params.user}`, {
-            method: "get"
-        });
-
-        const meRes = await fetch(`${apiBase}/auth/self`, {
-            method: "get",
-            credentials: "include"
-        });
-
-        const userPastesRes = await fetch(`${apiBase}/user/${params.user}/pastes?page_size=5`, {
-            method: "get",
-            credentials: "include"
-        });
-
-        let user: User;
-        let relativeJoined: string;
-        let isCurrentUser = false;
-        let pastes: Page<Paste>;
-        if (userRes.ok) {
-            user = await userRes.json();
-            relativeJoined = moment(user.createdAt).fromNow();
-
-            if (meRes.ok) {
-                const loggedInUser: User = await meRes.json();
-
-                isCurrentUser = loggedInUser.id === user.id;
-            }
-
-            if (userPastesRes.ok) {
-                pastes = await userPastesRes.json();
-            }
-        }
-
-        return {
-            status: userRes.status,
-            props: {
-                user: user,
-                isCurrentUser: isCurrentUser,
-                relativeJoined: relativeJoined,
-                pastes: pastes
-            }
-        };
-    };
-</script>
-
 <script lang="ts">
-    export let user: User;
-    export let relativeJoined: string;
-    export let isCurrentUser: boolean;
-    export let pastes: Page<Paste>;
+    import { apiBase } from "$lib/api/api";
+    import { ExpiresIn, type Paste } from "$lib/api/paste";
+    import type { PageData } from "./$types";
+    import { tooltip } from "$lib/tooltips";
+import moment from "moment";
+
+    export let data: PageData;
 
     const getPasteLangs = (paste: Paste): string => {
         let langs: string[] = [];
@@ -72,7 +20,7 @@
 
     const fetchPastes = async (page: number) => {
         const res = await fetch(
-            `${apiBase}/user/${user.username}/pastes?page=${page}&page_size=5`,
+            `${apiBase}/user/${data.user.username}/pastes?page=${page}&page_size=5`,
             {
                 method: "get",
                 credentials: "include"
@@ -82,37 +30,37 @@
         if (!res.ok) return;
 
         if (res.ok) {
-            pastes = await res.json();
+            data.pastes = await res.json();
         }
     };
 
     const onPrevPage = async () => {
-        if (pastes.page === 0) return;
+        if (data.pastes.page === 0) return;
 
-        await fetchPastes(pastes.page - 1);
+        await fetchPastes(data.pastes.page - 1);
     };
 
     const onNextPage = async () => {
-        if (pastes.page === pastes.totalPages - 1) return;
+        if (data.pastes.page === data.pastes.totalPages - 1) return;
 
-        await fetchPastes(pastes.page + 1);
+        await fetchPastes(data.pastes.page + 1);
     };
 </script>
 
 <svelte:head>
-    <title>pastemyst | {user.username}</title>
+    <title>pastemyst | {data.user.username}</title>
 </svelte:head>
 
 <div class="flex sm-row">
     <section class="user-header flex sm-col center">
-        <img class="avatar" src={user.avatarUrl} alt="${user.username}'s avatar" />
+        <img class="avatar" src={data.user.avatarUrl} alt="${data.user.username}'s avatar" />
 
         <div class="username flex col">
             <div class="flex row center username-top">
-                <h2>{user.username}</h2>
+                <h2>{data.user.username}</h2>
 
                 <div class="badges flex row center">
-                    {#if user.contributor}
+                    {#if data.user.contributor}
                         <div use:tooltip aria-label="contributor" class="flex">
                             <svg
                                 xmlns="http://www.w3.org/2000/svg"
@@ -136,10 +84,10 @@
                         </div>
                     {/if}
 
-                    {#if user.supporter}
+                    {#if data.user.supporter}
                         <div
                             use:tooltip
-                            aria-label="supporter for {user.supporter} months"
+                            aria-label="supporter for {data.user.supporter} months"
                             class="flex"
                         >
                             <svg
@@ -156,7 +104,7 @@
                         </div>
                     {/if}
 
-                    {#if isCurrentUser}
+                    {#if data.isCurrentUser}
                         <a
                             href="/settings"
                             use:tooltip
@@ -199,8 +147,8 @@
                 </div>
             </div>
 
-            <p class="joined" use:tooltip aria-label={new Date(user.createdAt).toString()}>
-                joined: {relativeJoined}
+            <p class="joined" use:tooltip aria-label={new Date(data.user.createdAt).toString()}>
+                joined: {data.relativeJoined}
             </p>
         </div>
     </section>
@@ -208,10 +156,10 @@
     <section class="public-pastes">
         <h3>public pastes</h3>
 
-        {#if pastes.items.length === 0}
-            <p class="no-public-pastes">{user.username} doesn't have any public pastes yet.</p>
+        {#if data.pastes.items.length === 0}
+            <p class="no-public-pastes">{data.user.username} doesn't have any public pastes yet.</p>
         {:else}
-            {#each pastes.items as paste}
+            {#each data.pastes.items as paste}
                 <a href="/{paste.id}" class="paste btn" sveltekit:prefetch>
                     <div class="flex row center space-between">
                         <p class="title">{paste.title === "" ? "(untitled)" : paste.title}</p>
@@ -251,9 +199,9 @@
                 </a>
             {/each}
 
-            {#if pastes.totalPages > 1}
+            {#if data.pastes.totalPages > 1}
                 <div class="pager flex row center">
-                    <button class="btn" disabled={pastes.page === 0} on:click={onPrevPage}>
+                    <button class="btn" disabled={data.pastes.page === 0} on:click={onPrevPage}>
                         <svg xmlns="http://www.w3.org/2000/svg" class="icon" viewBox="0 0 512 512">
                             <title>Caret Back</title>
                             <path
@@ -262,8 +210,8 @@
                             />
                         </svg>
                     </button>
-                    <span>{pastes.page + 1}/{pastes.totalPages}</span>
-                    <button class="btn" disabled={!pastes.hasNextPage} on:click={onNextPage}>
+                    <span>{data.pastes.page + 1}/{data.pastes.totalPages}</span>
+                    <button class="btn" disabled={!data.pastes.hasNextPage} on:click={onNextPage}>
                         <svg xmlns="http://www.w3.org/2000/svg" class="icon" viewBox="0 0 512 512">
                             <title>Caret Forward</title>
                             <path

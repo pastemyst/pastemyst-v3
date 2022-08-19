@@ -1,17 +1,14 @@
 import { getLangs } from "$lib/api/lang";
-import type { RequestEvent } from "@sveltejs/kit";
+import type { RequestEvent, RequestHandler } from "@sveltejs/kit";
 import { getHighlighter, type Highlighter, loadTheme, type ILanguageRegistration } from "shiki";
 import { readFileSync } from "fs";
 
 let highlighter: Highlighter;
 
-export const POST = async ({ request }: RequestEvent) => {
+export const POST: RequestHandler = async ({ request }: RequestEvent) => {
     const json = await request.json();
 
-    return {
-        status: 200,
-        body: await highlight(json.content, json.language)
-    };
+    return new Response(await highlight(json.content, json.language));
 };
 
 const highlight = async (content: string, language: string) => {
