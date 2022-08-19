@@ -3,7 +3,7 @@
     import { ExpiresIn, type Paste } from "$lib/api/paste";
     import type { PageData } from "./$types";
     import { tooltip } from "$lib/tooltips";
-import moment from "moment";
+    import moment from "moment";
 
     export let data: PageData;
 
