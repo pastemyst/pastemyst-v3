@@ -53,7 +53,12 @@
         </button>
 
         {#if !paste.private}
-            <a class="btn" href="/raw/{paste.id}/{pasty.id}" aria-label="view raw content" use:tooltip>raw</a>
+            <a
+                class="btn"
+                href="/raw/{paste.id}/{pasty.id}"
+                aria-label="view raw content"
+                use:tooltip>raw</a
+            >
         {/if}
     </div>
 </div>
