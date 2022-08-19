@@ -239,6 +239,7 @@
                         {#if data.pasteStats}
                             <div class="meta-stacked flex row center">
                                 <PastyMeta
+                                    paste={data.paste}
                                     {pasty}
                                     langStats={data.langStats}
                                     stats={data.pasteStats.pasties[pasty.id]}
@@ -270,6 +271,7 @@
             {#if data.pasteStats}
                 <div class="meta-tabbed">
                     <PastyMeta
+                        paste={data.paste}
                         pasty={activePasty}
                         langStats={data.langStats}
                         stats={data.pasteStats.pasties[activePastyId]}
