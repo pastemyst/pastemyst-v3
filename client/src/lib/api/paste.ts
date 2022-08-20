@@ -22,6 +22,7 @@ export interface Paste {
     pasties: Pasty[];
     ownerId: string;
     private: boolean;
+    stars: number;
 }
 
 export interface Pasty {
@@ -116,6 +117,24 @@ export const getPaste = async (
 export const deletePaste = async (id: string): Promise<boolean> => {
     const res = await fetch(`${apiBase}/paste/${id}`, {
         method: "delete",
+        credentials: "include"
+    });
+
+    return res.ok;
+};
+
+export const starPaste = async (id: string): Promise<boolean> => {
+    const res = await fetch(`${apiBase}/paste/${id}/star`, {
+        method: "post",
+        credentials: "include"
+    });
+
+    return res.ok;
+};
+
+export const isPasteStarred = async (fetchFunc: FetchFunc, id: string): Promise<boolean> => {
+    const res = await fetchFunc(`${apiBase}/paste/${id}/star`, {
+        method: "get",
         credentials: "include"
     });
 
