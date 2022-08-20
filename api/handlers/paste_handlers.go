@@ -316,6 +316,41 @@ func StarPasteHandler(ctx echo.Context) error {
 	return nil
 }
 
+// Checks if the current user starred the paste.
+//
+// GET /api/v3/paste/:id/star
+func IsPasteStarredHandler(ctx echo.Context) error {
+	id := ctx.Param("id")
+
+	user, hasUser := ctx.Get("user").(models.User)
+
+	if !hasUser {
+		return echo.NewHTTPError(http.StatusUnauthorized, "You must be authorized to star pastes.")
+	}
+
+	dbPaste, err := db.DBQueries.GetPaste(db.DBContext, id)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusNotFound)
+	}
+
+	if dbPaste.OwnerID.String != user.Id && dbPaste.Private {
+		// returning not found instead of unauthorized to not expose that this paste exists
+		return echo.NewHTTPError(http.StatusNotFound)
+	}
+
+	isStarred, err := db.DBQueries.IsPasteStarred(db.DBContext, db.IsPasteStarredParams{UserID: user.Id, PasteID: id})
+	if err != nil {
+		logging.Logger.Errorf("Failed checking if a paste is starred: %s", err.Error())
+		return echo.NewHTTPError(http.StatusInternalServerError)
+	}
+
+	if isStarred {
+		return nil
+	} else {
+		return echo.NewHTTPError(http.StatusNotFound)
+	}
+}
+
 // Returns the paste from the provided id.
 func GetPaste(id string, user *models.User) (models.Paste, error) {
 	// get paste from db

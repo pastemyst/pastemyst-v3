@@ -86,6 +86,7 @@ func main() {
 	e.GET("/api/v3/paste/:id", handlers.GetPaseHandler)
 	e.GET("/api/v3/paste/:id/stats", handlers.GetPasteStatsHandler)
 	e.GET("/api/v3/paste/:id/langs", handlers.GetPasteLangStatsHandler)
+	e.GET("/api/v3/paste/:id/star", handlers.IsPasteStarredHandler)
 	e.POST("/api/v3/paste/:id/star", handlers.StarPasteHandler)
 	e.DELETE("/api/v3/paste/:id", handlers.DeletePasteHandler)
 	e.POST("/api/v3/paste", handlers.CreatePasteHandler)

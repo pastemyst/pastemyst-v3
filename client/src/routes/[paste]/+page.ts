@@ -1,5 +1,5 @@
 import { error } from "@sveltejs/kit";
-import { ExpiresIn, getPaste, getPasteLangs, getPasteStats } from "$lib/api/paste";
+import { ExpiresIn, getPaste, getPasteLangs, getPasteStats, isPasteStarred } from "$lib/api/paste";
 import type { PageLoad } from "./$types";
 import moment from "moment";
 import { getUserById } from "$lib/api/user";
@@ -19,6 +19,7 @@ export const load: PageLoad = async ({ params, fetch }) => {
     const langStats = await getPasteLangs(fetch, paste.id);
     const [owner, ownerStatus] =
         paste.ownerId !== "" ? await getUserById(fetch, paste.ownerId) : [null, 0];
+    const isStarred = await isPasteStarred(fetch, paste.id);
 
     if (paste.ownerId !== "" && !owner) {
         // TODO: error handling
@@ -49,6 +50,7 @@ export const load: PageLoad = async ({ params, fetch }) => {
         langStats: langStats,
         pasteStats: pasteStats,
         owner: owner,
-        highlightedCode: highlightedCode
+        highlightedCode: highlightedCode,
+        isStarred: isStarred
     };
 };
