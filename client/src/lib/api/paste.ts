@@ -113,6 +113,15 @@ export const getPaste = async (
     return [null, res.status];
 };
 
+export const deletePaste = async (id: string): Promise<boolean> => {
+    const res = await fetch(`${apiBase}/paste/${id}`, {
+        method: "delete",
+        credentials: "include"
+    });
+
+    return res.ok;
+};
+
 export const getPasteStats = async (
     fetchFunc: FetchFunc,
     id: string

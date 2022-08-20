@@ -2,8 +2,10 @@
     import type { PageData } from "./$types";
     import Tab from "$lib/Tab.svelte";
     import PastyMeta from "$lib/PastyMeta.svelte";
-    import { ExpiresIn, type Pasty } from "$lib/api/paste";
+    import { deletePaste, ExpiresIn, type Pasty } from "$lib/api/paste";
     import { tooltip } from "$lib/tooltips";
+    import { currentUserStore } from "$lib/stores";
+    import { goto } from "$app/navigation";
 
     export let data: PageData;
 
@@ -35,6 +37,20 @@
         setTimeout(() => {
             linkCopied = false;
         }, 1000);
+    };
+
+    const onDeleteClick = async () => {
+        // TODO: nicer confirm (use modal from cmd palette)
+        if (confirm("are you sure you want to delete this paste? this action can't be undone.")) {
+            const success = await deletePaste(data.paste.id);
+
+            if (success) {
+                goto("/");
+            } else {
+                // TODO: nicer error reporting.
+                alert("failed to delete the paste. try again later.");
+            }
+        }
     };
 </script>
 
@@ -199,6 +215,27 @@
                 />
             </svg>
         </button>
+
+        {#if data.paste.ownerId === $currentUserStore?.id}
+            <button use:tooltip aria-label="delete paste" on:click={onDeleteClick}>
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon" viewBox="0 0 512 512">
+                    <title>Trash Bin</title>
+                    <rect
+                        x="32"
+                        y="48"
+                        width="448"
+                        height="80"
+                        rx="32"
+                        ry="32"
+                        fill="currentColor"
+                    />
+                    <path
+                        fill="currentColor"
+                        d="M74.45 160a8 8 0 00-8 8.83l26.31 252.56a1.5 1.5 0 000 .22A48 48 0 00140.45 464h231.09a48 48 0 0047.67-42.39v-.21l26.27-252.57a8 8 0 00-8-8.83zm248.86 180.69a16 16 0 11-22.63 22.62L256 318.63l-44.69 44.68a16 16 0 01-22.63-22.62L233.37 296l-44.69-44.69a16 16 0 0122.63-22.62L256 273.37l44.68-44.68a16 16 0 0122.63 22.62L278.62 296z"
+                    />
+                </svg>
+            </button>
+        {/if}
 
         <button aria-label="more options" use:tooltip>
             <svg
