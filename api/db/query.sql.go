@@ -143,6 +143,15 @@ func (q *Queries) DeleteExpiredPastes(ctx context.Context) (int64, error) {
 	return count, err
 }
 
+const deletePaste = `-- name: DeletePaste :exec
+delete from pastes where id = $1
+`
+
+func (q *Queries) DeletePaste(ctx context.Context, id string) error {
+	_, err := q.db.ExecContext(ctx, deletePaste, id)
+	return err
+}
+
 const existsPaste = `-- name: ExistsPaste :one
 select exists(select 1 from pastes where id = $1)
 `

@@ -17,7 +17,7 @@ import (
 
 // Gets a single paste.
 //
-// /api/v3/paste/:id
+// GET /api/v3/paste/:id
 func GetPaseHandler(ctx echo.Context) error {
 	id := ctx.Param("id")
 
@@ -33,7 +33,7 @@ func GetPaseHandler(ctx echo.Context) error {
 
 // Gets various statistics of a paste.
 //
-// /api/v3/paste/:id/stats
+// GET /api/v3/paste/:id/stats
 func GetPasteStatsHandler(ctx echo.Context) error {
 	id := ctx.Param("id")
 
@@ -78,7 +78,7 @@ func GetPasteStatsHandler(ctx echo.Context) error {
 
 // Returns language statistics of the provided paste.
 //
-// /api/v3/paste/:id/langs
+// GET /api/v3/paste/:id/langs
 func GetPasteLangStatsHandler(ctx echo.Context) error {
 	id := ctx.Param("id")
 
@@ -136,7 +136,7 @@ func GetPasteLangStatsHandler(ctx echo.Context) error {
 
 // Creates a new paste.
 //
-// /api/v3/paste/
+// POST /api/v3/paste/
 func CreatePasteHandler(ctx echo.Context) error {
 	user := ctx.Get("user")
 
@@ -156,6 +156,10 @@ func CreatePasteHandler(ctx echo.Context) error {
 
 	if createInfo.Private && user == nil {
 		return echo.NewHTTPError(http.StatusUnauthorized, "Can't create a private paste while unauthorized.")
+	}
+
+	if createInfo.Private && createInfo.Anonymous {
+		return echo.NewHTTPError(http.StatusBadRequest, "Can't create a private anonymous paste.")
 	}
 
 	now := time.Now().UTC()
@@ -227,6 +231,44 @@ func CreatePasteHandler(ctx echo.Context) error {
 	}
 
 	return ctx.JSON(http.StatusOK, paste)
+}
+
+// Deletes a paste.
+//
+// DELETE /api/v3/paste/:id
+func DeletePasteHandler(ctx echo.Context) error {
+	id := ctx.Param("id")
+
+	user, hasUser := ctx.Get("user").(models.User)
+
+	if !hasUser {
+		return echo.NewHTTPError(http.StatusBadRequest, "You must be authenticated to delete pastes.")
+	}
+
+	dbPaste, err := db.DBQueries.GetPaste(db.DBContext, id)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusNotFound)
+	}
+
+	if !dbPaste.OwnerID.Valid || dbPaste.OwnerID.String == "" {
+		return echo.NewHTTPError(http.StatusBadRequest, "Can't delete non-user pastes.")
+	}
+
+	if dbPaste.OwnerID.String != user.Id {
+		if dbPaste.Private {
+			// returning not found instead of unauthorized to not expose that this paste exists
+			return echo.NewHTTPError(http.StatusNotFound)
+		} else {
+			return echo.NewHTTPError(http.StatusUnauthorized)
+		}
+	}
+
+	if err = db.DBQueries.DeletePaste(db.DBContext, id); err != nil {
+		logging.Logger.Errorf("Faile deleting a paste: %s", err.Error())
+		return echo.NewHTTPError(http.StatusInternalServerError)
+	}
+
+	return nil
 }
 
 // Returns the paste from the provided id.

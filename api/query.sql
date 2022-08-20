@@ -25,6 +25,9 @@ insert into pasties (
 )
 returning *;
 
+-- name: DeletePaste :exec
+delete from pastes where id = $1;
+
 -- name: GetPasteCount :one
 select count(*) from pastes;
 
