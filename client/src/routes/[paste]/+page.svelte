@@ -2,7 +2,7 @@
     import type { PageData } from "./$types";
     import Tab from "$lib/Tab.svelte";
     import PastyMeta from "$lib/PastyMeta.svelte";
-    import { deletePaste, ExpiresIn, type Pasty } from "$lib/api/paste";
+    import { deletePaste, ExpiresIn, starPaste, type Pasty } from "$lib/api/paste";
     import { tooltip } from "$lib/tooltips";
     import { currentUserStore } from "$lib/stores";
     import { goto } from "$app/navigation";
@@ -52,6 +52,18 @@
             }
         }
     };
+
+    const onStarClick = async () => {
+        await starPaste(data.paste.id);
+
+        data.isStarred = !data.isStarred;
+
+        if (data.isStarred) {
+            data.paste.stars++;
+        } else {
+            data.paste.stars--;
+        }
+    };
 </script>
 
 <svelte:head>
@@ -95,7 +107,14 @@
     </div>
 
     <div class="options flex row center">
-        <button class="stars" aria-label="stars" use:tooltip>
+        <button
+            class="stars"
+            aria-label="stars"
+            use:tooltip
+            disabled={$currentUserStore == null}
+            on:click={onStarClick}
+            class:starred={data.isStarred}
+        >
             <svg
                 class="icon"
                 xmlns="http://www.w3.org/2000/svg"
@@ -109,7 +128,7 @@
                     d="M394,480a16,16,0,0,1-9.39-3L256,383.76,127.39,477a16,16,0,0,1-24.55-18.08L153,310.35,23,221.2A16,16,0,0,1,32,192H192.38l48.4-148.95a16,16,0,0,1,30.44,0l48.4,149H480a16,16,0,0,1,9.05,29.2L359,310.35l50.13,148.53A16,16,0,0,1,394,480Z"
                 />
             </svg>
-            <p>54</p>
+            <p>{data.paste.stars}</p>
         </button>
 
         <button aria-label="edit" use:tooltip>
@@ -365,6 +384,10 @@
                 svg {
                     max-width: 20px;
                     max-height: 20px;
+                }
+
+                &.starred svg {
+                    color: $color-prim;
                 }
             }
 

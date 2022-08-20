@@ -42,3 +42,12 @@ create table if not exists pasties (
 
 alter table
     pasties owner to pastemyst;
+
+create table if not exists stars (
+    user_id text not null constraint stars_user_id_fk references users(id) on delete cascade,
+    paste_id text not null constraint stars_paste_id_fk references pastes(id) on delete cascade,
+    constraint stars_pk primary key (user_id, paste_id)
+);
+
+alter table
+    stars owner to pastemyst;
