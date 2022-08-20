@@ -271,6 +271,51 @@ func DeletePasteHandler(ctx echo.Context) error {
 	return nil
 }
 
+// Stars (or unstars if already starred) a paste.
+//
+// POST /api/v3/paste/:id/star
+func StarPasteHandler(ctx echo.Context) error {
+	id := ctx.Param("id")
+
+	user, hasUser := ctx.Get("user").(models.User)
+
+	if !hasUser {
+		return echo.NewHTTPError(http.StatusUnauthorized, "You must be authorized to star pastes.")
+	}
+
+	dbPaste, err := db.DBQueries.GetPaste(db.DBContext, id)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusNotFound)
+	}
+
+	if dbPaste.OwnerID.String != user.Id && dbPaste.Private {
+		// returning not found instead of unauthorized to not expose that this paste exists
+		return echo.NewHTTPError(http.StatusNotFound)
+	}
+
+	isStarred, err := db.DBQueries.IsPasteStarred(db.DBContext, db.IsPasteStarredParams{UserID: user.Id, PasteID: id})
+	if err != nil {
+		logging.Logger.Errorf("Failed checking if a paste is starred: %s", err.Error())
+		return echo.NewHTTPError(http.StatusInternalServerError)
+	}
+
+	if isStarred {
+		err = db.DBQueries.UnstarPaste(db.DBContext, db.UnstarPasteParams{UserID: user.Id, PasteID: id})
+		if err != nil {
+			logging.Logger.Errorf("Failed to unstar a paste: %s", err.Error())
+			return echo.NewHTTPError(http.StatusInternalServerError)
+		}
+	} else {
+		err = db.DBQueries.StarPaste(db.DBContext, db.StarPasteParams{UserID: user.Id, PasteID: id})
+		if err != nil {
+			logging.Logger.Errorf("Failed to unstar a paste: %s", err.Error())
+			return echo.NewHTTPError(http.StatusInternalServerError)
+		}
+	}
+
+	return nil
+}
+
 // Returns the paste from the provided id.
 func GetPaste(id string, user *models.User) (models.Paste, error) {
 	// get paste from db
@@ -304,6 +349,12 @@ func GetPaste(id string, user *models.User) (models.Paste, error) {
 		}
 	}
 
+	stars, err := db.DBQueries.GetPasteStarCount(db.DBContext, dbPaste.ID)
+	if err != nil {
+		logging.Logger.Errorf("Failed getting the paste star count: %s", err.Error())
+		return models.Paste{}, echo.NewHTTPError(http.StatusInternalServerError)
+	}
+
 	paste := models.Paste{
 		Id:        dbPaste.ID,
 		CreatedAt: dbPaste.CreatedAt,
@@ -313,6 +364,7 @@ func GetPaste(id string, user *models.User) (models.Paste, error) {
 		Pasties:   pasties,
 		OwnerId:   dbPaste.OwnerID.String,
 		Private:   dbPaste.Private,
+		Stars:     stars,
 	}
 
 	return paste, nil

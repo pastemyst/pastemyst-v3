@@ -86,3 +86,15 @@ where owner_id = $1;
 with deleted as
     (delete from pastes where expires_in != 'never' and deletes_at < now() returning *)
 select count(*) from deleted;
+
+-- name: IsPasteStarred :one
+select exists(select 1 from stars where user_id = $1 and paste_id = $2);
+
+-- name: StarPaste :exec
+insert into stars (user_id, paste_id) values ($1, $2) returning *;
+
+-- name: UnstarPaste :exec
+delete from stars where user_id = $1 and paste_id = $2;
+
+-- name: GetPasteStarCount :one
+select count(*) from stars where paste_id = $1;
