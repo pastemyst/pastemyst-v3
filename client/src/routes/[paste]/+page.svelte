@@ -5,7 +5,7 @@
     import { deletePaste, ExpiresIn, type Pasty } from "$lib/api/paste";
     import { tooltip } from "$lib/tooltips";
     import { currentUserStore } from "$lib/stores";
-import { goto } from "$app/navigation";
+    import { goto } from "$app/navigation";
 
     export let data: PageData;
 
