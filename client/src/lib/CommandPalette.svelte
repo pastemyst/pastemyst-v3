@@ -6,8 +6,10 @@
     let isOpen = false;
 
     let commands: Command[] = [];
+    let filteredCommands: Command[] = [];
 
     let searchElement: HTMLInputElement | undefined;
+    let search = "";
 
     let isCommandSelected = false;
     let selectedCommand: Command | undefined;
@@ -23,6 +25,7 @@
 
         cmdPalCommands.subscribe((cmds) => {
             commands = cmds;
+            filteredCommands = commands;
         });
     });
 
@@ -60,11 +63,11 @@
                 {
                     e.preventDefault();
 
-                    const index = commands.findIndex((cmd) => cmd === selectedCommand);
+                    const index = filteredCommands.findIndex((cmd) => cmd === selectedCommand);
                     let newIndex = index - 1;
-                    if (newIndex < 0) newIndex = commands.length - 1;
+                    if (newIndex < 0) newIndex = filteredCommands.length - 1;
 
-                    selectedCommand = commands[newIndex];
+                    selectedCommand = filteredCommands[newIndex];
                 }
                 break;
 
@@ -72,12 +75,32 @@
                 {
                     e.preventDefault();
 
-                    const index = commands.findIndex((cmd) => cmd === selectedCommand);
-                    const newIndex = (index + 1) % commands.length;
+                    const index = filteredCommands.findIndex((cmd) => cmd === selectedCommand);
+                    const newIndex = (index + 1) % filteredCommands.length;
 
-                    selectedCommand = commands[newIndex];
+                    selectedCommand = filteredCommands[newIndex];
                 }
                 break;
+        }
+    };
+
+    const filter = () => {
+        filteredCommands = commands.filter((cmd) => {
+            if (cmd.name.toLowerCase().indexOf(search.toLowerCase()) > -1) {
+                return cmd;
+            }
+        });
+
+        if (filteredCommands.length > 0) {
+            // make sure exact matches are on top
+            filteredCommands = filteredCommands.sort((a, b) => {
+                const a1: number = a.name.toLowerCase() === search.toLowerCase() ? -1 : 1;
+                const b1: number = b.name.toLowerCase() === search.toLowerCase() ? -1 : 1;
+
+                return Math.min(Math.max(a1 - b1, -1), 1);
+            });
+
+            selectedCommand = filteredCommands[0];
         }
     };
 
@@ -104,9 +127,7 @@
     const close = () => {
         isOpen = false;
 
-        if (searchElement) {
-            searchElement.value = "";
-        }
+        search = "";
 
         cmdPalOpen.set(false);
     };
@@ -140,8 +161,10 @@
                 spellcheck="false"
                 autocomplete="off"
                 bind:this={searchElement}
+                bind:value={search}
                 on:blur={onSearchBlur}
                 on:keydown={onSearchKeyDown}
+                on:input={filter}
             />
         </div>
 
@@ -150,7 +173,11 @@
                 <p class="no-commands">there aren't any commands defined.</p>
             {/if}
 
-            {#each commands as cmd}
+            {#if filteredCommands.length === 0}
+                <p class="no-commands">no matching commands</p>
+            {/if}
+
+            {#each filteredCommands as cmd}
                 <button
                     class="command"
                     on:click={() => onCmd(cmd)}
