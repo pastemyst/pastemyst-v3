@@ -145,10 +145,6 @@ button,
     text-decoration: none;
     @include transition();
 
-    &.btn-square {
-        padding: 0.25rem;
-    }
-
     &.btn-plain {
         background-color: transparent;
         border: 0;
@@ -188,11 +184,19 @@ button,
         color: $color-red;
         border-color: rgba($color-red, 0.3);
 
+        .icon {
+            color: $color-red;
+        }
+
         &:hover,
         &:focus,
         &:active {
             border-color: $color-red;
         }
+    }
+
+    &.btn-icon {
+        padding: 0.5rem;
     }
 
     &[disabled] {
@@ -252,8 +256,8 @@ section {
 
 .icon {
     color: $color-fg;
-    width: 25px;
-    height: 25px;
+    width: 18px;
+    height: 18px;
     pointer-events: none;
 }
 

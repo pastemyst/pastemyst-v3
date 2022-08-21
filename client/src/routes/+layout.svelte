@@ -2,13 +2,17 @@
     import Header from "$lib/Header.svelte";
     import Footer from "$lib/Footer.svelte";
     import CommandPalette from "$lib/CommandPalette.svelte";
-    import { onMount } from "svelte";
-    import { currentUserStore } from "$lib/stores";
-    import { getSelf } from "$lib/api/auth";
+    import type { LayoutData } from "./$types";
+    import { activePastesStores, currentUserStore, versionStore } from "$lib/stores";
 
     import "tippy.js/dist/tippy.css";
     import "tippy.js/dist/svg-arrow.css";
     import "../app.scss";
+
+    export let data: LayoutData;
+    $: currentUserStore.set(data.self);
+    $: versionStore.set(data.version);
+    $: activePastesStores.set(data.activePastes);
 
     const handleKeys = async (e: KeyboardEvent) => {
         if (e.ctrlKey && e.key === "k") {
@@ -16,10 +20,6 @@
             window.dispatchEvent(new CustomEvent("toggleCmd"));
         }
     };
-
-    onMount(async () => {
-        $currentUserStore = await getSelf();
-    });
 </script>
 
 <svelte:window on:keydown={handleKeys} />

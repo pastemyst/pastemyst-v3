@@ -75,11 +75,12 @@
         <div class="flex row center">
             {#if data.paste.private}
                 <div use:tooltip aria-label="private paste" class="flex row center private-icon">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="icon" viewBox="0 0 512 512">
-                        <title>Lock Closed</title>
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" class="icon">
+                        <title>Lock Closed Icon</title>
                         <path
                             fill="currentColor"
-                            d="M368 192h-16v-80a96 96 0 10-192 0v80h-16a64.07 64.07 0 00-64 64v176a64.07 64.07 0 0064 64h224a64.07 64.07 0 0064-64V256a64.07 64.07 0 00-64-64zm-48 0H192v-80a64 64 0 11128 0z"
+                            fill-rule="evenodd"
+                            d="M4 4v2h-.25A1.75 1.75 0 002 7.75v5.5c0 .966.784 1.75 1.75 1.75h8.5A1.75 1.75 0 0014 13.25v-5.5A1.75 1.75 0 0012.25 6H12V4a4 4 0 10-8 0zm6.5 2V4a2.5 2.5 0 00-5 0v2h5zM12 7.5h.25a.25.25 0 01.25.25v5.5a.25.25 0 01-.25.25h-8.5a.25.25 0 01-.25-.25v-5.5a.25.25 0 01.25-.25H12z"
                         />
                     </svg>
                 </div>
@@ -115,42 +116,35 @@
             on:click={onStarClick}
             class:starred={data.isStarred}
         >
-            <svg
-                class="icon"
-                xmlns="http://www.w3.org/2000/svg"
-                width="512"
-                height="512"
-                viewBox="0 0 512 512"
-            >
-                <title>star</title>
-                <path
-                    fill="currentColor"
-                    d="M394,480a16,16,0,0,1-9.39-3L256,383.76,127.39,477a16,16,0,0,1-24.55-18.08L153,310.35,23,221.2A16,16,0,0,1,32,192H192.38l48.4-148.95a16,16,0,0,1,30.44,0l48.4,149H480a16,16,0,0,1,9.05,29.2L359,310.35l50.13,148.53A16,16,0,0,1,394,480Z"
-                />
-            </svg>
+            {#if data.isStarred}
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" class="icon">
+                    <title>Star Icon</title>
+                    <path
+                        fill="currentColor"
+                        fill-rule="evenodd"
+                        d="M8 .25a.75.75 0 01.673.418l1.882 3.815 4.21.612a.75.75 0 01.416 1.279l-3.046 2.97.719 4.192a.75.75 0 01-1.088.791L8 12.347l-3.766 1.98a.75.75 0 01-1.088-.79l.72-4.194L.818 6.374a.75.75 0 01.416-1.28l4.21-.611L7.327.668A.75.75 0 018 .25z"
+                    />
+                </svg>
+            {:else}
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" class="icon">
+                    <title>Star Icon</title>
+                    <path
+                        fill="currentColor"
+                        fill-rule="evenodd"
+                        d="M8 .25a.75.75 0 01.673.418l1.882 3.815 4.21.612a.75.75 0 01.416 1.279l-3.046 2.97.719 4.192a.75.75 0 01-1.088.791L8 12.347l-3.766 1.98a.75.75 0 01-1.088-.79l.72-4.194L.818 6.374a.75.75 0 01.416-1.28l4.21-.611L7.327.668A.75.75 0 018 .25zm0 2.445L6.615 5.5a.75.75 0 01-.564.41l-3.097.45 2.24 2.184a.75.75 0 01.216.664l-.528 3.084 2.769-1.456a.75.75 0 01.698 0l2.77 1.456-.53-3.084a.75.75 0 01.216-.664l2.24-2.183-3.096-.45a.75.75 0 01-.564-.41L8 2.694v.001z"
+                    />
+                </svg>
+            {/if}
             <p>{data.paste.stars}</p>
         </button>
 
         <button aria-label="edit" use:tooltip>
-            <svg
-                class="icon"
-                xmlns="http://www.w3.org/2000/svg"
-                width="512"
-                height="512"
-                viewBox="0 0 512 512"
-            >
-                <title>edit</title>
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" class="icon">
+                <title>Pen Icon</title>
                 <path
                     fill="currentColor"
-                    d="M459.94,53.25a16.06,16.06,0,0,0-23.22-.56L424.35,65a8,8,0,0,0,0,11.31l11.34,11.32a8,8,0,0,0,11.34,0l12.06-12C465.19,69.54,465.76,59.62,459.94,53.25Z"
-                />
-                <path
-                    fill="currentColor"
-                    d="M399.34,90,218.82,270.2a9,9,0,0,0-2.31,3.93L208.16,299a3.91,3.91,0,0,0,4.86,4.86l24.85-8.35a9,9,0,0,0,3.93-2.31L422,112.66A9,9,0,0,0,422,100L412.05,90A9,9,0,0,0,399.34,90Z"
-                />
-                <path
-                    fill="currentColor"
-                    d="M386.34,193.66,264.45,315.79A41.08,41.08,0,0,1,247.58,326l-25.9,8.67a35.92,35.92,0,0,1-44.33-44.33l8.67-25.9a41.08,41.08,0,0,1,10.19-16.87L318.34,125.66A8,8,0,0,0,312.69,112H104a56,56,0,0,0-56,56V408a56,56,0,0,0,56,56H344a56,56,0,0,0,56-56V199.31A8,8,0,0,0,386.34,193.66Z"
+                    fill-rule="evenodd"
+                    d="M11.013 1.427a1.75 1.75 0 012.474 0l1.086 1.086a1.75 1.75 0 010 2.474l-8.61 8.61c-.21.21-.47.364-.756.445l-3.251.93a.75.75 0 01-.927-.928l.929-3.25a1.75 1.75 0 01.445-.758l8.61-8.61zm1.414 1.06a.25.25 0 00-.354 0L10.811 3.75l1.439 1.44 1.263-1.263a.25.25 0 000-.354l-1.086-1.086zM11.189 6.25L9.75 4.81l-6.286 6.287a.25.25 0 00-.064.108l-.558 1.953 1.953-.558a.249.249 0 00.108-.064l6.286-6.286z"
                 />
             </svg>
         </button>
@@ -163,51 +157,31 @@
             }}
             on:click={onCopyLink}
         >
-            <svg
-                class="icon"
-                xmlns="http://www.w3.org/2000/svg"
-                width="512"
-                height="512"
-                viewBox="0 0 512 512"
-            >
-                <title>copy link</title>
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" class="icon">
+                <title>Link Icon</title>
                 <path
-                    stroke="currentColor"
-                    d="M200.66,352H144a96,96,0,0,1,0-192h55.41"
-                    style="fill:none;stroke-linecap:round;stroke-linejoin:round;stroke-width:48px"
-                />
-                <path
-                    stroke="currentColor"
-                    d="M312.59,160H368a96,96,0,0,1,0,192H311.34"
-                    style="fill:none;stroke-linecap:round;stroke-linejoin:round;stroke-width:48px"
-                />
-                <line
-                    stroke="currentColor"
-                    x1="169.07"
-                    y1="256"
-                    x2="344.93"
-                    y2="256"
-                    style="fill:none;stroke-linecap:round;stroke-linejoin:round;stroke-width:48px"
+                    fill="currentColor"
+                    fill-rule="evenodd"
+                    d="M7.775 3.275a.75.75 0 001.06 1.06l1.25-1.25a2 2 0 112.83 2.83l-2.5 2.5a2 2 0 01-2.83 0 .75.75 0 00-1.06 1.06 3.5 3.5 0 004.95 0l2.5-2.5a3.5 3.5 0 00-4.95-4.95l-1.25 1.25zm-4.69 9.64a2 2 0 010-2.83l2.5-2.5a2 2 0 012.83 0 .75.75 0 001.06-1.06 3.5 3.5 0 00-4.95 0l-2.5 2.5a3.5 3.5 0 004.95 4.95l1.25-1.25a.75.75 0 00-1.06-1.06l-1.25 1.25a2 2 0 01-2.83 0z"
                 />
             </svg>
         </button>
 
         <button aria-label="clone paste" use:tooltip>
-            <svg
-                class="icon"
-                xmlns="http://www.w3.org/2000/svg"
-                width="512"
-                height="512"
-                viewBox="0 0 512 512"
-            >
-                <title>clone paste</title>
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" class="icon">
+                <title>Duplicate Icon</title>
                 <path
                     fill="currentColor"
-                    d="M408,112H184a72,72,0,0,0-72,72V408a72,72,0,0,0,72,72H408a72,72,0,0,0,72-72V184A72,72,0,0,0,408,112ZM375.55,312H312v63.55c0,8.61-6.62,16-15.23,16.43A16,16,0,0,1,280,376V312H216.45c-8.61,0-16-6.62-16.43-15.23A16,16,0,0,1,216,280h64V216.45c0-8.61,6.62-16,15.23-16.43A16,16,0,0,1,312,216v64h64a16,16,0,0,1,16,16.77C391.58,305.38,384.16,312,375.55,312Z"
+                    d="M10.5 3a.75.75 0 01.75.75v1h1a.75.75 0 010 1.5h-1v1a.75.75 0 01-1.5 0v-1h-1a.75.75 0 010-1.5h1v-1A.75.75 0 0110.5 3z"
                 />
                 <path
                     fill="currentColor"
-                    d="M395.88,80A72.12,72.12,0,0,0,328,32H104a72,72,0,0,0-72,72V328a72.12,72.12,0,0,0,48,67.88V160a80,80,0,0,1,80-80Z"
+                    fill-rule="evenodd"
+                    d="M6.75 0A1.75 1.75 0 005 1.75v7.5c0 .966.784 1.75 1.75 1.75h7.5A1.75 1.75 0 0016 9.25v-7.5A1.75 1.75 0 0014.25 0h-7.5zM6.5 1.75a.25.25 0 01.25-.25h7.5a.25.25 0 01.25.25v7.5a.25.25 0 01-.25.25h-7.5a.25.25 0 01-.25-.25v-7.5z"
+                />
+                <path
+                    fill="currentColor"
+                    d="M1.75 5A1.75 1.75 0 000 6.75v7.5C0 15.216.784 16 1.75 16h7.5A1.75 1.75 0 0011 14.25v-1.5a.75.75 0 00-1.5 0v1.5a.25.25 0 01-.25.25h-7.5a.25.25 0 01-.25-.25v-7.5a.25.25 0 01.25-.25h1.5a.75.75 0 000-1.5h-1.5z"
                 />
             </svg>
         </button>
@@ -215,59 +189,58 @@
         <button
             class="toggle-view"
             on:click={togglePastiesView}
-            use:tooltip
-            aria-label="toggle stacked / tabbed view"
+            use:tooltip={{
+                hideOnClick: false,
+                content: `switch to ${stackedView ? "tabbed" : "stacked"} view`
+            }}
+            aria-label="switch to {stackedView ? 'tabbed' : 'stacked'} view"
         >
-            <svg xmlns="http://www.w3.org/2000/svg" class="icon" viewBox="0 0 512 512">
-                <title>Layers</title>
-                <path
-                    fill="currentColor"
-                    d="M256 256c-13.47 0-26.94-2.39-37.44-7.17l-148-67.49C63.79 178.26 48 169.25 48 152.24s15.79-26 22.58-29.12l149.28-68.07c20.57-9.4 51.61-9.4 72.19 0l149.37 68.07c6.79 3.09 22.58 12.1 22.58 29.12s-15.79 26-22.58 29.11l-148 67.48C282.94 253.61 269.47 256 256 256zm176.76-100.86z"
-                />
-                <path
-                    fill="currentColor"
-                    d="M441.36 226.81L426.27 220l-38.77 17.74-94 43c-10.5 4.8-24 7.19-37.44 7.19s-26.93-2.39-37.42-7.19l-94.07-43L85.79 220l-15.22 6.84C63.79 229.93 48 239 48 256s15.79 26.08 22.56 29.17l148 67.63C229 357.6 242.49 360 256 360s26.94-2.4 37.44-7.19l147.87-67.61c6.81-3.09 22.69-12.11 22.69-29.2s-15.77-26.07-22.64-29.19z"
-                />
-                <path
-                    fill="currentColor"
-                    d="M441.36 330.8l-15.09-6.8-38.77 17.73-94 42.95c-10.5 4.78-24 7.18-37.44 7.18s-26.93-2.39-37.42-7.18l-94.07-43L85.79 324l-15.22 6.84C63.79 333.93 48 343 48 360s15.79 26.07 22.56 29.15l148 67.59C229 461.52 242.54 464 256 464s26.88-2.48 37.38-7.27l147.92-67.57c6.82-3.08 22.7-12.1 22.7-29.16s-15.77-26.07-22.64-29.2z"
-                />
-            </svg>
+            {#if stackedView}
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" class="icon">
+                    <title>Columns Icon</title>
+                    <path
+                        fill="currentColor"
+                        fill-rule="evenodd"
+                        d="M2.75 0A1.75 1.75 0 001 1.75v12.5c0 .966.784 1.75 1.75 1.75h2.5A1.75 1.75 0 007 14.25V1.75A1.75 1.75 0 005.25 0h-2.5zM2.5 1.75a.25.25 0 01.25-.25h2.5a.25.25 0 01.25.25v12.5a.25.25 0 01-.25.25h-2.5a.25.25 0 01-.25-.25V1.75zM10.75 0A1.75 1.75 0 009 1.75v12.5c0 .966.784 1.75 1.75 1.75h2.5A1.75 1.75 0 0015 14.25V1.75A1.75 1.75 0 0013.25 0h-2.5zm-.25 1.75a.25.25 0 01.25-.25h2.5a.25.25 0 01.25.25v12.5a.25.25 0 01-.25.25h-2.5a.25.25 0 01-.25-.25V1.75z"
+                    />
+                </svg>
+            {:else}
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" class="icon">
+                    <title>Rows Icon</title>
+                    <path
+                        fill="currentColor"
+                        fill-rule="evenodd"
+                        d="M16 2.75A1.75 1.75 0 0014.25 1H1.75A1.75 1.75 0 000 2.75v2.5A1.75 1.75 0 001.75 7h12.5A1.75 1.75 0 0016 5.25v-2.5zm-1.75-.25a.25.25 0 01.25.25v2.5a.25.25 0 01-.25.25H1.75a.25.25 0 01-.25-.25v-2.5a.25.25 0 01.25-.25h12.5zM16 10.75A1.75 1.75 0 0014.25 9H1.75A1.75 1.75 0 000 10.75v2.5A1.75 1.75 0 001.75 15h12.5A1.75 1.75 0 0016 13.25v-2.5zm-1.75-.25a.25.25 0 01.25.25v2.5a.25.25 0 01-.25.25H1.75a.25.25 0 01-.25-.25v-2.5a.25.25 0 01.25-.25h12.5z"
+                    />
+                </svg>
+            {/if}
         </button>
 
         {#if data.paste.ownerId === $currentUserStore?.id}
-            <button use:tooltip aria-label="delete paste" on:click={onDeleteClick}>
-                <svg xmlns="http://www.w3.org/2000/svg" class="icon" viewBox="0 0 512 512">
-                    <title>Trash Bin</title>
-                    <rect
-                        x="32"
-                        y="48"
-                        width="448"
-                        height="80"
-                        rx="32"
-                        ry="32"
-                        fill="currentColor"
-                    />
+            <button
+                use:tooltip
+                aria-label="delete paste"
+                on:click={onDeleteClick}
+                class="btn-danger"
+            >
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" class="icon">
+                    <title>Trash Icon</title>
                     <path
                         fill="currentColor"
-                        d="M74.45 160a8 8 0 00-8 8.83l26.31 252.56a1.5 1.5 0 000 .22A48 48 0 00140.45 464h231.09a48 48 0 0047.67-42.39v-.21l26.27-252.57a8 8 0 00-8-8.83zm248.86 180.69a16 16 0 11-22.63 22.62L256 318.63l-44.69 44.68a16 16 0 01-22.63-22.62L233.37 296l-44.69-44.69a16 16 0 0122.63-22.62L256 273.37l44.68-44.68a16 16 0 0122.63 22.62L278.62 296z"
+                        fill-rule="evenodd"
+                        d="M6.5 1.75a.25.25 0 01.25-.25h2.5a.25.25 0 01.25.25V3h-3V1.75zm4.5 0V3h2.25a.75.75 0 010 1.5H2.75a.75.75 0 010-1.5H5V1.75C5 .784 5.784 0 6.75 0h2.5C10.216 0 11 .784 11 1.75zM4.496 6.675a.75.75 0 10-1.492.15l.66 6.6A1.75 1.75 0 005.405 15h5.19c.9 0 1.652-.681 1.741-1.576l.66-6.6a.75.75 0 00-1.492-.149l-.66 6.6a.25.25 0 01-.249.225h-5.19a.25.25 0 01-.249-.225l-.66-6.6z"
                     />
                 </svg>
             </button>
         {/if}
 
         <button aria-label="more options" use:tooltip>
-            <svg
-                class="icon"
-                xmlns="http://www.w3.org/2000/svg"
-                width="512"
-                height="512"
-                viewBox="0 0 512 512"
-            >
-                <title>more options</title>
-                <circle fill="currentColor" cx="256" cy="256" r="48" />
-                <circle fill="currentColor" cx="416" cy="256" r="48" />
-                <circle fill="currentColor" cx="96" cy="256" r="48" />
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" class="icon">
+                <title>Dots Horizontal Icon</title>
+                <path
+                    fill="currentColor"
+                    d="M8 9a1.5 1.5 0 100-3 1.5 1.5 0 000 3zM1.5 9a1.5 1.5 0 100-3 1.5 1.5 0 000 3zm13 0a1.5 1.5 0 100-3 1.5 1.5 0 000 3z"
+                />
             </svg>
         </button>
     </div>
@@ -378,7 +351,6 @@
 
         .options {
             button {
-                background-color: $color-bg;
                 margin-left: 0.5rem;
 
                 svg {
@@ -395,6 +367,7 @@
                 p {
                     margin: 0;
                     margin-left: 0.5rem;
+                    font-size: $fs-small;
                 }
             }
         }

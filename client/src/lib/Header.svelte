@@ -15,70 +15,38 @@
 
     <div class="flex row center">
         {#if $currentUserStore != null}
-            <a href="/~{$currentUserStore.username}" class="nav-item user btn">
-                {$currentUserStore.username}
+            <a href="/~{$currentUserStore.username}" class="nav-item user btn btn-icon">
                 <img
                     src={$currentUserStore.avatarUrl}
                     alt="{$currentUserStore.username}'s avatar"
                 />
             </a>
         {:else}
-            <a
-                href="/login"
-                class="btn btn-square nav-item"
-                aria-label="login/register"
-                use:tooltip
-            >
-                <svg
-                    width="24"
-                    height="24"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    xmlns="http://www.w3.org/2000/svg"
-                    class="icon"
-                >
-                    <title>user icon</title>
+            <a href="/login" class="btn btn-icon nav-item" aria-label="login/register" use:tooltip>
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" class="icon">
+                    <title>Login Icon</title>
                     <path
+                        fill="currentColor"
                         fill-rule="evenodd"
-                        clip-rule="evenodd"
-                        d="M16 7C16 9.20914 14.2091 11 12 11C9.79086 11 8 9.20914 8 7C8 4.79086 9.79086 3 12 3C14.2091 3 16 4.79086 16 7ZM14 7C14 8.10457 13.1046 9 12 9C10.8954 9 10 8.10457 10 7C10 5.89543 10.8954 5 12 5C13.1046 5 14 5.89543 14 7Z"
-                        fill="currentColor"
-                    />
-                    <path
-                        d="M16 15C16 14.4477 15.5523 14 15 14H9C8.44772 14 8 14.4477 8 15V21H6V15C6 13.3431 7.34315 12 9 12H15C16.6569 12 18 13.3431 18 15V21H16V15Z"
-                        fill="currentColor"
+                        d="M2 2.75C2 1.784 2.784 1 3.75 1h2.5a.75.75 0 010 1.5h-2.5a.25.25 0 00-.25.25v10.5c0 .138.112.25.25.25h2.5a.75.75 0 010 1.5h-2.5A1.75 1.75 0 012 13.25V2.75zm6.56 4.5l1.97-1.97a.75.75 0 10-1.06-1.06L6.22 7.47a.75.75 0 000 1.06l3.25 3.25a.75.75 0 101.06-1.06L8.56 8.75h5.69a.75.75 0 000-1.5H8.56z"
                     />
                 </svg>
             </a>
         {/if}
 
         <button
-            class="nav-item btn-square"
+            class="nav-item btn-icon"
             on:click={onMenuClick}
             aria-label="menu"
             role="menu"
             use:tooltip
         >
-            <svg
-                width="24"
-                height="24"
-                viewBox="0 0 24 24"
-                fill="none"
-                xmlns="http://www.w3.org/2000/svg"
-                class="icon"
-            >
-                <title>menu icon</title>
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" class="icon">
+                <title>Menu Icon</title>
                 <path
-                    d="M2 6C2 5.44772 2.44772 5 3 5H21C21.5523 5 22 5.44772 22 6C22 6.55228 21.5523 7 21 7H3C2.44772 7 2 6.55228 2 6Z"
                     fill="currentColor"
-                />
-                <path
-                    d="M2 12.0322C2 11.4799 2.44772 11.0322 3 11.0322H21C21.5523 11.0322 22 11.4799 22 12.0322C22 12.5845 21.5523 13.0322 21 13.0322H3C2.44772 13.0322 2 12.5845 2 12.0322Z"
-                    fill="currentColor"
-                />
-                <path
-                    d="M3 17.0645C2.44772 17.0645 2 17.5122 2 18.0645C2 18.6167 2.44772 19.0645 3 19.0645H21C21.5523 19.0645 22 18.6167 22 18.0645C22 17.5122 21.5523 17.0645 21 17.0645H3Z"
-                    fill="currentColor"
+                    fill-rule="evenodd"
+                    d="M1 2.75A.75.75 0 011.75 2h12.5a.75.75 0 110 1.5H1.75A.75.75 0 011 2.75zm0 5A.75.75 0 011.75 7h12.5a.75.75 0 110 1.5H1.75A.75.75 0 011 7.75zM1.75 12a.75.75 0 100 1.5h12.5a.75.75 0 100-1.5H1.75z"
                 />
             </svg>
         </button>
@@ -102,7 +70,8 @@
         }
 
         img {
-            max-width: 24px;
+            width: 24px;
+            height: 24px;
             margin: 0;
             margin-right: 0.5rem;
         }
@@ -116,11 +85,12 @@
             font-size: $fs-normal;
             text-decoration: none;
             word-break: break-word;
+            padding: 0;
 
             img {
-                max-width: 24px;
+                width: 34px;
+                height: 34px;
                 margin: 0;
-                margin-left: 0.5rem;
                 border-radius: $border-radius;
             }
         }
