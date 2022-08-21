@@ -7,6 +7,7 @@
         type PastySkeleton
     } from "$lib/api/paste";
     import PasteOptions from "$lib/PasteOptions.svelte";
+import { cmdPalCommands } from "$lib/stores";
     import TabbedEditor from "$lib/TabbedEditor.svelte";
     import type TabData from "$lib/TabData";
 

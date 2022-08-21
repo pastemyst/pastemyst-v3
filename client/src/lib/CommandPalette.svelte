@@ -1,13 +1,15 @@
 <script lang="ts">
     import { onMount } from "svelte";
     import type { Command } from "./command";
-    import { cmdPalOpen } from "./stores";
+    import { cmdPalCommands, cmdPalOpen } from "./stores";
 
     let isOpen = false;
 
     let commands: Command[] = [];
 
     let searchElement: HTMLInputElement | undefined;
+
+    let selectedCommand: Command | undefined;
 
     onMount(() => {
         cmdPalOpen.subscribe((val) => {
@@ -16,6 +18,10 @@
             } else {
                 close();
             }
+        });
+
+        cmdPalCommands.subscribe((cmds) => {
+            commands = cmds;
         });
     })
 
@@ -27,6 +33,8 @@
     };
 
     const onSearchBlur = () => {
+        if (selectedCommand) return;
+
         close();
     };
 
@@ -66,6 +74,20 @@
 
         cmdPalOpen.set(false);
     };
+
+    const onCmd = (cmd: Command) => {
+        cmd.action();
+
+        close();
+    };
+
+    const onCmdMouseDown = (cmd: Command) => {
+        selectedCommand = cmd;
+    };
+
+    const onCmdMouseUp = () => {
+        selectedCommand = undefined;
+    };
 </script>
 
 <svelte:window on:keydown={handleKeys} />
@@ -89,6 +111,12 @@
             {#if commands.length === 0}
                 <p class="no-commands">there aren't any commands defined.</p>
             {/if}
+
+            {#each commands as cmd}
+                <button class="command" on:click={() => onCmd(cmd)} on:mousedown={() => onCmdMouseDown(cmd)} on:mouseup={onCmdMouseUp}>
+                    <p>{cmd.name}</p>
+                </button>
+            {/each}
         </div>
     </div>
 </div>
@@ -138,6 +166,23 @@
         .no-commands {
             margin: 0;
             padding: 0.5rem;
+        }
+
+        .command {
+            padding: 0.5rem;
+            cursor: pointer;
+            background-color: transparent;
+            border: none;
+            width: 100%;
+            border-radius: 0;
+
+            &:hover {
+                background-color: $color-bg-2;
+            }
+
+            p {
+                margin: 0;
+            }
         }
     }
 </style>
