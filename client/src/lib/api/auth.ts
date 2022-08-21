@@ -1,4 +1,5 @@
 import { apiBase } from "./api";
+import type { FetchFunc } from "./fetch";
 import type { User } from "./user";
 
 export const createAccount = async (username: string): Promise<string | null> => {
@@ -20,8 +21,8 @@ export const createAccount = async (username: string): Promise<string | null> =>
     return null;
 };
 
-export const getSelf = async (): Promise<User | null> => {
-    const res = await fetch(`${apiBase}/auth/self`, {
+export const getSelf = async (fetchFunc: FetchFunc): Promise<User | null> => {
+    const res = await fetchFunc(`${apiBase}/auth/self`, {
         method: "get",
         credentials: "include"
     });

@@ -228,11 +228,12 @@
                 the actual paste view when the paste is created. use the preview button to see the
                 final result."
             >
-                <svg xmlns="http://www.w3.org/2000/svg" class="icon" viewBox="0 0 512 512">
-                    <title>Information Circle</title>
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" class="icon">
+                    <title>Info Icon</title>
                     <path
                         fill="currentColor"
-                        d="M256 56C145.72 56 56 145.72 56 256s89.72 200 200 200 200-89.72 200-200S366.28 56 256 56zm0 82a26 26 0 11-26 26 26 26 0 0126-26zm48 226h-88a16 16 0 010-32h28v-88h-16a16 16 0 010-32h32a16 16 0 0116 16v104h28a16 16 0 010 32z"
+                        fill-rule="evenodd"
+                        d="M8 1.5a6.5 6.5 0 100 13 6.5 6.5 0 000-13zM0 8a8 8 0 1116 0A8 8 0 010 8zm6.5-.25A.75.75 0 017.25 7h1a.75.75 0 01.75.75v2.75h.25a.75.75 0 010 1.5h-2a.75.75 0 010-1.5h.25v-2h-.25a.75.75 0 01-.75-.75zM8 6a1 1 0 100-2 1 1 0 000 2z"
                     />
                 </svg>
                 <p>limited language support</p>
@@ -326,7 +327,7 @@
 
         .icon {
             color: $color-bg-2;
-            margin-right: 0.25rem;
+            margin-right: 0.5rem;
         }
 
         p {
