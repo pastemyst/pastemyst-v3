@@ -1,9 +1,9 @@
 <script lang="ts">
-    import { currentUserStore } from "./stores";
+    import { cmdPalOpen, currentUserStore } from "./stores";
     import { tooltip } from "./tooltips";
 
     const onMenuClick = () => {
-        window.dispatchEvent(new CustomEvent("openCmd"));
+        cmdPalOpen.set(true);
     };
 </script>
 

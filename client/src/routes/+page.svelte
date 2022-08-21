@@ -6,12 +6,9 @@
         type PasteSkeleton,
         type PastySkeleton
     } from "$lib/api/paste";
-    import { expiresSelect } from "$lib/cmdOptions";
     import PasteOptions from "$lib/PasteOptions.svelte";
-    import { isCommandPaletteOpen } from "$lib/stores";
     import TabbedEditor from "$lib/TabbedEditor.svelte";
     import type TabData from "$lib/TabData";
-    import { onMount } from "svelte";
 
     let expiresIn = "never";
 
@@ -21,15 +18,6 @@
 
     let anonymous: boolean;
     let isPrivate: boolean;
-
-    onMount(() => {
-        isCommandPaletteOpen.subscribe((open) => {
-            // on cmd pal close, update expires in
-            if (!open) {
-                expiresIn = expiresSelect.getSelected()?.name ?? "never";
-            }
-        });
-    });
 
     const onCreatePaste = async () => {
         let pasties: PastySkeleton[] = [];
@@ -58,8 +46,6 @@
     };
 
     const openExpiresSelect = () => {
-        const evt = new CustomEvent("cmdShowOptions", { detail: expiresSelect });
-        window.dispatchEvent(evt);
     };
 </script>
 
@@ -75,6 +61,7 @@
         id="paste-title"
         name="paste-title"
         maxlength="128"
+        autocomplete="off"
         bind:value={title}
     />
 

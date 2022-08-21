@@ -1,9 +1,9 @@
 <script lang="ts">
     import Header from "$lib/Header.svelte";
     import Footer from "$lib/Footer.svelte";
-    import CommandPalette from "$lib/CommandPalette.svelte";
     import type { LayoutData } from "./$types";
     import { activePastesStores, currentUserStore, versionStore } from "$lib/stores";
+    import CommandPalette from "$lib/CommandPalette.svelte";
 
     import "tippy.js/dist/tippy.css";
     import "tippy.js/dist/svg-arrow.css";
@@ -13,16 +13,7 @@
     $: currentUserStore.set(data.self);
     $: versionStore.set(data.version);
     $: activePastesStores.set(data.activePastes);
-
-    const handleKeys = async (e: KeyboardEvent) => {
-        if (e.ctrlKey && e.key === "k") {
-            e.preventDefault();
-            window.dispatchEvent(new CustomEvent("toggleCmd"));
-        }
-    };
 </script>
-
-<svelte:window on:keydown={handleKeys} />
 
 <div id="container">
     <Header />
