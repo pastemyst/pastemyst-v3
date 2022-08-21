@@ -142,17 +142,12 @@
     </div>
 
     <div class="add-btn btn" on:click={addTab}>
-        <svg
-            width="24"
-            height="24"
-            viewBox="0 0 24 24"
-            fill="none"
-            xmlns="http://www.w3.org/2000/svg"
-            class="icon"
-        >
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" class="icon">
+            <title>Plus Icon</title>
             <path
-                d="M12 4C11.4477 4 11 4.44772 11 5V11H5C4.44772 11 4 11.4477 4 12C4 12.5523 4.44772 13 5 13H11V19C11 19.5523 11.4477 20 12 20C12.5523 20 13 19.5523 13 19V13H19C19.5523 13 20 12.5523 20 12C20 11.4477 19.5523 11 19 11H13V5C13 4.44772 12.5523 4 12 4Z"
                 fill="currentColor"
+                fill-rule="evenodd"
+                d="M7.75 2a.75.75 0 01.75.75V7h4.25a.75.75 0 110 1.5H8.5v4.25a.75.75 0 11-1.5 0V8.5H2.75a.75.75 0 010-1.5H7V2.75A.75.75 0 017.75 2z"
             />
         </svg>
     </div>

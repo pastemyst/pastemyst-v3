@@ -1,4 +1,5 @@
 import { apiBase } from "./api";
+import type { FetchFunc } from "./fetch";
 
 export interface Release {
     url: string;
@@ -8,8 +9,8 @@ export interface Release {
     releasedAt: string;
 }
 
-export const getVersion = async (): Promise<string> => {
-    const res = await fetch(`${apiBase}/meta/version`, {
+export const getVersion = async (fetchFunc: FetchFunc): Promise<string> => {
+    const res = await fetchFunc(`${apiBase}/meta/version`, {
         method: "get"
     });
 
@@ -18,8 +19,8 @@ export const getVersion = async (): Promise<string> => {
     return "unknown version";
 };
 
-export const getReleases = async (): Promise<Release[]> => {
-    const res = await fetch(`${apiBase}/meta/releases`, {
+export const getReleases = async (fetchFunc: FetchFunc): Promise<Release[]> => {
+    const res = await fetchFunc(`${apiBase}/meta/releases`, {
         method: "get"
     });
 
@@ -28,8 +29,8 @@ export const getReleases = async (): Promise<Release[]> => {
     return [];
 };
 
-export const getActivePastes = async (): Promise<number> => {
-    const res = await fetch(`${apiBase}/meta/active_pastes`, {
+export const getActivePastes = async (fetchFunc: FetchFunc): Promise<number> => {
+    const res = await fetchFunc(`${apiBase}/meta/active_pastes`, {
         method: "get"
     });
 
