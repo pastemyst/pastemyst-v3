@@ -9,6 +9,7 @@
 
     let searchElement: HTMLInputElement | undefined;
 
+    let isCommandSelected = false;
     let selectedCommand: Command | undefined;
 
     onMount(() => {
@@ -23,7 +24,7 @@
         cmdPalCommands.subscribe((cmds) => {
             commands = cmds;
         });
-    })
+    });
 
     const handleKeys = (e: KeyboardEvent) => {
         if (e.ctrlKey && e.key === "k") {
@@ -33,7 +34,7 @@
     };
 
     const onSearchBlur = () => {
-        if (selectedCommand) return;
+        if (isCommandSelected) return;
 
         close();
     };
@@ -44,6 +45,37 @@
                 {
                     e.preventDefault();
                     close();
+                }
+                break;
+
+            case "Enter":
+                {
+                    e.preventDefault();
+
+                    selectedCommand?.action();
+                }
+                break;
+
+            case "ArrowUp":
+                {
+                    e.preventDefault();
+
+                    const index = commands.findIndex((cmd) => cmd === selectedCommand);
+                    let newIndex = index - 1;
+                    if (newIndex < 0) newIndex = commands.length - 1;
+
+                    selectedCommand = commands[newIndex];
+                }
+                break;
+
+            case "ArrowDown":
+                {
+                    e.preventDefault();
+
+                    const index = commands.findIndex((cmd) => cmd === selectedCommand);
+                    const newIndex = (index + 1) % commands.length;
+
+                    selectedCommand = commands[newIndex];
                 }
                 break;
         }
@@ -61,6 +93,10 @@
         isOpen = true;
 
         searchElement?.focus();
+
+        if (!selectedCommand) {
+            selectedCommand = commands[0];
+        }
 
         cmdPalOpen.set(true);
     };
@@ -83,10 +119,12 @@
 
     const onCmdMouseDown = (cmd: Command) => {
         selectedCommand = cmd;
+        isCommandSelected = true;
     };
 
     const onCmdMouseUp = () => {
         selectedCommand = undefined;
+        isCommandSelected = false;
     };
 </script>
 
@@ -113,7 +151,13 @@
             {/if}
 
             {#each commands as cmd}
-                <button class="command" on:click={() => onCmd(cmd)} on:mousedown={() => onCmdMouseDown(cmd)} on:mouseup={onCmdMouseUp}>
+                <button
+                    class="command"
+                    on:click={() => onCmd(cmd)}
+                    on:mousedown={() => onCmdMouseDown(cmd)}
+                    on:mouseup={onCmdMouseUp}
+                    class:selected={selectedCommand === cmd}
+                >
                     <p>{cmd.name}</p>
                 </button>
             {/each}
@@ -177,6 +221,10 @@
             border-radius: 0;
 
             &:hover {
+                background-color: $color-bg-1;
+            }
+
+            &.selected {
                 background-color: $color-bg-2;
             }
 
