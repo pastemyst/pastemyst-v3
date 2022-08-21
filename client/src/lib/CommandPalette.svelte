@@ -1,4 +1,6 @@
 <script lang="ts">
+    import type { HighlightWords } from "highlight-words";
+    import highlightWords from "highlight-words";
     import { onMount } from "svelte";
     import type { Command } from "./command";
     import { cmdPalCommands, cmdPalOpen } from "./stores";
@@ -10,6 +12,8 @@
 
     let searchElement: HTMLInputElement | undefined;
     let search = "";
+
+    let highlightedChunks: HighlightWords.Chunk[][][];
 
     let isCommandSelected = false;
     let selectedCommand: Command | undefined;
@@ -101,6 +105,25 @@
             });
 
             selectedCommand = filteredCommands[0];
+        } else {
+            // deselect commands
+            isCommandSelected = false;
+            selectedCommand = undefined;
+        }
+
+        highlightedChunks = [];
+        for (const cmd of filteredCommands) {
+            const chunks = [];
+
+            chunks.push(
+                highlightWords({
+                    text: cmd.name,
+                    query: search,
+                    matchExactly: true
+                })
+            );
+
+            highlightedChunks.push(chunks);
         }
     };
 
@@ -128,6 +151,8 @@
         isOpen = false;
 
         search = "";
+        filteredCommands = commands;
+        highlightedChunks = [];
 
         cmdPalOpen.set(false);
     };
@@ -177,7 +202,7 @@
                 <p class="no-commands">no matching commands</p>
             {/if}
 
-            {#each filteredCommands as cmd}
+            {#each filteredCommands as cmd, i}
                 <button
                     class="command"
                     on:click={() => onCmd(cmd)}
@@ -185,7 +210,13 @@
                     on:mouseup={onCmdMouseUp}
                     class:selected={selectedCommand === cmd}
                 >
-                    <p>{cmd.name}</p>
+                    {#if search && search !== "" && highlightedChunks[0]}
+                        {#each highlightedChunks[i][0] as chunk (chunk.key)}
+                            <span aria-hidden="true" class:highlight={chunk.match}>{chunk.text}</span>
+                        {/each}
+                    {:else}
+                        <p>{cmd.name}</p>
+                    {/if}
                 </button>
             {/each}
         </div>
@@ -246,6 +277,7 @@
             border: none;
             width: 100%;
             border-radius: 0;
+            white-space: pre;
 
             &:hover {
                 background-color: $color-bg-1;
@@ -257,6 +289,10 @@
 
             p {
                 margin: 0;
+            }
+
+            .highlight {
+                color: $color-sec;
             }
         }
     }
