@@ -10,6 +10,7 @@ export enum ExpiresIn {
     oneDay = "1d",
     twoDays = "2d",
     oneWeek = "1w",
+    oneMonth = "1m",
     oneYear = "1y"
 }
 
@@ -78,11 +79,39 @@ export const expiresInFromString = (s: string): ExpiresIn => {
             return ExpiresIn.twoDays;
         case "1 week":
             return ExpiresIn.oneWeek;
+        case "1 month":
+            return ExpiresIn.oneMonth;
         case "1 year":
             return ExpiresIn.oneYear;
     }
 
     return ExpiresIn.never;
+};
+
+/**
+ * Converts an `ExpiresIn` enum to a long string.
+ */
+export const expiresInToLongString = (exp: ExpiresIn): string => {
+    switch (exp) {
+        case ExpiresIn.never:
+            return "never";
+        case ExpiresIn.oneHour:
+            return "1 hour";
+        case ExpiresIn.twoHours:
+            return "2 hours";
+        case ExpiresIn.tenHours:
+            return "10 hours";
+        case ExpiresIn.oneDay:
+            return "1 day";
+        case ExpiresIn.twoDays:
+            return "2 days";
+        case ExpiresIn.oneWeek:
+            return "1 week";
+        case ExpiresIn.oneMonth:
+            return "1 month";
+        case ExpiresIn.oneYear:
+            return "1 year";
+    }
 };
 
 export const createPaste = async (skeleton: PasteSkeleton): Promise<Paste | null> => {

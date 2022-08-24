@@ -7,6 +7,10 @@
 
     let isOpen = false;
 
+    // save the current commands, next time the palette is open, switch to the previous commands
+    // used for modal dialogs
+    let prevCommands: Command[] | undefined = undefined;
+
     let commands: Command[] = [];
     let filteredCommands: Command[] = [];
 
@@ -29,6 +33,8 @@
         });
 
         cmdPalCommands.subscribe((cmds) => {
+            prevCommands = commands;
+
             commands = cmds;
             filteredCommands = commands;
         });
@@ -61,6 +67,7 @@
                     e.preventDefault();
 
                     selectedCommand?.action();
+                    close();
                 }
                 break;
 
@@ -156,9 +163,7 @@
 
         searchElement?.focus();
 
-        if (!selectedCommand) {
-            selectedCommand = commands[0];
-        }
+        selectedCommand = commands[0];
 
         cmdPalOpen.set(true);
 
@@ -173,6 +178,14 @@
         highlightedChunks = [];
 
         cmdPalOpen.set(false);
+
+        // if previous commands are defined, switch to those
+        if (prevCommands) {
+            commands = prevCommands;
+            filteredCommands = commands;
+
+            prevCommands = undefined;
+        }
     };
 
     const onCmd = (cmd: Command) => {

@@ -2,16 +2,19 @@
     import { goto } from "$app/navigation";
     import {
         createPaste,
+        ExpiresIn,
         expiresInFromString,
+        expiresInToLongString,
         type PasteSkeleton,
         type PastySkeleton
     } from "$lib/api/paste";
+    import type { Command } from "$lib/command";
     import PasteOptions from "$lib/PasteOptions.svelte";
-import { cmdPalCommands } from "$lib/stores";
+    import { cmdPalCommands, cmdPalOpen } from "$lib/stores";
     import TabbedEditor from "$lib/TabbedEditor.svelte";
     import type TabData from "$lib/TabData";
 
-    let expiresIn = "never";
+    export let selectedExpiresIn = ExpiresIn.never;
 
     let title: string;
 
@@ -33,7 +36,7 @@ import { cmdPalCommands } from "$lib/stores";
 
         const pasteSkeleton: PasteSkeleton = {
             title: title,
-            expiresIn: expiresInFromString(expiresIn),
+            expiresIn: selectedExpiresIn,
             pasties: pasties,
             anonymous: anonymous,
             private: isPrivate
@@ -47,6 +50,20 @@ import { cmdPalCommands } from "$lib/stores";
     };
 
     const openExpiresSelect = () => {
+        const commands: Command[] = [];
+
+        for (const [_, exp] of Object.entries(ExpiresIn)) {
+            commands.push({
+                name: expiresInToLongString(exp),
+                action: () => {
+                    selectedExpiresIn = exp;
+                }
+            });
+        }
+
+        cmdPalCommands.set(commands);
+
+        cmdPalOpen.set(true);
     };
 </script>
 
@@ -66,7 +83,7 @@ import { cmdPalCommands } from "$lib/stores";
         bind:value={title}
     />
 
-    <button on:click={openExpiresSelect}>expires in: {expiresIn}</button>
+    <button on:click={openExpiresSelect}>expires in: {expiresInToLongString(selectedExpiresIn)}</button>
 </div>
 
 <TabbedEditor bind:tabs />
