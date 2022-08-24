@@ -17,6 +17,7 @@
 
     let isCommandSelected = false;
     let selectedCommand: Command | undefined;
+    let commandElements: HTMLElement[] = [];
 
     onMount(() => {
         cmdPalOpen.subscribe((val) => {
@@ -72,6 +73,8 @@
                     if (newIndex < 0) newIndex = filteredCommands.length - 1;
 
                     selectedCommand = filteredCommands[newIndex];
+
+                    scrollIntoView();
                 }
                 break;
 
@@ -83,9 +86,22 @@
                     const newIndex = (index + 1) % filteredCommands.length;
 
                     selectedCommand = filteredCommands[newIndex];
+
+                    scrollIntoView();
                 }
                 break;
         }
+    };
+
+    const scrollIntoView = () => {
+        const index = filteredCommands.findIndex((cmd) => cmd === selectedCommand);
+
+        if (index === -1) return;
+
+        commandElements[index].scrollIntoView({
+            behavior: "smooth",
+            block: "nearest"
+        });
     };
 
     const filter = () => {
@@ -145,6 +161,8 @@
         }
 
         cmdPalOpen.set(true);
+
+        scrollIntoView();
     };
 
     const close = () => {
@@ -208,6 +226,7 @@
                     on:click={() => onCmd(cmd)}
                     on:mousedown={() => onCmdMouseDown(cmd)}
                     on:mouseup={onCmdMouseUp}
+                    bind:this={commandElements[i]}
                     class:selected={selectedCommand === cmd}
                 >
                     {#if search && search !== "" && highlightedChunks[0]}
@@ -251,6 +270,7 @@
         border: 1px solid $color-bg-2;
         position: relative;
         top: 25%;
+        max-height: 20rem;
         @include shadow-big();
     }
 
@@ -265,6 +285,9 @@
     }
 
     .commands {
+        max-height: 275px;
+        overflow-y: auto;
+
         .no-commands {
             margin: 0;
             padding: 0.5rem;
