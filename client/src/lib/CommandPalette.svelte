@@ -23,6 +23,9 @@
     let selectedCommand: Command | undefined;
     let commandElements: HTMLElement[] = [];
 
+    // keep track of the last focused element, so we can focus it back once the command palette is closed
+    let lastFocusedElement: Element | null;
+
     onMount(() => {
         cmdPalOpen.subscribe((val) => {
             if (val) {
@@ -161,6 +164,9 @@
     const open = () => {
         isOpen = true;
 
+        // save the focused element
+        lastFocusedElement = document.activeElement;
+
         searchElement?.focus();
 
         selectedCommand = commands[0];
@@ -186,6 +192,9 @@
 
             prevCommands = undefined;
         }
+
+        // restore focus
+        (lastFocusedElement as HTMLElement)?.focus();
     };
 
     const onCmd = (cmd: Command) => {
