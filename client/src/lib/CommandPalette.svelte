@@ -108,7 +108,7 @@
 
         if (index === -1) return;
 
-        commandElements[index].scrollIntoView({
+        commandElements[index]?.scrollIntoView({
             behavior: "smooth",
             block: "nearest"
         });
@@ -116,7 +116,16 @@
 
     const filter = () => {
         filteredCommands = commands.filter((cmd) => {
+            // by name
             if (cmd.name.toLowerCase().indexOf(search.toLowerCase()) > -1) {
+                return cmd;
+            }
+
+            // by description
+            if (
+                cmd.description &&
+                cmd.description.toLowerCase().indexOf(search.toLowerCase()) > -1
+            ) {
                 return cmd;
             }
         });
@@ -141,6 +150,7 @@
         for (const cmd of filteredCommands) {
             const chunks = [];
 
+            // highlight name
             chunks.push(
                 highlightWords({
                     text: cmd.name,
@@ -148,6 +158,17 @@
                     matchExactly: true
                 })
             );
+
+            // highlight description
+            if (cmd.description) {
+                chunks.push(
+                    highlightWords({
+                        text: cmd.description,
+                        query: search,
+                        matchExactly: true
+                    })
+                );
+            }
 
             highlightedChunks.push(chunks);
         }
@@ -244,19 +265,33 @@
 
             {#each filteredCommands as cmd, i}
                 <button
-                    class="command"
+                    class="command flex col"
                     on:click={() => onCmd(cmd)}
                     on:mousedown={() => onCmdMouseDown(cmd)}
                     on:mouseup={onCmdMouseUp}
                     bind:this={commandElements[i]}
                     class:selected={selectedCommand === cmd}
                 >
-                    {#if search && search !== "" && highlightedChunks[0]}
-                        {#each highlightedChunks[i][0] as chunk (chunk.key)}
-                            <span aria-hidden="true" class:highlight={chunk.match}>{chunk.text}</span>
-                        {/each}
-                    {:else}
-                        <p>{cmd.name}</p>
+                    <div class="name">
+                        {#if search && search !== "" && highlightedChunks[0]}
+                            {#each highlightedChunks[i][0] as chunk (chunk.key)}
+                                <span aria-hidden="true" class:highlight={chunk.match}>{chunk.text}</span>
+                            {/each}
+                        {:else}
+                            <p>{cmd.name}</p>
+                        {/if}
+                    </div>
+
+                    {#if cmd.description}
+                        <div class="description">
+                            {#if search && search !== "" && highlightedChunks}
+                                {#each highlightedChunks[i][1] as chunk (chunk.key)}
+                                    <span aria-hidden="true" class:highlight={chunk.match}>{chunk.text}</span>
+                                {/each}
+                            {:else}
+                                <p>{cmd.description}</p>
+                            {/if}
+                        </div>
                     {/if}
                 </button>
             {/each}
@@ -323,6 +358,7 @@
             width: 100%;
             border-radius: 0;
             white-space: pre;
+            align-items: flex-start;
 
             &:hover {
                 background-color: $color-bg-1;
@@ -334,6 +370,11 @@
 
             p {
                 margin: 0;
+            }
+
+            .description {
+                color: $color-bg-3;
+                font-size: $fs-small;
             }
 
             .highlight {

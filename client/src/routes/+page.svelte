@@ -55,6 +55,7 @@
         for (const [_, exp] of Object.entries(ExpiresIn)) {
             commands.push({
                 name: expiresInToLongString(exp),
+                description: exp.toString(),
                 action: () => {
                     selectedExpiresIn = exp;
                 }
