@@ -64,10 +64,10 @@ var OAuthProviders map[string]*ProviderConfig
 func InitAuth() {
 	GithubOauthConfig = &ProviderConfig{
 		Config: oauth2.Config{
-			ClientID:     config.Cfg.GitHubClientId,
-			ClientSecret: config.Cfg.GitHubClientSecret,
+			ClientID:     config.Cfg.Github.Id,
+			ClientSecret: config.Cfg.Github.Secret,
 			Endpoint:     github.Endpoint,
-			RedirectURL:  fmt.Sprintf("%s/api/v3/login/github/callback", config.Cfg.Host),
+			RedirectURL:  fmt.Sprintf("%s/api/v3/login/github/callback", config.Cfg.Api.Host),
 			Scopes:       []string{"read:user"},
 		},
 		Name:               "GitHub",
@@ -79,10 +79,10 @@ func InitAuth() {
 
 	GitlabOauthConfig = &ProviderConfig{
 		Config: oauth2.Config{
-			ClientID:     config.Cfg.GitLabClientId,
-			ClientSecret: config.Cfg.GitLabClientSecret,
+			ClientID:     config.Cfg.Github.Id,
+			ClientSecret: config.Cfg.Github.Secret,
 			Endpoint:     gitlab.Endpoint,
-			RedirectURL:  fmt.Sprintf("%s/api/v3/login/gitlab/callback", config.Cfg.Host),
+			RedirectURL:  fmt.Sprintf("%s/api/v3/login/gitlab/callback", config.Cfg.Api.Host),
 			Scopes:       []string{"read_user"},
 		},
 		Name:               "GitLab",

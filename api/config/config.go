@@ -6,31 +6,44 @@ import (
 
 // Configuration for the application.
 type Config struct {
-	Host       string `yaml:"host"`
-	Port       uint16 `yaml:"port"`
-	ClientHost string `yaml:"clientHost"`
-	Https      bool   `yaml:"https"`
+	Api struct {
+		Host  string `toml:"host"`
+		Port  uint64 `toml:"port"`
+		Https bool   `toml:"https"`
+	} `toml:"api"`
 
-	DbHost     string `yaml:"dbHost"`
-	DbUser     string `yaml:"dbUser"`
-	DbPassword string `yaml:"dbPassword"`
-	DbName     string `yaml:"dbName"`
-	DbPort     string `yaml:"dbPort"`
+	Client struct {
+		Host string `toml:"host"`
+	} `toml:"client"`
 
-	SessionSecret string `yaml:"sessionSecret"`
-	JwtSecret     string `yaml:"jwtSecret"`
+	Database struct {
+		Host     string `toml:"host"`
+		Port     uint64 `toml:"port"`
+		User     string `toml:"user"`
+		Password string `toml:"password"`
+		Database string `toml:"database"`
+	} `toml:"database"`
 
-	GitHubClientId     string `yaml:"githubClientId"`
-	GitHubClientSecret string `yaml:"githubClientSecret"`
+	Secrets struct {
+		Jwt     string `toml:"jwt"`
+		Session string `toml:"session"`
+	} `toml:"secrets"`
 
-	GitLabClientId     string `yaml:"gitlabClientId"`
-	GitLabClientSecret string `yaml:"gitlabClientSecret"`
+	Github struct {
+		Id     string `toml:"id"`
+		Secret string `toml:"secret"`
+	} `toml:"github"`
+
+	Gitlab struct {
+		Id     string `toml:"id"`
+		Secret string `toml:"secret"`
+	} `toml:"gitlab"`
 }
 
 var Cfg Config
 
-// Loads the configuration from the `config.yml` file.
+// Loads the configuration from the `config.toml` file.
 func LoadConfig() error {
-	err := cleanenv.ReadConfig("config.yml", &Cfg)
+	err := cleanenv.ReadConfig("config.toml", &Cfg)
 	return err
 }

@@ -103,7 +103,7 @@ func CallbackHandler(ctx echo.Context) error {
 	cookie.Path = "/"
 	cookie.HttpOnly = true
 	cookie.SameSite = http.SameSiteStrictMode
-	cookie.Secure = config.Cfg.Https
+	cookie.Secure = config.Cfg.Api.Https
 
 	jwtToken := jwt.New(jwt.SigningMethodHS512)
 
@@ -128,7 +128,7 @@ func CallbackHandler(ctx echo.Context) error {
 			Username: user.Username,
 		}
 
-		tokenString, err := jwtToken.SignedString([]byte(config.Cfg.JwtSecret))
+		tokenString, err := jwtToken.SignedString([]byte(config.Cfg.Secrets.Jwt))
 		if err != nil {
 			logging.Logger.Errorf("Failed to sign JWT token: %s", err.Error())
 			return echo.NewHTTPError(http.StatusInternalServerError)
@@ -140,7 +140,7 @@ func CallbackHandler(ctx echo.Context) error {
 
 		ctx.SetCookie(cookie)
 
-		return ctx.Redirect(http.StatusTemporaryRedirect, config.Cfg.ClientHost)
+		return ctx.Redirect(http.StatusTemporaryRedirect, config.Cfg.Client.Host)
 	} else {
 		// if user doesn't exist yet, redirect to the create account page with the temporary cookie
 		expirationTime := time.Now().Add(1 * time.Hour)
@@ -154,7 +154,7 @@ func CallbackHandler(ctx echo.Context) error {
 			AvatarUrl:    providerUser.AvatarUrl,
 		}
 
-		tokenString, err := jwtToken.SignedString([]byte(config.Cfg.JwtSecret))
+		tokenString, err := jwtToken.SignedString([]byte(config.Cfg.Secrets.Jwt))
 		if err != nil {
 			logging.Logger.Errorf("Failed to sign JWT token: %s", err.Error())
 		}
@@ -165,7 +165,7 @@ func CallbackHandler(ctx echo.Context) error {
 
 		ctx.SetCookie(cookie)
 
-		return ctx.Redirect(http.StatusTemporaryRedirect, fmt.Sprintf("%s/create-account?username=%s", config.Cfg.ClientHost, url.QueryEscape(providerUser.Username)))
+		return ctx.Redirect(http.StatusTemporaryRedirect, fmt.Sprintf("%s/create-account?username=%s", config.Cfg.Client.Host, url.QueryEscape(providerUser.Username)))
 	}
 }
 
@@ -208,7 +208,7 @@ func PostRegisterHandler(ctx echo.Context) error {
 
 	jwtClaims := &auth.RegistrationClaims{}
 	jwtToken, err := jwt.ParseWithClaims(cookie.Value, jwtClaims, func(t *jwt.Token) (interface{}, error) {
-		return []byte(config.Cfg.JwtSecret), nil
+		return []byte(config.Cfg.Secrets.Jwt), nil
 	})
 	if err != nil {
 		logging.Logger.Errorf("User tried to create an account with an invalid JWT token: %s", err.Error())
@@ -254,7 +254,7 @@ func PostRegisterHandler(ctx echo.Context) error {
 	cookie.Path = "/"
 	cookie.HttpOnly = true
 	cookie.SameSite = http.SameSiteStrictMode
-	cookie.Secure = config.Cfg.Https
+	cookie.Secure = config.Cfg.Api.Https
 	ctx.SetCookie(cookie)
 
 	expirationTime := time.Now().Add(30 * 24 * time.Hour)
@@ -268,7 +268,7 @@ func PostRegisterHandler(ctx echo.Context) error {
 		Username: username,
 	}
 
-	tokenString, err := newJwt.SignedString([]byte(config.Cfg.JwtSecret))
+	tokenString, err := newJwt.SignedString([]byte(config.Cfg.Secrets.Jwt))
 	if err != nil {
 		logging.Logger.Errorf("Failed to sign JWT token: %s", err.Error())
 		return echo.NewHTTPError(http.StatusInternalServerError)
@@ -281,7 +281,7 @@ func PostRegisterHandler(ctx echo.Context) error {
 	newCookie.Expires = expirationTime
 	newCookie.Name = "pastemyst"
 	newCookie.Value = tokenString
-	newCookie.Secure = config.Cfg.Https
+	newCookie.Secure = config.Cfg.Api.Https
 
 	ctx.SetCookie(newCookie)
 
@@ -316,11 +316,11 @@ func GetLogoutHandler(ctx echo.Context) error {
 	cookie.HttpOnly = true
 	cookie.SameSite = http.SameSiteStrictMode
 	cookie.Name = "pastemyst"
-	cookie.Secure = config.Cfg.Https
+	cookie.Secure = config.Cfg.Api.Https
 
 	ctx.SetCookie(cookie)
 
-	return ctx.Redirect(http.StatusTemporaryRedirect, config.Cfg.ClientHost)
+	return ctx.Redirect(http.StatusTemporaryRedirect, config.Cfg.Client.Host)
 }
 
 // Generates a random user ID, making sure that it's unique.

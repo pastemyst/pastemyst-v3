@@ -62,7 +62,7 @@ func main() {
 		AllowCredentials: true,
 	}))
 
-	e.Use(session.Middleware(sessions.NewCookieStore([]byte(config.Cfg.SessionSecret))))
+	e.Use(session.Middleware(sessions.NewCookieStore([]byte(config.Cfg.Secrets.Session))))
 
 	e.Use(auth.AuthMiddleware)
 
@@ -112,5 +112,5 @@ func main() {
 
 	fmt.Printf("\nRunning pastemyst version %s\n", changelog.Version)
 
-	e.Logger.Fatal(e.Start(fmt.Sprintf(":%d", config.Cfg.Port)))
+	e.Logger.Fatal(e.Start(fmt.Sprintf(":%d", config.Cfg.Api.Port)))
 }

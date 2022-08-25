@@ -17,8 +17,8 @@ var DBContext context.Context
 func InitDb() error {
 	DBContext = context.Background()
 
-	pdb, err := sql.Open("postgres", fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%s sslmode=disable",
-		config.Cfg.DbHost, config.Cfg.DbUser, config.Cfg.DbPassword, config.Cfg.DbName, config.Cfg.DbPort))
+	pdb, err := sql.Open("postgres", fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%d sslmode=disable",
+		config.Cfg.Database.Host, config.Cfg.Database.User, config.Cfg.Database.Password, config.Cfg.Database.Database, config.Cfg.Database.Port))
 
 	if err != nil {
 		return err
