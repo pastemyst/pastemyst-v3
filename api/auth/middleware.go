@@ -39,7 +39,7 @@ func AuthMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
 		// decode jwt
 		claims := &Claims{}
 		token, err := jwt.ParseWithClaims(tokenString, claims, func(t *jwt.Token) (interface{}, error) {
-			return []byte(config.Cfg.JwtSecret), nil
+			return []byte(config.Cfg.Secrets.Jwt), nil
 		})
 		if err != nil || !token.Valid {
 			logging.Logger.Errorf("User tried to authorize with an invalid JWT token: %s", err.Error())
@@ -57,7 +57,7 @@ func AuthMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
 			cookie.Path = "/"
 			cookie.HttpOnly = true
 			cookie.SameSite = http.SameSiteStrictMode
-			cookie.Secure = config.Cfg.Https
+			cookie.Secure = config.Cfg.Api.Https
 			cookie.Value = ""
 			cookie.Expires = time.Unix(0, 0)
 

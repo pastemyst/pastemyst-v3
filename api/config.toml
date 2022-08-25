@@ -1,0 +1,26 @@
+[api]
+host = "http://localhost:5000"
+port = 5000
+https = false
+
+[client]
+host = "http://localhost:3000"
+
+[database]
+host = "localhost"
+port = 5432
+user = "pastemyst"
+password = "epikepik"
+database = "pastemyst"
+
+[secrets]
+jwt = "superepikstrongsecret"
+session = "anothersuperepikstrongsecret"
+
+[github]
+id = "45309c2154427d429d29"
+secret = "3329ea7932b53a4d203b987536b4a5608dc51d43"
+
+[gitlab]
+id = "3549c70488f2133b5d4ed870101d705f09c2bc3383cd74d376f8de864203257c"
+secret = "a053cffe17897fa2da4562fd4aa3b29fc6453b15e8b52a7f239794d7ffc9aa9c"
