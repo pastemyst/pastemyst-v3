@@ -3,14 +3,13 @@
     import {
         createPaste,
         ExpiresIn,
-        expiresInFromString,
         expiresInToLongString,
         type PasteSkeleton,
         type PastySkeleton
     } from "$lib/api/paste";
-    import type { Command } from "$lib/command";
+    import { setTempCommands, type Command } from "$lib/command";
     import PasteOptions from "$lib/PasteOptions.svelte";
-    import { cmdPalCommands, cmdPalOpen } from "$lib/stores";
+    import { cmdPalOpen } from "$lib/stores";
     import TabbedEditor from "$lib/TabbedEditor.svelte";
     import type TabData from "$lib/TabData";
 
@@ -62,7 +61,7 @@
             });
         }
 
-        cmdPalCommands.set(commands);
+        setTempCommands(commands);
 
         cmdPalOpen.set(true);
     };

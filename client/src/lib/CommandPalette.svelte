@@ -2,14 +2,10 @@
     import type { HighlightWords } from "highlight-words";
     import highlightWords from "highlight-words";
     import { onMount } from "svelte";
-    import type { Command } from "./command";
-    import { cmdPalCommands, cmdPalOpen } from "./stores";
+    import { baseCommandsStore, getBaseCommands, tempCommandsStore, type Command } from "./command";
+    import { cmdPalOpen } from "./stores";
 
     let isOpen = false;
-
-    // save the current commands, next time the palette is open, switch to the previous commands
-    // used for modal dialogs
-    let prevCommands: Command[] | undefined = undefined;
 
     let commands: Command[] = [];
     let filteredCommands: Command[] = [];
@@ -23,6 +19,8 @@
     let selectedCommand: Command | undefined;
     let commandElements: HTMLElement[] = [];
 
+    let showingTempCommands = false;
+
     // keep track of the last focused element, so we can focus it back once the command palette is closed
     let lastFocusedElement: Element | null;
 
@@ -35,11 +33,16 @@
             }
         });
 
-        cmdPalCommands.subscribe((cmds) => {
-            prevCommands = commands;
-
-            commands = cmds;
+        baseCommandsStore.subscribe((cmd) => {
+            commands = cmd;
             filteredCommands = commands;
+        });
+
+        tempCommandsStore.subscribe((cmd) => {
+            commands = cmd;
+            filteredCommands = commands;
+
+            showingTempCommands = true;
         });
     });
 
@@ -206,12 +209,11 @@
 
         cmdPalOpen.set(false);
 
-        // if previous commands are defined, switch to those
-        if (prevCommands !== undefined && prevCommands.length > 0) {
-            commands = prevCommands;
-            filteredCommands = commands;
+        if (showingTempCommands) {
+            showingTempCommands = false;
 
-            prevCommands = undefined;
+            commands = getBaseCommands();
+            filteredCommands = commands;
         }
 
         // restore focus
@@ -273,7 +275,7 @@
                     class:selected={selectedCommand === cmd}
                 >
                     <div class="name">
-                        {#if search && search !== "" && highlightedChunks[0]}
+                        {#if search && search !== "" && highlightedChunks[i]}
                             {#each highlightedChunks[i][0] as chunk (chunk.key)}
                                 <span aria-hidden="true" class:highlight={chunk.match}>{chunk.text}</span>
                             {/each}
@@ -284,7 +286,7 @@
 
                     {#if cmd.description}
                         <div class="description">
-                            {#if search && search !== "" && highlightedChunks}
+                            {#if search && search !== "" && highlightedChunks[i]}
                                 {#each highlightedChunks[i][1] as chunk (chunk.key)}
                                     <span aria-hidden="true" class:highlight={chunk.match}>{chunk.text}</span>
                                 {/each}

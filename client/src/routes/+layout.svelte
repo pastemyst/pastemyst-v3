@@ -2,16 +2,16 @@
     import Header from "$lib/Header.svelte";
     import Footer from "$lib/Footer.svelte";
     import type { LayoutData } from "./$types";
-    import { activePastesStores, cmdPalCommands, currentUserStore, versionStore } from "$lib/stores";
+    import { activePastesStores, currentUserStore, versionStore } from "$lib/stores";
     import CommandPalette from "$lib/CommandPalette.svelte";
-    import type { Command } from "$lib/command";
+    import { setBaseCommands, type Command } from "$lib/command";
     import { onMount } from "svelte";
     import { goto } from "$app/navigation";
+    import { apiBase } from "$lib/api/api";
 
     import "tippy.js/dist/tippy.css";
     import "tippy.js/dist/svg-arrow.css";
     import "../app.scss";
-import { apiBase } from "$lib/api/api";
 
     export let data: LayoutData;
     $: currentUserStore.set(data.self);
@@ -29,19 +29,20 @@ import { apiBase } from "$lib/api/api";
         ];
 
         if (data.self) {
-            commands.push({
-                name: "view my profile",
-                action: () => {
-                    goto(`/~${data.self?.username}`);
+            commands.push(
+                {
+                    name: "view my profile",
+                    action: () => {
+                        goto(`/~${data.self?.username}`);
+                    }
+                },
+                {
+                    name: "logout",
+                    action: () => {
+                        window.location.href = `${apiBase}/auth/logout`;
+                    }
                 }
-            });
-
-            commands.push({
-                name: "logout",
-                action: () => {
-                    window.location.href = `${apiBase}/auth/logout`;
-                }
-            });
+            );
         } else {
             commands.push({
                 name: "login / register",
@@ -51,7 +52,7 @@ import { apiBase } from "$lib/api/api";
             });
         }
 
-        cmdPalCommands.set(commands);
+        setBaseCommands(commands);
     });
 </script>
 
