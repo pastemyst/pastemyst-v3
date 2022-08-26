@@ -207,7 +207,7 @@
         cmdPalOpen.set(false);
 
         // if previous commands are defined, switch to those
-        if (prevCommands) {
+        if (prevCommands !== undefined && prevCommands.length > 0) {
             commands = prevCommands;
             filteredCommands = commands;
 
