@@ -7,11 +7,12 @@
         type PasteSkeleton,
         type PastySkeleton
     } from "$lib/api/paste";
-    import { setTempCommands, type Command } from "$lib/command";
+    import { addBaseCommands, Close, setTempCommands, type Command } from "$lib/command";
     import PasteOptions from "$lib/PasteOptions.svelte";
     import { cmdPalOpen } from "$lib/stores";
     import TabbedEditor from "$lib/TabbedEditor.svelte";
     import type TabData from "$lib/TabData";
+    import { onMount } from "svelte";
 
     export let selectedExpiresIn = ExpiresIn.never;
 
@@ -21,6 +22,20 @@
 
     let anonymous: boolean;
     let isPrivate: boolean;
+
+    onMount(() => {
+        const commands: Command[] = [
+            {
+                name: "set expires in",
+                action: () => {
+                    setTempCommands(getExpiresInCommands());
+                    return Close.no;
+                }
+            }
+        ];
+
+        addBaseCommands(commands);
+    });
 
     const onCreatePaste = async () => {
         let pasties: PastySkeleton[] = [];
@@ -48,7 +63,7 @@
         goto(`/${paste?.id}`);
     };
 
-    const openExpiresSelect = () => {
+    const getExpiresInCommands = (): Command[] => {
         const commands: Command[] = [];
 
         for (const [_, exp] of Object.entries(ExpiresIn)) {
@@ -57,11 +72,16 @@
                 description: exp.toString(),
                 action: () => {
                     selectedExpiresIn = exp;
+                    return Close.yes;
                 }
             });
         }
 
-        setTempCommands(commands);
+        return commands;
+    };
+
+    const openExpiresSelect = () => {
+        setTempCommands(getExpiresInCommands());
 
         cmdPalOpen.set(true);
     };
@@ -83,7 +103,9 @@
         bind:value={title}
     />
 
-    <button on:click={openExpiresSelect}>expires in: {expiresInToLongString(selectedExpiresIn)}</button>
+    <button on:click={openExpiresSelect}>
+        expires in: {expiresInToLongString(selectedExpiresIn)}
+    </button>
 </div>
 
 <TabbedEditor bind:tabs />

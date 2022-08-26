@@ -6,7 +6,12 @@ export interface Command {
     action: CommandAction;
 }
 
-export type CommandAction = () => void;
+export enum Close {
+    yes,
+    no
+}
+
+export type CommandAction = () => Close;
 
 let baseCommands: Command[] = [];
 
@@ -24,7 +29,7 @@ export const setBaseCommands = (commands: Command[]) => {
 };
 
 export const addBaseCommands = (commands: Command[]) => {
-    baseCommands.push(...commands);
+    baseCommands.unshift(...commands);
 
     baseCommandsStore.set(baseCommands);
 };

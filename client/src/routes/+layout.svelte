@@ -4,9 +4,9 @@
     import type { LayoutData } from "./$types";
     import { activePastesStores, currentUserStore, versionStore } from "$lib/stores";
     import CommandPalette from "$lib/CommandPalette.svelte";
-    import { setBaseCommands, type Command } from "$lib/command";
+    import { addBaseCommands, Close, setBaseCommands, type Command } from "$lib/command";
     import { onMount } from "svelte";
-    import { goto } from "$app/navigation";
+    import { beforeNavigate, goto } from "$app/navigation";
     import { apiBase } from "$lib/api/api";
 
     import "tippy.js/dist/tippy.css";
@@ -18,12 +18,13 @@
     $: versionStore.set(data.version);
     $: activePastesStores.set(data.activePastes);
 
-    onMount(() => {
+    const getCommands = (): Command[] => {
         const commands: Command[] = [
             {
                 name: "view changelog",
                 action: () => {
                     goto("/changelog");
+                    return Close.yes;
                 }
             }
         ];
@@ -34,12 +35,14 @@
                     name: "view my profile",
                     action: () => {
                         goto(`/~${data.self?.username}`);
+                        return Close.yes;
                     }
                 },
                 {
                     name: "logout",
                     action: () => {
                         window.location.href = `${apiBase}/auth/logout`;
+                        return Close.yes;
                     }
                 }
             );
@@ -48,11 +51,18 @@
                 name: "login / register",
                 action: () => {
                     goto("/login");
+                    return Close.yes;
                 }
             });
         }
 
-        setBaseCommands(commands);
+        return commands;
+    };
+
+    setBaseCommands(getCommands());
+
+    beforeNavigate(() => {
+        setBaseCommands(getCommands());
     });
 </script>
 

@@ -2,7 +2,7 @@
     import type { HighlightWords } from "highlight-words";
     import highlightWords from "highlight-words";
     import { onMount } from "svelte";
-    import { baseCommandsStore, getBaseCommands, tempCommandsStore, type Command } from "./command";
+    import { baseCommandsStore, Close, getBaseCommands, tempCommandsStore, type Command } from "./command";
     import { cmdPalOpen } from "./stores";
 
     let isOpen = false;
@@ -24,6 +24,20 @@
     // keep track of the last focused element, so we can focus it back once the command palette is closed
     let lastFocusedElement: Element | null;
 
+    baseCommandsStore.subscribe((cmd) => {
+        commands = cmd;
+        filteredCommands = commands;
+    });
+
+    tempCommandsStore.subscribe((cmd) => {
+        commands = cmd;
+        filteredCommands = commands;
+
+        selectedCommand = commands[0];
+
+        showingTempCommands = true;
+    });
+
     onMount(() => {
         cmdPalOpen.subscribe((val) => {
             if (val) {
@@ -31,18 +45,6 @@
             } else {
                 close();
             }
-        });
-
-        baseCommandsStore.subscribe((cmd) => {
-            commands = cmd;
-            filteredCommands = commands;
-        });
-
-        tempCommandsStore.subscribe((cmd) => {
-            commands = cmd;
-            filteredCommands = commands;
-
-            showingTempCommands = true;
         });
     });
 
@@ -72,8 +74,10 @@
                 {
                     e.preventDefault();
 
-                    selectedCommand?.action();
-                    close();
+                    if (selectedCommand?.action() === Close.yes) close();
+                    search = "";
+                    filteredCommands = commands;
+                    highlightedChunks = [];
                 }
                 break;
 
@@ -221,9 +225,11 @@
     };
 
     const onCmd = (cmd: Command) => {
-        cmd.action();
+        if (cmd.action() === Close.yes) close();
 
-        close();
+        search = "";
+        filteredCommands = commands;
+        highlightedChunks = [];
     };
 
     const onCmdMouseDown = (cmd: Command) => {
