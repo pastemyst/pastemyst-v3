@@ -41,7 +41,16 @@
             {
                 name: "set editor language",
                 action: () => {
-                    setTempCommands(activeTab?.editor.getLanguageCommands());
+                    const cmds = activeTab?.editor.getLanguageCommands();
+                    if (cmds) setTempCommands(cmds);
+                    return Close.no;
+                }
+            },
+            {
+                name: "set editor indentation",
+                action: () => {
+                    const cmds = activeTab?.editor.getIndentUnitCommands();
+                    if (cmds) setTempCommands(cmds);
                     return Close.no;
                 }
             }

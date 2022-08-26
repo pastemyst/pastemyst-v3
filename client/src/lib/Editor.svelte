@@ -127,13 +127,60 @@
         return commands;
     };
 
-    const openLanguageSelect = () => {
+    export const getIndentUnitCommands = (): Command[] => {
+        return [
+            {
+                name: "spaces",
+                action: () => {
+                    selectedIndentUnit = "spaces";
+                    setEditorIndentation();
+                    setTempCommands(getIndentWidthCommands());
+
+                    return Close.no;
+                }
+            },
+            {
+                name: "tabs",
+                action: () => {
+                    selectedIndentUnit = "tabs";
+                    setEditorIndentation();
+                    setTempCommands(getIndentWidthCommands());
+
+                    return Close.no;
+                }
+            }
+        ];
+    };
+
+    export const getIndentWidthCommands = (): Command[] => {
+        const commands: Command[] = [];
+
+        for (let i = 1; i <= 8; i++) {
+            commands.push({
+                name: i.toString(),
+                action: () => {
+                    selectedIndentWidth = i;
+
+                    setEditorIndentation();
+
+                    return Close.yes;
+                }
+            });
+        }
+
+        return commands;
+    };
+
+    const onLanguageClick = () => {
         setTempCommands(getLanguageCommands());
 
         cmdPalOpen.set(true);
     };
 
     const onIndentClick = () => {
+        setTempCommands(getIndentUnitCommands());
+
+        cmdPalOpen.set(true);
     };
 
     const onPreviewClick = async () => {
@@ -198,7 +245,7 @@
 
     <div class="toolbar flex sm-row center space-between">
         <div class="flex sm-row center">
-            <button on:click={openLanguageSelect}>language: {selectedLanguage?.name}</button>
+            <button on:click={onLanguageClick}>language: {selectedLanguage?.name}</button>
 
             <button on:click={onIndentClick}>{selectedIndentUnit}: {selectedIndentWidth}</button>
 
