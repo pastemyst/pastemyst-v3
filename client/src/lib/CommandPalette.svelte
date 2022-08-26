@@ -2,7 +2,13 @@
     import type { HighlightWords } from "highlight-words";
     import highlightWords from "highlight-words";
     import { onMount } from "svelte";
-    import { baseCommandsStore, Close, getBaseCommands, tempCommandsStore, type Command } from "./command";
+    import {
+        baseCommandsStore,
+        Close,
+        getBaseCommands,
+        tempCommandsStore,
+        type Command
+    } from "./command";
     import { cmdPalOpen } from "./stores";
 
     let isOpen = false;
@@ -283,6 +289,7 @@
                     <div class="name">
                         {#if search && search !== "" && highlightedChunks[i]}
                             {#each highlightedChunks[i][0] as chunk (chunk.key)}
+                                <!-- prettier-ignore -->
                                 <span aria-hidden="true" class:highlight={chunk.match}>{chunk.text}</span>
                             {/each}
                         {:else}
@@ -294,6 +301,7 @@
                         <div class="description">
                             {#if search && search !== "" && highlightedChunks[i]}
                                 {#each highlightedChunks[i][1] as chunk (chunk.key)}
+                                    <!-- prettier-ignore -->
                                     <span aria-hidden="true" class:highlight={chunk.match}>{chunk.text}</span>
                                 {/each}
                             {:else}

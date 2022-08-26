@@ -100,7 +100,9 @@
                 action: () => {
                     setSelectedLang(lang);
 
-                    const langDescription = cmLangs.find((l) => selectedLanguage.name.toLowerCase() === l.name.toLowerCase());
+                    const langDescription = cmLangs.find(
+                        (l) => selectedLanguage.name.toLowerCase() === l.name.toLowerCase()
+                    );
 
                     if (langDescription) {
                         langSupported = true;

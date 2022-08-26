@@ -4,8 +4,7 @@
     import type { LayoutData } from "./$types";
     import { activePastesStores, currentUserStore, versionStore } from "$lib/stores";
     import CommandPalette from "$lib/CommandPalette.svelte";
-    import { addBaseCommands, Close, setBaseCommands, type Command } from "$lib/command";
-    import { onMount } from "svelte";
+    import { Close, setBaseCommands, type Command } from "$lib/command";
     import { beforeNavigate, goto } from "$app/navigation";
     import { apiBase } from "$lib/api/api";
 

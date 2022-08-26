@@ -1,6 +1,5 @@
 <script lang="ts">
     import { goto } from "$app/navigation";
-    import { getLangs, type Language } from "$lib/api/lang";
     import {
         createPaste,
         ExpiresIn,
@@ -25,11 +24,7 @@
     let anonymous: boolean;
     let isPrivate: boolean;
 
-    let langs: Language[];
-
-    onMount(async () => {
-        langs = await getLangs();
-
+    onMount(() => {
         const commands: Command[] = [
             {
                 name: "set expires in",
@@ -88,6 +83,7 @@
     const getExpiresInCommands = (): Command[] => {
         const commands: Command[] = [];
 
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
         for (const [_, exp] of Object.entries(ExpiresIn)) {
             commands.push({
                 name: expiresInToLongString(exp),
