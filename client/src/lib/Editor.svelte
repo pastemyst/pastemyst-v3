@@ -4,13 +4,13 @@
     import { EditorView, keymap } from "@codemirror/view";
     import { indentWithTab } from "@codemirror/commands";
     import { mystCMTheme } from "./codemirror-myst-theme";
-    import { languages as cmLangs } from "@codemirror/language-data";
     import { indentUnit } from "@codemirror/language";
-    import { indentSelect, langSelect, SelectCommand } from "./cmdOptions";
-    import { isCommandPaletteOpen } from "./stores";
     import { Compartment, EditorState } from "@codemirror/state";
     import { getLangs, type Language } from "./api/lang";
     import { tooltip } from "$lib/tooltips";
+    import { Close, setTempCommands, type Command } from "./command";
+    import { cmdPalOpen } from "./stores";
+    import { languages as cmLangs } from "@codemirror/language-data";
 
     type IndentUnit = "tabs" | "spaces";
 
@@ -35,8 +35,11 @@
     let currentPreviewContent: string;
     let langSupported = false;
 
+    let langs: Language[];
+
     onMount(async () => {
-        selectedLanguage = (await getLangs())[0];
+        langs = await getLangs();
+        selectedLanguage = langs[0];
 
         const editorUpdateListener = EditorView.updateListener.of((update) => {
             // get the current line
@@ -65,90 +68,6 @@
 
         setEditorIndentation();
 
-        // if the current editor is focused and the command palette is closed, set the selected language
-        // also focus the editor back (by default it will focus the lang button)
-        // also set the indentation settings
-        isCommandPaletteOpen.subscribe(async (open) => {
-            if (hidden) return;
-
-            // if opening, set all selected items and return
-            if (open) {
-                langSelect.setSelected(selectedLanguage.name);
-
-                const selectedIndent = indentSelect.subCommands.find(
-                    (s) => s.name === selectedIndentUnit
-                ) as SelectCommand;
-                const otherIndent = indentSelect.subCommands.find(
-                    (s) => s.name !== selectedIndentUnit
-                ) as SelectCommand;
-
-                selectedIndent.setSelected(selectedIndentWidth.toString());
-
-                const otherIndentSelected = otherIndent.getSelected();
-                if (otherIndentSelected) {
-                    otherIndentSelected.selected = false;
-                }
-
-                return;
-            }
-
-            const langSearch = (await getLangs()).find(
-                (l) => l.name.toLowerCase() === langSelect.getSelected()?.name.toLowerCase()
-            );
-
-            if (langSearch) selectedLanguage = langSearch;
-
-            let langDescription = cmLangs.find(
-                (l) => selectedLanguage.name.toLowerCase() === l.name.toLowerCase()
-            );
-
-            if (langDescription) {
-                langSupported = true;
-
-                let langSupport = await langDescription.load();
-
-                editorView.dispatch({
-                    effects: langCompartment.reconfigure(langSupport)
-                });
-            } else {
-                langSupported = false;
-                if (selectedLanguage.name === "Text") langSupported = true;
-
-                editorView.dispatch({
-                    effects: langCompartment.reconfigure([])
-                });
-            }
-
-            focus();
-
-            const tabsOpt = indentSelect.subCommands.find(
-                (s) => s.name === "tabs"
-            ) as SelectCommand;
-            const spacesOpt = indentSelect.subCommands.find(
-                (s) => s.name === "spaces"
-            ) as SelectCommand;
-
-            const tabsWidth = tabsOpt.getSelected();
-            const spacesWidth = spacesOpt.getSelected();
-
-            // if both are selected, that means the unit was changed
-            // otherwise only the width was changed
-            if (tabsWidth && spacesWidth) {
-                selectedIndentUnit = selectedIndentUnit === "spaces" ? "tabs" : "spaces";
-                selectedIndentWidth =
-                    selectedIndentUnit === "spaces"
-                        ? Number(spacesWidth.name)
-                        : Number(tabsWidth.name);
-            }
-
-            selectedIndentWidth =
-                selectedIndentUnit === "spaces"
-                    ? Number(spacesWidth?.name)
-                    : Number(tabsWidth?.name);
-
-            setEditorIndentation();
-        });
-
         focus();
     });
 
@@ -171,14 +90,99 @@
         }
     };
 
+    export const getLanguageCommands = (): Command[] => {
+        const commands: Command[] = [];
+
+        for (const lang of langs) {
+            commands.push({
+                name: lang.name,
+                description: lang.aliases?.join(","),
+                action: () => {
+                    setSelectedLang(lang);
+
+                    const langDescription = cmLangs.find(
+                        (l) => selectedLanguage.name.toLowerCase() === l.name.toLowerCase()
+                    );
+
+                    if (langDescription) {
+                        langSupported = true;
+
+                        langDescription.load().then((langSupport) => {
+                            editorView.dispatch({
+                                effects: langCompartment.reconfigure(langSupport)
+                            });
+                        });
+                    } else {
+                        langSupported = false;
+                        if (selectedLanguage.name === "Text") langSupported = true;
+
+                        editorView.dispatch({
+                            effects: langCompartment.reconfigure([])
+                        });
+                    }
+
+                    return Close.yes;
+                }
+            });
+        }
+
+        return commands;
+    };
+
+    export const getIndentUnitCommands = (): Command[] => {
+        return [
+            {
+                name: "spaces",
+                action: () => {
+                    selectedIndentUnit = "spaces";
+                    setEditorIndentation();
+                    setTempCommands(getIndentWidthCommands());
+
+                    return Close.no;
+                }
+            },
+            {
+                name: "tabs",
+                action: () => {
+                    selectedIndentUnit = "tabs";
+                    setEditorIndentation();
+                    setTempCommands(getIndentWidthCommands());
+
+                    return Close.no;
+                }
+            }
+        ];
+    };
+
+    export const getIndentWidthCommands = (): Command[] => {
+        const commands: Command[] = [];
+
+        for (let i = 1; i <= 8; i++) {
+            commands.push({
+                name: i.toString(),
+                action: () => {
+                    selectedIndentWidth = i;
+
+                    setEditorIndentation();
+
+                    return Close.yes;
+                }
+            });
+        }
+
+        return commands;
+    };
+
     const onLanguageClick = () => {
-        const evt = new CustomEvent("cmdShowOptions", { detail: langSelect });
-        window.dispatchEvent(evt);
+        setTempCommands(getLanguageCommands());
+
+        cmdPalOpen.set(true);
     };
 
     const onIndentClick = () => {
-        const evt = new CustomEvent("cmdShowOptions", { detail: indentSelect });
-        window.dispatchEvent(evt);
+        setTempCommands(getIndentUnitCommands());
+
+        cmdPalOpen.set(true);
     };
 
     const onPreviewClick = async () => {

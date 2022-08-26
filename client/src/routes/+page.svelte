@@ -2,33 +2,56 @@
     import { goto } from "$app/navigation";
     import {
         createPaste,
-        expiresInFromString,
+        ExpiresIn,
+        expiresInToLongString,
         type PasteSkeleton,
         type PastySkeleton
     } from "$lib/api/paste";
-    import { expiresSelect } from "$lib/cmdOptions";
+    import { addBaseCommands, Close, setTempCommands, type Command } from "$lib/command";
     import PasteOptions from "$lib/PasteOptions.svelte";
-    import { isCommandPaletteOpen } from "$lib/stores";
+    import { cmdPalOpen } from "$lib/stores";
     import TabbedEditor from "$lib/TabbedEditor.svelte";
     import type TabData from "$lib/TabData";
     import { onMount } from "svelte";
 
-    let expiresIn = "never";
+    export let selectedExpiresIn = ExpiresIn.never;
 
     let title: string;
 
     let tabs: TabData[];
+    let activeTab: TabData | undefined;
 
     let anonymous: boolean;
     let isPrivate: boolean;
 
     onMount(() => {
-        isCommandPaletteOpen.subscribe((open) => {
-            // on cmd pal close, update expires in
-            if (!open) {
-                expiresIn = expiresSelect.getSelected()?.name ?? "never";
+        const commands: Command[] = [
+            {
+                name: "set expires in",
+                action: () => {
+                    setTempCommands(getExpiresInCommands());
+                    return Close.no;
+                }
+            },
+            {
+                name: "set editor language",
+                action: () => {
+                    const cmds = activeTab?.editor.getLanguageCommands();
+                    if (cmds) setTempCommands(cmds);
+                    return Close.no;
+                }
+            },
+            {
+                name: "set editor indentation",
+                action: () => {
+                    const cmds = activeTab?.editor.getIndentUnitCommands();
+                    if (cmds) setTempCommands(cmds);
+                    return Close.no;
+                }
             }
-        });
+        ];
+
+        addBaseCommands(commands);
     });
 
     const onCreatePaste = async () => {
@@ -44,7 +67,7 @@
 
         const pasteSkeleton: PasteSkeleton = {
             title: title,
-            expiresIn: expiresInFromString(expiresIn),
+            expiresIn: selectedExpiresIn,
             pasties: pasties,
             anonymous: anonymous,
             private: isPrivate
@@ -57,9 +80,28 @@
         goto(`/${paste?.id}`);
     };
 
+    const getExpiresInCommands = (): Command[] => {
+        const commands: Command[] = [];
+
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        for (const [_, exp] of Object.entries(ExpiresIn)) {
+            commands.push({
+                name: expiresInToLongString(exp),
+                description: exp.toString(),
+                action: () => {
+                    selectedExpiresIn = exp;
+                    return Close.yes;
+                }
+            });
+        }
+
+        return commands;
+    };
+
     const openExpiresSelect = () => {
-        const evt = new CustomEvent("cmdShowOptions", { detail: expiresSelect });
-        window.dispatchEvent(evt);
+        setTempCommands(getExpiresInCommands());
+
+        cmdPalOpen.set(true);
     };
 </script>
 
@@ -75,13 +117,16 @@
         id="paste-title"
         name="paste-title"
         maxlength="128"
+        autocomplete="off"
         bind:value={title}
     />
 
-    <button on:click={openExpiresSelect}>expires in: {expiresIn}</button>
+    <button on:click={openExpiresSelect}>
+        expires in: {expiresInToLongString(selectedExpiresIn)}
+    </button>
 </div>
 
-<TabbedEditor bind:tabs />
+<TabbedEditor bind:tabs bind:activeTab />
 
 <div class="paste-options">
     <PasteOptions on:create={onCreatePaste} bind:anonymous bind:isPrivate />

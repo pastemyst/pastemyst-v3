@@ -1,9 +1,12 @@
 <script lang="ts">
     import Header from "$lib/Header.svelte";
     import Footer from "$lib/Footer.svelte";
-    import CommandPalette from "$lib/CommandPalette.svelte";
     import type { LayoutData } from "./$types";
     import { activePastesStores, currentUserStore, versionStore } from "$lib/stores";
+    import CommandPalette from "$lib/CommandPalette.svelte";
+    import { Close, setBaseCommands, type Command } from "$lib/command";
+    import { beforeNavigate, goto } from "$app/navigation";
+    import { apiBase } from "$lib/api/api";
 
     import "tippy.js/dist/tippy.css";
     import "tippy.js/dist/svg-arrow.css";
@@ -14,15 +17,53 @@
     $: versionStore.set(data.version);
     $: activePastesStores.set(data.activePastes);
 
-    const handleKeys = async (e: KeyboardEvent) => {
-        if (e.ctrlKey && e.key === "k") {
-            e.preventDefault();
-            window.dispatchEvent(new CustomEvent("toggleCmd"));
-        }
-    };
-</script>
+    const getCommands = (): Command[] => {
+        const commands: Command[] = [
+            {
+                name: "view changelog",
+                action: () => {
+                    goto("/changelog");
+                    return Close.yes;
+                }
+            }
+        ];
 
-<svelte:window on:keydown={handleKeys} />
+        if (data.self) {
+            commands.push(
+                {
+                    name: "view my profile",
+                    action: () => {
+                        goto(`/~${data.self?.username}`);
+                        return Close.yes;
+                    }
+                },
+                {
+                    name: "logout",
+                    action: () => {
+                        window.location.href = `${apiBase}/auth/logout`;
+                        return Close.yes;
+                    }
+                }
+            );
+        } else {
+            commands.push({
+                name: "login / register",
+                action: () => {
+                    goto("/login");
+                    return Close.yes;
+                }
+            });
+        }
+
+        return commands;
+    };
+
+    setBaseCommands(getCommands());
+
+    beforeNavigate(() => {
+        setBaseCommands(getCommands());
+    });
+</script>
 
 <div id="container">
     <Header />
