@@ -1,5 +1,6 @@
 <script lang="ts">
     import { goto } from "$app/navigation";
+    import { getLangs, type Language } from "$lib/api/lang";
     import {
         createPaste,
         ExpiresIn,
@@ -19,16 +20,28 @@
     let title: string;
 
     let tabs: TabData[];
+    let activeTab: TabData | undefined;
 
     let anonymous: boolean;
     let isPrivate: boolean;
 
-    onMount(() => {
+    let langs: Language[];
+
+    onMount(async () => {
+        langs = await getLangs();
+
         const commands: Command[] = [
             {
                 name: "set expires in",
                 action: () => {
                     setTempCommands(getExpiresInCommands());
+                    return Close.no;
+                }
+            },
+            {
+                name: "set editor language",
+                action: () => {
+                    setTempCommands(activeTab?.editor.getLanguageCommands());
                     return Close.no;
                 }
             }
@@ -108,7 +121,7 @@
     </button>
 </div>
 
-<TabbedEditor bind:tabs />
+<TabbedEditor bind:tabs bind:activeTab />
 
 <div class="paste-options">
     <PasteOptions on:create={onCreatePaste} bind:anonymous bind:isPrivate />

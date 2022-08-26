@@ -6,6 +6,8 @@
     import TabData from "./TabData";
 
     export let tabs: TabData[] = new Array<TabData>();
+    export let activeTab: TabData | undefined = undefined;
+    $: activeTab = tabs.find((t) => t.id === activeTabId);
 
     // used for giving tabs their own unique ID
     let tabCounter = 0;

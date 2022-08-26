@@ -4,11 +4,13 @@
     import { EditorView, keymap } from "@codemirror/view";
     import { indentWithTab } from "@codemirror/commands";
     import { mystCMTheme } from "./codemirror-myst-theme";
-    import { languages as cmLangs } from "@codemirror/language-data";
     import { indentUnit } from "@codemirror/language";
     import { Compartment, EditorState } from "@codemirror/state";
     import { getLangs, type Language } from "./api/lang";
     import { tooltip } from "$lib/tooltips";
+    import { Close, setTempCommands, type Command } from "./command";
+    import { cmdPalOpen } from "./stores";
+    import { languages as cmLangs } from "@codemirror/language-data";
 
     type IndentUnit = "tabs" | "spaces";
 
@@ -33,8 +35,11 @@
     let currentPreviewContent: string;
     let langSupported = false;
 
+    let langs: Language[];
+
     onMount(async () => {
-        selectedLanguage = (await getLangs())[0];
+        langs = await getLangs();
+        selectedLanguage = langs[0];
 
         const editorUpdateListener = EditorView.updateListener.of((update) => {
             // get the current line
@@ -85,7 +90,47 @@
         }
     };
 
-    const onLanguageClick = () => {
+    export const getLanguageCommands = (): Command[] => {
+        const commands: Command[] = [];
+
+        for (const lang of langs) {
+            commands.push({
+                name: lang.name,
+                description: lang.aliases?.join(","),
+                action: () => {
+                    setSelectedLang(lang);
+
+                    const langDescription = cmLangs.find((l) => selectedLanguage.name.toLowerCase() === l.name.toLowerCase());
+
+                    if (langDescription) {
+                        langSupported = true;
+
+                        langDescription.load().then((langSupport) => {
+                            editorView.dispatch({
+                                effects: langCompartment.reconfigure(langSupport)
+                            });
+                        });
+                    } else {
+                        langSupported = false;
+                        if (selectedLanguage.name === "Text") langSupported = true;
+
+                        editorView.dispatch({
+                            effects: langCompartment.reconfigure([])
+                        });
+                    }
+
+                    return Close.yes;
+                }
+            });
+        }
+
+        return commands;
+    };
+
+    const openLanguageSelect = () => {
+        setTempCommands(getLanguageCommands());
+
+        cmdPalOpen.set(true);
     };
 
     const onIndentClick = () => {
@@ -153,7 +198,7 @@
 
     <div class="toolbar flex sm-row center space-between">
         <div class="flex sm-row center">
-            <button on:click={onLanguageClick}>language: {selectedLanguage?.name}</button>
+            <button on:click={openLanguageSelect}>language: {selectedLanguage?.name}</button>
 
             <button on:click={onIndentClick}>{selectedIndentUnit}: {selectedIndentWidth}</button>
 
