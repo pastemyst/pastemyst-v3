@@ -105,10 +105,6 @@
     };
 </script>
 
-<svelte:head>
-    <title>pastemyst | home</title>
-</svelte:head>
-
 <div class="title-input flex sm-row">
     <label class="hidden" for="paste-title">paste title</label>
     <input
