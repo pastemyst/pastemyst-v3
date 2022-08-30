@@ -2,6 +2,10 @@
     import { apiBase } from "$lib/api/api";
 </script>
 
+<svelte:head>
+    <title>pastemyst | login / register</title>
+</svelte:head>
+
 <section class="centered">
     <h2>login / register</h2>
 
