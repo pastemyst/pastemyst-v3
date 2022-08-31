@@ -14,7 +14,14 @@ const config = {
     ],
 
     kit: {
-        adapter: adapter()
+        adapter: adapter(),
+
+        csp: {
+            mode: "auto",
+            directives: {
+                "script-src": ["self"]
+            }
+        }
     }
 };
 
