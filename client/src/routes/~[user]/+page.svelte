@@ -259,11 +259,11 @@
                     margin-right: 0.75rem;
 
                     &.contributor {
-                        color: $color-sec;
+                        color: var(--color-secondary);
                     }
 
                     &.supporter {
-                        color: $color-pink;
+                        color: var(--color-pink);
                     }
                 }
 
@@ -280,14 +280,14 @@
 
                     .icon {
                         margin: 0;
-                        color: $color-red;
+                        color: var(--color-danger);
                     }
                 }
             }
 
             .joined {
                 font-size: $fs-small;
-                color: $color-bg-3;
+                color: var(--color-bg3);
                 margin: 0;
                 margin-top: 0.25rem;
             }
@@ -313,25 +313,25 @@
 
         .paste {
             display: block;
-            background-color: $color-bg;
+            background-color: var(--color-bg);
             margin-top: 1rem;
             border-radius: $border-radius;
             padding: 0.5rem;
             text-decoration: none;
             font-size: $fs-medium;
-            border: 1px solid $color-bg-2;
-            color: $color-prim;
+            border: 1px solid var(--color-bg2);
+            color: var(--color-primary);
 
             &:hover {
-                color: $color-sec;
-                background-color: $color-bg-2;
-                border-color: $color-bg-3;
+                color: var(--color-secondary);
+                background-color: var(--color-bg2);
+                border-color: var(--color-bg3);
             }
 
             &:focus {
-                color: $color-sec;
-                background-color: $color-bg-2;
-                border-color: $color-prim;
+                color: var(--color-secondary);
+                background-color: var(--color-bg2);
+                border-color: var(--color-primary);
             }
 
             p {
@@ -339,12 +339,12 @@
             }
 
             .icon {
-                color: $color-bg-3;
+                color: var(--color-bg3);
             }
 
             span {
                 font-size: $fs-small;
-                color: $color-bg-3;
+                color: var(--color-bg3);
             }
         }
 

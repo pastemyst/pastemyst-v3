@@ -102,7 +102,7 @@
         line-height: 2rem;
 
         .error {
-            color: $color-red;
+            color: var(--color-danger);
             font-weight: normal;
         }
     }

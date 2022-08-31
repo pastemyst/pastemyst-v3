@@ -28,7 +28,7 @@
         padding: 1rem 0rem;
         margin-top: 2rem;
         font-size: $fs-small;
-        border-top: 2px solid $color-bg-1;
+        border-top: 2px solid var(--color-bg1);
 
         .copy-wrap span {
             margin-right: 0.35rem;

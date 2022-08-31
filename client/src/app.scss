@@ -1,8 +1,24 @@
 @import "normalize.css";
 
+:root {
+    --color-bg: #141414;
+    --color-bg1: #1c1c1c;
+    --color-bg2: #222222;
+    --color-bg3: #777777;
+
+    --color-fg: #cccccc;
+
+    --color-primary: #ee720d;
+    --color-secondary: #1eaedb;
+
+    --color-danger: #ff4c4c;
+    --color-success: #2ec933;
+    --color-pink: #cb6dce;
+}
+
 * {
     box-sizing: border-box;
-    scrollbar-color: $color-bg-3 transparent;
+    scrollbar-color: var(--color-bg3) transparent;
 
     &::-webkit-scrollbar {
         width: 10px;
@@ -17,25 +33,25 @@
     }
 
     &::-webkit-scrollbar-thumb {
-        box-shadow: inset 0 0 10px 10px $color-bg-3;
+        box-shadow: inset 0 0 10px 10px var(--color-bg3);
         border: solid 3px transparent;
         border-radius: 5px;
     }
 }
 
 body {
-    background-color: $color-bg;
-    color: $color-fg;
+    background-color: var(--color-bg);
+    color: var(--color-fg);
     font-family: $font-stack;
     font-size: $fs-medium;
 }
 
 a {
-    color: $color-prim;
+    color: var(--color-primary);
     @include transition;
 
     &:hover {
-        color: $color-sec;
+        color: var(--color-secondary);
     }
 
     &.no-dec {
@@ -54,17 +70,17 @@ a {
 
 kbd,
 code {
-    background-color: $color-bg;
-    border: 1px solid $color-bg-2;
+    background-color: var(--color-bg);
+    border: 1px solid var(--color-bg2);
     border-radius: $border-radius;
     padding: 3px 6px;
     font-size: $fs-small;
-    border-bottom: 3px solid $color-bg-2;
+    border-bottom: 3px solid var(--color-bg2);
     font-family: $font-stack;
 }
 
 code {
-    border-bottom: 1px solid $color-bg-2;
+    border-bottom: 1px solid var(--color-bg2);
 }
 
 .flex {
@@ -124,9 +140,9 @@ code {
 input[type="text"],
 input[type="password"],
 textarea {
-    background-color: $color-bg-1;
-    border: 1px solid $color-bg-2;
-    color: $color-fg;
+    background-color: var(--color-bg1);
+    border: 1px solid var(--color-bg2);
+    color: var(--color-fg);
     outline: none;
     border-radius: $border-radius;
     padding: 0.5rem 1rem;
@@ -134,20 +150,20 @@ textarea {
     @include transition();
 
     &:hover {
-        background-color: $color-bg-2;
-        border-color: $color-bg-3;
+        background-color: var(--color-bg2);
+        border-color: var(--color-bg3);
     }
 
     &:focus,
     &:active {
         outline: none;
-        border-color: $color-prim;
+        border-color: var(--color-primary);
     }
 }
 
 form {
     span.required {
-        color: $color-red;
+        color: var(--color-danger);
     }
 
     label {
@@ -158,13 +174,13 @@ form {
 button,
 .btn {
     cursor: pointer;
-    background-color: $color-bg-1;
+    background-color: var(--color-bg1);
     display: flex;
     align-items: center;
     padding: 0.25rem 0.5rem;
     border-radius: $border-radius;
-    border: 1px solid $color-bg-2;
-    color: $color-fg;
+    border: 1px solid var(--color-bg2);
+    color: var(--color-fg);
     text-decoration: none;
     @include transition();
 
@@ -174,47 +190,47 @@ button,
     }
 
     &:hover {
-        background-color: $color-bg-2;
-        border-color: $color-bg-3;
-        color: $color-fg;
+        background-color: var(--color-bg2);
+        border-color: var(--color-bg3);
+        color: var(--color-fg);
     }
 
     &:focus,
     &:active {
         outline: none;
-        border-color: $color-prim;
+        border-color: var(--color-primary);
     }
 
     &.btn-main {
-        background-color: $color-prim;
-        color: $color-bg;
+        background-color: var(--color-primary);
+        color: var(--color-bg);
         border-color: rgba(240, 246, 252, 0.1);
 
         &:hover {
-            background-color: $color-sec;
+            background-color: var(--color-secondary);
         }
 
         &:focus,
         &:active {
             background-color: transparent;
-            color: $color-fg;
-            border-color: $color-prim;
+            color: var(--color-fg);
+            border-color: var(--color-primary);
             outline: none;
         }
     }
 
     &.btn-danger {
-        color: $color-red;
-        border-color: rgba($color-red, 0.3);
+        color: var(--color-danger);
+        border-color: var(--color-danger);
 
         .icon {
-            color: $color-red;
+            color: var(--color-danger);
         }
 
         &:hover,
         &:focus,
         &:active {
-            border-color: $color-red;
+            border-color: var(--color-danger);
         }
     }
 
@@ -224,19 +240,19 @@ button,
 
     &[disabled] {
         cursor: not-allowed;
-        background-color: $color-bg-2;
-        border-color: $color-bg-2;
-        color: $color-bg-3;
+        background-color: var(--color-bg2);
+        border-color: var(--color-bg2);
+        color: var(--color-bg3);
 
         .icon {
-            color: $color-bg-3;
+            color: var(--color-bg3);
         }
     }
 }
 
 section {
-    background-color: $color-bg-1;
-    border: 1px solid $color-bg-2;
+    background-color: var(--color-bg1);
+    border: 1px solid var(--color-bg2);
     border-radius: $border-radius;
     padding: 1rem;
     margin-top: 2rem;
@@ -251,7 +267,7 @@ section {
     button,
     textarea,
     .btn {
-        background-color: $color-bg;
+        background-color: var(--color-bg);
     }
 
     &.centered {
@@ -266,19 +282,19 @@ section {
 }
 
 .block {
-    background-color: $color-bg-1;
-    border: 1px solid $color-bg-2;
+    background-color: var(--color-bg1);
+    border: 1px solid var(--color-bg2);
     border-radius: $border-radius;
 }
 
 .error-message {
     padding: 1rem;
-    border: 2px solid $color-red;
+    border: 2px solid var(--color-danger);
     border-radius: $border-radius;
 }
 
 .icon {
-    color: $color-fg;
+    color: var(--color-fg);
     width: 18px;
     height: 18px;
     pointer-events: none;
@@ -287,13 +303,13 @@ section {
 // tooltips themes
 
 .tippy-box[data-theme~="myst"] {
-    background-color: $color-bg-1;
-    border: 1px solid $color-bg-2;
+    background-color: var(--color-bg1);
+    border: 1px solid var(--color-bg2);
     border-radius: $border-radius;
-    color: $color-fg;
+    color: var(--color-fg);
     @include shadow-big();
 }
 
 .tippy-box[data-theme~="myst"] > .tippy-svg-arrow {
-    fill: $color-bg-2;
+    fill: var(--color-bg2);
 }

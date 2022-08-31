@@ -93,27 +93,27 @@
 
 <style lang="scss">
     .tab {
-        background-color: $color-bg-1;
+        background-color: var(--color-bg1);
         cursor: pointer;
         user-select: none;
         flex-grow: 0.25;
-        border: 1px solid $color-bg-2;
+        border: 1px solid var(--color-bg2);
         border-bottom-color: transparent;
         border-left-color: transparent;
         @include transition(border-color, background-color);
 
         &:first-child {
             border-radius: $border-radius 0 0 0;
-            border-left-color: $color-bg-2;
+            border-left-color: var(--color-bg2);
         }
 
         &:hover {
-            background-color: $color-bg-2;
-            border-color: $color-bg-3;
+            background-color: var(--color-bg2);
+            border-color: var(--color-bg3);
         }
 
         &.active {
-            border-color: $color-prim;
+            border-color: var(--color-primary);
             z-index: 1;
         }
 
@@ -139,14 +139,14 @@
             }
 
             &:hover .icon {
-                color: $color-red;
+                color: var(--color-danger);
             }
         }
 
         input {
             background-color: transparent;
             border-radius: $border-radius;
-            color: $color-sec;
+            color: var(--color-secondary);
             border: none;
             outline: none;
             width: auto;

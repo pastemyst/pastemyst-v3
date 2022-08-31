@@ -7,6 +7,7 @@
     import { Close, setBaseCommands, type Command } from "$lib/command";
     import { beforeNavigate, goto } from "$app/navigation";
     import { apiBase } from "$lib/api/api";
+    import ThemeContext from "$lib/ThemeContext.svelte";
 
     import "tippy.js/dist/tippy.css";
     import "tippy.js/dist/svg-arrow.css";
@@ -65,15 +66,17 @@
     });
 </script>
 
-<div id="container">
-    <Header />
+<ThemeContext>
+    <div id="container">
+        <Header />
 
-    <main>
-        <slot />
-    </main>
+        <main>
+            <slot />
+        </main>
 
-    <Footer />
-</div>
+        <Footer />
+    </div>
+</ThemeContext>
 
 <CommandPalette />
 

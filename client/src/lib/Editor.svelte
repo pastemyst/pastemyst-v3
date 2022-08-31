@@ -273,22 +273,22 @@
         font-size: $fs-normal;
 
         :global(.cm-editor) {
-            border: 1px solid $color-bg-2;
+            border: 1px solid var(--color-bg2);
             @include transition();
 
             &:hover {
-                background-color: $color-bg-2;
-                border-color: $color-bg-3;
+                background-color: var(--color-bg2);
+                border-color: var(--color-bg3);
 
                 :global(.cm-gutter),
                 :global(.cm-activeLineGutter) {
-                    background-color: $color-bg-2;
+                    background-color: var(--color-bg2);
                 }
             }
         }
 
         :global(.cm-focused) {
-            border-color: $color-prim !important;
+            border-color: var(--color-primary) !important;
         }
 
         :global(.cm-scroller) {
@@ -323,14 +323,14 @@
         box-sizing: border-box;
         bottom: 0;
         right: 0;
-        background-color: $color-sec;
+        background-color: var(--color-secondary);
         margin: 0.5rem;
         padding: 0.25rem 0.5rem;
         border-radius: $border-radius;
-        color: $color-bg-2;
+        color: var(--color-bg2);
 
         .icon {
-            color: $color-bg-2;
+            color: var(--color-bg2);
             margin-right: 0.5rem;
         }
 
@@ -341,7 +341,7 @@
 
     .toolbar {
         font-size: $fs-small;
-        background-color: $color-bg-2;
+        background-color: var(--color-bg2);
         padding: 0.25rem 0.5rem;
         border-radius: 0 0 $border-radius $border-radius;
 
@@ -349,8 +349,8 @@
             margin-right: 0.5rem;
 
             &.enabled {
-                color: $color-sec;
-                border-color: $color-sec;
+                color: var(--color-secondary);
+                border-color: var(--color-secondary);
             }
         }
     }
@@ -359,7 +359,7 @@
         height: 50vh;
         border-bottom-left-radius: $border-radius;
         border-bottom-right-radius: $border-radius;
-        border: 1px solid $color-bg-2;
+        border: 1px solid var(--color-bg2);
         border-top: none;
         margin: 0;
         overflow-x: auto;
@@ -392,7 +392,7 @@
         margin-right: 1.1rem;
         display: inline-block;
         text-align: right;
-        color: $color-bg-3;
+        color: var(--color-bg3);
         font-size: $fs-normal;
         padding-left: 0.75rem;
     }
