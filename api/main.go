@@ -66,6 +66,8 @@ func main() {
 
 	e.Use(auth.AuthMiddleware)
 
+	e.Static("/assets", "assets")
+
 	e.GET("/api/v3/login/:provider", handlers.LoginHandler)
 	e.GET("/api/v3/login/:provider/callback", handlers.CallbackHandler)
 
@@ -82,6 +84,8 @@ func main() {
 	e.GET("/api/v3/user", handlers.GetUserHandler)
 	e.GET("/api/v3/user/:username", handlers.GetUserHandler)
 	e.GET("/api/v3/user/:username/pastes", handlers.GetUserPastesHandler)
+
+	e.PATCH("/api/v3/settings/avatar", handlers.PatchAvatarHandler)
 
 	e.GET("/api/v3/paste/:id", handlers.GetPaseHandler)
 	e.GET("/api/v3/paste/:id/stats", handlers.GetPasteStatsHandler)
