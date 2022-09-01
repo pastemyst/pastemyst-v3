@@ -88,6 +88,7 @@ func main() {
 	e.GET("/api/v3/user/:username/pastes", handlers.GetUserPastesHandler)
 
 	e.PATCH("/api/v3/settings/avatar", handlers.PatchAvatarHandler)
+	e.PATCH("/api/v3/settings/username", handlers.PatchUserUsername)
 
 	e.GET("/api/v3/paste/:id", handlers.GetPaseHandler)
 	e.GET("/api/v3/paste/:id/stats", handlers.GetPasteStatsHandler)

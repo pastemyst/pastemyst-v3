@@ -14,6 +14,7 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/go-playground/validator/v10"
 	"github.com/labstack/echo/v4"
 )
 
@@ -81,6 +82,54 @@ func PatchAvatarHandler(ctx echo.Context) error {
 	db.DBQueries.SetUserAvatar(db.DBContext, db.SetUserAvatarParams{
 		ID:        user.Id,
 		AvatarUrl: fmt.Sprintf("%s/assets/avatars/%s%s", config.Cfg.Api.Host, avatarId, filepath.Ext(file.Filename)),
+	})
+
+	return nil
+}
+
+// Sets the user's username.
+//
+// PATCH /api/v3/settings/username
+func PatchUserUsername(ctx echo.Context) error {
+	type usernameUpdate struct {
+		Username string `json:"username"`
+	}
+
+	user, hasUser := ctx.Get("user").(models.User)
+
+	if !hasUser {
+		return echo.NewHTTPError(http.StatusUnauthorized)
+	}
+
+	var username usernameUpdate
+	err := ctx.Bind(&username)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest)
+	}
+
+	validate := validator.New()
+	err = validate.Var(username, validation.UsernameValidation)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, validation.ValidationErrToMsg(err))
+	}
+
+	if username.Username == user.Username {
+		return nil
+	}
+
+	exists, err := db.DBQueries.ExistsUserByUsername(db.DBContext, username.Username)
+	if err != nil {
+		logging.Logger.Errorf("Failed to check if user exists by username: %s", err.Error())
+		return echo.NewHTTPError(http.StatusInternalServerError)
+	}
+
+	if exists {
+		return echo.NewHTTPError(http.StatusBadRequest, "Username is taken.")
+	}
+
+	db.DBQueries.SetUserUsername(db.DBContext, db.SetUserUsernameParams{
+		ID:       user.Id,
+		Username: username.Username,
 	})
 
 	return nil

@@ -191,7 +191,7 @@ func PostRegisterHandler(ctx echo.Context) error {
 	}
 
 	validate := validator.New()
-	err = validate.Var(username, "required,max=20,containsany=abcdefghijklmnopqrstuvwxyz0123456789.-_")
+	err = validate.Var(username, validation.UsernameValidation)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, validation.ValidationErrToMsg(err))
 	}

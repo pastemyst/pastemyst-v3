@@ -489,6 +489,20 @@ func (q *Queries) SetUserAvatar(ctx context.Context, arg SetUserAvatarParams) er
 	return err
 }
 
+const setUserUsername = `-- name: SetUserUsername :exec
+update users set username = $2 where id = $1
+`
+
+type SetUserUsernameParams struct {
+	ID       string
+	Username string
+}
+
+func (q *Queries) SetUserUsername(ctx context.Context, arg SetUserUsernameParams) error {
+	_, err := q.db.ExecContext(ctx, setUserUsername, arg.ID, arg.Username)
+	return err
+}
+
 const starPaste = `-- name: StarPaste :exec
 insert into stars (user_id, paste_id) values ($1, $2) returning user_id, paste_id
 `
