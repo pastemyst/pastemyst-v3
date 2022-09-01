@@ -5,8 +5,9 @@
     import { activePastesStores, currentUserStore, versionStore } from "$lib/stores";
     import CommandPalette from "$lib/CommandPalette.svelte";
     import { Close, setBaseCommands, type Command } from "$lib/command";
-    import { beforeNavigate, goto } from "$app/navigation";
+    import { afterNavigate, beforeNavigate, goto } from "$app/navigation";
     import { apiBase } from "$lib/api/api";
+    import ThemeContext from "$lib/ThemeContext.svelte";
 
     import "tippy.js/dist/tippy.css";
     import "tippy.js/dist/svg-arrow.css";
@@ -63,17 +64,27 @@
     beforeNavigate(() => {
         setBaseCommands(getCommands());
     });
+
+    let loaded = false;
+
+    afterNavigate(() => {
+        loaded = true;
+    });
 </script>
 
-<div id="container">
-    <Header />
+<ThemeContext>
+    {#if loaded}
+        <div id="container">
+            <Header />
 
-    <main>
-        <slot />
-    </main>
+            <main>
+                <slot />
+            </main>
 
-    <Footer />
-</div>
+            <Footer />
+        </div>
+    {/if}
+</ThemeContext>
 
 <CommandPalette />
 

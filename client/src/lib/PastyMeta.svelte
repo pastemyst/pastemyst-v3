@@ -91,7 +91,7 @@
 <style lang="scss">
     .stats {
         font-size: $fs-normal;
-        color: $color-bg-3;
+        color: var(--color-bg3);
         padding-left: 0.5rem;
     }
 
@@ -119,10 +119,10 @@
 
     button,
     .btn {
-        background-color: $color-bg;
+        background-color: var(--color-bg);
 
         &:hover {
-            background-color: $color-bg-2;
+            background-color: var(--color-bg2);
         }
     }
 </style>

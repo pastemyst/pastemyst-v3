@@ -146,17 +146,17 @@
         opacity: 0;
 
         &:checked + label {
-            color: $color-prim;
+            color: var(--color-primary);
         }
     }
 
     label {
         margin-right: 1rem;
-        background-color: $color-bg;
+        background-color: var(--color-bg);
         padding: 0.5rem;
 
         &:hover {
-            background-color: $color-bg;
+            background-color: var(--color-bg);
         }
 
         .icon {
@@ -164,10 +164,10 @@
         }
 
         &.enabled {
-            border-color: $color-sec;
+            border-color: var(--color-secondary);
 
             .icon {
-                color: $color-sec;
+                color: var(--color-secondary);
             }
         }
     }

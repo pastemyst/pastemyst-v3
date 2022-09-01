@@ -161,7 +161,7 @@
     .tabs {
         width: 100%;
         box-sizing: border-box;
-        background-color: $color-bg-2;
+        background-color: var(--color-bg2);
         border-radius: $border-radius $border-radius 0 0;
         margin-bottom: -1px; // collapse bottom border
 
@@ -175,7 +175,7 @@
             background-color: transparent;
 
             &:hover {
-                border-bottom-color: $color-bg-3;
+                border-bottom-color: var(--color-bg3);
             }
 
             .icon {
@@ -192,6 +192,6 @@
     .tabs .tabgroup :global(.sortable-chosen) {
         @include shadow-big();
         z-index: 10;
-        border-color: $color-sec;
+        border-color: var(--color-secondary);
     }
 </style>

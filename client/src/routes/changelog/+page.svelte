@@ -56,10 +56,10 @@
 
     .release {
         margin-top: 2rem;
-        background-color: $color-bg;
+        background-color: var(--color-bg);
         padding: 0.5rem 1rem;
         border-radius: $border-radius;
-        border: 1px solid $color-bg-2;
+        border: 1px solid var(--color-bg2);
     }
 
     h4 {
@@ -70,7 +70,7 @@
     }
 
     .alpha {
-        border: 1px solid $color-sec;
+        border: 1px solid var(--color-secondary);
         padding: 0.25rem 0.5rem;
         border-radius: $border-radius;
         font-size: $fs-small;

@@ -336,11 +336,11 @@
     }
 
     .palette {
-        background-color: $color-bg;
+        background-color: var(--color-bg);
         max-width: 40rem;
         margin: 0 auto;
         border-radius: $border-radius;
-        border: 1px solid $color-bg-2;
+        border: 1px solid var(--color-bg2);
         position: relative;
         top: 25%;
         max-height: 20rem;
@@ -348,10 +348,10 @@
     }
 
     .search {
-        border-bottom: 1px solid $color-bg-2;
+        border-bottom: 1px solid var(--color-bg2);
 
         input {
-            background-color: $color-bg;
+            background-color: var(--color-bg);
             border: none;
             width: 100%;
         }
@@ -377,11 +377,11 @@
             align-items: flex-start;
 
             &:hover {
-                background-color: $color-bg-1;
+                background-color: var(--color-bg1);
             }
 
             &.selected {
-                background-color: $color-bg-2;
+                background-color: var(--color-bg2);
             }
 
             p {
@@ -389,12 +389,12 @@
             }
 
             .description {
-                color: $color-bg-3;
+                color: var(--color-bg3);
                 font-size: $fs-small;
             }
 
             .highlight {
-                color: $color-sec;
+                color: var(--color-secondary);
             }
         }
     }

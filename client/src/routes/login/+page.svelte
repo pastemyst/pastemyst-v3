@@ -69,7 +69,7 @@
             margin-top: 2rem;
 
             a {
-                background-color: $color-bg;
+                background-color: var(--color-bg);
                 padding: 1rem;
                 text-decoration: none;
                 flex-direction: row;

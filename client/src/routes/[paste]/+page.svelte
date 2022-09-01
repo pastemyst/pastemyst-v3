@@ -340,7 +340,7 @@
 
             .dates {
                 font-size: $fs-small;
-                color: $color-bg-3;
+                color: var(--color-bg3);
                 margin-top: 0.25rem;
 
                 span:last-child {
@@ -359,7 +359,7 @@
                 }
 
                 &.starred svg {
-                    color: $color-prim;
+                    color: var(--color-primary);
                 }
             }
 
@@ -378,7 +378,7 @@
         margin-bottom: 2rem;
 
         .lang {
-            border-right: 2px solid $color-bg;
+            border-right: 2px solid var(--color-bg);
 
             &:first-child {
                 border-bottom-left-radius: $border-radius;
@@ -395,9 +395,9 @@
         .tabs {
             width: 100%;
             box-sizing: border-box;
-            background-color: $color-bg-2;
+            background-color: var(--color-bg2);
             border-radius: $border-radius $border-radius 0 0;
-            border-bottom: 1px solid $color-bg-2;
+            border-bottom: 1px solid var(--color-bg2);
 
             .tabgroup {
                 flex-wrap: wrap;
@@ -410,9 +410,9 @@
         }
 
         .meta-tabbed {
-            background-color: $color-bg-1;
+            background-color: var(--color-bg1);
             padding: 0.25rem;
-            border: 1px solid $color-bg-2;
+            border: 1px solid var(--color-bg2);
             border-top: none;
         }
 
@@ -424,9 +424,9 @@
             }
 
             .title {
-                background-color: $color-bg-1;
+                background-color: var(--color-bg1);
                 border-radius: $border-radius $border-radius 0 0;
-                border-bottom: 1px solid $color-prim;
+                border-bottom: 1px solid var(--color-primary);
                 width: 100%;
                 box-sizing: border-box;
 
@@ -451,7 +451,7 @@
         padding: 0.5rem;
         border-bottom-left-radius: $border-radius;
         border-bottom-right-radius: $border-radius;
-        border: 1px solid $color-bg-2;
+        border: 1px solid var(--color-bg2);
         border-top: none;
         margin: 0;
         overflow-x: auto;
@@ -477,7 +477,7 @@
         margin-right: 1rem;
         display: inline-block;
         text-align: right;
-        color: $color-bg-3;
+        color: var(--color-bg3);
         font-size: $fs-normal;
     }
 
