@@ -100,7 +100,7 @@
 
                     {#if data.isCurrentUser}
                         <a
-                            href="/settings"
+                            href="/settings/profile"
                             use:tooltip
                             aria-label="profile settings"
                             class="settings btn"
