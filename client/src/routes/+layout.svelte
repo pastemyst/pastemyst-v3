@@ -39,6 +39,13 @@
                     }
                 },
                 {
+                    name: "settings",
+                    action: () => {
+                        goto("/settings/profile");
+                        return Close.yes;
+                    }
+                },
+                {
                     name: "logout",
                     action: () => {
                         window.location.href = `${apiBase}/auth/logout`;
@@ -47,13 +54,22 @@
                 }
             );
         } else {
-            commands.push({
-                name: "login / register",
-                action: () => {
-                    goto("/login");
-                    return Close.yes;
+            commands.push(
+                {
+                    name: "settings",
+                    action: () => {
+                        goto("/settings/behaviour");
+                        return Close.yes;
+                    }
+                },
+                {
+                    name: "login / register",
+                    action: () => {
+                        goto("/login");
+                        return Close.yes;
+                    }
                 }
-            });
+            );
         }
 
         return commands;
@@ -74,7 +90,7 @@
 
 <ThemeContext>
     {#if loaded}
-        <div id="container">
+        <div id="container" data-sveltekit-prefetch>
             <Header />
 
             <main>
