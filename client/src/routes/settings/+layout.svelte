@@ -172,6 +172,8 @@
         height: 100%;
 
         nav {
+            width: 100%;
+
             ul {
                 margin: 0;
                 margin-bottom: 1rem;

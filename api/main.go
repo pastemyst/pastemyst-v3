@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"net/http"
 	"pastemyst-api/auth"
 	"pastemyst-api/changelog"
 	"pastemyst-api/config"
@@ -60,6 +61,7 @@ func main() {
 		AllowOrigins:     []string{"*"},
 		AllowHeaders:     []string{echo.HeaderOrigin, echo.HeaderAccept, echo.HeaderContentType, echo.HeaderAuthorization},
 		AllowCredentials: true,
+		AllowMethods:     []string{http.MethodGet, http.MethodPost, http.MethodDelete, http.MethodHead, http.MethodOptions, http.MethodPatch},
 	}))
 
 	e.Use(session.Middleware(sessions.NewCookieStore([]byte(config.Cfg.Secrets.Session))))
