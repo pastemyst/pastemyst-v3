@@ -61,35 +61,35 @@ func (ns NullExpiresIn) Value() (driver.Value, error) {
 }
 
 type Paste struct {
-	ID        string
-	CreatedAt time.Time
-	ExpiresIn ExpiresIn
-	DeletesAt sql.NullTime
-	Title     string
-	OwnerID   sql.NullString
-	Private   bool
+	ID        string         `db:"id"`
+	CreatedAt time.Time      `db:"created_at"`
+	ExpiresIn ExpiresIn      `db:"expires_in"`
+	DeletesAt sql.NullTime   `db:"deletes_at"`
+	Title     string         `db:"title"`
+	OwnerID   sql.NullString `db:"owner_id"`
+	Private   bool           `db:"private"`
 }
 
 type Pasty struct {
-	ID       string
-	PasteID  string
-	Title    string
-	Content  string
-	Language string
+	ID       string `db:"id"`
+	PasteID  string `db:"paste_id"`
+	Title    string `db:"title"`
+	Content  string `db:"content"`
+	Language string `db:"language"`
 }
 
 type Star struct {
-	UserID  string
-	PasteID string
+	UserID  string `db:"user_id"`
+	PasteID string `db:"paste_id"`
 }
 
 type User struct {
-	ID           string
-	CreatedAt    time.Time
-	Username     string
-	AvatarUrl    string
-	Contributor  bool
-	Supporter    int32
-	ProviderName string
-	ProviderID   string
+	ID           string    `db:"id"`
+	CreatedAt    time.Time `db:"created_at"`
+	Username     string    `db:"username"`
+	AvatarUrl    string    `db:"avatar_url"`
+	Contributor  bool      `db:"contributor"`
+	Supporter    int32     `db:"supporter"`
+	ProviderName string    `db:"provider_name"`
+	ProviderID   string    `db:"provider_id"`
 }

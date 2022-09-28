@@ -14,6 +14,9 @@ import (
 
 	"github.com/go-co-op/gocron"
 	"github.com/go-playground/validator/v10"
+	"github.com/golang-migrate/migrate/v4"
+	"github.com/golang-migrate/migrate/v4/database/postgres"
+	_ "github.com/golang-migrate/migrate/v4/source/file"
 	"github.com/gorilla/sessions"
 	"github.com/labstack/echo-contrib/session"
 	"github.com/labstack/echo/v4"
@@ -27,7 +30,23 @@ func main() {
 		panic(err)
 	}
 
-	err = db.InitDb()
+	sqldb, err := db.InitDb()
+	if err != nil {
+		panic(err)
+	}
+
+	driver, err := postgres.WithInstance(sqldb, &postgres.Config{})
+	if err != nil {
+		panic(err)
+	}
+
+	// run migrations
+	migrations, err := migrate.NewWithDatabaseInstance("file://db/migrations", "postgres", driver)
+	if err != nil {
+		panic(err)
+	}
+
+	err = migrations.Up()
 	if err != nil {
 		panic(err)
 	}

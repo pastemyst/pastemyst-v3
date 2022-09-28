@@ -1,0 +1,1 @@
+drop type if exists expires_in;
