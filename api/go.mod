@@ -9,7 +9,7 @@ require (
 	github.com/gorilla/sessions v1.2.1
 	github.com/ilyakaznacheev/cleanenv v1.3.0
 	github.com/labstack/echo-contrib v0.13.0
-	github.com/labstack/echo/v4 v4.7.2
+	github.com/labstack/echo/v4 v4.9.0
 	github.com/lib/pq v1.10.6
 	go.uber.org/zap v1.21.0
 	golang.org/x/oauth2 v0.0.0-20220808172628-8227340efae7
@@ -36,7 +36,6 @@ require (
 	github.com/BurntSushi/toml v1.1.0 // indirect
 	github.com/go-playground/locales v0.14.0 // indirect
 	github.com/go-playground/universal-translator v0.18.0 // indirect
-	github.com/golang-migrate/migrate v3.5.4+incompatible
 	github.com/golang-migrate/migrate/v4 v4.15.2
 	github.com/joho/godotenv v1.4.0 // indirect
 	github.com/labstack/echo v3.3.10+incompatible
