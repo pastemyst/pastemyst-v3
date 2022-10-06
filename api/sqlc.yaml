@@ -1,7 +1,12 @@
-version: 1
-packages:
-  - path: "db"
-    name: "db"
-    engine: "postgresql"
-    schema: "schema.sql"
-    queries: "query.sql"
+version: 2
+
+sql:
+- schema: "db/migrations"
+  queries: "query.sql"
+  engine: "postgresql"
+  gen:
+    go:
+      package: "db"
+      out: "db"
+      emit_db_tags: true
+      emit_prepared_queries: true
