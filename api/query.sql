@@ -83,10 +83,10 @@ select count(*) from paste
 where owner_id = $1;
 
 -- name: SetUserAvatar :exec
-update users set avatar_url = $2 where id = $1;
+update "user" set avatar_url = $2 where id = $1;
 
 -- name: SetUserUsername :exec
-update users set username = $2 where id = $1;
+update "user" set username = $2 where id = $1;
 
 -- name: DeleteExpiredPastes :one
 with deleted as

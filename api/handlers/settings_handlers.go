@@ -104,7 +104,7 @@ func PatchUserUsername(ctx echo.Context) error {
 	var username usernameUpdate
 	err := ctx.Bind(&username)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest)
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 
 	validate := validator.New()
@@ -127,10 +127,14 @@ func PatchUserUsername(ctx echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, "Username is taken.")
 	}
 
-	db.DBQueries.SetUserUsername(db.DBContext, db.SetUserUsernameParams{
+	err = db.DBQueries.SetUserUsername(db.DBContext, db.SetUserUsernameParams{
 		ID:       user.Id,
 		Username: username.Username,
 	})
+	if err != nil {
+		logging.Logger.Errorf("Failed to set user username: %s", err.Error())
+		return echo.NewHTTPError(http.StatusInternalServerError)
+	}
 
 	return nil
 }

@@ -48,7 +48,7 @@ func main() {
 	}
 
 	err = migrations.Up()
-	if err != nil {
+	if err != migrate.ErrNoChange {
 		panic(err)
 	}
 
@@ -103,6 +103,7 @@ func main() {
 	e.GET("/api/v3/lang/all", handlers.GetAllLangsHandler)
 
 	e.GET("/api/v3/user", handlers.GetUserHandler)
+	e.GET("/api/v3/user/exists", handlers.GetUserExistsHandler)
 	e.GET("/api/v3/user/:username", handlers.GetUserHandler)
 	e.GET("/api/v3/user/:username/pastes", handlers.GetUserPastesHandler)
 
