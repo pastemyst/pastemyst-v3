@@ -11,5 +11,5 @@ export const load: PageLoad = async ({ fetch }) => {
 
     return {
         self: self
-    }
+    };
 };

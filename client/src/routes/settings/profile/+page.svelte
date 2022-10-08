@@ -35,12 +35,12 @@
         }
     };
 
-    let usernameTimer: NodeJS.Timeout;
+    let usernameTimer: number;
 
     const onUsernameInputKeyup = () => {
         waitingForUsernameCheck = true;
-        clearTimeout(usernameTimer);
-        usernameTimer = setTimeout(checkIfUsernameAvailable, 250);
+        window.clearTimeout(usernameTimer);
+        usernameTimer = window.setTimeout(checkIfUsernameAvailable, 250);
     };
 
     const checkIfUsernameAvailable = async () => {
