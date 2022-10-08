@@ -47,6 +47,25 @@ func GetUserHandler(ctx echo.Context) error {
 	return ctx.JSON(http.StatusOK, user)
 }
 
+// Checks if the user with the provided username exists.
+//
+// Always returns 200 OK.
+//
+// Result body:
+//
+//	{ "exists": true }
+//
+// /api/v3/user/exists?username=...
+func GetUserExistsHandler(ctx echo.Context) error {
+	username := ctx.QueryParam("username")
+
+	exists, _ := db.DBQueries.ExistsUserByUsername(db.DBContext, username)
+
+	return ctx.JSON(http.StatusOK, map[string]bool{
+		"exists": exists,
+	})
+}
+
 // Returns the list of all pastes of a user.
 // If the user that is logged in is the same as the one that the list of pastes is fetched for, it returns all pastes,
 // otherwise it only returns the public pastes.

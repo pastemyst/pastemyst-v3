@@ -82,6 +82,12 @@ offset $3;
 select count(*) from paste
 where owner_id = $1;
 
+-- name: SetUserAvatar :exec
+update "user" set avatar_url = $2 where id = $1;
+
+-- name: SetUserUsername :exec
+update "user" set username = $2 where id = $1;
+
 -- name: DeleteExpiredPastes :one
 with deleted as
     (delete from paste where expires_in != 'never' and deletes_at < now() returning *)

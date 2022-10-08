@@ -87,6 +87,12 @@ func Prepare(ctx context.Context, db DBTX) (*Queries, error) {
 	if q.isPasteStarredStmt, err = db.PrepareContext(ctx, isPasteStarred); err != nil {
 		return nil, fmt.Errorf("error preparing query IsPasteStarred: %w", err)
 	}
+	if q.setUserAvatarStmt, err = db.PrepareContext(ctx, setUserAvatar); err != nil {
+		return nil, fmt.Errorf("error preparing query SetUserAvatar: %w", err)
+	}
+	if q.setUserUsernameStmt, err = db.PrepareContext(ctx, setUserUsername); err != nil {
+		return nil, fmt.Errorf("error preparing query SetUserUsername: %w", err)
+	}
 	if q.starPasteStmt, err = db.PrepareContext(ctx, starPaste); err != nil {
 		return nil, fmt.Errorf("error preparing query StarPaste: %w", err)
 	}
@@ -203,6 +209,16 @@ func (q *Queries) Close() error {
 			err = fmt.Errorf("error closing isPasteStarredStmt: %w", cerr)
 		}
 	}
+	if q.setUserAvatarStmt != nil {
+		if cerr := q.setUserAvatarStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing setUserAvatarStmt: %w", cerr)
+		}
+	}
+	if q.setUserUsernameStmt != nil {
+		if cerr := q.setUserUsernameStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing setUserUsernameStmt: %w", cerr)
+		}
+	}
 	if q.starPasteStmt != nil {
 		if cerr := q.starPasteStmt.Close(); cerr != nil {
 			err = fmt.Errorf("error closing starPasteStmt: %w", cerr)
@@ -273,6 +289,8 @@ type Queries struct {
 	getUserPublicPastesStmt      *sql.Stmt
 	getUserPublicPastesCountStmt *sql.Stmt
 	isPasteStarredStmt           *sql.Stmt
+	setUserAvatarStmt            *sql.Stmt
+	setUserUsernameStmt          *sql.Stmt
 	starPasteStmt                *sql.Stmt
 	unstarPasteStmt              *sql.Stmt
 }
@@ -302,6 +320,8 @@ func (q *Queries) WithTx(tx *sql.Tx) *Queries {
 		getUserPublicPastesStmt:      q.getUserPublicPastesStmt,
 		getUserPublicPastesCountStmt: q.getUserPublicPastesCountStmt,
 		isPasteStarredStmt:           q.isPasteStarredStmt,
+		setUserAvatarStmt:            q.setUserAvatarStmt,
+		setUserUsernameStmt:          q.setUserUsernameStmt,
 		starPasteStmt:                q.starPasteStmt,
 		unstarPasteStmt:              q.unstarPasteStmt,
 	}

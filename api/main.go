@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"net/http"
 	"pastemyst-api/auth"
 	"pastemyst-api/changelog"
 	"pastemyst-api/config"
@@ -47,7 +48,7 @@ func main() {
 	}
 
 	err = migrations.Up()
-	if err != nil {
+	if err != migrate.ErrNoChange {
 		panic(err)
 	}
 
@@ -79,11 +80,14 @@ func main() {
 		AllowOrigins:     []string{"*"},
 		AllowHeaders:     []string{echo.HeaderOrigin, echo.HeaderAccept, echo.HeaderContentType, echo.HeaderAuthorization},
 		AllowCredentials: true,
+		AllowMethods:     []string{http.MethodGet, http.MethodPost, http.MethodDelete, http.MethodHead, http.MethodOptions, http.MethodPatch},
 	}))
 
 	e.Use(session.Middleware(sessions.NewCookieStore([]byte(config.Cfg.Secrets.Session))))
 
 	e.Use(auth.AuthMiddleware)
+
+	e.Static("/assets", "assets")
 
 	e.GET("/api/v3/login/:provider", handlers.LoginHandler)
 	e.GET("/api/v3/login/:provider/callback", handlers.CallbackHandler)
@@ -99,8 +103,12 @@ func main() {
 	e.GET("/api/v3/lang/all", handlers.GetAllLangsHandler)
 
 	e.GET("/api/v3/user", handlers.GetUserHandler)
+	e.GET("/api/v3/user/exists", handlers.GetUserExistsHandler)
 	e.GET("/api/v3/user/:username", handlers.GetUserHandler)
 	e.GET("/api/v3/user/:username/pastes", handlers.GetUserPastesHandler)
+
+	e.PATCH("/api/v3/settings/avatar", handlers.PatchAvatarHandler)
+	e.PATCH("/api/v3/settings/username", handlers.PatchUserUsername)
 
 	e.GET("/api/v3/paste/:id", handlers.GetPaseHandler)
 	e.GET("/api/v3/paste/:id/stats", handlers.GetPasteStatsHandler)

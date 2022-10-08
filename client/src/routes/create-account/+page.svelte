@@ -2,14 +2,13 @@
     import { page } from "$app/stores";
     import { createAccount } from "$lib/api/auth";
     import { getUserByUsername } from "$lib/api/user";
+    import { usernameRegex } from "$lib/patterns";
 
     let username = $page.url.searchParams.get("username");
     let usernameInput: HTMLInputElement;
 
     let usernameValid = true;
     let usernameErrorMsg: string;
-
-    const usernameRegex = /^[\w.-]+$/m;
 
     let createAccountErrorMsg: string | null = null;
 

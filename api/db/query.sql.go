@@ -475,6 +475,34 @@ func (q *Queries) IsPasteStarred(ctx context.Context, arg IsPasteStarredParams) 
 	return exists, err
 }
 
+const setUserAvatar = `-- name: SetUserAvatar :exec
+update "user" set avatar_url = $2 where id = $1
+`
+
+type SetUserAvatarParams struct {
+	ID        string `db:"id"`
+	AvatarUrl string `db:"avatar_url"`
+}
+
+func (q *Queries) SetUserAvatar(ctx context.Context, arg SetUserAvatarParams) error {
+	_, err := q.exec(ctx, q.setUserAvatarStmt, setUserAvatar, arg.ID, arg.AvatarUrl)
+	return err
+}
+
+const setUserUsername = `-- name: SetUserUsername :exec
+update "user" set username = $2 where id = $1
+`
+
+type SetUserUsernameParams struct {
+	ID       string `db:"id"`
+	Username string `db:"username"`
+}
+
+func (q *Queries) SetUserUsername(ctx context.Context, arg SetUserUsernameParams) error {
+	_, err := q.exec(ctx, q.setUserUsernameStmt, setUserUsername, arg.ID, arg.Username)
+	return err
+}
+
 const starPaste = `-- name: StarPaste :exec
 insert into star (user_id, paste_id) values ($1, $2) returning user_id, paste_id
 `
