@@ -1,6 +1,3 @@
-config.toml
-main
-languages.yml
-
-assets/avatars/*
-!assets/avatars/.gitkeep
+.idea/
+bin/
+obj/
