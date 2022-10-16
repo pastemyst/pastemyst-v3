@@ -1,4 +1,4 @@
-import { apiBase } from "./api";
+import { PUBLIC_API_BASE } from "$env/static/public";
 import type { FetchFunc } from "./fetch";
 
 export interface Release {
@@ -10,7 +10,7 @@ export interface Release {
 }
 
 export const getVersion = async (fetchFunc: FetchFunc): Promise<string> => {
-    const res = await fetchFunc(`${apiBase}/meta/version`, {
+    const res = await fetchFunc(`${PUBLIC_API_BASE}/meta/version`, {
         method: "get"
     });
 
@@ -20,7 +20,7 @@ export const getVersion = async (fetchFunc: FetchFunc): Promise<string> => {
 };
 
 export const getReleases = async (fetchFunc: FetchFunc): Promise<Release[]> => {
-    const res = await fetchFunc(`${apiBase}/meta/releases`, {
+    const res = await fetchFunc(`${PUBLIC_API_BASE}/meta/releases`, {
         method: "get"
     });
 
@@ -30,7 +30,7 @@ export const getReleases = async (fetchFunc: FetchFunc): Promise<Release[]> => {
 };
 
 export const getActivePastes = async (fetchFunc: FetchFunc): Promise<number> => {
-    const res = await fetchFunc(`${apiBase}/meta/active_pastes`, {
+    const res = await fetchFunc(`${PUBLIC_API_BASE}/meta/active_pastes`, {
         method: "get"
     });
 

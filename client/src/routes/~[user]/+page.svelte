@@ -1,9 +1,9 @@
 <script lang="ts">
-    import { apiBase } from "$lib/api/api";
     import { ExpiresIn, type Paste } from "$lib/api/paste";
     import type { PageData } from "./$types";
     import { tooltip } from "$lib/tooltips";
     import moment from "moment";
+    import { PUBLIC_API_BASE } from "$env/static/public";
 
     export let data: PageData;
 
@@ -20,7 +20,7 @@
 
     const fetchPastes = async (page: number) => {
         const res = await fetch(
-            `${apiBase}/user/${data.user.username}/pastes?page=${page}&page_size=5`,
+            `${PUBLIC_API_BASE}/user/${data.user.username}/pastes?page=${page}&page_size=5`,
             {
                 method: "get",
                 credentials: "include"
@@ -120,7 +120,7 @@
                         </a>
 
                         <a
-                            href="{apiBase}/auth/logout"
+                            href="{PUBLIC_API_BASE}/auth/logout"
                             use:tooltip
                             aria-label="log out"
                             class="logout btn btn-danger"

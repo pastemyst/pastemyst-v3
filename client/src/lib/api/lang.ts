@@ -1,4 +1,4 @@
-import { apiBase } from "./api";
+import { PUBLIC_API_BASE } from "$env/static/public";
 
 export interface Language {
     name: string;
@@ -21,7 +21,7 @@ let langs: Language[] = [];
 
 export const getLangs = async (): Promise<Language[]> => {
     if (langs.length === 0) {
-        const res = await fetch(`${apiBase}/lang/all`);
+        const res = await fetch(`${PUBLIC_API_BASE}/lang/all`);
 
         if (res.ok) langs = await res.json();
     }
