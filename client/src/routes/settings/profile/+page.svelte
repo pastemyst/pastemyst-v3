@@ -1,5 +1,5 @@
 <script lang="ts">
-    import { apiBase } from "$lib/api/api";
+    import { PUBLIC_API_BASE } from "$env/static/public";
     import { getSelf } from "$lib/api/auth";
     import { doesUserExist } from "$lib/api/user";
     import { usernameRegex } from "$lib/patterns";
@@ -21,7 +21,7 @@
     };
 
     const onAvatarChange = async () => {
-        await fetch(`${apiBase}/settings/avatar`, {
+        await fetch(`${PUBLIC_API_BASE}/settings/avatar`, {
             method: "PATCH",
             credentials: "include",
             body: new FormData(avatarForm)
@@ -71,7 +71,7 @@
             username: usernameInputValue
         };
 
-        await fetch(`${apiBase}/settings/username`, {
+        await fetch(`${PUBLIC_API_BASE}/settings/username`, {
             method: "PATCH",
             credentials: "include",
             body: JSON.stringify(usernameData),

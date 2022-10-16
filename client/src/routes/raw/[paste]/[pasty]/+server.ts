@@ -2,6 +2,10 @@ import { getPaste } from "$lib/api/paste";
 import { error, type RequestHandler } from "@sveltejs/kit";
 
 export const GET: RequestHandler = async ({ params }) => {
+    if (!params.paste) {
+        throw error(404);
+    }
+
     const [paste, pasteRes] = await getPaste(fetch, params.paste);
 
     if (!paste) {

@@ -1,22 +1,22 @@
-import { apiBase } from "$lib/api/api";
 import type { User } from "$lib/api/user";
 import moment from "moment";
 import type { Page } from "$lib/api/page";
 import type { PageLoad } from "./$types";
 import type { Paste } from "$lib/api/paste";
 import { error } from "@sveltejs/kit";
+import { PUBLIC_API_BASE } from "$env/static/public";
 
 export const load: PageLoad = async ({ params, fetch }) => {
-    const userRes = await fetch(`${apiBase}/user/${params.user}`, {
+    const userRes = await fetch(`${PUBLIC_API_BASE}/user/${params.user}`, {
         method: "get"
     });
 
-    const meRes = await fetch(`${apiBase}/auth/self`, {
+    const meRes = await fetch(`${PUBLIC_API_BASE}/auth/self`, {
         method: "get",
         credentials: "include"
     });
 
-    const userPastesRes = await fetch(`${apiBase}/user/${params.user}/pastes?page_size=5`, {
+    const userPastesRes = await fetch(`${PUBLIC_API_BASE}/user/${params.user}/pastes?page_size=5`, {
         method: "get",
         credentials: "include"
     });
