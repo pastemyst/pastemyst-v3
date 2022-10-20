@@ -27,6 +27,8 @@ jobs:
       working-directory: client
     - run: npm ci
       working-directory: client
+    - run: npm run build
+      working-directory: client
     - run: npm run check
       working-directory: client
     - run: npm run lint
