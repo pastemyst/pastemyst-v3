@@ -23,7 +23,11 @@ jobs:
         node-version: ${{ matrix.node-version }}
         cache: 'npm'
         cache-dependency-path: ./client/package-lock.json
+    - run: cp .env.example .env
+      working-directory: client
     - run: npm ci
+      working-directory: client
+    - run: npm run build
       working-directory: client
     - run: npm run check
       working-directory: client
