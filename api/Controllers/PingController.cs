@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace pastemyst.Controllers;
 
 [ApiController]
-[Route("api/ping")]
+[Route("api/v3/ping")]
 public class PingController : ControllerBase
 {
     [HttpGet]
