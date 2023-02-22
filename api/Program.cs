@@ -1,9 +1,13 @@
 using Microsoft.EntityFrameworkCore;
 using pastemyst.DbContexts;
+using pastemyst.Middleware;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
+
+builder.Logging.ClearProviders();
+builder.Logging.AddConsole();
 
 builder.Services.AddDbContext<UserContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultDb"))
@@ -17,6 +21,8 @@ builder.Services.AddSwaggerGen();
 var app = builder.Build();
 
 app.UseHttpLogging();
+
+app.UseMiddleware<ExceptionMiddleware>();
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
