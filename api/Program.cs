@@ -11,7 +11,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Logging.ClearProviders();
 builder.Logging.AddConsole();
 
-builder.Services.AddDbContext<UserContext>(options =>
+builder.Services.AddDbContext<DataContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultDb"))
            .UseSnakeCaseNamingConvention());
 
@@ -23,6 +23,9 @@ builder.Services.TryAddSingleton<ILanguageProvider, LanguageProvider>();
 builder.Services.AddSingleton<IHostedService>(s =>
     (IHostedService)s.GetRequiredService<ILanguageProvider>()
 );
+
+builder.Services.AddScoped<IImageService, ImageService>();
+builder.Services.AddScoped<IIdProvider, IdProvider>();
 
 var app = builder.Build();
 

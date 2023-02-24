@@ -11,7 +11,7 @@ using pastemyst.DbContexts;
 
 namespace pastemyst.Migrations
 {
-    [DbContext(typeof(UserContext))]
+    [DbContext(typeof(DataContext))]
     [Migration("20221011195831_Initial")]
     partial class Initial
     {

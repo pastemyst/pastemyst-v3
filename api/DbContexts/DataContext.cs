@@ -3,13 +3,14 @@ using pastemyst.Models;
 
 namespace pastemyst.DbContexts;
 
-public class UserContext : DbContext
+public class DataContext : DbContext
 {
-    public UserContext(DbContextOptions<UserContext> contextOptions) : base(contextOptions)
+    public DbSet<User> Users { get; set; } = null!;
+    public DbSet<Image> Images { get; set; } = null!;
+    
+    public DataContext(DbContextOptions<DataContext> contextOptions) : base(contextOptions)
     {
     }
-
-    public DbSet<User> Users { get; set; } = null!;
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
