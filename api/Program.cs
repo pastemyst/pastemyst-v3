@@ -24,6 +24,11 @@ builder.Services.AddSingleton<IHostedService>(s =>
     (IHostedService)s.GetRequiredService<ILanguageProvider>()
 );
 
+builder.Services.TryAddSingleton<IVersionProvider, VersionProvider>();
+builder.Services.AddSingleton<IHostedService>(s =>
+    (IHostedService)s.GetRequiredService<IVersionProvider>()
+);
+
 builder.Services.AddScoped<IImageService, ImageService>();
 builder.Services.AddScoped<IIdProvider, IdProvider>();
 
