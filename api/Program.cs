@@ -29,6 +29,11 @@ builder.Services.AddSingleton<IHostedService>(s =>
     (IHostedService)s.GetRequiredService<IVersionProvider>()
 );
 
+builder.Services.TryAddSingleton<IChangelogProvider, ChangelogProvider>();
+builder.Services.AddSingleton<IHostedService>(s =>
+    (IHostedService)s.GetRequiredService<IChangelogProvider>()
+);
+
 builder.Services.AddScoped<IImageService, ImageService>();
 builder.Services.AddScoped<IIdProvider, IdProvider>();
 
