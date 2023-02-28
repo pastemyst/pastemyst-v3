@@ -9,10 +9,12 @@ namespace pastemyst.Controllers;
 public class MetaController : ControllerBase
 {
     private readonly IVersionProvider _versionProvider;
+    private readonly IChangelogProvider _changelogProvider;
 
-    public MetaController(IVersionProvider versionProvider)
+    public MetaController(IVersionProvider versionProvider, IChangelogProvider changelogProvider)
     {
         _versionProvider = versionProvider;
+        _changelogProvider = changelogProvider;
     }
 
     [HttpGet]
@@ -20,5 +22,12 @@ public class MetaController : ControllerBase
     public VersionResponse GetVersion()
     {
         return new VersionResponse { Version = _versionProvider.Version };
+    }
+
+    [HttpGet]
+    [Route("releases")]
+    public List<Release> GetReleases()
+    {
+        return _changelogProvider.Releases;
     }
 }
