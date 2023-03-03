@@ -4,7 +4,7 @@ import type { FetchFunc } from "./fetch";
 export interface User {
     id: string;
     username: string;
-    avatarUrl: string;
+    avatarId: string;
     createdAt: string;
     contributor: boolean;
     supporter: number;

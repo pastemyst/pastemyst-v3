@@ -4,12 +4,12 @@ namespace pastemyst.Services;
 
 public interface IVersionProvider
 {
-    string Version { get; set; }
+    string Version { get; }
 }
 
-public class VersionProvider: IVersionProvider, IHostedService
+public class VersionProvider : IVersionProvider, IHostedService
 {
-    public string Version { get; set; } = null!;
+    public string Version { get; private set; } = null!;
 
     public Task StartAsync(CancellationToken cancellationToken)
     {

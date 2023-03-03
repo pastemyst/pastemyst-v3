@@ -17,15 +17,13 @@ public class MetaController : ControllerBase
         _changelogProvider = changelogProvider;
     }
 
-    [HttpGet]
-    [Route("version")]
+    [HttpGet("version")]
     public VersionResponse GetVersion()
     {
         return new VersionResponse { Version = _versionProvider.Version };
     }
 
-    [HttpGet]
-    [Route("releases")]
+    [HttpGet("releases")]
     public List<Release> GetReleases()
     {
         return _changelogProvider.Releases;

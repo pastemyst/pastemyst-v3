@@ -9,33 +9,58 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 
 builder.Logging.ClearProviders();
+builder.Services.AddLogging();
 builder.Logging.AddConsole();
 
 builder.Services.AddDbContext<DataContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultDb"))
-           .UseSnakeCaseNamingConvention());
+        .UseSnakeCaseNamingConvention());
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+builder.Services.AddDistributedMemoryCache();
+
+builder.Services.AddSession(options =>
+{
+    options.IdleTimeout = TimeSpan.FromSeconds(10);
+    options.Cookie.HttpOnly = true;
+    options.Cookie.IsEssential = true;
+    options.Cookie.Name = "pastemyst-session";
+});
+
+builder.Services.AddHttpClient();
+
 builder.Services.TryAddSingleton<ILanguageProvider, LanguageProvider>();
-builder.Services.AddSingleton<IHostedService>(s =>
+builder.Services.AddSingleton(s =>
     (IHostedService)s.GetRequiredService<ILanguageProvider>()
 );
 
 builder.Services.TryAddSingleton<IVersionProvider, VersionProvider>();
-builder.Services.AddSingleton<IHostedService>(s =>
+builder.Services.AddSingleton(s =>
     (IHostedService)s.GetRequiredService<IVersionProvider>()
 );
 
 builder.Services.TryAddSingleton<IChangelogProvider, ChangelogProvider>();
-builder.Services.AddSingleton<IHostedService>(s =>
+builder.Services.AddSingleton(s =>
     (IHostedService)s.GetRequiredService<IChangelogProvider>()
 );
 
-builder.Services.AddScoped<IImageService, ImageService>();
 builder.Services.AddScoped<IIdProvider, IdProvider>();
+builder.Services.AddScoped<IImageService, ImageService>();
+builder.Services.AddScoped<IUserProvider, UserProvider>();
+builder.Services.AddScoped<IOAuthService, OAuthService>();
+builder.Services.AddScoped<IAuthService, AuthService>();
+
+builder.Services.AddCors(options =>
+{
+    options.AddDefaultPolicy(policy =>
+        policy.WithOrigins("http://localhost:3000")
+            .AllowCredentials()
+            .AllowAnyHeader()
+            .AllowAnyMethod());
+});
 
 var app = builder.Build();
 
@@ -50,9 +75,11 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-app.UseHttpsRedirection();
-
 app.UseAuthorization();
+
+app.UseSession();
+
+app.UseCors();
 
 app.MapControllers();
 

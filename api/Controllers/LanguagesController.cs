@@ -21,11 +21,9 @@ public class LanguagesController : ControllerBase
         return _languageProvider.Languages;
     }
 
-    [HttpGet]
-    [Route("{name}")]
-    public Language? FindByName(string name)
+    [HttpGet("{name}")]
+    public Language FindByName(string name)
     {
-        Console.WriteLine("????");
         return _languageProvider.FindByName(name);
     }
 }
