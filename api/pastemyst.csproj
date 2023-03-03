@@ -2,13 +2,18 @@
 
     <PropertyGroup>
         <TargetFramework>net7.0</TargetFramework>
-        <Nullable>enable</Nullable>
+        <Nullable>disable</Nullable>
         <ImplicitUsings>enable</ImplicitUsings>
       <UserSecretsId>52a38b57-ad1a-4427-960b-9dd8f74576a9</UserSecretsId>
   </PropertyGroup>
 
     <ItemGroup>
         <PackageReference Include="EFCore.NamingConventions" Version="7.0.2" />
+<<<<<<< Updated upstream
+=======
+        <PackageReference Include="JWT" Version="10.0.2" />
+        <PackageReference Include="LibGit2Sharp" Version="0.27.0-preview-0182" />
+>>>>>>> Stashed changes
         <PackageReference Include="Microsoft.EntityFrameworkCore" Version="7.0.3" />
         <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="7.0.3">
           <PrivateAssets>all</PrivateAssets>

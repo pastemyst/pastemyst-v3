@@ -44,7 +44,7 @@ public class ExceptionMiddleware
     private async Task HandleDefaultExceptionAsync(HttpContext context, Exception exception)
     {
         _logger.LogError("Unhandled exception: {}", exception);
-        
+
         context.Response.ContentType = "application/json";
         context.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
 
@@ -53,4 +53,3 @@ public class ExceptionMiddleware
         await context.Response.WriteAsJsonAsync(response);
     }
 }
-

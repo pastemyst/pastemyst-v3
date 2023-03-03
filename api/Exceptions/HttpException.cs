@@ -5,8 +5,7 @@ namespace pastemyst.Exceptions;
 
 public class HttpException : Exception
 {
-    [JsonIgnore]
-    public HttpStatusCode Status { get; set; }
+    [JsonIgnore] public HttpStatusCode Status { get; }
 
     public HttpException(HttpStatusCode status, string message) : base(message)
     {

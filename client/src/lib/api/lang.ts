@@ -21,7 +21,7 @@ let langs: Language[] = [];
 
 export const getLangs = async (): Promise<Language[]> => {
     if (langs.length === 0) {
-        const res = await fetch(`${PUBLIC_API_BASE}/lang/all`);
+        const res = await fetch(`${PUBLIC_API_BASE}/langs`);
 
         if (res.ok) langs = await res.json();
     }

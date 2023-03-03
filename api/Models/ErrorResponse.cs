@@ -11,4 +11,3 @@ public class ErrorResponse
         Message = message;
     }
 }
-
