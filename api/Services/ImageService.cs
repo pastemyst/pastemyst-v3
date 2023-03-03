@@ -5,9 +5,11 @@ namespace pastemyst.Services;
 
 public interface IImageService
 {
-    Task<Image> UploadImageAsync(byte[] bytes);
-    
-    Task<Image?> GetImageAsync(string id);
+    Task<Image> UploadImageAsync(byte[] bytes, string contentType);
+
+    Task<Image> FindByIdAsync(string id);
+
+    bool ExistsById(string id);
 }
 
 public class ImageService : IImageService
@@ -22,12 +24,13 @@ public class ImageService : IImageService
         _idProvider = idProvider;
     }
 
-    public async Task<Image> UploadImageAsync(byte[] bytes)
+    public async Task<Image> UploadImageAsync(byte[] bytes, string contentType)
     {
         var image = new Image
         {
             Id = _idProvider.GenerateId(ExistsById),
             CreatedAt = DateTime.UtcNow,
+            ContentType = contentType,
             Bytes = bytes
         };
 
@@ -38,7 +41,7 @@ public class ImageService : IImageService
         return image;
     }
 
-    public async Task<Image?> GetImageAsync(string id) => await _context.Images.FindAsync(id);
+    public async Task<Image> FindByIdAsync(string id) => await _context.Images.FindAsync(id);
 
     public bool ExistsById(string id) => _context.Images.Any(img => img.Id == id);
 }

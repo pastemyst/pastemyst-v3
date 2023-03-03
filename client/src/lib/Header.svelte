@@ -1,6 +1,7 @@
 <script lang="ts">
     import { cmdPalOpen, currentUserStore } from "./stores";
     import { tooltip } from "./tooltips";
+    import { PUBLIC_API_BASE } from "$env/static/public";
 
     const onMenuClick = () => {
         cmdPalOpen.set(true);
@@ -21,7 +22,7 @@
                 sveltekit:prefetch
             >
                 <img
-                    src={$currentUserStore.avatarUrl}
+                    src="{PUBLIC_API_BASE}/images/{$currentUserStore.avatarId}"
                     alt="{$currentUserStore.username}'s avatar"
                 />
             </a>

@@ -18,13 +18,14 @@ public interface ILanguageProvider
 
 public class LanguageProvider : ILanguageProvider, IHostedService
 {
-    private const string LanguagesUri = "https://raw.githubusercontent.com/github/linguist/master/lib/linguist/languages.yml";
+    private const string LanguagesUri =
+        "https://raw.githubusercontent.com/github/linguist/master/lib/linguist/languages.yml";
 
     public List<Language> Languages { get; private set; } = new();
 
     public Language FindByName(string name)
     {
-        Language? foundLang = null;
+        Language foundLang = null;
 
         foreach (var language in Languages)
         {
@@ -33,12 +34,12 @@ public class LanguageProvider : ILanguageProvider, IHostedService
             {
                 return language;
             }
-            
+
             if (foundLang is not null) continue;
-            
+
             // Check of aliases and extensions.
             // If found, keep searching, maybe in the next iterations there will be a better match.
-            
+
             // Ignore the dot from the extension.
             if (language.Extensions.Any(extension => name.EqualsIgnoreCase(extension[1..])) ||
                 language.Aliases.Any(name.EqualsIgnoreCase))
@@ -51,7 +52,7 @@ public class LanguageProvider : ILanguageProvider, IHostedService
 
         return foundLang;
     }
-    
+
     public async Task StartAsync(CancellationToken cancellationToken)
     {
         await LoadLanguages();

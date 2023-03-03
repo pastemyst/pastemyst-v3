@@ -24,17 +24,17 @@ export const getReleases = async (fetchFunc: FetchFunc): Promise<Release[]> => {
         method: "get"
     });
 
-    if (res.ok) return (await res.json()).releases;
+    if (res.ok) return await res.json();
 
     return [];
 };
 
 export const getActivePastes = async (fetchFunc: FetchFunc): Promise<number> => {
-    const res = await fetchFunc(`${PUBLIC_API_BASE}/meta/active_pastes`, {
-        method: "get"
-    });
+    // const res = await fetchFunc(`${PUBLIC_API_BASE}/meta/active_pastes`, {
+    //     method: "get"
+    // });
 
-    if (res.ok) return (await res.json()).count;
+    // if (res.ok) return (await res.json()).count;
 
     return 0;
 };

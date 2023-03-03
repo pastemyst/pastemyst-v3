@@ -17,7 +17,7 @@
         <span>{new Date().getFullYear()}</span>
     </span>
 
-    <span><a href="/changelog" sveltekit:prefetch class="no-dec">{$versionStore}</a></span>
+    <span><a href="/changelog" sveltekit:prefetch class="no-dec">v{$versionStore}</a></span>
 
     <span><a href="/" class="no-dec">{$activePastesStores} active pastes</a></span>
 </footer>

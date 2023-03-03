@@ -69,6 +69,19 @@ dotnet run
 
 to test that everything is fine, you can open https://localhost:5000/swagger or `get /ping`.
 
+#### authentification
+
+to enable auth (login), you need to set secrets for github and gitlab oauth applications, you also need to add the secret used for jwt keys.
+
+```
+dotnet user-secrets set GitHub:ClientId "..."
+dotnet user-secrets set GitHub:ClientSecret "..."
+dotnet user-secrets set GitLab:ClientId "..."
+dotnet user-secrets set GitLab:ClientSecret "..."
+
+dotnet user-secrets set JwtSecret "..."
+```
+
 ### client
 
 the client is written with sveltekit, so install node and npm (or yarn).
