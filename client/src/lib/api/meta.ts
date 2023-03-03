@@ -24,7 +24,7 @@ export const getReleases = async (fetchFunc: FetchFunc): Promise<Release[]> => {
         method: "get"
     });
 
-    if (res.ok) return (await res.json());
+    if (res.ok) return await res.json();
 
     return [];
 };
