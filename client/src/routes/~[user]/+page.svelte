@@ -53,7 +53,7 @@
 
 <div class="flex sm-row">
     <section class="user-header flex sm-col center">
-        <img class="avatar" src={data.user.avatarUrl} alt="${data.user.username}'s avatar" />
+        <img class="avatar" src="{PUBLIC_API_BASE}/images/{data.user.avatarId}" alt="${data.user.username}'s avatar" />
 
         <div class="username flex col">
             <div class="flex row center username-top">
