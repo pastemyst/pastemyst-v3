@@ -1,7 +1,9 @@
 using System.Runtime.Serialization;
+using System.Text.Json.Serialization;
 
 namespace pastemyst.Models;
 
+[JsonConverter(typeof(JsonStringEnumMemberConverter))]
 public enum ExpiresIn
 {
     [EnumMember(Value = "never")]

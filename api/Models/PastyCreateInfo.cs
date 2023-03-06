@@ -2,11 +2,10 @@ using System.ComponentModel.DataAnnotations;
 
 namespace pastemyst.Models;
 
-public class Pasty
+public class PastyCreateInfo
 {
-    public string Id { get; set; }
-    
-    public string Tile { get; set; }
+    [MaxLength(50)]
+    public string Title { get; set; }
     
     [Required]
     public string Content { get; set; }
