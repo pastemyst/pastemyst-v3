@@ -13,6 +13,8 @@ public interface IPasteService
 
     public Task<Paste> GetPasteAsync(string id);
 
+    public Task<PasteStats> GetPasteStatsAsync(string id);
+
     public Task<int> GetActivePastesCountAsync();
 
     public Task<bool> ExistsByIdAsync(string id);
@@ -98,6 +100,35 @@ public class PasteService : IPasteService
             throw new HttpException(HttpStatusCode.NotFound, "Paste not found");
 
         return paste;
+    }
+
+    public async Task<PasteStats> GetPasteStatsAsync(string id)
+    {
+        var paste = await GetPasteAsync(id);
+
+        var res = new PasteStats();
+
+        foreach (var pasty in paste.Pasties)
+        {
+            var lines = pasty.Content.Count(c => c == '\n') + 1;
+            var words = pasty.Content
+                .Split(new[] { ' ', '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries)
+                .Length;
+            var bytes = System.Text.Encoding.UTF8.GetByteCount(pasty.Content);
+
+            res.Pasties[pasty.Id] = new Stats
+            {
+                Lines = lines,
+                Words = words,
+                Bytes = bytes
+            };
+
+            res.Lines += lines;
+            res.Words += words;
+            res.Bytes += bytes;
+        }
+
+        return res;
     }
 
     public async Task<int> GetActivePastesCountAsync()
