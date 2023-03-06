@@ -10,11 +10,14 @@ public class MetaController : ControllerBase
 {
     private readonly IVersionProvider _versionProvider;
     private readonly IChangelogProvider _changelogProvider;
+    private readonly IPasteService _pasteService;
 
-    public MetaController(IVersionProvider versionProvider, IChangelogProvider changelogProvider)
+    public MetaController(IVersionProvider versionProvider, IChangelogProvider changelogProvider,
+        IPasteService pasteService)
     {
         _versionProvider = versionProvider;
         _changelogProvider = changelogProvider;
+        _pasteService = pasteService;
     }
 
     [HttpGet("version")]
@@ -27,5 +30,16 @@ public class MetaController : ControllerBase
     public List<Release> GetReleases()
     {
         return _changelogProvider.Releases;
+    }
+
+    [HttpGet("active_pastes")]
+    public async Task<ActivePastesResponse> GetActivePastesCount()
+    {
+        var count = await _pasteService.GetActivePastesCountAsync();
+
+        return new ActivePastesResponse
+        {
+            Count = count
+        };
     }
 }
