@@ -11,6 +11,8 @@ public interface IPasteService
 {
     public Task<Paste> CreatePasteAsync(PasteCreateInfo createInfo);
 
+    public Task<Paste> GetPasteAsync(string id);
+
     public Task<bool> ExistsByIdAsync(string id);
 }
 
@@ -76,6 +78,22 @@ public class PasteService : IPasteService
 
         await _dbContext.Pastes.AddAsync(paste);
         await _dbContext.SaveChangesAsync();
+
+        return paste;
+    }
+
+    public async Task<Paste> GetPasteAsync(string id)
+    {
+        var user = await _authService.GetSelfAsync(_contextAccessor.HttpContext);
+
+        var paste = await _dbContext.Pastes
+            .Include(p => p.Pasties)
+            .FirstOrDefaultAsync(p => p.Id == id);
+
+        if (paste is null) throw new HttpException(HttpStatusCode.NotFound, "Paste not found");
+
+        if (paste.Private && (user is null || user.Id != paste.Owner.Id))
+            throw new HttpException(HttpStatusCode.NotFound, "Paste not found");
 
         return paste;
     }

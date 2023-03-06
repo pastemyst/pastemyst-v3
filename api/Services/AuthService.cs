@@ -206,10 +206,9 @@ public class AuthService : IAuthService
         {
             string authHeader = httpContext.Request.Headers["Authorization"];
 
-            if (authHeader is not null && authHeader.Length > "Bearer ".Length)
-            {
-                jwtToken = authHeader["Bearer ".Length..];
-            }
+            if (authHeader is null || authHeader.Length <= "Bearer ".Length) return null;
+
+            jwtToken = authHeader["Bearer ".Length..];
         }
 
         var claims = JwtBuilder.Create()
