@@ -1,5 +1,7 @@
+using System.Net;
 using Microsoft.EntityFrameworkCore;
 using pastemyst.DbContexts;
+using pastemyst.Exceptions;
 using pastemyst.Models;
 using pastemyst.Utils;
 
@@ -17,21 +19,35 @@ public class PasteService : IPasteService
     private readonly IIdProvider _idProvider;
     private readonly ILanguageProvider _languageProvider;
     private readonly IPastyService _pastyService;
+    private readonly IAuthService _authService;
     private readonly DataContext _dbContext;
+    private readonly IHttpContextAccessor _contextAccessor;
 
-    public PasteService(IIdProvider idProvider, DataContext dbContext, ILanguageProvider languageProvider, IPastyService pastyService)
+    public PasteService(IIdProvider idProvider, DataContext dbContext, ILanguageProvider languageProvider,
+        IPastyService pastyService, IAuthService authService, IHttpContextAccessor contextAccessor)
     {
         _idProvider = idProvider;
         _dbContext = dbContext;
         _languageProvider = languageProvider;
         _pastyService = pastyService;
+        _authService = authService;
+        _contextAccessor = contextAccessor;
     }
 
     public async Task<Paste> CreatePasteAsync(PasteCreateInfo createInfo)
     {
-        // TODO: User stuff
-        
-        // TODO: Validate expires in?
+        var user = await _authService.GetSelfAsync(_contextAccessor.HttpContext);
+
+        if (createInfo.Private && user is null)
+        {
+            throw new HttpException(HttpStatusCode.Unauthorized,
+                "Can't create a private paste while unauthorized.");
+        }
+
+        if (createInfo.Private && createInfo.Anonymous)
+        {
+            throw new HttpException(HttpStatusCode.BadRequest, "Can't create a private anonymous paste.");
+        }
 
         var paste = new Paste
         {
@@ -40,6 +56,8 @@ public class PasteService : IPasteService
             ExpiresIn = createInfo.ExpiresIn,
             DeletesAt = ExpiresInUtils.ToDeletesAt(DateTime.UtcNow, createInfo.ExpiresIn),
             Title = createInfo.Title,
+            Owner = createInfo.Anonymous ? null : user,
+            Private = createInfo.Private,
             Pasties = new List<Pasty>()
         };
 
@@ -57,7 +75,7 @@ public class PasteService : IPasteService
         }
 
         await _dbContext.Pastes.AddAsync(paste);
-        await _dbContext.SaveChangesAsync();       
+        await _dbContext.SaveChangesAsync();
 
         return paste;
     }

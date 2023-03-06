@@ -200,27 +200,27 @@ public class AuthService : IAuthService
 
     public async Task<User> GetSelfAsync(HttpContext httpContext)
     {
-        var cookie = httpContext.Request.Cookies["pastemyst"];
+        var jwtToken = httpContext.Request.Cookies["pastemyst"];
 
-        if (cookie is null)
+        if (jwtToken is null)
         {
-            throw new HttpException(HttpStatusCode.Unauthorized, "Missing authorization cookie.");
+            string authHeader = httpContext.Request.Headers["Authorization"];
+
+            if (authHeader is not null && authHeader.Length > "Bearer ".Length)
+            {
+                jwtToken = authHeader["Bearer ".Length..];
+            }
         }
 
         var claims = JwtBuilder.Create()
             .WithAlgorithm(new HMACSHA512Algorithm())
             .WithSecret(_configuration["JwtSecret"])
             .MustVerifySignature()
-            .Decode<Dictionary<string, object>>(cookie);
+            .Decode<Dictionary<string, object>>(jwtToken);
 
         var userId = (string)claims["id"];
 
         var user = await _dbContext.Users.FindAsync(userId);
-
-        if (user is null)
-        {
-            throw new HttpException(HttpStatusCode.Unauthorized, "User from the token doesn't exist anymore.");
-        }
 
         return user;
     }
