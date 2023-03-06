@@ -21,5 +21,10 @@ public class DataContext : DbContext
         modelBuilder.Entity<User>()
             .HasIndex(e => e.Username)
             .IsUnique();
+
+        modelBuilder.Entity<Paste>()
+            .HasMany(p => p.Pasties)
+            .WithOne()
+            .OnDelete(DeleteBehavior.Cascade);
     }
 }

@@ -17,6 +17,8 @@ public interface IPasteService
 
     public Task<int> GetActivePastesCountAsync();
 
+    public Task DeletePasteAsync(string id);
+
     public Task<bool> ExistsByIdAsync(string id);
 }
 
@@ -134,6 +136,28 @@ public class PasteService : IPasteService
     public async Task<int> GetActivePastesCountAsync()
     {
         return await _dbContext.Pastes.CountAsync();
+    }
+
+    public async Task DeletePasteAsync(string id)
+    {
+        var user = await _authService.GetSelfAsync(_contextAccessor.HttpContext);
+
+        if (user is null)
+            throw new HttpException(HttpStatusCode.Unauthorized, "You must be authorized to delete pastes.");
+
+        var paste = await GetPasteAsync(id);
+
+        if (paste.Owner is null || paste.Owner.Id != user.Id)
+        {
+            // Returning not found instead of unauthorized to not expose that the paste exists.
+            if (paste.Private)
+                throw new HttpException(HttpStatusCode.NotFound, "Paste not found.");
+            
+            throw new HttpException(HttpStatusCode.Unauthorized, "You can only delete your own pastes.");
+        }
+
+        _dbContext.Pastes.Remove(paste);
+        await _dbContext.SaveChangesAsync();
     }
 
     public async Task<bool> ExistsByIdAsync(string id)
