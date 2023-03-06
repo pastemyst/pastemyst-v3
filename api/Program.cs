@@ -19,6 +19,7 @@ builder.Services.AddDbContext<DataContext>(options =>
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+builder.Services.AddHttpContextAccessor();
 
 builder.Services.AddDistributedMemoryCache();
 
@@ -52,6 +53,8 @@ builder.Services.AddScoped<IImageService, ImageService>();
 builder.Services.AddScoped<IUserProvider, UserProvider>();
 builder.Services.AddScoped<IOAuthService, OAuthService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddScoped<IPastyService, PastyService>();
+builder.Services.AddScoped<IPasteService, PasteService>();
 
 builder.Services.AddCors(options =>
 {

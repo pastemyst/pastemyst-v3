@@ -41,7 +41,13 @@ public class LanguageProvider : ILanguageProvider, IHostedService
             // If found, keep searching, maybe in the next iterations there will be a better match.
 
             // Ignore the dot from the extension.
-            if (language.Extensions.Any(extension => name.EqualsIgnoreCase(extension[1..])) ||
+            if (language.Extensions is not null &&
+                language.Extensions.Any(extension => name.EqualsIgnoreCase(extension[1..])))
+            {
+                foundLang = language;
+            }
+            
+            if (language.Aliases is not null &&
                 language.Aliases.Any(name.EqualsIgnoreCase))
             {
                 foundLang = language;
