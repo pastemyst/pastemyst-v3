@@ -15,6 +15,12 @@ public class PasteController : ControllerBase
         _pasteService = pasteService;
     }
 
+    [HttpGet("{pasteId}")]
+    public async Task<Paste> GetPaste(string pasteId)
+    {
+        return await _pasteService.GetPasteAsync(pasteId);
+    }
+
     [HttpPost]
     public async Task<IActionResult> CreatePaste([FromBody] PasteCreateInfo createInfo)
     {
