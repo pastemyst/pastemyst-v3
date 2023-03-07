@@ -22,5 +22,7 @@ public class Paste
 
     public bool Private { get; set; }
 
-    public int Stars { get; set; }
+    [JsonIgnore] public List<User> Stars { get; set; } = new();
+
+    [JsonPropertyName("stars")] public int StarsCount => Stars.Count;
 }
