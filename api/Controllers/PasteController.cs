@@ -33,6 +33,12 @@ public class PasteController : ControllerBase
         await _pasteService.DeletePasteAsync(pasteId);
     }
 
+    [HttpPost("{pasteId}/star")]
+    public async Task ToggleStarPaste(string pasteId)
+    {
+        await _pasteService.ToggleStarPasteAsync(pasteId);
+    }
+
     [HttpPost]
     public async Task<IActionResult> CreatePaste([FromBody] PasteCreateInfo createInfo)
     {

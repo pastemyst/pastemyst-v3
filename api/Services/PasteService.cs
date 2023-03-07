@@ -19,6 +19,8 @@ public interface IPasteService
 
     public Task DeletePasteAsync(string id);
 
+    public Task ToggleStarPasteAsync(string id);
+
     public Task<bool> ExistsByIdAsync(string id);
 }
 
@@ -94,6 +96,7 @@ public class PasteService : IPasteService
 
         var paste = await _dbContext.Pastes
             .Include(p => p.Pasties)
+            .Include(p => p.Stars)
             .FirstOrDefaultAsync(p => p.Id == id);
 
         if (paste is null) throw new HttpException(HttpStatusCode.NotFound, "Paste not found");
@@ -152,11 +155,39 @@ public class PasteService : IPasteService
             // Returning not found instead of unauthorized to not expose that the paste exists.
             if (paste.Private)
                 throw new HttpException(HttpStatusCode.NotFound, "Paste not found.");
-            
+
             throw new HttpException(HttpStatusCode.Unauthorized, "You can only delete your own pastes.");
         }
 
         _dbContext.Pastes.Remove(paste);
+        await _dbContext.SaveChangesAsync();
+    }
+
+    public async Task ToggleStarPasteAsync(string id)
+    {
+        var user = await _authService.GetSelfAsync(_contextAccessor.HttpContext);
+
+        if (user is null)
+            throw new HttpException(HttpStatusCode.Unauthorized, "You must be authorized to star pastes.");
+
+        var paste = await GetPasteAsync(id);
+
+        if (paste.Owner is null || paste.Owner.Id != user.Id)
+        {
+            // Returning not found instead of unauthorized to not expose that the paste exists.
+            if (paste.Private)
+                throw new HttpException(HttpStatusCode.NotFound, "Paste not found.");
+        }
+
+        if (paste.Stars.Any(u => u.Id == user.Id))
+        {
+            paste.Stars.Remove(user);
+        }
+        else
+        {
+            paste.Stars.Add(user);
+        }
+
         await _dbContext.SaveChangesAsync();
     }
 

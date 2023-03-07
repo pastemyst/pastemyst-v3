@@ -26,5 +26,14 @@ public class DataContext : DbContext
             .HasMany(p => p.Pasties)
             .WithOne()
             .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<Paste>()
+            .HasOne(p => p.Owner)
+            .WithMany();
+
+        modelBuilder.Entity<Paste>()
+            .HasMany(p => p.Stars)
+            .WithMany()
+            .UsingEntity(j => j.ToTable("stars"));
     }
 }
