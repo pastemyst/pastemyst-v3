@@ -9,7 +9,7 @@
 </script>
 
 <header class="flex row center space-between">
-    <a href="/" class="title btn" sveltekit:prefetch>
+    <a href="/" class="title btn">
         <img src="/images/pastemyst.svg" alt="pastemyst logo" />
         <h1>pastemyst</h1>
     </a>
@@ -19,7 +19,6 @@
             <a
                 href="/~{$currentUserStore.username}"
                 class="nav-item user btn btn-icon"
-                sveltekit:prefetch
             >
                 <img
                     src="{PUBLIC_API_BASE}/images/{$currentUserStore.avatarId}"
@@ -32,7 +31,6 @@
                 class="btn btn-icon nav-item"
                 aria-label="login/register"
                 use:tooltip
-                sveltekit:prefetch
             >
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" class="icon">
                     <title>Login Icon</title>
@@ -50,7 +48,6 @@
             href={$currentUserStore !== null ? "/settings/profile" : "/settings/behaviour"}
             aria-label="settings"
             use:tooltip
-            sveltekit:prefetch
         >
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" class="icon">
                 <path

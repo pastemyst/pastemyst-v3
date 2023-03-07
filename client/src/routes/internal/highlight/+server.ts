@@ -29,12 +29,15 @@ const initHighlighter = async () => {
     for (const lang of langs) {
         if (!lang.tmScope || lang.tmScope === "none") continue;
 
+        const path = `./static/grammars/${lang.tmScope}.json`;
+
         // TODO: embedded langs?
         shikiLangs.push({
             id: lang.name,
             scopeName: lang.tmScope,
             aliases: lang.aliases,
-            grammar: JSON.parse(readFileSync(`./static/grammars/${lang.tmScope}.json`).toString())
+            grammar: JSON.parse(readFileSync(path).toString()),
+            path: path
         });
     }
 

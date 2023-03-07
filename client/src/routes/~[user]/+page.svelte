@@ -160,7 +160,7 @@
             <p class="no-public-pastes">{data.user.username} doesn't have any public pastes yet.</p>
         {:else}
             {#each data.pastes.items as paste}
-                <a href="/{paste.id}" class="paste btn" sveltekit:prefetch>
+                <a href="/{paste.id}" class="paste btn">
                     <div class="flex row center space-between">
                         <p class="title">{paste.title === "" ? "(untitled)" : paste.title}</p>
 

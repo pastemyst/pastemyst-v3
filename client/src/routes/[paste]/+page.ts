@@ -35,8 +35,8 @@ export const load: PageLoad = async ({ params, fetch }) => {
                 "Content-Type": "application/json"
             },
             body: JSON.stringify({
-                content: "asd",
-                language: "C#"
+                content: pasty.content,
+                language: pasty.language
             })
         });
 
