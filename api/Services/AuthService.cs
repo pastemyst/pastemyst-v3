@@ -2,6 +2,7 @@ using System.Net;
 using System.Web;
 using JWT.Algorithms;
 using JWT.Builder;
+using Microsoft.EntityFrameworkCore;
 using pastemyst.DbContexts;
 using pastemyst.Exceptions;
 using pastemyst.Models;
@@ -24,20 +25,18 @@ public interface IAuthService
 public class AuthService : IAuthService
 {
     private readonly IIdProvider _idProvider;
-    private readonly IUserProvider _userProvider;
     private readonly IOAuthService _oAuthService;
     private readonly IImageService _imageService;
     private readonly IHttpClientFactory _httpClientFactory;
     private readonly DataContext _dbContext;
     private readonly IConfiguration _configuration;
 
-    public AuthService(IIdProvider idProvider, IOAuthService oAuthService, IUserProvider userProvider,
-        IConfiguration configuration, IHttpClientFactory httpClientFactory, IImageService imageService,
+    public AuthService(IIdProvider idProvider, IOAuthService oAuthService, IConfiguration configuration,
+        IHttpClientFactory httpClientFactory, IImageService imageService,
         DataContext dbContext)
     {
         _idProvider = idProvider;
         _oAuthService = oAuthService;
-        _userProvider = userProvider;
         _configuration = configuration;
         _httpClientFactory = httpClientFactory;
         _imageService = imageService;
@@ -83,7 +82,10 @@ public class AuthService : IAuthService
         var oAuthProvider = _oAuthService.OAuthProviders[provider];
         var accessToken = await _oAuthService.ExchangeTokenAsync(oAuthProvider, code);
         var providerUser = await _oAuthService.GetProviderUserAsync(oAuthProvider, accessToken);
-        var existingUser = await _userProvider.FindByProviderAsync(oAuthProvider.Name, providerUser.Id);
+        var existingUser = await _dbContext.Users.FirstOrDefaultAsync(user =>
+            user.ProviderName == oAuthProvider.Name &&
+            user.ProviderId == providerUser.Id
+        );
 
         var cookie = new CookieOptions
         {
@@ -141,7 +143,7 @@ public class AuthService : IAuthService
             throw new HttpException(HttpStatusCode.BadRequest, "Missing the registration cookie.");
         }
 
-        if (await _userProvider.ExistsByUsernameAsync(username))
+        if (await _dbContext.Users.AnyAsync(user => user.Username == username))
         {
             throw new HttpException(HttpStatusCode.BadRequest, "Username is already taken.");
         }
@@ -152,7 +154,7 @@ public class AuthService : IAuthService
             .MustVerifySignature()
             .Decode<Dictionary<string, object>>(cookie);
 
-        var id = await _idProvider.GenerateId(async id => await _userProvider.ExistsById(id));
+        var id = await _idProvider.GenerateId(async id => await _dbContext.Users.AnyAsync(user => user.Id == id));
 
         var client = _httpClientFactory.CreateClient();
         var response = await client.GetAsync((string)claims["avatarUrl"]);
@@ -227,7 +229,7 @@ public class AuthService : IAuthService
     public string Logout(HttpContext httpContext)
     {
         httpContext.Response.Cookies.Delete("pastemyst");
-        
+
         return _configuration["ClientUrl"];
     }
 }

@@ -1,7 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using pastemyst.DbContexts;
 using pastemyst.Models;
+using pastemyst.Services;
 
 namespace pastemyst.Controllers;
 
@@ -9,11 +8,11 @@ namespace pastemyst.Controllers;
 [Route("/api/v3/users")]
 public class UserController : ControllerBase
 {
-    private readonly DataContext _dbContext;
+    private readonly IUserProvider _userProvider;
 
-    public UserController(DataContext dbContext)
+    public UserController(IUserProvider userProvider)
     {
-        _dbContext = dbContext;
+        _userProvider = userProvider;
     }
 
     [HttpGet]
@@ -21,17 +20,14 @@ public class UserController : ControllerBase
     [Route("")]
     public async Task<IActionResult> GetUser(string username, [FromQuery] string id)
     {
-        User user = null;
-
-        if (username is not null)
-        {
-            user = await _dbContext.Users.Where(u => u.Username == username).FirstOrDefaultAsync();
-        }
-        else if (id is not null)
-        {
-            user = await _dbContext.Users.FindAsync(id);
-        }
+        var user = await _userProvider.GetByUsernameOrIdAsync(username, id);
 
         return user is not null ? Ok(user) : NotFound();
+    }
+
+    [HttpGet("{username}/pastes")]
+    public async Task<Page<Paste>> GetUserOwnedPastes(string username, [FromQuery] PageRequest pageRequest)
+    {
+        return await _userProvider.GetOwnedPastesAsync(username, pageRequest);
     }
 }
