@@ -21,6 +21,8 @@ public interface IPasteService
 
     public Task ToggleStarPasteAsync(string id);
 
+    public Task<bool> IsPasteStarredAsync(string id);
+
     public Task<bool> ExistsByIdAsync(string id);
 }
 
@@ -189,6 +191,25 @@ public class PasteService : IPasteService
         }
 
         await _dbContext.SaveChangesAsync();
+    }
+
+    public async Task<bool> IsPasteStarredAsync(string id)
+    {
+        var user = await _authService.GetSelfAsync(_contextAccessor.HttpContext);
+
+        if (user is null)
+            throw new HttpException(HttpStatusCode.Unauthorized, "You must be authorized to star pastes.");
+
+        var paste = await GetPasteAsync(id);
+
+        if (paste.Owner is null || paste.Owner.Id != user.Id)
+        {
+            // Returning not found instead of unauthorized to not expose that the paste exists.
+            if (paste.Private)
+                throw new HttpException(HttpStatusCode.NotFound, "Paste not found.");
+        }
+
+        return paste.Stars.Any(u => u.Id == user.Id);
     }
 
     public async Task<bool> ExistsByIdAsync(string id)
