@@ -35,7 +35,7 @@ public class MetaController : ControllerBase
     [HttpGet("active_pastes")]
     public async Task<ActivePastesResponse> GetActivePastesCount()
     {
-        var count = await _pasteService.GetActivePastesCountAsync();
+        var count = await _pasteService.GetActiveCountAsync();
 
         return new ActivePastesResponse
         {
