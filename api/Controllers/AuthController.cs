@@ -36,9 +36,12 @@ public class AuthController : ControllerBase
     }
 
     [HttpGet("auth/self")]
-    public async Task<User> GetSelf()
+    public async Task<IActionResult> GetSelf()
     {
-        return await _authService.GetSelfAsync(HttpContext);
+        var self = await _authService.GetSelfAsync(HttpContext);
+
+        if (self is null) return Unauthorized();
+        return Ok(self);
     }
 
     [HttpGet("auth/logout")]

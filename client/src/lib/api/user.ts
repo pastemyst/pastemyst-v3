@@ -11,7 +11,7 @@ export interface User {
 }
 
 export const getUserByUsername = async (username: string): Promise<User | null> => {
-    const res = await fetch(`${PUBLIC_API_BASE}/user/${username}`, {
+    const res = await fetch(`${PUBLIC_API_BASE}/users/${username}`, {
         method: "get"
     });
 
@@ -21,7 +21,7 @@ export const getUserByUsername = async (username: string): Promise<User | null> 
 };
 
 export const doesUserExist = async (username: string): Promise<boolean> => {
-    const res = await fetch(`${PUBLIC_API_BASE}/user/exists?username=${username}`, {
+    const res = await fetch(`${PUBLIC_API_BASE}/users/exists?username=${username}`, {
         method: "get"
     });
 
@@ -32,7 +32,7 @@ export const getUserById = async (
     fetchFunc: FetchFunc,
     id: string
 ): Promise<[User | null, number]> => {
-    const res = await fetchFunc(`${PUBLIC_API_BASE}/user?id=${id}`, {
+    const res = await fetchFunc(`${PUBLIC_API_BASE}/users?id=${id}`, {
         method: "get"
     });
 

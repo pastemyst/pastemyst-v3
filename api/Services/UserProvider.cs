@@ -56,6 +56,7 @@ public class UserProvider : IUserProvider
         var pastes = _dbContext.Pastes
             .Where(CanViewPaste(user, self))
             .OrderBy(p => p.CreatedAt)
+            .Include(p => p.Pasties)
             .Skip(pageRequest.Page * pageRequest.PageSize)
             .Take(pageRequest.PageSize)
             .ToList();

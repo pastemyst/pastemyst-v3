@@ -7,7 +7,7 @@ import { error } from "@sveltejs/kit";
 import { PUBLIC_API_BASE } from "$env/static/public";
 
 export const load: PageLoad = async ({ params, fetch }) => {
-    const userRes = await fetch(`${PUBLIC_API_BASE}/user/${params.user}`, {
+    const userRes = await fetch(`${PUBLIC_API_BASE}/users/${params.user}`, {
         method: "get"
     });
 
@@ -16,7 +16,7 @@ export const load: PageLoad = async ({ params, fetch }) => {
         credentials: "include"
     });
 
-    const userPastesRes = await fetch(`${PUBLIC_API_BASE}/user/${params.user}/pastes?page_size=5`, {
+    const userPastesRes = await fetch(`${PUBLIC_API_BASE}/users/${params.user}/pastes?page_size=5`, {
         method: "get",
         credentials: "include"
     });

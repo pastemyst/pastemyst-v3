@@ -18,10 +18,10 @@ export const load: PageLoad = async ({ params, fetch }) => {
     const pasteStats = await getPasteStats(fetch, paste.id);
     const langStats = await getPasteLangs(fetch, paste.id);
     const [owner, ownerStatus] =
-        paste.ownerId !== "" ? await getUserById(fetch, paste.ownerId) : [null, 0];
+        paste.ownerId !== null ? await getUserById(fetch, paste.ownerId) : [null, 0];
     const isStarred = await isPasteStarred(fetch, paste.id);
 
-    if (paste.ownerId !== "" && !owner) {
+    if (paste.ownerId !== null && !owner) {
         // TODO: error handling
         throw error(ownerStatus);
     }
@@ -31,9 +31,12 @@ export const load: PageLoad = async ({ params, fetch }) => {
     for (const pasty of paste.pasties) {
         const res = await fetch("/internal/highlight", {
             method: "post",
+            headers: {
+                "Content-Type": "application/json"
+            },
             body: JSON.stringify({
-                content: pasty.content,
-                language: pasty.language
+                content: "asd",
+                language: "C#"
             })
         });
 

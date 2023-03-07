@@ -36,14 +36,14 @@ export interface Pasty {
 export interface PasteStats {
     lines: number;
     words: number;
-    size: number;
+    bytes: number;
     pasties: { [id: string]: Stats };
 }
 
 export interface Stats {
     lines: number;
     words: number;
-    size: number;
+    bytes: number;
 }
 
 export interface PasteSkeleton {
@@ -115,7 +115,7 @@ export const expiresInToLongString = (exp: ExpiresIn): string => {
 };
 
 export const createPaste = async (skeleton: PasteSkeleton): Promise<Paste | null> => {
-    const res = await fetch(`${PUBLIC_API_BASE}/paste/`, {
+    const res = await fetch(`${PUBLIC_API_BASE}/pastes/`, {
         method: "post",
         credentials: "include",
         headers: {
@@ -133,7 +133,7 @@ export const getPaste = async (
     fetchFunc: FetchFunc,
     id: string
 ): Promise<[Paste | null, number]> => {
-    const res = await fetchFunc(`${PUBLIC_API_BASE}/paste/${id}`, {
+    const res = await fetchFunc(`${PUBLIC_API_BASE}/pastes/${id}`, {
         method: "get",
         credentials: "include"
     });
@@ -144,7 +144,7 @@ export const getPaste = async (
 };
 
 export const deletePaste = async (id: string): Promise<boolean> => {
-    const res = await fetch(`${PUBLIC_API_BASE}/paste/${id}`, {
+    const res = await fetch(`${PUBLIC_API_BASE}/pastes/${id}`, {
         method: "delete",
         credentials: "include"
     });
@@ -153,7 +153,7 @@ export const deletePaste = async (id: string): Promise<boolean> => {
 };
 
 export const starPaste = async (id: string): Promise<boolean> => {
-    const res = await fetch(`${PUBLIC_API_BASE}/paste/${id}/star`, {
+    const res = await fetch(`${PUBLIC_API_BASE}/pastes/${id}/star`, {
         method: "post",
         credentials: "include"
     });
@@ -162,19 +162,21 @@ export const starPaste = async (id: string): Promise<boolean> => {
 };
 
 export const isPasteStarred = async (fetchFunc: FetchFunc, id: string): Promise<boolean> => {
-    const res = await fetchFunc(`${PUBLIC_API_BASE}/paste/${id}/star`, {
+    const res = await fetchFunc(`${PUBLIC_API_BASE}/pastes/${id}/star`, {
         method: "get",
         credentials: "include"
     });
 
-    return res.ok;
+    if (res.ok) return await res.json();
+
+    return false;
 };
 
 export const getPasteStats = async (
     fetchFunc: FetchFunc,
     id: string
 ): Promise<PasteStats | null> => {
-    const res = await fetchFunc(`${PUBLIC_API_BASE}/paste/${id}/stats`, {
+    const res = await fetchFunc(`${PUBLIC_API_BASE}/pastes/${id}/stats`, {
         method: "get",
         credentials: "include"
     });
@@ -185,7 +187,7 @@ export const getPasteStats = async (
 };
 
 export const getPasteLangs = async (fetchFunc: FetchFunc, id: string): Promise<LangStat[]> => {
-    const res = await fetchFunc(`${PUBLIC_API_BASE}/paste/${id}/langs`, {
+    const res = await fetchFunc(`${PUBLIC_API_BASE}/pastes/${id}/langs`, {
         method: "get",
         credentials: "include"
     });
