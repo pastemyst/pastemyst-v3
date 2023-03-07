@@ -9,19 +9,21 @@ namespace pastemyst.Services;
 
 public interface IPasteService
 {
-    public Task<Paste> CreatePasteAsync(PasteCreateInfo createInfo);
+    public Task<Paste> CreateAsync(PasteCreateInfo createInfo);
 
-    public Task<Paste> GetPasteAsync(string id);
+    public Task<Paste> GetAsync(string id);
 
-    public Task<PasteStats> GetPasteStatsAsync(string id);
+    public Task<PasteStats> GetStatsAsync(string id);
 
-    public Task<int> GetActivePastesCountAsync();
+    public Task<List<LanguageStat>> GetLanguageStatsAsync(string id);
 
-    public Task DeletePasteAsync(string id);
+    public Task<int> GetActiveCountAsync();
 
-    public Task ToggleStarPasteAsync(string id);
+    public Task DeleteAsync(string id);
 
-    public Task<bool> IsPasteStarredAsync(string id);
+    public Task ToggleStarAsync(string id);
+
+    public Task<bool> IsStarredAsync(string id);
 
     public Task<bool> ExistsByIdAsync(string id);
 }
@@ -46,7 +48,7 @@ public class PasteService : IPasteService
         _contextAccessor = contextAccessor;
     }
 
-    public async Task<Paste> CreatePasteAsync(PasteCreateInfo createInfo)
+    public async Task<Paste> CreateAsync(PasteCreateInfo createInfo)
     {
         var user = await _authService.GetSelfAsync(_contextAccessor.HttpContext);
 
@@ -92,7 +94,7 @@ public class PasteService : IPasteService
         return paste;
     }
 
-    public async Task<Paste> GetPasteAsync(string id)
+    public async Task<Paste> GetAsync(string id)
     {
         var user = await _authService.GetSelfAsync(_contextAccessor.HttpContext);
 
@@ -109,9 +111,9 @@ public class PasteService : IPasteService
         return paste;
     }
 
-    public async Task<PasteStats> GetPasteStatsAsync(string id)
+    public async Task<PasteStats> GetStatsAsync(string id)
     {
-        var paste = await GetPasteAsync(id);
+        var paste = await GetAsync(id);
 
         var res = new PasteStats();
 
@@ -138,19 +140,64 @@ public class PasteService : IPasteService
         return res;
     }
 
-    public async Task<int> GetActivePastesCountAsync()
+    public async Task<List<LanguageStat>> GetLanguageStatsAsync(string id)
+    {
+        var paste = await GetAsync(id);
+
+        var stats = new List<LanguageStat>();
+
+        var charsPerLanguage = new Dictionary<string, int>();
+        var totalChars = 0;
+
+        foreach (var pasty in paste.Pasties)
+        {
+            if (charsPerLanguage.ContainsKey(pasty.Language))
+            {
+                charsPerLanguage[pasty.Language] += pasty.Content.Length;
+            }
+            else
+            {
+                charsPerLanguage.Add(pasty.Language, pasty.Content.Length);
+            }
+
+            totalChars += pasty.Content.Length;
+        }
+
+        if (totalChars == 0) return stats;
+
+        foreach (var entry in charsPerLanguage)
+        {
+            var percentage = entry.Value / (float)totalChars * 100;
+
+            if (percentage == 0) continue;
+            
+            var language = _languageProvider.FindByName(entry.Key);
+                
+            stats.Add(new LanguageStat
+            {
+                Language = language,
+                Percentage = percentage
+            });
+        }
+        
+        stats.Sort((a, b) => a.Percentage.CompareTo(b.Percentage));
+
+        return stats;
+    }
+
+    public async Task<int> GetActiveCountAsync()
     {
         return await _dbContext.Pastes.CountAsync();
     }
 
-    public async Task DeletePasteAsync(string id)
+    public async Task DeleteAsync(string id)
     {
         var user = await _authService.GetSelfAsync(_contextAccessor.HttpContext);
 
         if (user is null)
             throw new HttpException(HttpStatusCode.Unauthorized, "You must be authorized to delete pastes.");
 
-        var paste = await GetPasteAsync(id);
+        var paste = await GetAsync(id);
 
         if (paste.Owner is null || paste.Owner.Id != user.Id)
         {
@@ -165,14 +212,14 @@ public class PasteService : IPasteService
         await _dbContext.SaveChangesAsync();
     }
 
-    public async Task ToggleStarPasteAsync(string id)
+    public async Task ToggleStarAsync(string id)
     {
         var user = await _authService.GetSelfAsync(_contextAccessor.HttpContext);
 
         if (user is null)
             throw new HttpException(HttpStatusCode.Unauthorized, "You must be authorized to star pastes.");
 
-        var paste = await GetPasteAsync(id);
+        var paste = await GetAsync(id);
 
         if (paste.Owner is null || paste.Owner.Id != user.Id)
         {
@@ -193,14 +240,14 @@ public class PasteService : IPasteService
         await _dbContext.SaveChangesAsync();
     }
 
-    public async Task<bool> IsPasteStarredAsync(string id)
+    public async Task<bool> IsStarredAsync(string id)
     {
         var user = await _authService.GetSelfAsync(_contextAccessor.HttpContext);
 
         if (user is null)
             throw new HttpException(HttpStatusCode.Unauthorized, "You must be authorized to star pastes.");
 
-        var paste = await GetPasteAsync(id);
+        var paste = await GetAsync(id);
 
         if (paste.Owner is null || paste.Owner.Id != user.Id)
         {

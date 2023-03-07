@@ -18,37 +18,43 @@ public class PasteController : ControllerBase
     [HttpGet("{pasteId}")]
     public async Task<Paste> GetPaste(string pasteId)
     {
-        return await _pasteService.GetPasteAsync(pasteId);
+        return await _pasteService.GetAsync(pasteId);
     }
 
     [HttpGet("{pasteId}/stats")]
     public async Task<PasteStats> GetPasteStats(string pasteId)
     {
-        return await _pasteService.GetPasteStatsAsync(pasteId);
+        return await _pasteService.GetStatsAsync(pasteId);
+    }
+
+    [HttpGet("{pasteId}/langs")]
+    public async Task<List<LanguageStat>> GetPasteLanguageStats(string pasteId)
+    {
+        return await _pasteService.GetLanguageStatsAsync(pasteId);
     }
 
     [HttpDelete("{pasteId}")]
     public async Task DeletePaste(string pasteId)
     {
-        await _pasteService.DeletePasteAsync(pasteId);
+        await _pasteService.DeleteAsync(pasteId);
     }
 
     [HttpGet("{pasteId}/star")]
     public async Task<IActionResult> IsPasteStarred(string pasteId)
     {
-        return Ok(await _pasteService.IsPasteStarredAsync(pasteId));
+        return Ok(await _pasteService.IsStarredAsync(pasteId));
     }
 
     [HttpPost("{pasteId}/star")]
     public async Task ToggleStarPaste(string pasteId)
     {
-        await _pasteService.ToggleStarPasteAsync(pasteId);
+        await _pasteService.ToggleStarAsync(pasteId);
     }
 
     [HttpPost]
     public async Task<IActionResult> CreatePaste([FromBody] PasteCreateInfo createInfo)
     {
-        var paste = await _pasteService.CreatePasteAsync(createInfo);
+        var paste = await _pasteService.CreateAsync(createInfo);
         return Created("/api/v3/pastes/" + paste.Id, paste);
     }
 }
