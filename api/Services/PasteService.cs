@@ -180,7 +180,7 @@ public class PasteService : IPasteService
             });
         }
         
-        stats.Sort((a, b) => a.Percentage.CompareTo(b.Percentage));
+        stats.Sort((a, b) => b.Percentage.CompareTo(a.Percentage));
 
         return stats;
     }
