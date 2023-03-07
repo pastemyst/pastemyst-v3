@@ -16,10 +16,13 @@ export const load: PageLoad = async ({ params, fetch }) => {
         credentials: "include"
     });
 
-    const userPastesRes = await fetch(`${PUBLIC_API_BASE}/users/${params.user}/pastes?page_size=5`, {
-        method: "get",
-        credentials: "include"
-    });
+    const userPastesRes = await fetch(
+        `${PUBLIC_API_BASE}/users/${params.user}/pastes?page_size=5`,
+        {
+            method: "get",
+            credentials: "include"
+        }
+    );
 
     let user: User;
     let relativeJoined: string;

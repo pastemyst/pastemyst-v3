@@ -16,22 +16,14 @@
 
     <div class="flex row center">
         {#if $currentUserStore != null}
-            <a
-                href="/~{$currentUserStore.username}"
-                class="nav-item user btn btn-icon"
-            >
+            <a href="/~{$currentUserStore.username}" class="nav-item user btn btn-icon">
                 <img
                     src="{PUBLIC_API_BASE}/images/{$currentUserStore.avatarId}"
                     alt="{$currentUserStore.username}'s avatar"
                 />
             </a>
         {:else}
-            <a
-                href="/login"
-                class="btn btn-icon nav-item"
-                aria-label="login/register"
-                use:tooltip
-            >
+            <a href="/login" class="btn btn-icon nav-item" aria-label="login/register" use:tooltip>
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" class="icon">
                     <title>Login Icon</title>
                     <path

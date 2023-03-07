@@ -202,7 +202,11 @@
 
             {#if data.pastes.totalPages > 1}
                 <div class="pager flex row center">
-                    <button class="btn" disabled={data.pastes.currentPage === 0} on:click={onPrevPage}>
+                    <button
+                        class="btn"
+                        disabled={data.pastes.currentPage === 0}
+                        on:click={onPrevPage}
+                    >
                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" class="icon">
                             <title>Chevron Left</title>
                             <path
