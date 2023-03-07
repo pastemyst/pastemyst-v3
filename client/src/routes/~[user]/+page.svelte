@@ -8,6 +8,7 @@
     export let data: PageData;
 
     const getPasteLangs = (paste: Paste): string => {
+        console.log(paste);
         let langs: string[] = [];
         for (const pasty of paste.pasties) {
             if (!langs.some((l) => l === pasty.language)) {
@@ -20,7 +21,7 @@
 
     const fetchPastes = async (page: number) => {
         const res = await fetch(
-            `${PUBLIC_API_BASE}/user/${data.user.username}/pastes?page=${page}&page_size=5`,
+            `${PUBLIC_API_BASE}/users/${data.user.username}/pastes?page=${page}&page_size=5`,
             {
                 method: "get",
                 credentials: "include"
@@ -35,15 +36,15 @@
     };
 
     const onPrevPage = async () => {
-        if (data.pastes.page === 0) return;
+        if (data.pastes.currentPage === 0) return;
 
-        await fetchPastes(data.pastes.page - 1);
+        await fetchPastes(data.pastes.currentPage - 1);
     };
 
     const onNextPage = async () => {
-        if (data.pastes.page === data.pastes.totalPages - 1) return;
+        if (data.pastes.currentPage === data.pastes.totalPages - 1) return;
 
-        await fetchPastes(data.pastes.page + 1);
+        await fetchPastes(data.pastes.currentPage + 1);
     };
 </script>
 
@@ -159,7 +160,7 @@
             <p class="no-public-pastes">{data.user.username} doesn't have any public pastes yet.</p>
         {:else}
             {#each data.pastes.items as paste}
-                <a href="/{paste.id}" class="paste btn" sveltekit:prefetch>
+                <a href="/{paste.id}" class="paste btn">
                     <div class="flex row center space-between">
                         <p class="title">{paste.title === "" ? "(untitled)" : paste.title}</p>
 
@@ -201,7 +202,11 @@
 
             {#if data.pastes.totalPages > 1}
                 <div class="pager flex row center">
-                    <button class="btn" disabled={data.pastes.page === 0} on:click={onPrevPage}>
+                    <button
+                        class="btn"
+                        disabled={data.pastes.currentPage === 0}
+                        on:click={onPrevPage}
+                    >
                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" class="icon">
                             <title>Chevron Left</title>
                             <path
@@ -211,7 +216,7 @@
                             />
                         </svg>
                     </button>
-                    <span>{data.pastes.page + 1}/{data.pastes.totalPages}</span>
+                    <span>{data.pastes.currentPage + 1}/{data.pastes.totalPages}</span>
                     <button class="btn" disabled={!data.pastes.hasNextPage} on:click={onNextPage}>
                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" class="icon">
                             <title>Chevron Right</title>

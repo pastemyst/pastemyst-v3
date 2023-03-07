@@ -43,7 +43,7 @@
         </span>
 
         <span>
-            {humanFileSize(stats.size).toLowerCase()}
+            {humanFileSize(stats.bytes).toLowerCase()}
         </span>
     </div>
 

@@ -12,7 +12,7 @@ public class Paste
 
     public DateTime? DeletesAt { get; set; }
 
-    public string Title { get; set; }
+    public string Title { get; set; } = "";
 
     public List<Pasty> Pasties { get; set; }
 

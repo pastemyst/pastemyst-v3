@@ -90,7 +90,7 @@
 
 <ThemeContext>
     {#if loaded}
-        <div id="container" data-sveltekit-prefetch>
+        <div id="container">
             <Header />
 
             <main>
