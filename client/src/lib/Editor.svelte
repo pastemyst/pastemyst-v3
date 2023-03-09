@@ -37,9 +37,11 @@
 
     let langs: Language[];
 
-    onMount(async () => {
-        langs = await getLangs();
-        selectedLanguage = langs[0];
+    onMount(() => {
+        (async () => {
+            langs = await getLangs();
+            selectedLanguage = langs[0];
+        })();
 
         const editorUpdateListener = EditorView.updateListener.of((update) => {
             // get the current line
@@ -90,8 +92,10 @@
         }
     };
 
-    export const getLanguageCommands = (): Command[] => {
+    export const getLanguageCommands = async (): Promise<Command[]> => {
         const commands: Command[] = [];
+
+        langs = await getLangs();
 
         for (const lang of langs) {
             commands.push({
@@ -99,27 +103,6 @@
                 description: lang.aliases?.join(","),
                 action: () => {
                     setSelectedLang(lang);
-
-                    const langDescription = cmLangs.find(
-                        (l) => selectedLanguage.name.toLowerCase() === l.name.toLowerCase()
-                    );
-
-                    if (langDescription) {
-                        langSupported = true;
-
-                        langDescription.load().then((langSupport) => {
-                            editorView.dispatch({
-                                effects: langCompartment.reconfigure(langSupport)
-                            });
-                        });
-                    } else {
-                        langSupported = false;
-                        if (selectedLanguage.name === "Text") langSupported = true;
-
-                        editorView.dispatch({
-                            effects: langCompartment.reconfigure([])
-                        });
-                    }
 
                     return Close.yes;
                 }
@@ -173,8 +156,8 @@
         return commands;
     };
 
-    const onLanguageClick = () => {
-        setTempCommands(getLanguageCommands());
+    const onLanguageClick = async () => {
+        setTempCommands(await getLanguageCommands());
 
         cmdPalOpen.set(true);
     };
@@ -221,6 +204,27 @@
 
     export const setSelectedLang = (lang: Language) => {
         selectedLanguage = lang;
+
+        const langDescription = cmLangs.find(
+            (l) => selectedLanguage.name.toLowerCase() === l.name.toLowerCase()
+        );
+
+        if (langDescription) {
+            langSupported = true;
+
+            langDescription.load().then((langSupport) => {
+                editorView.dispatch({
+                    effects: langCompartment.reconfigure(langSupport)
+                });
+            });
+        } else {
+            langSupported = false;
+            if (selectedLanguage.name === "Text") langSupported = true;
+
+            editorView.dispatch({
+                effects: langCompartment.reconfigure([])
+            });
+        }
     };
 </script>
 
