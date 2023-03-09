@@ -37,7 +37,9 @@
                 name: "set editor language",
                 action: () => {
                     const cmds = activeTab?.editor.getLanguageCommands();
-                    if (cmds) setTempCommands(cmds);
+                    (async () => {
+                        if (cmds) setTempCommands(await cmds);
+                    })();
                     return Close.no;
                 }
             },
