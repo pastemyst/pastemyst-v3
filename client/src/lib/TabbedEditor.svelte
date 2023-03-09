@@ -4,6 +4,7 @@
     import Tab from "./Tab.svelte";
     import Editor from "./Editor.svelte";
     import TabData from "./TabData";
+    import { getLangs } from "./api/lang";
 
     export let tabs: TabData[] = new Array<TabData>();
     export let activeTab: TabData | undefined = undefined;
@@ -16,6 +17,8 @@
     let editorTarget: HTMLElement;
 
     let activeTabId = 0;
+
+    let isDragedOver = false;
 
     onMount(async () => {
         Sortable.create(tabGroupElement, {
@@ -86,8 +89,8 @@
         tabs[idx].editor.focus();
     };
 
-    const addTab = async () => {
-        const name = "untitled";
+    const addTab = async (title?: string) => {
+        const name = title || "untitled";
 
         let newtab = new TabData(tabCounter, name, new Editor({ target: editorTarget }));
 
@@ -125,7 +128,52 @@
             tab.editor.$set({ hidden: !(tab.id === activeTabId) });
         }
     };
+
+    const toggleDragContainer = () => {
+        isDragedOver = !isDragedOver;
+    };
+
+    const preventDefaultEvent = (e: Event) => e.preventDefault();
+
+    const handleDragDrop = (e: DragEvent) => {
+        preventDefaultEvent(e);
+        toggleDragContainer();
+
+        const files = e.dataTransfer?.files;
+
+        if (!files) return;
+
+        Array.from(files).forEach(async (file) => {
+            const { name } = file;
+
+            const content = await file.text();
+
+            const langs = await getLangs();
+            const lang = langs.find(
+                (lang) =>
+                    lang.extensions && lang.extensions.includes(name.slice(name.lastIndexOf(".")))
+            );
+
+            await addTab(name);
+
+            //Doesn't update if set on tab creation
+            lang && tabs[tabs.length - 1].editor.setSelectedLang(lang);
+            content && tabs[tabs.length - 1].editor.setContent(content);
+        });
+    };
 </script>
+
+<svelte:body on:dragleave={toggleDragContainer} on:dragenter={toggleDragContainer} />
+
+<div
+    class="drop-container"
+    class:drop-container--shown={isDragedOver}
+    on:dragover={preventDefaultEvent}
+    on:drop={handleDragDrop}
+>
+    <div class="drop-container__cover" />
+    <p>Drop files here</p>
+</div>
 
 <div class="tabs flex row center">
     <div class="tabgroup flex row" bind:this={tabGroupElement}>
@@ -143,7 +191,7 @@
         {/each}
     </div>
 
-    <div class="add-btn btn" on:click={addTab}>
+    <div class="add-btn btn" on:click={() => addTab()}>
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" class="icon">
             <title>Plus Icon</title>
             <path
@@ -158,6 +206,28 @@
 <div class="editor" bind:this={editorTarget} />
 
 <style lang="scss">
+    .drop-container {
+        position: fixed;
+        inset: 0;
+        z-index: 105;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        font-size: 7rem;
+        display: none;
+
+        &--shown {
+            display: flex;
+        }
+
+        &__cover {
+            position: absolute;
+            inset: 0;
+            opacity: 0.3;
+            background-color: var(--color-bg3);
+        }
+    }
+
     .tabs {
         width: 100%;
         box-sizing: border-box;
