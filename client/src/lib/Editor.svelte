@@ -207,6 +207,14 @@
         return editorView.state.doc.toString();
     };
 
+    export const setContent = (content: string) => {
+        const transaction = editorView.state.update({
+            changes: { from: 0, to: editorView.state.doc.length, insert: content }
+        });
+
+        editorView.update([transaction]);
+    };
+
     export const getSelectedLang = (): Language => {
         return selectedLanguage;
     };
