@@ -129,14 +129,18 @@
         }
     };
 
-    const toggleDragContainer = (e?: DragEvent) => {
-        if (e?.dataTransfer?.dropEffect === "move") return;
-        isDragedOver = !isDragedOver;
+    const closeDragContainer = () => (isDragedOver = false);
+
+    const handleDragOver = (e: DragEvent) => {
+        e.preventDefault();
+        if (!e.dataTransfer?.types.includes("Files")) return;
+        isDragedOver = true;
     };
 
     const handleDragDrop = (e: DragEvent) => {
         e.preventDefault();
-        toggleDragContainer();
+
+        closeDragContainer();
 
         const files = e.dataTransfer?.files;
 
@@ -162,14 +166,13 @@
     };
 </script>
 
-<svelte:body on:dragleave={toggleDragContainer} on:dragenter={toggleDragContainer} />
-
-<div
-    class="drop-container"
-    class:drop-container--shown={isDragedOver}
-    on:dragover={(e) => e.preventDefault()}
+<svelte:body
+    on:dragover={handleDragOver}
     on:drop={handleDragDrop}
->
+    on:dragleave={closeDragContainer}
+/>
+
+<div class="drop-container" class:drop-container--shown={isDragedOver}>
     <div class="drop-container__cover" />
     <p>drop files here</p>
 </div>
@@ -214,6 +217,7 @@
         align-items: center;
         font-size: 7rem;
         display: none;
+        pointer-events: none;
 
         &--shown {
             display: flex;
@@ -221,6 +225,7 @@
 
         &__cover {
             position: absolute;
+            pointer-events: none;
             inset: 0;
             opacity: 0.3;
             background-color: var(--color-bg3);
