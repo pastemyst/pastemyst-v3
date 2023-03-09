@@ -129,14 +129,13 @@
         }
     };
 
-    const toggleDragContainer = () => {
+    const toggleDragContainer = (e?: DragEvent) => {
+        if (e?.dataTransfer?.dropEffect === "move") return;
         isDragedOver = !isDragedOver;
     };
 
-    const preventDefaultEvent = (e: Event) => e.preventDefault();
-
     const handleDragDrop = (e: DragEvent) => {
-        preventDefaultEvent(e);
+        e.preventDefault();
         toggleDragContainer();
 
         const files = e.dataTransfer?.files;
@@ -156,7 +155,7 @@
 
             await addTab(name);
 
-            //Doesn't update if set on tab creation
+            // Doesn't update if set on tab creation
             lang && tabs[tabs.length - 1].editor.setSelectedLang(lang);
             content && tabs[tabs.length - 1].editor.setContent(content);
         });
@@ -168,11 +167,11 @@
 <div
     class="drop-container"
     class:drop-container--shown={isDragedOver}
-    on:dragover={preventDefaultEvent}
+    on:dragover={(e) => e.preventDefault()}
     on:drop={handleDragDrop}
 >
     <div class="drop-container__cover" />
-    <p>Drop files here</p>
+    <p>drop files here</p>
 </div>
 
 <div class="tabs flex row center">
