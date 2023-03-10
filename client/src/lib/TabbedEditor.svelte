@@ -198,7 +198,7 @@
         {/each}
     </div>
 
-    <div class="add-btn btn" on:click={async () => await addTab()}>
+    <div class="add-btn btn" on:click={() => addTab()}>
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" class="icon">
             <title>Plus Icon</title>
             <path
