@@ -172,7 +172,7 @@
 
     const hasModifiedTabs = () => {
         for (const tab of tabs) {
-            if (!!tab.editor.getContent()) return true;
+            if (tab.editor.getContent()) return true;
         }
 
         return false;
