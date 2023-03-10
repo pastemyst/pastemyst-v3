@@ -182,7 +182,7 @@
 <svelte:window
     on:beforeunload={(e) => {
         if (hasModifiedTabs()) {
-            // prevent default only after the check, mozzila issue
+            // prevent default only after the check, firefox issue
             e.preventDefault();
 
             // next 2 lines are needed to work
