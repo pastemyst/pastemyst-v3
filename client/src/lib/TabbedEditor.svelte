@@ -169,7 +169,28 @@
             }
         });
     };
+
+    const hasModifiedTabs = () => {
+        for (const tab of tabs) {
+            if (tab.editor.getContent()) return true;
+        }
+
+        return false;
+    };
 </script>
+
+<svelte:window
+    on:beforeunload={(e) => {
+        if (hasModifiedTabs()) {
+            // prevent default only after the check, firefox issue
+            e.preventDefault();
+
+            // next 2 lines are needed to work
+            e.returnValue = "";
+            return "";
+        }
+    }}
+/>
 
 <svelte:body
     on:dragover={handleDragOver}
