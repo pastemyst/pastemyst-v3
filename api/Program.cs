@@ -59,10 +59,17 @@ builder.Services.AddScoped<IPasteService, PasteService>();
 builder.Services.AddCors(options =>
 {
     options.AddDefaultPolicy(policy =>
-        policy.WithOrigins("http://localhost:3000")
-            .AllowCredentials()
+        policy.AllowAnyOrigin()
             .AllowAnyHeader()
-            .AllowAnyMethod());
+            .AllowAnyMethod()
+    );
+
+    options.AddPolicy("client", policy =>
+        policy.WithOrigins(builder.Configuration["ClientUrl"])
+        .AllowAnyHeader()
+        .AllowAnyMethod()
+        .AllowCredentials()
+    );
 });
 
 var app = builder.Build();
@@ -82,6 +89,7 @@ app.UseAuthorization();
 
 app.UseSession();
 
+app.UseCors("client");
 app.UseCors();
 
 app.MapControllers();
