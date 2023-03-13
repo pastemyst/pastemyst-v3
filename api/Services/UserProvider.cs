@@ -11,6 +11,8 @@ public interface IUserProvider
 
     public Task<User> GetByUsernameAsync(string username);
 
+    public Task<bool> ExistsByUsernameAsync(string username);
+
     public Task<Page<Paste>> GetOwnedPastesAsync(string username, PageRequest pageRequest);
 }
 
@@ -46,6 +48,11 @@ public class UserProvider : IUserProvider
     public async Task<User> GetByUsernameAsync(string username)
     {
         return await _dbContext.Users.FirstOrDefaultAsync(user => user.Username.Equals(username));
+    }
+
+    public async Task<bool> ExistsByUsernameAsync(string username)
+    {
+        return await GetByUsernameAsync(username) is not null;
     }
 
     public async Task<Page<Paste>> GetOwnedPastesAsync(string username, PageRequest pageRequest)

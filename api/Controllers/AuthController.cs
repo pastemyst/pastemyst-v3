@@ -1,5 +1,4 @@
 using Microsoft.AspNetCore.Mvc;
-using pastemyst.Models;
 using pastemyst.Models.Auth;
 using pastemyst.Services;
 
