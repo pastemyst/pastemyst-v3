@@ -1,7 +1,7 @@
 <script lang="ts">
     import { PUBLIC_API_BASE } from "$env/static/public";
     import { getSelf } from "$lib/api/auth";
-    import { doesUserExist } from "$lib/api/user";
+    import { getUserByUsername } from "$lib/api/user";
     import { usernameRegex } from "$lib/patterns";
     import { currentUserStore } from "$lib/stores";
     import type { PageData } from "./$types";
@@ -52,7 +52,7 @@
 
         usernameValid = usernameRegex.test(usernameInputValue);
 
-        usernameAvailable = !(await doesUserExist(usernameInputValue));
+        usernameAvailable = (await getUserByUsername(usernameInputValue)) == null;
 
         waitingForUsernameCheck = false;
     };
@@ -179,7 +179,7 @@
     </button>
 
     {#if !usernameValid}
-        <p class="error">1-20 chars, only a-z and .,-_</p>
+        <p class="error">1-20 chars, only a-z and .-_</p>
     {/if}
 </div>
 
