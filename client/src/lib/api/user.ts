@@ -20,14 +20,6 @@ export const getUserByUsername = async (username: string): Promise<User | null> 
     return null;
 };
 
-export const doesUserExist = async (username: string): Promise<boolean> => {
-    const res = await fetch(`${PUBLIC_API_BASE}/users/exists?username=${username}`, {
-        method: "get"
-    });
-
-    return (await res.json()).exists;
-};
-
 export const getUserById = async (
     fetchFunc: FetchFunc,
     id: string
