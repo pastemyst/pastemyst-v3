@@ -5,7 +5,7 @@
 
     export let encrypt = false;
     export let isPrivate = false;
-    export let pin = false;
+    export let pinned = false;
     export let anonymous = false;
 
     let dispatcher = createEventDispatcher();
@@ -22,15 +22,15 @@
         isPrivate = !isPrivate;
 
         if (isPrivate) {
-            pin = false;
+            pinned = false;
             anonymous = false;
         }
     };
 
     const onPinClick = () => {
-        pin = !pin;
+        pinned = !pinned;
 
-        if (pin) {
+        if (pinned) {
             isPrivate = false;
             anonymous = false;
         }
@@ -41,7 +41,7 @@
 
         if (anonymous) {
             isPrivate = false;
-            pin = false;
+            pinned = false;
         }
     };
 </script>
@@ -110,7 +110,7 @@
                 for="pin"
                 aria-label="pin the paste on your profile"
                 class="btn btn-square"
-                class:enabled={pin}
+                class:enabled={pinned}
                 on:click={onPinClick}
                 use:tooltip
             >

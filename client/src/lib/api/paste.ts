@@ -46,15 +46,16 @@ export interface Stats {
     bytes: number;
 }
 
-export interface PasteSkeleton {
+export interface PasteCreateInfo {
     title: string;
     expiresIn: ExpiresIn;
-    pasties: PastySkeleton[];
+    pasties: PastyCreateInfo[];
     anonymous: boolean;
     private: boolean;
+    pinned: boolean;
 }
 
-export interface PastySkeleton {
+export interface PastyCreateInfo {
     title: string;
     content: string;
     language: string;
@@ -114,7 +115,7 @@ export const expiresInToLongString = (exp: ExpiresIn): string => {
     }
 };
 
-export const createPaste = async (skeleton: PasteSkeleton): Promise<Paste | null> => {
+export const createPaste = async (skeleton: PasteCreateInfo): Promise<Paste | null> => {
     const res = await fetch(`${PUBLIC_API_BASE}/pastes/`, {
         method: "post",
         credentials: "include",
