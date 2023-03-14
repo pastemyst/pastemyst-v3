@@ -52,15 +52,24 @@ public class PasteService : IPasteService
     {
         var user = await _authService.GetSelfAsync(_contextAccessor.HttpContext);
 
-        if (createInfo.Private && user is null)
+        switch (createInfo.Pinned)
         {
-            throw new HttpException(HttpStatusCode.Unauthorized,
-                "Can't create a private paste while unauthorized.");
+            case true when user is null:
+                throw new HttpException(HttpStatusCode.Unauthorized,
+                    "Can't create a pinned paste while unauthorized.");
+            case true when createInfo.Private || createInfo.Anonymous:
+                throw new HttpException(HttpStatusCode.Unauthorized,
+                    "Can't create a private or anonymous pinned paste.");
         }
 
-        if (createInfo.Private && createInfo.Anonymous)
+        switch (createInfo.Private)
         {
-            throw new HttpException(HttpStatusCode.BadRequest, "Can't create a private anonymous paste.");
+            case true when user is null:
+                throw new HttpException(HttpStatusCode.Unauthorized,
+                    "Can't create a private paste while unauthorized.");
+            case true when createInfo.Anonymous:
+                throw new HttpException(HttpStatusCode.BadRequest,
+                    "Can't create a private anonymous paste.");
         }
 
         var paste = new Paste
@@ -72,6 +81,7 @@ public class PasteService : IPasteService
             Title = createInfo.Title,
             Owner = createInfo.Anonymous ? null : user,
             Private = createInfo.Private,
+            Pinned = createInfo.Pinned,
             Pasties = new List<Pasty>()
         };
 
@@ -170,16 +180,16 @@ public class PasteService : IPasteService
             var percentage = entry.Value / (float)totalChars * 100;
 
             if (percentage == 0) continue;
-            
+
             var language = _languageProvider.FindByName(entry.Key);
-                
+
             stats.Add(new LanguageStat
             {
                 Language = language,
                 Percentage = percentage
             });
         }
-        
+
         stats.Sort((a, b) => b.Percentage.CompareTo(a.Percentage));
 
         return stats;

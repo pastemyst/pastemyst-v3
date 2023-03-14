@@ -21,6 +21,8 @@ public class Paste
     public string OwnerId { get; set; }
 
     public bool Private { get; set; }
+    
+    public bool Pinned { get; set; }
 
     [JsonIgnore] public List<User> Stars { get; set; } = new();
 
