@@ -9,6 +9,8 @@ public interface IImageService
 
     Task<Image> FindByIdAsync(string id);
 
+    Task DeleteAsync(Image image);
+
     bool ExistsById(string id);
 }
 
@@ -42,6 +44,12 @@ public class ImageService : IImageService
     }
 
     public async Task<Image> FindByIdAsync(string id) => await _context.Images.FindAsync(id);
+    
+    public async Task DeleteAsync(Image image)
+    {
+        _context.Images.Remove(image);
+        await _context.SaveChangesAsync();
+    }
 
     public bool ExistsById(string id) => _context.Images.Any(img => img.Id == id);
 }

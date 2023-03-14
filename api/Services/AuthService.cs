@@ -221,9 +221,9 @@ public class AuthService : IAuthService
 
         var userId = (string)claims["id"];
 
-        var user = await _dbContext.Users.FindAsync(userId);
-
-        return user;
+        return await _dbContext.Users
+            .Include(u => u.Avatar)
+            .FirstAsync(u => u.Id == userId);
     }
 
     public string Logout(HttpContext httpContext)
