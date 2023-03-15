@@ -1,6 +1,7 @@
 import { PUBLIC_API_BASE } from "$env/static/public";
 import type { FetchFunc } from "./fetch";
 import type { LangStat } from "./lang";
+import type { Page } from "./page";
 
 export enum ExpiresIn {
     never = "never",
@@ -23,6 +24,7 @@ export interface Paste {
     pasties: Pasty[];
     ownerId: string;
     private: boolean;
+    pinned: boolean;
     stars: number;
 }
 
@@ -196,4 +198,26 @@ export const getPasteLangs = async (fetchFunc: FetchFunc, id: string): Promise<L
     if (res.ok) return await res.json();
 
     return [];
+};
+
+export const getUserPastes = async (
+    fetchFunc: FetchFunc,
+    username: string,
+    pinned: boolean,
+    page: number,
+    pageSize: number
+): Promise<Page<Paste> | null> => {
+    const res = await fetchFunc(
+        `${PUBLIC_API_BASE}/users/${username}/pastes${pinned ? "/pinned" : ""}` +
+        `?page=${page}` +
+        `&pageSize=${pageSize}`,
+        {
+            method: "get",
+            credentials: "include"
+        }
+    );
+
+    if (res.ok) return await res.json();
+
+    return null;
 };

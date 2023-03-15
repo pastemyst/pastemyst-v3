@@ -13,7 +13,7 @@ public interface IUserProvider
 
     public Task<bool> ExistsByUsernameAsync(string username);
 
-    public Task<Page<Paste>> GetOwnedPastesAsync(string username, PageRequest pageRequest);
+    public Task<Page<Paste>> GetOwnedPastesAsync(string username, bool pinnedOnly, PageRequest pageRequest);
 }
 
 public class UserProvider : IUserProvider
@@ -55,13 +55,13 @@ public class UserProvider : IUserProvider
         return await GetByUsernameAsync(username) is not null;
     }
 
-    public async Task<Page<Paste>> GetOwnedPastesAsync(string username, PageRequest pageRequest)
+    public async Task<Page<Paste>> GetOwnedPastesAsync(string username, bool pinnedOnly, PageRequest pageRequest)
     {
         var self = await _authService.GetSelfAsync(_contextAccessor.HttpContext);
         var user = await GetByUsernameAsync(username);
 
         var pastes = _dbContext.Pastes
-            .Where(CanViewPaste(user, self))
+            .Where(FilterUserPastes(user, self, pinnedOnly))
             .OrderBy(p => p.CreatedAt)
             .Reverse()
             .Include(p => p.Pasties)
@@ -69,7 +69,7 @@ public class UserProvider : IUserProvider
             .Take(pageRequest.PageSize)
             .ToList();
 
-        var totalItems = _dbContext.Pastes.Count(CanViewPaste(user, self));
+        var totalItems = _dbContext.Pastes.Count(FilterUserPastes(user, self, pinnedOnly));
         var totalPages = (int)Math.Ceiling((float)totalItems / pageRequest.PageSize);
 
         return new Page<Paste>
@@ -82,8 +82,8 @@ public class UserProvider : IUserProvider
         };
     }
 
-    private static Expression<Func<Paste, bool>> CanViewPaste(User user, User self)
+    private static Expression<Func<Paste, bool>> FilterUserPastes(User user, User self, bool pinnedOnly)
     {
-        return p => p.Owner == user && (!p.Private || self == p.Owner);
+        return p => p.Owner == user && (!p.Private || self == p.Owner) && (!pinnedOnly || p.Pinned);
     }
 }

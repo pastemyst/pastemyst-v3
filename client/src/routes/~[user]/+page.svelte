@@ -1,51 +1,10 @@
 <script lang="ts">
-    import { ExpiresIn, type Paste } from "$lib/api/paste";
     import type { PageData } from "./$types";
     import { tooltip } from "$lib/tooltips";
-    import moment from "moment";
     import { PUBLIC_API_BASE } from "$env/static/public";
+    import PasteList from "$lib/PasteList.svelte";
 
     export let data: PageData;
-
-    const getPasteLangs = (paste: Paste): string => {
-        console.log(paste);
-        let langs: string[] = [];
-        for (const pasty of paste.pasties) {
-            if (!langs.some((l) => l === pasty.language)) {
-                langs.push(pasty.language);
-            }
-        }
-
-        return langs.slice(0, 3).join(", ");
-    };
-
-    const fetchPastes = async (page: number) => {
-        const res = await fetch(
-            `${PUBLIC_API_BASE}/users/${data.user.username}/pastes?page=${page}&page_size=5`,
-            {
-                method: "get",
-                credentials: "include"
-            }
-        );
-
-        if (!res.ok) return;
-
-        if (res.ok) {
-            data.pastes = await res.json();
-        }
-    };
-
-    const onPrevPage = async () => {
-        if (data.pastes.currentPage === 0) return;
-
-        await fetchPastes(data.pastes.currentPage - 1);
-    };
-
-    const onNextPage = async () => {
-        if (data.pastes.currentPage === data.pastes.totalPages - 1) return;
-
-        await fetchPastes(data.pastes.currentPage + 1);
-    };
 </script>
 
 <svelte:head>
@@ -153,84 +112,21 @@
         </div>
     </section>
 
-    <section class="public-pastes">
-        <h3>public pastes</h3>
+    <div class="pastes">
+        {#if data.pinnedPastes.items.length > 0}
+            <section>
+                <h3>pinned pastes</h3>
 
-        {#if data.pastes.items.length === 0}
-            <p class="no-public-pastes">{data.user.username} doesn't have any public pastes yet.</p>
-        {:else}
-            {#each data.pastes.items as paste}
-                <a href="/{paste.id}" class="paste btn">
-                    <div class="flex row center space-between">
-                        <p class="title">{paste.title || "untitled"}</p>
-
-                        <div>
-                            {#if paste.private}
-                                <div use:tooltip aria-label="private" class="flex">
-                                    <svg
-                                        xmlns="http://www.w3.org/2000/svg"
-                                        viewBox="0 0 16 16"
-                                        class="icon"
-                                    >
-                                        <title>Lock Closed Icon</title>
-                                        <path
-                                            fill="currentColor"
-                                            fill-rule="evenodd"
-                                            d="M4 4v2h-.25A1.75 1.75 0 002 7.75v5.5c0 .966.784 1.75 1.75 1.75h8.5A1.75 1.75 0 0014 13.25v-5.5A1.75 1.75 0 0012.25 6H12V4a4 4 0 10-8 0zm6.5 2V4a2.5 2.5 0 00-5 0v2h5zM12 7.5h.25a.25.25 0 01.25.25v5.5a.25.25 0 01-.25.25h-8.5a.25.25 0 01-.25-.25v-5.5a.25.25 0 01.25-.25H12z"
-                                        />
-                                    </svg>
-                                </div>
-                            {/if}
-                        </div>
-                    </div>
-
-                    <div>
-                        <!-- prettier-ignore -->
-                        <span use:tooltip aria-label={new Date(paste.createdAt).toString()}>{moment(paste.createdAt).fromNow()}</span>
-
-                        {#if paste.expiresIn !== ExpiresIn.never}
-                            <!-- prettier-ignore -->
-                            <span use:tooltip aria-label={new Date(paste.deletesAt).toString()}> - expires {moment(paste.deletesAt).fromNow()}</span>
-                        {/if}
-                    </div>
-
-                    <div>
-                        <span>{getPasteLangs(paste)}</span>
-                    </div>
-                </a>
-            {/each}
-
-            {#if data.pastes.totalPages > 1}
-                <div class="pager flex row center">
-                    <button
-                        class="btn"
-                        disabled={data.pastes.currentPage === 0}
-                        on:click={onPrevPage}
-                    >
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" class="icon">
-                            <title>Chevron Left</title>
-                            <path
-                                fill="currentColor"
-                                fill-rule="evenodd"
-                                d="M9.78 12.78a.75.75 0 01-1.06 0L4.47 8.53a.75.75 0 010-1.06l4.25-4.25a.75.75 0 011.06 1.06L6.06 8l3.72 3.72a.75.75 0 010 1.06z"
-                            />
-                        </svg>
-                    </button>
-                    <span>{data.pastes.currentPage + 1}/{data.pastes.totalPages}</span>
-                    <button class="btn" disabled={!data.pastes.hasNextPage} on:click={onNextPage}>
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" class="icon">
-                            <title>Chevron Right</title>
-                            <path
-                                fill="currentColor"
-                                fill-rule="evenodd"
-                                d="M6.22 3.22a.75.75 0 011.06 0l4.25 4.25a.75.75 0 010 1.06l-4.25 4.25a.75.75 0 01-1.06-1.06L9.94 8 6.22 4.28a.75.75 0 010-1.06z"
-                            />
-                        </svg>
-                    </button>
-                </div>
-            {/if}
+                <PasteList pastes={data.pinnedPastes} user={data.user} pinned />
+            </section>
         {/if}
-    </section>
+
+        <section>
+            <h3>public pastes</h3>
+
+            <PasteList pastes={data.pastes} user={data.user} />
+        </section>
+    </div>
 </div>
 
 <style lang="scss">
@@ -303,7 +199,7 @@
         }
     }
 
-    .public-pastes {
+    .pastes {
         flex-grow: 1;
         height: 100%;
 
@@ -312,65 +208,6 @@
             font-size: $fs-medium;
             margin: 0;
             margin-bottom: 1rem;
-        }
-
-        .no-public-pastes {
-            text-align: center;
-            margin: 0;
-            font-size: $fs-normal;
-        }
-
-        .paste {
-            display: block;
-            background-color: var(--color-bg);
-            margin-top: 1rem;
-            border-radius: $border-radius;
-            padding: 0.5rem;
-            text-decoration: none;
-            font-size: $fs-medium;
-            border: 1px solid var(--color-bg2);
-            color: var(--color-primary);
-
-            &:hover {
-                color: var(--color-secondary);
-                background-color: var(--color-bg2);
-                border-color: var(--color-bg3);
-            }
-
-            &:focus {
-                color: var(--color-secondary);
-                background-color: var(--color-bg2);
-                border-color: var(--color-primary);
-            }
-
-            p {
-                margin: 0;
-            }
-
-            .icon {
-                color: var(--color-bg3);
-            }
-
-            span {
-                font-size: $fs-small;
-                color: var(--color-bg3);
-            }
-        }
-
-        .pager {
-            justify-content: center;
-            margin-top: 1rem;
-            font-size: $fs-normal;
-
-            span {
-                margin: 0 0.5rem;
-            }
-
-            button {
-                .icon {
-                    max-width: 18px;
-                }
-            }
         }
     }
 

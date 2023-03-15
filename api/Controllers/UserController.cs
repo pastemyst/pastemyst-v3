@@ -28,6 +28,12 @@ public class UserController : ControllerBase
     [HttpGet("{username}/pastes")]
     public async Task<Page<Paste>> GetUserOwnedPastes(string username, [FromQuery] PageRequest pageRequest)
     {
-        return await _userProvider.GetOwnedPastesAsync(username, pageRequest);
+        return await _userProvider.GetOwnedPastesAsync(username, false, pageRequest);
+    }
+
+    [HttpGet("{username}/pastes/pinned")]
+    public async Task<Page<Paste>> GetUserOwnedPinnedPastes(string username, [FromQuery] PageRequest pageRequest)
+    {
+        return await _userProvider.GetOwnedPastesAsync(username, true, pageRequest);
     }
 }
