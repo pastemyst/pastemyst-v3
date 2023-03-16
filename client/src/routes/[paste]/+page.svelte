@@ -2,7 +2,7 @@
     import type { PageData } from "./$types";
     import Tab from "$lib/Tab.svelte";
     import PastyMeta from "$lib/PastyMeta.svelte";
-    import { deletePaste, ExpiresIn, starPaste, type Pasty } from "$lib/api/paste";
+    import { deletePaste, ExpiresIn, pinPaste, starPaste, type Pasty } from "$lib/api/paste";
     import { tooltip } from "$lib/tooltips";
     import { currentUserStore } from "$lib/stores";
     import { goto } from "$app/navigation";
@@ -64,6 +64,12 @@
             data.paste.stars--;
         }
     };
+
+    const onPinClick = async () => {
+        await pinPaste(data.paste.id);
+
+        data.paste.pinned = !data.paste.pinned;
+    };
 </script>
 
 <svelte:head>
@@ -108,6 +114,42 @@
     </div>
 
     <div class="options flex row center">
+        {#if $currentUserStore?.id === data.paste.ownerId}
+            <button
+                aria-label={data.paste.pinned ? "unpin" : "pin"}
+                use:tooltip={{
+                    content: data.paste.pinned ? "unpin" : "pin",
+                    hideOnClick: false
+                }}
+                on:click={onPinClick}
+                class:pinned={data.paste.pinned}
+            >
+                {#if data.paste.pinned}
+                    <svg viewBox="0 0 16 16" class="icon" width="16" height="16">
+                        <title>Pin Icon</title>
+                        <path
+                            fill="currentColor"
+                            fill-rule="evenodd"
+                            d="m 4.456,0.734 a 1.75,1.75 0 0 1 2.826,0.504 l 0.613,1.327 a 3.081,3.081 0 0 0 2.084,1.707 l 2.454,0.584 c 1.332,0.317 1.8,1.972 0.832,2.94 L 11.06,10 l 3.72,3.72 a 0.75,0.75 0 1 1 -1.061,1.06 L 10,11.06 7.796,13.265 c -0.968,0.968 -2.623,0.5 -2.94,-0.832 L 4.272,9.979 A 3.081,3.081 0 0 0 2.565,7.895 L 1.238,7.282 A 1.75,1.75 0 0 1 0.734,4.456 Z M 5.92,1.866 A 0.25,0.25 0 0 0 5.516,1.794 L 1.794,5.516 A 0.25,0.25 0 0 0 1.866,5.92 L 3.194,6.533 A 4.582,4.582 0 0 1 5.73,9.63 l 0.584,2.454 a 0.25,0.25 0 0 0 0.42,0.12 l 5.47,-5.47 a 0.25,0.25 0 0 0 -0.12,-0.42 L 9.63,5.73 A 4.581,4.581 0 0 1 6.532,3.193 Z"
+                        />
+                        <path
+                            fill="currentColor"
+                            d="M 0.9653876,5.8199081 4.1925405,8.2195859 6.3991407,13.322349 13.322349,6.2336457 8.6609059,4.440783 5.8474906,0.66198007 Z"
+                        />
+                    </svg>
+                {:else}
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" class="icon">
+                        <title>Pin Icon</title>
+                        <path
+                            fill="currentColor"
+                            fill-rule="evenodd"
+                            d="M4.456.734a1.75 1.75 0 012.826.504l.613 1.327a3.081 3.081 0 002.084 1.707l2.454.584c1.332.317 1.8 1.972.832 2.94L11.06 10l3.72 3.72a.75.75 0 11-1.061 1.06L10 11.06l-2.204 2.205c-.968.968-2.623.5-2.94-.832l-.584-2.454a3.081 3.081 0 00-1.707-2.084l-1.327-.613a1.75 1.75 0 01-.504-2.826L4.456.734zM5.92 1.866a.25.25 0 00-.404-.072L1.794 5.516a.25.25 0 00.072.404l1.328.613A4.582 4.582 0 015.73 9.63l.584 2.454a.25.25 0 00.42.12l5.47-5.47a.25.25 0 00-.12-.42L9.63 5.73a4.581 4.581 0 01-3.098-2.537L5.92 1.866z"
+                        />
+                    </svg>
+                {/if}
+            </button>
+        {/if}
+
         <button
             class="stars"
             aria-label="stars"
@@ -263,7 +305,7 @@
             <div class="pasty">
                 <div class="sticky">
                     <div class="title flex row space-between center">
-                        <span>{pasty.title}</span>
+                        <span>{pasty.title || "untitled"}</span>
 
                         {#if data.pasteStats}
                             <div class="meta-stacked flex row center">
@@ -358,7 +400,8 @@
                     max-height: 20px;
                 }
 
-                &.starred svg {
+                &.starred svg,
+                &.pinned svg {
                     color: var(--color-primary);
                 }
             }

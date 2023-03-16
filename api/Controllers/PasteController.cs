@@ -51,6 +51,12 @@ public class PasteController : ControllerBase
         await _pasteService.ToggleStarAsync(pasteId);
     }
 
+    [HttpPost("{pasteId}/pin")]
+    public async Task TogglePinPaste(string pasteId)
+    {
+        await _pasteService.TogglePinnedAsync(pasteId);
+    }
+
     [HttpPost]
     public async Task<IActionResult> CreatePaste([FromBody] PasteCreateInfo createInfo)
     {

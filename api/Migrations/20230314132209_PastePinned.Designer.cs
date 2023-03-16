@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using pastemyst.DbContexts;
@@ -11,9 +12,11 @@ using pastemyst.DbContexts;
 namespace pastemyst.Migrations
 {
     [DbContext(typeof(DataContext))]
-    partial class UserContextModelSnapshot : ModelSnapshot
+    [Migration("20230314132209_PastePinned")]
+    partial class PastePinned
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -128,9 +131,9 @@ namespace pastemyst.Migrations
                         .HasColumnType("text")
                         .HasColumnName("paste_id");
 
-                    b.Property<string>("Title")
+                    b.Property<string>("Tile")
                         .HasColumnType("text")
-                        .HasColumnName("title");
+                        .HasColumnName("tile");
 
                     b.HasKey("Id")
                         .HasName("pk_pasties");

@@ -16,4 +16,6 @@ public class PasteCreateInfo
     public bool Anonymous { get; set; } = false;
 
     public bool Private { get; set; } = false;
+
+    public bool Pinned { get; set; } = false;
 }

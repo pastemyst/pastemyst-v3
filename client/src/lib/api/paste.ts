@@ -1,6 +1,7 @@
 import { PUBLIC_API_BASE } from "$env/static/public";
 import type { FetchFunc } from "./fetch";
 import type { LangStat } from "./lang";
+import type { Page } from "./page";
 
 export enum ExpiresIn {
     never = "never",
@@ -23,6 +24,7 @@ export interface Paste {
     pasties: Pasty[];
     ownerId: string;
     private: boolean;
+    pinned: boolean;
     stars: number;
 }
 
@@ -46,15 +48,16 @@ export interface Stats {
     bytes: number;
 }
 
-export interface PasteSkeleton {
+export interface PasteCreateInfo {
     title: string;
     expiresIn: ExpiresIn;
-    pasties: PastySkeleton[];
+    pasties: PastyCreateInfo[];
     anonymous: boolean;
     private: boolean;
+    pinned: boolean;
 }
 
-export interface PastySkeleton {
+export interface PastyCreateInfo {
     title: string;
     content: string;
     language: string;
@@ -114,7 +117,7 @@ export const expiresInToLongString = (exp: ExpiresIn): string => {
     }
 };
 
-export const createPaste = async (skeleton: PasteSkeleton): Promise<Paste | null> => {
+export const createPaste = async (skeleton: PasteCreateInfo): Promise<Paste | null> => {
     const res = await fetch(`${PUBLIC_API_BASE}/pastes/`, {
         method: "post",
         credentials: "include",
@@ -161,6 +164,15 @@ export const starPaste = async (id: string): Promise<boolean> => {
     return res.ok;
 };
 
+export const pinPaste = async (id: string): Promise<boolean> => {
+    const res = await fetch(`${PUBLIC_API_BASE}/pastes/${id}/pin`, {
+        method: "post",
+        credentials: "include"
+    });
+
+    return res.ok;
+};
+
 export const isPasteStarred = async (fetchFunc: FetchFunc, id: string): Promise<boolean> => {
     const res = await fetchFunc(`${PUBLIC_API_BASE}/pastes/${id}/star`, {
         method: "get",
@@ -195,4 +207,26 @@ export const getPasteLangs = async (fetchFunc: FetchFunc, id: string): Promise<L
     if (res.ok) return await res.json();
 
     return [];
+};
+
+export const getUserPastes = async (
+    fetchFunc: FetchFunc,
+    username: string,
+    pinned: boolean,
+    page: number,
+    pageSize: number
+): Promise<Page<Paste> | null> => {
+    const res = await fetchFunc(
+        `${PUBLIC_API_BASE}/users/${username}/pastes${pinned ? "/pinned" : ""}` +
+            `?page=${page}` +
+            `&pageSize=${pageSize}`,
+        {
+            method: "get",
+            credentials: "include"
+        }
+    );
+
+    if (res.ok) return await res.json();
+
+    return null;
 };

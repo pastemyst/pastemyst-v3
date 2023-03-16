@@ -6,7 +6,7 @@ public class Pasty
 {
     public string Id { get; set; }
 
-    public string Tile { get; set; } = "";
+    public string Title { get; set; } = "";
     
     [Required]
     public string Content { get; set; }

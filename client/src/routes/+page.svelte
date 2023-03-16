@@ -4,8 +4,8 @@
         createPaste,
         ExpiresIn,
         expiresInToLongString,
-        type PasteSkeleton,
-        type PastySkeleton
+        type PasteCreateInfo,
+        type PastyCreateInfo
     } from "$lib/api/paste";
     import { addBaseCommands, Close, setTempCommands, type Command } from "$lib/command";
     import PasteOptions from "$lib/PasteOptions.svelte";
@@ -23,6 +23,7 @@
 
     let anonymous: boolean;
     let isPrivate: boolean;
+    let pinned: boolean;
 
     onMount(() => {
         const commands: Command[] = [
@@ -57,7 +58,7 @@
     });
 
     const onCreatePaste = async () => {
-        let pasties: PastySkeleton[] = [];
+        let pasties: PastyCreateInfo[] = [];
 
         for (const tab of tabs) {
             pasties.push({
@@ -67,12 +68,13 @@
             });
         }
 
-        const pasteSkeleton: PasteSkeleton = {
+        const pasteSkeleton: PasteCreateInfo = {
             title: title,
             expiresIn: selectedExpiresIn,
             pasties: pasties,
             anonymous: anonymous,
-            private: isPrivate
+            private: isPrivate,
+            pinned: pinned
         };
 
         const paste = await createPaste(pasteSkeleton);
@@ -131,7 +133,7 @@
 <TabbedEditor bind:tabs bind:activeTab />
 
 <div class="paste-options">
-    <PasteOptions on:create={onCreatePaste} bind:anonymous bind:isPrivate />
+    <PasteOptions on:create={onCreatePaste} bind:anonymous bind:isPrivate bind:pinned />
 </div>
 
 <style lang="scss">

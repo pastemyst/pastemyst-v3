@@ -16,8 +16,13 @@ export const load: PageLoad = async ({ params, fetch }) => {
         credentials: "include"
     });
 
-    const userPastesRes = await fetch(
-        `${PUBLIC_API_BASE}/users/${params.user}/pastes?page_size=5`,
+    const userPastesRes = await fetch(`${PUBLIC_API_BASE}/users/${params.user}/pastes?pageSize=5`, {
+        method: "get",
+        credentials: "include"
+    });
+
+    const userPinnedPastesRes = await fetch(
+        `${PUBLIC_API_BASE}/users/${params.user}/pastes/pinned?pageSize=5`,
         {
             method: "get",
             credentials: "include"
@@ -28,6 +33,7 @@ export const load: PageLoad = async ({ params, fetch }) => {
     let relativeJoined: string;
     let isCurrentUser = false;
     let pastes: Page<Paste>;
+    let pinnedPastes: Page<Paste>;
     if (userRes.ok) {
         user = await userRes.json();
         relativeJoined = moment(user.createdAt).fromNow();
@@ -38,8 +44,9 @@ export const load: PageLoad = async ({ params, fetch }) => {
             isCurrentUser = loggedInUser.id === user.id;
         }
 
-        if (userPastesRes.ok) {
+        if (userPastesRes.ok && userPinnedPastesRes.ok) {
             pastes = await userPastesRes.json();
+            pinnedPastes = await userPinnedPastesRes.json();
         } else {
             throw error(userPastesRes.status);
         }
@@ -48,7 +55,8 @@ export const load: PageLoad = async ({ params, fetch }) => {
             user: user,
             isCurrentUser: isCurrentUser,
             relativeJoined: relativeJoined,
-            pastes: pastes
+            pastes: pastes,
+            pinnedPastes: pinnedPastes
         };
     } else {
         throw error(userRes.status);
