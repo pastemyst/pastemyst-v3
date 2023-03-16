@@ -7,7 +7,7 @@
 
     export let pastes: Page<Paste>;
     export let user: User;
-    export let pinned: boolean = false;
+    export let pinned = false;
 
     const getPasteLangs = (paste: Paste): string => {
         let langs: string[] = [];
