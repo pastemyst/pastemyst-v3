@@ -164,6 +164,15 @@ export const starPaste = async (id: string): Promise<boolean> => {
     return res.ok;
 };
 
+export const pinPaste = async (id: string): Promise<boolean> => {
+    const res = await fetch(`${PUBLIC_API_BASE}/pastes/${id}/pin`, {
+        method: "post",
+        credentials: "include"
+    });
+
+    return res.ok;
+};
+
 export const isPasteStarred = async (fetchFunc: FetchFunc, id: string): Promise<boolean> => {
     const res = await fetchFunc(`${PUBLIC_API_BASE}/pastes/${id}/star`, {
         method: "get",

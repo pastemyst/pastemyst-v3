@@ -21,9 +21,11 @@ public interface IPasteService
 
     public Task DeleteAsync(string id);
 
+    public Task<bool> IsStarredAsync(string id);
+
     public Task ToggleStarAsync(string id);
 
-    public Task<bool> IsStarredAsync(string id);
+    public Task TogglePinnedAsync(string id);
 
     public Task<bool> ExistsByIdAsync(string id);
 }
@@ -92,7 +94,7 @@ public class PasteService : IPasteService
             paste.Pasties.Add(new Pasty
             {
                 Id = await _idProvider.GenerateId(async id => await _pastyService.ExistsByIdAsync(id)),
-                Tile = pasty.Title,
+                Title = pasty.Title,
                 Content = pasty.Content,
                 Language = langName
             });
@@ -222,6 +224,25 @@ public class PasteService : IPasteService
         await _dbContext.SaveChangesAsync();
     }
 
+    public async Task<bool> IsStarredAsync(string id)
+    {
+        var user = await _authService.GetSelfAsync(_contextAccessor.HttpContext);
+
+        if (user is null)
+            throw new HttpException(HttpStatusCode.Unauthorized, "You must be authorized to star pastes.");
+
+        var paste = await GetAsync(id);
+
+        if (paste.Owner is null || paste.Owner.Id != user.Id)
+        {
+            // Returning not found instead of unauthorized to not expose that the paste exists.
+            if (paste.Private)
+                throw new HttpException(HttpStatusCode.NotFound, "Paste not found.");
+        }
+
+        return paste.Stars.Any(u => u.Id == user.Id);
+    }
+
     public async Task ToggleStarAsync(string id)
     {
         var user = await _authService.GetSelfAsync(_contextAccessor.HttpContext);
@@ -250,23 +271,32 @@ public class PasteService : IPasteService
         await _dbContext.SaveChangesAsync();
     }
 
-    public async Task<bool> IsStarredAsync(string id)
+    public async Task TogglePinnedAsync(string id)
     {
-        var user = await _authService.GetSelfAsync(_contextAccessor.HttpContext);
+        var self = await _authService.GetSelfAsync(_contextAccessor.HttpContext);
 
-        if (user is null)
-            throw new HttpException(HttpStatusCode.Unauthorized, "You must be authorized to star pastes.");
+        if (self is null)
+        {
+            throw new HttpException(HttpStatusCode.Unauthorized, "You must be authorized to pin/unpin pastes.");
+        }
 
         var paste = await GetAsync(id);
 
-        if (paste.Owner is null || paste.Owner.Id != user.Id)
+        if (paste.Owner is null)
         {
-            // Returning not found instead of unauthorized to not expose that the paste exists.
-            if (paste.Private)
-                throw new HttpException(HttpStatusCode.NotFound, "Paste not found.");
+            throw new HttpException(HttpStatusCode.BadRequest, "Only owned pastes can be pinned.");
         }
 
-        return paste.Stars.Any(u => u.Id == user.Id);
+        if (paste.Owner != self)
+        {
+            throw new HttpException(HttpStatusCode.Unauthorized, "You can only pin/unpin your own pastes.");
+        }
+
+        paste.Pinned = !paste.Pinned;
+        
+        _dbContext.Pastes.Attach(paste);
+        _dbContext.Pastes.Entry(paste).Property(p => p.Pinned).IsModified = true;
+        await _dbContext.SaveChangesAsync();
     }
 
     public async Task<bool> ExistsByIdAsync(string id)
