@@ -100,7 +100,7 @@
         for (const lang of langs) {
             commands.push({
                 name: lang.name,
-                description: lang.aliases?.join(","),
+                description: lang.aliases?.join(", "),
                 action: () => {
                     setSelectedLang(lang);
 
