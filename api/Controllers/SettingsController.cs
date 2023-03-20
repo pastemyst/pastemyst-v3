@@ -1,5 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 using Microsoft.AspNetCore.Mvc;
+using pastemyst.Models;
 using pastemyst.Models.Settings;
 using pastemyst.Services;
 
@@ -9,11 +10,23 @@ namespace pastemyst.Controllers;
 [Route("/api/v3/settings")]
 public class SettingsController : ControllerBase
 {
-    private readonly ISettingsService _settingsService;
+    private readonly IUserSettingsService _settingsService;
 
-    public SettingsController(ISettingsService settingsService)
+    public SettingsController(IUserSettingsService settingsService)
     {
         _settingsService = settingsService;
+    }
+
+    [HttpGet]
+    public async Task<UserSettings> GetUserSettings()
+    {
+        return await _settingsService.GetUserSettingsAsync();
+    }
+
+    [HttpPatch]
+    public async Task UpdateUserSettings([FromBody] UserSettings userSettings)
+    {
+        await _settingsService.UpdateUserSettingsAsync(userSettings);
     }
 
     [HttpPatch("username")]

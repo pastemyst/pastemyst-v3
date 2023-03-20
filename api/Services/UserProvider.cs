@@ -47,7 +47,8 @@ public class UserProvider : IUserProvider
 
     public async Task<User> GetByUsernameAsync(string username)
     {
-        return await _dbContext.Users.FirstOrDefaultAsync(user => user.Username.Equals(username));
+        return await _dbContext.Users.Include(u => u.Settings)
+            .FirstOrDefaultAsync(user => user.Username.Equals(username));
     }
 
     public async Task<bool> ExistsByUsernameAsync(string username)
@@ -60,16 +61,25 @@ public class UserProvider : IUserProvider
         var self = await _authService.GetSelfAsync(_contextAccessor.HttpContext);
         var user = await GetByUsernameAsync(username);
 
-        var pastes = _dbContext.Pastes
-            .Where(FilterUserPastes(user, self, pinnedOnly))
-            .OrderBy(p => p.CreatedAt)
+        // If not showing only pinned pastes, and show all pastes is disabled, return an empty list.
+        if (!pinnedOnly && self != user && !user.Settings.ShowAllPastesOnProfile)
+        {
+            return new Page<Paste>();
+        }
+
+        var pastesQuery = _dbContext.Pastes
+            .Where(p => p.Owner == user) // check owner
+            .Where(p => !p.Private || p.Owner == self) // only get private if self is owner
+            .Where(p => !pinnedOnly || p.Pinned); // if pinnedOnly, make sure all pasted are pinned
+        
+        var pastes = pastesQuery.OrderBy(p => p.CreatedAt)
             .Reverse()
             .Include(p => p.Pasties)
             .Skip(pageRequest.Page * pageRequest.PageSize)
             .Take(pageRequest.PageSize)
             .ToList();
 
-        var totalItems = _dbContext.Pastes.Count(FilterUserPastes(user, self, pinnedOnly));
+        var totalItems = pastesQuery.Count();
         var totalPages = (int)Math.Ceiling((float)totalItems / pageRequest.PageSize);
 
         return new Page<Paste>
@@ -80,10 +90,5 @@ public class UserProvider : IUserProvider
             HasNextPage = pageRequest.Page < totalPages - 1,
             TotalPages = totalPages
         };
-    }
-
-    private static Expression<Func<Paste, bool>> FilterUserPastes(User user, User self, bool pinnedOnly)
-    {
-        return p => p.Owner == user && (!p.Private || self == p.Owner) && (!pinnedOnly || p.Pinned);
     }
 }

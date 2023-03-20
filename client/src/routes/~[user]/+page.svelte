@@ -121,11 +121,13 @@
             </section>
         {/if}
 
-        <section>
-            <h3>public pastes</h3>
+        {#if data.pinnedPastes.items.length == 0 || data.pastes.items.length > 0}
+            <section>
+                <h3>public pastes</h3>
 
-            <PasteList pastes={data.pastes} user={data.user} />
-        </section>
+                <PasteList pastes={data.pastes} user={data.user} />
+            </section>
+        {/if}
     </div>
 </div>
 

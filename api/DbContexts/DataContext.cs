@@ -6,6 +6,7 @@ namespace pastemyst.DbContexts;
 public class DataContext : DbContext
 {
     public DbSet<User> Users { get; set; }
+    public DbSet<UserSettings> UserSettings { get; set; }
     public DbSet<Image> Images { get; set; }
     public DbSet<Pasty> Pasties { get; set; }
     public DbSet<Paste> Pastes { get; set; }
@@ -21,6 +22,14 @@ public class DataContext : DbContext
         modelBuilder.Entity<User>()
             .HasIndex(e => e.Username)
             .IsUnique();
+
+        modelBuilder.Entity<User>()
+            .HasOne(u => u.Settings)
+            .WithOne(s => s.User)
+            .HasForeignKey<UserSettings>(s => s.UserId);
+
+        modelBuilder.Entity<UserSettings>()
+            .HasKey(u => u.UserId);
 
         modelBuilder.Entity<Paste>()
             .HasMany(p => p.Pasties)

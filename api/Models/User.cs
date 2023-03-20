@@ -22,4 +22,6 @@ public class User
     [JsonIgnore] public string ProviderName { get; set; }
 
     [JsonIgnore] public string ProviderId { get; set; }
+    
+    [JsonIgnore] public UserSettings Settings { get; set; }
 }

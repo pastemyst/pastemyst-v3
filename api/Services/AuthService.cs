@@ -172,7 +172,8 @@ public class AuthService : IAuthService
             Username = username,
             Avatar = avatar,
             ProviderName = (string)claims["providerName"],
-            ProviderId = (string)claims["providerId"]
+            ProviderId = (string)claims["providerId"],
+            Settings = new UserSettings()
         };
 
         await _dbContext.Users.AddAsync(user);
@@ -223,6 +224,7 @@ public class AuthService : IAuthService
 
         return await _dbContext.Users
             .Include(u => u.Avatar)
+            .Include(u => u.Settings)
             .FirstAsync(u => u.Id == userId);
     }
 
