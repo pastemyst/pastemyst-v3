@@ -1,7 +1,6 @@
 <script lang="ts">
     import { createEventDispatcher } from "svelte";
 
-
     export let label: string;
     export let checked: boolean;
 

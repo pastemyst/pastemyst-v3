@@ -1,7 +1,7 @@
 <script lang="ts">
     import { PUBLIC_API_BASE } from "$env/static/public";
     import { getSelf } from "$lib/api/auth";
-    import { getUserSettings, updateUserSettings } from "$lib/api/settings";
+    import { updateUserSettings } from "$lib/api/settings";
     import { getUserByUsername } from "$lib/api/user";
     import Checkbox from "$lib/Checkbox.svelte";
     import { usernameRegex } from "$lib/patterns";
@@ -197,9 +197,9 @@
         bind:checked={data.userSettings.showAllPastesOnProfile}
         on:change={saveSettings}
     />
-    <span class="hint"
-        >toggle whether to show only your pinned pastes or all your public pastes on your profile</span
-    >
+    <span class="hint">
+        toggle whether to show only your pinned pastes or all your public pastes on your profile
+    </span>
 </div>
 
 <style lang="scss">

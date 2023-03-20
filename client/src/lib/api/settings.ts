@@ -25,4 +25,4 @@ export const updateUserSettings = async (fetchFunc: FetchFunc, userSettings: Use
         },
         body: JSON.stringify(userSettings)
     });
-}
+};
