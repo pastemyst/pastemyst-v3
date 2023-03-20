@@ -1,7 +1,9 @@
 <script lang="ts">
     import { PUBLIC_API_BASE } from "$env/static/public";
     import { getSelf } from "$lib/api/auth";
+    import { getUserSettings, updateUserSettings } from "$lib/api/settings";
     import { getUserByUsername } from "$lib/api/user";
+    import Checkbox from "$lib/Checkbox.svelte";
     import { usernameRegex } from "$lib/patterns";
     import { currentUserStore } from "$lib/stores";
     import type { PageData } from "./$types";
@@ -88,6 +90,10 @@
         }
 
         await checkIfUsernameAvailable();
+    };
+
+    const saveSettings = async () => {
+        await updateUserSettings(fetch, data.userSettings);
     };
 </script>
 
@@ -183,6 +189,19 @@
     {/if}
 </div>
 
+<h4>privacy</h4>
+
+<div class="privacy">
+    <Checkbox
+        label="show all pastes on your profile"
+        bind:checked={data.userSettings.showAllPastesOnProfile}
+        on:change={saveSettings}
+    />
+    <span class="hint"
+        >toggle whether to show only your pinned pastes or all your public pastes on your profile</span
+    >
+</div>
+
 <style lang="scss">
     .avatar {
         gap: 1rem;
@@ -226,10 +245,19 @@
         }
     }
 
+    .privacy {
+        margin-bottom: 2rem;
+    }
+
     button {
         .icon {
             margin-right: 0.5rem;
         }
+    }
+
+    .hint {
+        color: var(--color-bg3);
+        font-size: $fs-small;
     }
 
     @keyframes loader {

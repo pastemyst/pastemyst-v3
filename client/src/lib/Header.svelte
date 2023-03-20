@@ -82,6 +82,7 @@
             font-size: $fs-normal;
             font-weight: normal;
             margin: 0;
+            margin-top: -2px;
             color: var(--color-primary);
         }
 
