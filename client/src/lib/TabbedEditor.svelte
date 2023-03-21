@@ -274,6 +274,11 @@
             border-bottom-color: transparent;
             background-color: transparent;
 
+            &:focus,
+            &:active {
+                border-bottom-color: var(--color-primary) !important;
+            }
+
             &:hover {
                 border-bottom-color: var(--color-bg3);
             }
