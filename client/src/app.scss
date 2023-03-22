@@ -54,6 +54,10 @@ a {
         color: var(--color-secondary);
     }
 
+    &:focus {
+        border: 1px solid var(--color-primary);
+    }
+
     &.no-dec {
         text-decoration: none;
     }
