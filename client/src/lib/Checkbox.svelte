@@ -7,6 +7,7 @@
     const dispatch = createEventDispatcher();
 </script>
 
+<!-- TODO: id, for, keyboard control -->
 <label>
     <input type="checkbox" bind:checked on:change={() => dispatch("change")} />
     <span>{label}</span>

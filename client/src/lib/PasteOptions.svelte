@@ -48,15 +48,20 @@
 
 <div class="paste-options block flex sm-row center space-between">
     <div class="options flex row center">
-        <input type="checkbox" id="encrypt" />
         <label
             for="encrypt"
             aria-label="encrypt the paste with a password"
-            class="btn btn-square"
-            class:enabled={encrypt}
-            on:click={onEncryptClick}
+            class="btn"
+            class:checked={encrypt}
             use:tooltip
         >
+            <input
+                type="checkbox"
+                name="encrypt"
+                id="encrypt"
+                on:change={onEncryptClick}
+                bind:checked={encrypt}
+            />
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" class="icon">
                 <title>Key Icon</title>
                 <path
@@ -68,15 +73,20 @@
         </label>
 
         {#if $currentUserStore != null}
-            <input type="checkbox" id="detach" />
             <label
                 for="anonymous"
                 aria-label="anonymous paste, won't be associated with your account"
-                class="btn btn-square"
-                class:enabled={anonymous}
-                on:click={onAnonymousClick}
+                class="btn"
+                class:checked={anonymous}
                 use:tooltip
             >
+                <input
+                    type="checkbox"
+                    name="anonymous"
+                    id="anonymous"
+                    on:change={onAnonymousClick}
+                    bind:checked={anonymous}
+                />
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" class="icon">
                     <title>User Icon</title>
                     <path
@@ -86,15 +96,20 @@
                 </svg>
             </label>
 
-            <input type="checkbox" id="private" />
             <label
                 for="private"
                 aria-label="private paste, only visible by you"
-                class="btn btn-square"
-                class:enabled={isPrivate}
-                on:click={onPrivateClick}
+                class="btn"
+                class:checked={isPrivate}
                 use:tooltip
             >
+                <input
+                    type="checkbox"
+                    name="private"
+                    id="private"
+                    on:change={onPrivateClick}
+                    bind:checked={isPrivate}
+                />
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" class="icon">
                     <title>Lock Icon</title>
                     <path
@@ -105,15 +120,20 @@
                 </svg>
             </label>
 
-            <input type="checkbox" id="pin" />
             <label
                 for="pin"
                 aria-label="pin the paste on your profile"
-                class="btn btn-square"
-                class:enabled={pinned}
-                on:click={onPinClick}
+                class="btn"
+                class:checked={pinned}
                 use:tooltip
             >
+                <input
+                    type="checkbox"
+                    name="pin"
+                    id="pin"
+                    on:change={onPinClick}
+                    bind:checked={pinned}
+                />
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" class="icon">
                     <title>Pin Icon</title>
                     <path
@@ -140,35 +160,37 @@
         }
     }
 
-    input[type="checkbox"] {
-        width: 0;
-        height: 0;
-        opacity: 0;
-
-        &:checked + label {
-            color: var(--color-primary);
-        }
-    }
-
     label {
-        margin-right: 1rem;
+        cursor: pointer;
         background-color: var(--color-bg);
         padding: 0.5rem;
+        margin-right: 1rem;
 
-        &:hover {
-            background-color: var(--color-bg);
+        &:focus-within {
+            border-color: var(--color-primary) !important;
         }
 
-        .icon {
-            max-width: 20px;
-        }
-
-        &.enabled {
+        &.checked {
             border-color: var(--color-secondary);
+        }
 
-            .icon {
+        input[type="checkbox"] {
+            appearance: none;
+            width: 0;
+            height: 0;
+
+            &:focus-visible {
+                outline: none;
+                border: none;
+            }
+
+            &:checked ~ svg {
                 color: var(--color-secondary);
             }
+        }
+
+        svg {
+            @include transition(color);
         }
     }
 
