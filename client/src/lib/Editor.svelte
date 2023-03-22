@@ -109,7 +109,7 @@
                 .slice(0, text.indexOf(text.trimStart().charAt(0)))
                 .split("").length;
 
-            const previousSpaces = Math.floor(previousIndentIndex / previousIndent.width)    
+            const previousSpaces = Math.floor(previousIndentIndex / previousIndent.width);
 
             const transaction = editorView.state.update({
                 changes: {
@@ -117,12 +117,16 @@
                     to,
                     insert:
                         selectedIndentUnit === "spaces"
-                            ? " ".repeat(previousIndent.unit === "spaces" ?
-                                  selectedIndentWidth *
-                                      previousSpaces : previousIndentIndex * selectedIndentWidth
+                            ? " ".repeat(
+                                  previousIndent.unit === "spaces"
+                                      ? selectedIndentWidth * previousSpaces
+                                      : previousIndentIndex * selectedIndentWidth
                               ) + text.trimStart()
-                            : "\t".repeat(previousIndent.unit === "spaces" ? previousSpaces : previousIndentIndex) +
-                              text.trimStart()
+                            : "\t".repeat(
+                                  previousIndent.unit === "spaces"
+                                      ? previousSpaces
+                                      : previousIndentIndex
+                              ) + text.trimStart()
                 }
             });
 
@@ -150,11 +154,10 @@
         return commands;
     };
 
-    export function getIndentUnitCommands(): Command[]
-    export function getIndentUnitCommands({replaceIndent} : {replaceIndent: true}): Command[] 
+    export function getIndentUnitCommands(): Command[];
+    export function getIndentUnitCommands({ replaceIndent }: { replaceIndent: true }): Command[];
     export function getIndentUnitCommands(): Command[] {
-
-        const replaceIndent = arguments[0] && arguments[0].replaceIndent
+        const replaceIndent = arguments[0] && arguments[0].replaceIndent;
 
         return [
             {
@@ -180,7 +183,7 @@
                 }
             }
         ];
-    };
+    }
 
     export const getIndentWidthCommands = (
         prevUnit: IndentUnit,
