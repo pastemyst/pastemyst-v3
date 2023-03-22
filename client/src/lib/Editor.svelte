@@ -154,11 +154,7 @@
         return commands;
     };
 
-    export function getIndentUnitCommands(): Command[];
-    export function getIndentUnitCommands({ replaceIndent }: { replaceIndent: true }): Command[];
-    export function getIndentUnitCommands(): Command[] {
-        const replaceIndent = arguments[0] && arguments[0].replaceIndent;
-
+    export const getIndentUnitCommands = (replaceIndent = false): Command[] => {
         return [
             {
                 name: "spaces",
@@ -183,11 +179,11 @@
                 }
             }
         ];
-    }
+    };
 
     export const getIndentWidthCommands = (
         prevUnit: IndentUnit,
-        replaceIndent?: true
+        replaceIndent = false
     ): Command[] => {
         const commands: Command[] = [];
 
@@ -199,13 +195,14 @@
                     selectedIndentWidth = i;
                     setEditorIndentation();
 
-                    replaceIndent &&
+                    if (replaceIndent) {
                         replaceIndentation({
                             previousIndent: {
                                 width: prevWidth,
                                 unit: prevUnit
                             }
                         });
+                    }
 
                     return Close.yes;
                 }
