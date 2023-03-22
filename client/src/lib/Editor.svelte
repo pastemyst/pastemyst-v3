@@ -154,7 +154,7 @@
         return commands;
     };
 
-    export const getIndentUnitCommands = (replaceIndent = false): Command[] => {
+    export const getIndentUnitCommands = (convertIndent = false): Command[] => {
         return [
             {
                 name: "spaces",
@@ -162,7 +162,7 @@
                     let prevUnit = selectedIndentUnit;
                     selectedIndentUnit = "spaces";
                     setEditorIndentation();
-                    setTempCommands(getIndentWidthCommands(prevUnit, replaceIndent));
+                    setTempCommands(getIndentWidthCommands(prevUnit, convertIndent));
 
                     return Close.no;
                 }
@@ -173,7 +173,7 @@
                     let prevUnit = selectedIndentUnit;
                     selectedIndentUnit = "tabs";
                     setEditorIndentation();
-                    setTempCommands(getIndentWidthCommands(prevUnit, replaceIndent));
+                    setTempCommands(getIndentWidthCommands(prevUnit, convertIndent));
 
                     return Close.no;
                 }
@@ -183,7 +183,7 @@
 
     export const getIndentWidthCommands = (
         prevUnit: IndentUnit,
-        replaceIndent = false
+        convertIndent = false
     ): Command[] => {
         const commands: Command[] = [];
 
@@ -195,7 +195,7 @@
                     selectedIndentWidth = i;
                     setEditorIndentation();
 
-                    if (replaceIndent) {
+                    if (convertIndent) {
                         replaceIndentation({
                             previousIndent: {
                                 width: prevWidth,

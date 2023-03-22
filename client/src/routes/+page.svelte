@@ -52,7 +52,7 @@
                 }
             },
             {
-                name: "replace indentation",
+                name: "convert indentation",
                 action: () => {
                     const cmds = activeTab?.editor.getIndentUnitCommands(true);
                     if (cmds) setTempCommands(cmds);
