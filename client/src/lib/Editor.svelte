@@ -92,6 +92,44 @@
         }
     };
 
+    export const replaceIndentation = ({
+        previousIndent
+    }: {
+        previousIndent: {
+            width: number;
+            unit: IndentUnit;
+        };
+    }) => {
+        const { lines } = editorView.state.doc;
+
+        for (let i = 1; i <= lines; i++) {
+            const { from, to, text } = editorView.state.doc.line(i);
+
+            const previousIndentIndex = text
+                .slice(0, text.indexOf(text.trimStart().charAt(0)))
+                .split("").length;
+
+            const previousSpaces = Math.floor(previousIndentIndex / previousIndent.width)    
+
+            const transaction = editorView.state.update({
+                changes: {
+                    from,
+                    to,
+                    insert:
+                        selectedIndentUnit === "spaces"
+                            ? " ".repeat(previousIndent.unit === "spaces" ?
+                                  selectedIndentWidth *
+                                      previousSpaces : previousIndentIndex * selectedIndentWidth
+                              ) + text.trimStart()
+                            : "\t".repeat(previousIndent.unit === "spaces" ? previousSpaces : previousIndentIndex) +
+                              text.trimStart()
+                }
+            });
+
+            editorView.update([transaction]);
+        }
+    };
+
     export const getLanguageCommands = async (): Promise<Command[]> => {
         const commands: Command[] = [];
 
@@ -112,14 +150,20 @@
         return commands;
     };
 
-    export const getIndentUnitCommands = (): Command[] => {
+    export function getIndentUnitCommands(): Command[]
+    export function getIndentUnitCommands({replaceIndent} : {replaceIndent: true}): Command[] 
+    export function getIndentUnitCommands(): Command[] {
+
+        const replaceIndent = arguments[0] && arguments[0].replaceIndent
+
         return [
             {
                 name: "spaces",
                 action: () => {
+                    let prevUnit = selectedIndentUnit;
                     selectedIndentUnit = "spaces";
                     setEditorIndentation();
-                    setTempCommands(getIndentWidthCommands());
+                    setTempCommands(getIndentWidthCommands(prevUnit, replaceIndent));
 
                     return Close.no;
                 }
@@ -127,9 +171,10 @@
             {
                 name: "tabs",
                 action: () => {
+                    let prevUnit = selectedIndentUnit;
                     selectedIndentUnit = "tabs";
                     setEditorIndentation();
-                    setTempCommands(getIndentWidthCommands());
+                    setTempCommands(getIndentWidthCommands(prevUnit, replaceIndent));
 
                     return Close.no;
                 }
@@ -137,16 +182,27 @@
         ];
     };
 
-    export const getIndentWidthCommands = (): Command[] => {
+    export const getIndentWidthCommands = (
+        prevUnit: IndentUnit,
+        replaceIndent?: true
+    ): Command[] => {
         const commands: Command[] = [];
 
         for (let i = 1; i <= 8; i++) {
             commands.push({
                 name: i.toString(),
                 action: () => {
+                    let prevWidth = selectedIndentWidth;
                     selectedIndentWidth = i;
-
                     setEditorIndentation();
+
+                    replaceIndent &&
+                        replaceIndentation({
+                            previousIndent: {
+                                width: prevWidth,
+                                unit: prevUnit
+                            }
+                        });
 
                     return Close.yes;
                 }

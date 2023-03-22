@@ -50,6 +50,14 @@
                     if (cmds) setTempCommands(cmds);
                     return Close.no;
                 }
+            },
+            {
+                name: "replace indentation",
+                action: () => {
+                    const cmds = activeTab?.editor.getIndentUnitCommands({replaceIndent: true});
+                    if (cmds) setTempCommands(cmds);
+                    return Close.no;
+                }
             }
         ];
 
