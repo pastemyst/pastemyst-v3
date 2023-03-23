@@ -98,11 +98,9 @@
         for (let i = 1; i <= lines; i++) {
             const { from, to, text } = editorView.state.doc.line(i);
 
-            const previousIndentIndex = text
-                .slice(0, text.indexOf(text.trimStart()[0]))
-                .length;
+            const currentIndentLength = text.slice(0, text.indexOf(text.trimStart()[0])).length;
 
-            const previousSpaces = Math.floor(previousIndentIndex / previousWidth);
+            const previousSpaces = Math.floor(currentIndentLength / previousWidth);
 
             const transaction = editorView.state.update({
                 changes: {
@@ -113,12 +111,10 @@
                             ? " ".repeat(
                                   previousUnit === "spaces"
                                       ? selectedIndentWidth * previousSpaces
-                                      : previousIndentIndex * selectedIndentWidth
+                                      : currentIndentLength * selectedIndentWidth
                               ) + text.trimStart()
                             : "\t".repeat(
-                                  previousUnit === "spaces"
-                                      ? previousSpaces
-                                      : previousIndentIndex
+                                  previousUnit === "spaces" ? previousSpaces : currentIndentLength
                               ) + text.trimStart()
                 }
             });
