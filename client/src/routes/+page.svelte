@@ -51,6 +51,14 @@
                     if (cmds) setTempCommands(cmds);
                     return Close.no;
                 }
+            },
+            {
+                name: "convert indentation",
+                action: () => {
+                    const cmds = activeTab?.editor.getIndentUnitCommands(true);
+                    if (cmds) setTempCommands(cmds);
+                    return Close.no;
+                }
             }
         ];
 
