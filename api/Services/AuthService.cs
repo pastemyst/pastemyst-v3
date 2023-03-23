@@ -7,6 +7,9 @@ using pastemyst.DbContexts;
 using pastemyst.Exceptions;
 using pastemyst.Models;
 
+// disable warning for using HMACSHA512Algorithm
+#pragma warning disable CS0618
+
 namespace pastemyst.Services;
 
 public interface IAuthService
