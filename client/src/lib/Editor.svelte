@@ -92,24 +92,17 @@
         }
     };
 
-    export const replaceIndentation = ({
-        previousIndent
-    }: {
-        previousIndent: {
-            width: number;
-            unit: IndentUnit;
-        };
-    }) => {
+    export const replaceIndentation = (previousUnit: IndentUnit, previousWidth: number) => {
         const { lines } = editorView.state.doc;
 
         for (let i = 1; i <= lines; i++) {
             const { from, to, text } = editorView.state.doc.line(i);
 
             const previousIndentIndex = text
-                .slice(0, text.indexOf(text.trimStart().charAt(0)))
-                .split("").length;
+                .slice(0, text.indexOf(text.trimStart()[0]))
+                .length;
 
-            const previousSpaces = Math.floor(previousIndentIndex / previousIndent.width);
+            const previousSpaces = Math.floor(previousIndentIndex / previousWidth);
 
             const transaction = editorView.state.update({
                 changes: {
@@ -118,12 +111,12 @@
                     insert:
                         selectedIndentUnit === "spaces"
                             ? " ".repeat(
-                                  previousIndent.unit === "spaces"
+                                  previousUnit === "spaces"
                                       ? selectedIndentWidth * previousSpaces
                                       : previousIndentIndex * selectedIndentWidth
                               ) + text.trimStart()
                             : "\t".repeat(
-                                  previousIndent.unit === "spaces"
+                                  previousUnit === "spaces"
                                       ? previousSpaces
                                       : previousIndentIndex
                               ) + text.trimStart()
@@ -196,12 +189,7 @@
                     setEditorIndentation();
 
                     if (convertIndent) {
-                        replaceIndentation({
-                            previousIndent: {
-                                width: prevWidth,
-                                unit: prevUnit
-                            }
-                        });
+                        replaceIndentation(prevUnit, prevWidth);
                     }
 
                     return Close.yes;
