@@ -54,7 +54,7 @@
     };
 </script>
 
-<div
+<button
     class="tab flex row center space-between"
     class:active={isActive}
     class:rename-state={isInRenamingState}
@@ -78,7 +78,7 @@
     {/if}
 
     {#if !isReadonly && closeable}
-        <span class="close-icon flex center" on:click={onClose}>
+        <button class="close-icon flex center" on:click={onClose}>
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" class="icon">
                 <title>Close Icon</title>
                 <path
@@ -87,9 +87,9 @@
                     d="M3.72 3.72a.75.75 0 011.06 0L8 6.94l3.22-3.22a.75.75 0 111.06 1.06L9.06 8l3.22 3.22a.75.75 0 11-1.06 1.06L8 9.06l-3.22 3.22a.75.75 0 01-1.06-1.06L6.94 8 3.72 4.78a.75.75 0 010-1.06z"
                 />
             </svg>
-        </span>
+        </button>
     {/if}
-</div>
+</button>
 
 <style lang="scss">
     .tab {
@@ -97,7 +97,9 @@
         cursor: pointer;
         user-select: none;
         flex-grow: 0.25;
+        padding: 0;
         border: 1px solid var(--color-bg2);
+        border-radius: 0;
         border-bottom-color: transparent;
         border-left-color: transparent;
         @include transition(border-color, background-color);
@@ -125,6 +127,8 @@
 
         .close-icon {
             border-radius: $border-radius;
+            border: none;
+            background-color: initial;
             height: 100%;
             width: 2rem;
             margin-right: 0.25rem;
