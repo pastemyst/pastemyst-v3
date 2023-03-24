@@ -9,7 +9,7 @@
     } from "$lib/api/paste";
     import { addBaseCommands, Close, setTempCommands, type Command } from "$lib/command";
     import PasteOptions from "$lib/PasteOptions.svelte";
-    import { cmdPalOpen } from "$lib/stores";
+    import { cmdPalOpen, creatingPasteStore } from "$lib/stores";
     import TabbedEditor from "$lib/TabbedEditor.svelte";
     import type TabData from "$lib/TabData";
     import { onMount } from "svelte";
@@ -88,6 +88,8 @@
         const paste = await createPaste(pasteSkeleton);
 
         // TODO: handle if creating paste failed.
+
+        $creatingPasteStore = true;
 
         goto(`/${paste?.id}`);
     };

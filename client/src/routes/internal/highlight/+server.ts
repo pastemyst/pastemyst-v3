@@ -14,6 +14,12 @@ export const POST: RequestHandler = async ({ request }: RequestEvent) => {
 const highlight = async (content: string, language: string) => {
     if (!highlighter) await initHighlighter();
 
+    const lang = (await getLangs()).find(l => l.name === language);
+
+    if (!lang || !lang.tmScope || lang.tmScope === "none") {
+        return highlighter.codeToHtml(content, {});
+    }
+
     return highlighter.codeToHtml(content, {
         lang: language
     });

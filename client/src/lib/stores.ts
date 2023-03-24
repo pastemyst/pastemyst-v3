@@ -11,3 +11,5 @@ export const activePastesStores = writable(0);
 export const cmdPalOpen = writable(false);
 
 export const themeStore = writable(themes[0]);
+
+export const creatingPasteStore = writable(false);
