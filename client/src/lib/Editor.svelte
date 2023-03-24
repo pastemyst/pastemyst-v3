@@ -41,7 +41,7 @@
         (async () => {
             langs = await getLangs();
 
-            const textLang = langs.find(l => l.name === "Text");
+            const textLang = langs.find((l) => l.name === "Text");
             selectedLanguage = textLang ?? langs[0];
         })();
 
