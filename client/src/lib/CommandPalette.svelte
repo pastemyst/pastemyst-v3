@@ -246,6 +246,8 @@
     const onCmdMouseUp = () => {
         selectedCommand = undefined;
         isCommandSelected = false;
+
+        searchElement?.focus();
     };
 </script>
 
