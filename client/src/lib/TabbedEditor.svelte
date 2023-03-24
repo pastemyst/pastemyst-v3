@@ -5,6 +5,7 @@
     import Editor from "./Editor.svelte";
     import TabData from "./TabData";
     import { getLangs } from "./api/lang";
+    import { beforeNavigate } from "$app/navigation";
 
     export let tabs: TabData[] = new Array<TabData>();
     export let activeTab: TabData | undefined = undefined;
@@ -19,6 +20,15 @@
     let activeTabId = 0;
 
     let isDragedOver = false;
+
+    beforeNavigate((navigation) => {
+        if (hasModifiedTabs()) {
+            // TODO: custom alert
+            if (!confirm("you have modified content, are you sure you want to leave the current page?")) {
+                navigation.cancel();
+            }
+        }
+    });
 
     onMount(async () => {
         Sortable.create(tabGroupElement, {
@@ -48,7 +58,7 @@
 
         // ask if it's okay to close a non empty tab
         if (tabs[idx].editor.getContent().length > 0) {
-            if (!confirm("Are you sure you want to close a non-empty tab?")) {
+            if (!confirm("are you sure you want to close a non-empty tab?")) {
                 return;
             }
         }
