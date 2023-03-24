@@ -33,14 +33,16 @@
 
     let previewEnabled = false;
     let currentPreviewContent: string;
-    let langSupported = false;
+    let langSupported = true;
 
     let langs: Language[];
 
     onMount(() => {
         (async () => {
             langs = await getLangs();
-            selectedLanguage = langs[0];
+
+            const textLang = langs.find((l) => l.name === "Text");
+            selectedLanguage = textLang ?? langs[0];
         })();
 
         const editorUpdateListener = EditorView.updateListener.of((update) => {

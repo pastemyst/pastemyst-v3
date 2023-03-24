@@ -6,6 +6,7 @@
     import TabData from "./TabData";
     import { getLangs } from "./api/lang";
     import { beforeNavigate } from "$app/navigation";
+    import { creatingPasteStore } from "./stores";
 
     export let tabs: TabData[] = new Array<TabData>();
     export let activeTab: TabData | undefined = undefined;
@@ -22,6 +23,11 @@
     let isDragedOver = false;
 
     beforeNavigate((navigation) => {
+        if ($creatingPasteStore) {
+            $creatingPasteStore = false;
+            return;
+        }
+
         if (
             hasModifiedTabs() &&
             !confirm("you have modified content, are you sure you want to leave the current page?")
