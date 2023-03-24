@@ -22,11 +22,11 @@
     let isDragedOver = false;
 
     beforeNavigate((navigation) => {
-        if (hasModifiedTabs()) {
-            // TODO: custom alert
-            if (!confirm("you have modified content, are you sure you want to leave the current page?")) {
-                navigation.cancel();
-            }
+        if (
+            hasModifiedTabs() &&
+            !confirm("you have modified content, are you sure you want to leave the current page?")
+        ) {
+            navigation.cancel();
         }
     });
 
