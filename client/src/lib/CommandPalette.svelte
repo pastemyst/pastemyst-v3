@@ -319,11 +319,9 @@
 
 <style lang="scss">
     .palette-bg {
+        background-color: rgba(11, 11, 11, 0.7);
         position: absolute;
-        top: 0;
-        left: 50%;
-        transform: translateX(-50%);
-        width: 90%;
+        inset: 0;
         font-size: $fs-normal;
         overflow: hidden;
         z-index: 999;
@@ -339,7 +337,8 @@
 
     .palette {
         background-color: var(--color-bg);
-        max-width: 40rem;
+        max-width: 90%;
+        width: 40rem;
         margin: 0 auto;
         border-radius: $border-radius;
         border: 1px solid var(--color-bg2);
