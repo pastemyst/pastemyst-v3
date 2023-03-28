@@ -53,6 +53,7 @@ builder.Services.AddScoped<IImageService, ImageService>();
 builder.Services.AddScoped<IUserProvider, UserProvider>();
 builder.Services.AddScoped<IOAuthService, OAuthService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddScoped<IUserContext, UserContext>();
 builder.Services.AddScoped<IUserSettingsService, UserSettingsService>();
 builder.Services.AddScoped<IPastyService, PastyService>();
 builder.Services.AddScoped<IPasteService, PasteService>();
@@ -78,6 +79,7 @@ var app = builder.Build();
 app.UseHttpLogging();
 
 app.UseMiddleware<ExceptionMiddleware>();
+app.UseMiddleware<UserContextMiddleware>();
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())

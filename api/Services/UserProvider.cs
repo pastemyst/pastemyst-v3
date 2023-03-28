@@ -21,15 +21,13 @@ public interface IUserProvider
 
 public class UserProvider : IUserProvider
 {
-    private readonly IAuthService _authService;
-    private readonly IHttpContextAccessor _contextAccessor;
+    private readonly IUserContext _userContext;
     private readonly DataContext _dbContext;
 
-    public UserProvider(DataContext dbContext, IAuthService authService, IHttpContextAccessor contextAccessor)
+    public UserProvider(DataContext dbContext, IUserContext userContext)
     {
         _dbContext = dbContext;
-        _authService = authService;
-        _contextAccessor = contextAccessor;
+        _userContext = userContext;
     }
 
     public async Task<User> GetByUsernameOrIdAsync(string username, string id)
@@ -61,18 +59,17 @@ public class UserProvider : IUserProvider
 
     public async Task<Page<Paste>> GetOwnedPastesAsync(string username, bool pinnedOnly, PageRequest pageRequest)
     {
-        var self = await _authService.GetSelfAsync(_contextAccessor.HttpContext);
         var user = await GetByUsernameAsync(username);
 
         // If not showing only pinned pastes, and show all pastes is disabled, return an empty list.
-        if (!pinnedOnly && self != user && !user.Settings.ShowAllPastesOnProfile)
+        if (!pinnedOnly && _userContext.Self != user && !user.Settings.ShowAllPastesOnProfile)
         {
             return new Page<Paste>();
         }
 
         var pastesQuery = _dbContext.Pastes
             .Where(p => p.Owner == user) // check owner
-            .Where(p => !p.Private || p.Owner == self) // only get private if self is owner
+            .Where(p => !p.Private || p.Owner == _userContext.Self) // only get private if self is owner
             .Where(p => !pinnedOnly || p.Pinned); // if pinnedOnly, make sure all pasted are pinned
         
         var pastes = pastesQuery.OrderBy(p => p.CreatedAt)
@@ -97,14 +94,12 @@ public class UserProvider : IUserProvider
 
     public async Task<List<string>> GetTagsAsync(string username)
     {
-        var self = await _authService.GetSelfAsync(_contextAccessor.HttpContext);
-
-        if (self is null)
-            throw new HttpException(HttpStatusCode.Unauthorized, "You must be authorized to fetch your tags.");
+        if (!_userContext.IsLoggedIn())
+            throw new HttpException(HttpStatusCode.Unauthorized, "You must be authorized to get your own tags.");
         
         var user = await GetByUsernameAsync(username);
 
-        if (self != user)
+        if (_userContext.Self != user)
             throw new HttpException(HttpStatusCode.Unauthorized, "You can only fetch your own tags.");
 
         return _dbContext.Pastes
