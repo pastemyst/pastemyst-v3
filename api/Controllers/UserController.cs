@@ -36,4 +36,10 @@ public class UserController : ControllerBase
     {
         return await _userProvider.GetOwnedPastesAsync(username, true, pageRequest);
     }
+
+    [HttpGet("{username}/tags")]
+    public async Task<List<string>> GetUserTags(string username)
+    {
+        return await _userProvider.GetTagsAsync(username);
+    }
 }

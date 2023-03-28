@@ -1,6 +1,7 @@
-using System.Linq.Expressions;
+using System.Net;
 using Microsoft.EntityFrameworkCore;
 using pastemyst.DbContexts;
+using pastemyst.Exceptions;
 using pastemyst.Models;
 
 namespace pastemyst.Services;
@@ -14,6 +15,8 @@ public interface IUserProvider
     public Task<bool> ExistsByUsernameAsync(string username);
 
     public Task<Page<Paste>> GetOwnedPastesAsync(string username, bool pinnedOnly, PageRequest pageRequest);
+
+    public Task<List<string>> GetTagsAsync(string username);
 }
 
 public class UserProvider : IUserProvider
@@ -90,5 +93,25 @@ public class UserProvider : IUserProvider
             HasNextPage = pageRequest.Page < totalPages - 1,
             TotalPages = totalPages
         };
+    }
+
+    public async Task<List<string>> GetTagsAsync(string username)
+    {
+        var self = await _authService.GetSelfAsync(_contextAccessor.HttpContext);
+
+        if (self is null)
+            throw new HttpException(HttpStatusCode.Unauthorized, "You must be authorized to fetch your tags.");
+        
+        var user = await GetByUsernameAsync(username);
+
+        if (self != user)
+            throw new HttpException(HttpStatusCode.Unauthorized, "You can only fetch your own tags.");
+
+        return _dbContext.Pastes
+            .Where(p => p.Owner == user)
+            .ToList()
+            .SelectMany(p => p.Tags ?? new List<string>())
+            .Distinct()
+            .ToList();
     }
 }

@@ -94,7 +94,7 @@ public class PasteService : IPasteService
             Owner = createInfo.Anonymous ? null : user,
             Private = createInfo.Private,
             Pinned = createInfo.Pinned,
-            Tags = createInfo.Tags.Select(t => t.Trim()).ToList(),
+            Tags = createInfo.Tags.Select(t => t.Trim()).Where(s => !string.IsNullOrEmpty(s)).ToList(),
             Pasties = new List<Pasty>()
         };
 
@@ -304,7 +304,7 @@ public class PasteService : IPasteService
         }
 
         paste.Pinned = !paste.Pinned;
-        
+
         _dbContext.Pastes.Attach(paste);
         _dbContext.Pastes.Entry(paste).Property(p => p.Pinned).IsModified = true;
         await _dbContext.SaveChangesAsync();
