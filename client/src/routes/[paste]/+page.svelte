@@ -292,7 +292,7 @@
     {#each data.langStats as lang}
         <div
             class="lang"
-            style="width:{lang.percentage}%; background-color:{lang.language.color};"
+            style="width:{lang.percentage}%; background-color:{lang.language.color ?? 'var(--color-fg)'};"
             use:tooltip
             aria-label="{lang.language.name} {lang.percentage.toFixed(2)}%"
         />

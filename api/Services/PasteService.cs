@@ -74,6 +74,16 @@ public class PasteService : IPasteService
                     "Can't create a private anonymous paste.");
         }
 
+        switch (createInfo.Tags.Count != 0)
+        {
+            case true when user is null:
+                throw new HttpException(HttpStatusCode.Unauthorized,
+                    "Can't create a tagged paste while unauthorized.");
+            case true when createInfo.Anonymous:
+                throw new HttpException(HttpStatusCode.BadRequest,
+                    "Can't create a tagged anonymous paste.");
+        }
+
         var paste = new Paste
         {
             Id = await _idProvider.GenerateId(async id => await ExistsByIdAsync(id)),
@@ -84,6 +94,7 @@ public class PasteService : IPasteService
             Owner = createInfo.Anonymous ? null : user,
             Private = createInfo.Private,
             Pinned = createInfo.Pinned,
+            Tags = createInfo.Tags.Select(t => t.Trim()).ToList(),
             Pasties = new List<Pasty>()
         };
 

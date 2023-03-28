@@ -24,6 +24,8 @@ public class Paste
     
     public bool Pinned { get; set; }
 
+    public List<string> Tags { get; set; } = new();
+
     [JsonIgnore] public List<User> Stars { get; set; } = new();
 
     [JsonPropertyName("stars")] public int StarsCount => Stars.Count;
