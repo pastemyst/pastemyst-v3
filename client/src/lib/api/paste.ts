@@ -55,6 +55,7 @@ export interface PasteCreateInfo {
     anonymous: boolean;
     private: boolean;
     pinned: boolean;
+    tags: string[];
 }
 
 export interface PastyCreateInfo {

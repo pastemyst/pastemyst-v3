@@ -9,14 +9,17 @@
     } from "$lib/api/paste";
     import { addBaseCommands, Close, setTempCommands, type Command } from "$lib/command";
     import PasteOptions from "$lib/PasteOptions.svelte";
-    import { cmdPalOpen, creatingPasteStore } from "$lib/stores";
+    import { cmdPalOpen, creatingPasteStore, currentUserStore } from "$lib/stores";
     import TabbedEditor from "$lib/TabbedEditor.svelte";
     import type TabData from "$lib/TabData";
+    import TagInput from "$lib/TagInput.svelte";
     import { onMount } from "svelte";
 
     export let selectedExpiresIn = ExpiresIn.never;
 
     let title: string;
+
+    let tags: string[];
 
     let tabs: TabData[];
     let activeTab: TabData | undefined;
@@ -82,7 +85,8 @@
             pasties: pasties,
             anonymous: anonymous,
             private: isPrivate,
-            pinned: pinned
+            pinned: pinned,
+            tags: tags
         };
 
         const paste = await createPaste(pasteSkeleton);
@@ -140,6 +144,10 @@
     </button>
 </div>
 
+{#if $currentUserStore}
+    <TagInput bind:tags />
+{/if}
+
 <TabbedEditor bind:tabs bind:activeTab />
 
 <div class="paste-options">
@@ -149,7 +157,7 @@
 <style lang="scss">
     .title-input {
         margin-top: 2rem;
-        margin-bottom: 2rem;
+        margin-bottom: 1rem;
 
         input {
             width: 100%;
