@@ -3,6 +3,7 @@
     import { tooltip } from "./tooltips";
 
     export let tags: string[] = [];
+    export let existingTags: string[];
 
     let addingTag = false;
 
@@ -70,7 +71,13 @@
             bind:value={newTag}
             on:blur={onTagInputBlur}
             on:keydown={onTagInputKeyPress}
+            list="taglist"
         />
+        <datalist id="taglist">
+            {#each existingTags as tag}
+                <option value={tag}>{tag}</option>
+            {/each}
+        </datalist>
     {/if}
 
     <button

@@ -14,6 +14,9 @@
     import type TabData from "$lib/TabData";
     import TagInput from "$lib/TagInput.svelte";
     import { onMount } from "svelte";
+    import type { PageData } from "./$types";
+
+    export let data: PageData;
 
     export let selectedExpiresIn = ExpiresIn.never;
 
@@ -145,7 +148,7 @@
 </div>
 
 {#if $currentUserStore}
-    <TagInput bind:tags />
+    <TagInput bind:tags existingTags={data.userTags} />
 {/if}
 
 <TabbedEditor bind:tabs bind:activeTab />
