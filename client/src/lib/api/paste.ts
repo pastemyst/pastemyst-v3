@@ -26,6 +26,7 @@ export interface Paste {
     private: boolean;
     pinned: boolean;
     stars: number;
+    tags: string[];
 }
 
 export interface Pasty {
@@ -219,8 +220,8 @@ export const getUserPastes = async (
 ): Promise<Page<Paste> | null> => {
     const res = await fetchFunc(
         `${PUBLIC_API_BASE}/users/${username}/pastes${pinned ? "/pinned" : ""}` +
-            `?page=${page}` +
-            `&pageSize=${pageSize}`,
+        `?page=${page}` +
+        `&pageSize=${pageSize}`,
         {
             method: "get",
             credentials: "include"

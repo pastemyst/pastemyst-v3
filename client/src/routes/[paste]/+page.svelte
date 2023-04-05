@@ -6,6 +6,7 @@
     import { tooltip } from "$lib/tooltips";
     import { currentUserStore } from "$lib/stores";
     import { goto } from "$app/navigation";
+    import { each } from "svelte/internal";
 
     export let data: PageData;
 
@@ -292,12 +293,21 @@
     {#each data.langStats as lang}
         <div
             class="lang"
-            style="width:{lang.percentage}%; background-color:{lang.language.color ?? 'var(--color-fg)'};"
+            style="width:{lang.percentage}%; background-color:{lang.language.color ??
+                'var(--color-fg)'};"
             use:tooltip
             aria-label="{lang.language.name} {lang.percentage.toFixed(2)}%"
         />
     {/each}
 </div>
+
+{#if data.paste.tags}
+    <div class="tags flex row center">
+        {#each data.paste.tags as tag}
+            <a href="/~{data.self?.username}/{tag}" class="btn">{tag}</a>
+        {/each}
+    </div>
+{/if}
 
 <div class="pasties">
     {#if stackedView}
@@ -418,7 +428,7 @@
 
     .lang-stats {
         height: 5px;
-        margin-bottom: 2rem;
+        margin-bottom: 1rem;
 
         .lang {
             border-right: 2px solid var(--color-bg);
@@ -434,7 +444,15 @@
         }
     }
 
+    .tags {
+        font-size: $fs-small;
+        gap: 0.5rem;
+        flex-wrap: wrap;
+    }
+
     .pasties {
+        margin-top: 1rem;
+
         .tabs {
             width: 100%;
             box-sizing: border-box;
