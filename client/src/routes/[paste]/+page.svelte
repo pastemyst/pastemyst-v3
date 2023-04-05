@@ -6,7 +6,6 @@
     import { tooltip } from "$lib/tooltips";
     import { currentUserStore } from "$lib/stores";
     import { goto } from "$app/navigation";
-    import { each } from "svelte/internal";
 
     export let data: PageData;
 
