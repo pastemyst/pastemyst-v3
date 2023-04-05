@@ -6,7 +6,10 @@ import type { Paste } from "$lib/api/paste";
 import { error } from "@sveltejs/kit";
 import { PUBLIC_API_BASE } from "$env/static/public";
 
-export const load: PageLoad = async ({ params, fetch }) => {
+export const load: PageLoad = async ({ params, url, fetch }) => {
+    const tag: string | null = url.searchParams.get("tag");
+    const tagQuery = tag == null ? "" : "&tag=" + tag;
+
     const userRes = await fetch(`${PUBLIC_API_BASE}/users/${params.user}`, {
         method: "get"
     });
@@ -16,7 +19,7 @@ export const load: PageLoad = async ({ params, fetch }) => {
         credentials: "include"
     });
 
-    const userPastesRes = await fetch(`${PUBLIC_API_BASE}/users/${params.user}/pastes?pageSize=5`, {
+    const userPastesRes = await fetch(`${PUBLIC_API_BASE}/users/${params.user}/pastes?pageSize=5${tagQuery}`, {
         method: "get",
         credentials: "include"
     });
@@ -44,9 +47,20 @@ export const load: PageLoad = async ({ params, fetch }) => {
             isCurrentUser = loggedInUser.id === user.id;
         }
 
-        if (userPastesRes.ok && userPinnedPastesRes.ok) {
+        if (userPastesRes.ok) {
             pastes = await userPastesRes.json();
-            pinnedPastes = await userPinnedPastesRes.json();
+
+            if (tag) {
+                pinnedPastes = {
+                    items: [],
+                    totalPages: 0,
+                    currentPage: 0,
+                    hasNextPage: false,
+                    pageSize: 5
+                };
+            } else {
+                pinnedPastes = await userPinnedPastesRes.json();
+            }
         } else {
             throw error(userPastesRes.status);
         }
@@ -59,7 +73,8 @@ export const load: PageLoad = async ({ params, fetch }) => {
             relativeJoined: relativeJoined,
             pastes: pastes,
             pinnedPastes: pinnedPastes,
-            tags: tags
+            tags: tags,
+            tag: tag
         };
     } else {
         throw error(userRes.status);

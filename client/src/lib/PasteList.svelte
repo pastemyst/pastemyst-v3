@@ -60,7 +60,7 @@
                 <p class="title">
                     {paste.title || "untitled"}
                     {#if paste.tags?.length > 0}
-                        <span class="tags">{paste.tags.join(", ")}</span>
+                        <span>{paste.tags.join(", ")}</span>
                     {/if}
                 </p>
 

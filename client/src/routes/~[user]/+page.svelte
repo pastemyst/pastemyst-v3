@@ -113,20 +113,40 @@
             </div>
         </section>
 
-        <details class="tags">
+        <details class="tags" open={data.tag !== null}>
             <summary class="flex row center">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" class="icon">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" class="icon chevron">
                     <path
                         fill="currentColor"
                         d="M6.22 3.22a.75.75 0 0 1 1.06 0l4.25 4.25a.75.75 0 0 1 0 1.06l-4.25 4.25a.751.751 0 0 1-1.042-.018.751.751 0 0 1-.018-1.042L9.94 8 6.22 4.28a.75.75 0 0 1 0-1.06Z"
                     />
                 </svg>
                 <span class="summary-title">tags</span>
+
+                {#if data.tag}
+                    <a
+                        href="/~{data.self?.username}"
+                        class="btn btn-icon clear-tag-filter btn-danger"
+                        aria-label="clear the tag filter"
+                        use:tooltip
+                    >
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" class="icon">
+                            <path
+                                fill="currentColor"
+                                d="M3.72 3.72a.75.75 0 0 1 1.06 0L8 6.94l3.22-3.22a.749.749 0 0 1 1.275.326.749.749 0 0 1-.215.734L9.06 8l3.22 3.22a.749.749 0 0 1-.326 1.275.749.749 0 0 1-.734-.215L8 9.06l-3.22 3.22a.751.751 0 0 1-1.042-.018.751.751 0 0 1-.018-1.042L6.94 8 3.72 4.78a.75.75 0 0 1 0-1.06Z"
+                            />
+                        </svg>
+                    </a>
+                {/if}
             </summary>
 
             <div class="tags-wrapper">
                 {#each data.tags as tag}
-                    <a href="/~{data.self?.username}/{tag}" class="btn">{tag}</a>
+                    <a
+                        href="/~{data.self?.username}?tag={tag}"
+                        class="btn"
+                        class:active={tag == data.tag}>{tag}</a
+                    >
                 {/each}
             </div>
         </details>
@@ -135,7 +155,7 @@
     <div class="pastes">
         {#if data.pinnedPastes.items.length > 0}
             <section>
-                <h3>pinned pastes</h3>
+                <h3>pinned</h3>
 
                 <PasteList pastes={data.pinnedPastes} user={data.user} pinned />
             </section>
@@ -143,7 +163,7 @@
 
         {#if data.pinnedPastes.items.length == 0 || data.pastes.items.length > 0}
             <section>
-                <h3>public pastes</h3>
+                <h3>pastes</h3>
 
                 <PasteList pastes={data.pastes} user={data.user} />
             </section>
@@ -247,9 +267,15 @@
                 display: none;
             }
 
-            .icon {
+            .chevron {
                 margin-right: 0.5rem;
                 @include transition(transform);
+            }
+
+            .clear-tag-filter {
+                margin-top: 0;
+                margin-left: auto;
+                padding: 0;
             }
         }
 
@@ -260,6 +286,10 @@
         a {
             margin-top: 0.5rem;
             background-color: var(--color-bg);
+
+            &.active {
+                border-color: var(--color-primary);
+            }
         }
     }
 

@@ -14,7 +14,7 @@ public interface IUserProvider
 
     public Task<bool> ExistsByUsernameAsync(string username);
 
-    public Task<Page<Paste>> GetOwnedPastesAsync(string username, bool pinnedOnly, PageRequest pageRequest);
+    public Task<Page<Paste>> GetOwnedPastesAsync(string username, string tag, bool pinnedOnly, PageRequest pageRequest);
 
     public Task<List<string>> GetTagsAsync(string username);
 }
@@ -57,7 +57,7 @@ public class UserProvider : IUserProvider
         return await GetByUsernameAsync(username) is not null;
     }
 
-    public async Task<Page<Paste>> GetOwnedPastesAsync(string username, bool pinnedOnly, PageRequest pageRequest)
+    public async Task<Page<Paste>> GetOwnedPastesAsync(string username, string tag, bool pinnedOnly, PageRequest pageRequest)
     {
         var user = await GetByUsernameAsync(username);
 
@@ -71,6 +71,16 @@ public class UserProvider : IUserProvider
             .Where(p => p.Owner == user) // check owner
             .Where(p => !p.Private || p.Owner == _userContext.Self) // only get private if self is owner
             .Where(p => !pinnedOnly || p.Pinned); // if pinnedOnly, make sure all pasted are pinned
+
+        if (tag is not null)
+        {
+            if (_userContext.Self != user)
+            {
+                throw new HttpException(HttpStatusCode.Unauthorized, "You must be authorized to view paste tags.");
+            }
+
+            pastesQuery = pastesQuery.Where(p => p.Tags.Contains(tag));
+        }
 
         var pastes = pastesQuery.OrderBy(p => p.CreatedAt)
             .Reverse()
