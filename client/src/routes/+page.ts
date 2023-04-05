@@ -12,5 +12,5 @@ export const load: PageLoad = async ({ fetch }) => {
 
     return {
         userTags: tags
-    }
+    };
 };

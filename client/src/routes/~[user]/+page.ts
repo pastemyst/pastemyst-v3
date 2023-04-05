@@ -19,10 +19,13 @@ export const load: PageLoad = async ({ params, url, fetch }) => {
         credentials: "include"
     });
 
-    const userPastesRes = await fetch(`${PUBLIC_API_BASE}/users/${params.user}/pastes?pageSize=5${tagQuery}`, {
-        method: "get",
-        credentials: "include"
-    });
+    const userPastesRes = await fetch(
+        `${PUBLIC_API_BASE}/users/${params.user}/pastes?pageSize=5${tagQuery}`,
+        {
+            method: "get",
+            credentials: "include"
+        }
+    );
 
     const userPinnedPastesRes = await fetch(
         `${PUBLIC_API_BASE}/users/${params.user}/pastes/pinned?pageSize=5`,

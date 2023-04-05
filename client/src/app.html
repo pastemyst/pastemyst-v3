@@ -1,33 +1,35 @@
 <!DOCTYPE html>
 <html lang="en">
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <meta
+            name="description"
+            content="a powerful website for storing and sharing text and code snippets. completely free and open source."
+        />
 
-<head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="description"
-        content="a powerful website for storing and sharing text and code snippets. completely free and open source." />
+        <meta name="themecolor" content="#ee720d" />
 
-    <meta name="themecolor" content="#ee720d" />
+        <meta name="og:title" content="pastemyst" />
+        <meta name="og:image" content="%sveltekit.assets%/images/pastemyst.png" />
+        <meta name="twitter:title" content="pastemyst" />
+        <meta name="twitter:image" content="%sveltekit.assets%/images/pastemyst.png" />
 
-    <meta name="og:title" content="pastemyst" />
-    <meta name="og:image" content="%sveltekit.assets%/images/pastemyst.png" />
-    <meta name="twitter:title" content="pastemyst" />
-    <meta name="twitter:image" content="%sveltekit.assets%/images/pastemyst.png" />
+        <link rel="shortcut icon" href="%sveltekit.assets%/favicon.ico" />
 
-    <link rel="shortcut icon" href="%sveltekit.assets%/favicon.ico" />
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+        <link
+            href="https://fonts.googleapis.com/css2?family=Ubuntu+Mono:ital,wght@0,400;0,700;1,400;1,700&display=swap"
+            rel="stylesheet"
+        />
 
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Ubuntu+Mono:ital,wght@0,400;0,700;1,400;1,700&display=swap"
-        rel="stylesheet" />
+        <title>pastemyst</title>
 
-    <title>pastemyst</title>
+        %sveltekit.head%
+    </head>
 
-    %sveltekit.head%
-</head>
-
-<body data-sveltekit-preload-data="hover">
-    <div style="display: contents">%sveltekit.body%</div>
-</body>
-
+    <body data-sveltekit-preload-data="hover">
+        <div style="display: contents">%sveltekit.body%</div>
+    </body>
 </html>
