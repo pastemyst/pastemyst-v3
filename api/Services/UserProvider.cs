@@ -71,7 +71,7 @@ public class UserProvider : IUserProvider
             .Where(p => p.Owner == user) // check owner
             .Where(p => !p.Private || p.Owner == _userContext.Self) // only get private if self is owner
             .Where(p => !pinnedOnly || p.Pinned); // if pinnedOnly, make sure all pasted are pinned
-        
+
         var pastes = pastesQuery.OrderBy(p => p.CreatedAt)
             .Reverse()
             .Include(p => p.Pasties)
@@ -81,6 +81,11 @@ public class UserProvider : IUserProvider
 
         var totalItems = pastesQuery.Count();
         var totalPages = (int)Math.Ceiling((float)totalItems / pageRequest.PageSize);
+
+        if (_userContext.Self != user)
+        {
+            pastes.ForEach(p => p.Tags = new());
+        }
 
         return new Page<Paste>
         {
@@ -96,7 +101,7 @@ public class UserProvider : IUserProvider
     {
         if (!_userContext.IsLoggedIn())
             throw new HttpException(HttpStatusCode.Unauthorized, "You must be authorized to get your own tags.");
-        
+
         var user = await GetByUsernameAsync(username);
 
         if (_userContext.Self != user)
