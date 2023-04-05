@@ -57,7 +57,12 @@
     {#each pastes.items as paste}
         <a href="/{paste.id}" class="paste btn">
             <div class="flex row center space-between">
-                <p class="title">{paste.title || "untitled"}</p>
+                <p class="title">
+                    {paste.title || "untitled"}
+                    {#if paste.tags?.length > 0}
+                        <span>{paste.tags.join(", ")}</span>
+                    {/if}
+                </p>
 
                 <div>
                     {#if paste.private}

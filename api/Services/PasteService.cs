@@ -35,28 +35,24 @@ public class PasteService : IPasteService
     private readonly IIdProvider _idProvider;
     private readonly ILanguageProvider _languageProvider;
     private readonly IPastyService _pastyService;
-    private readonly IAuthService _authService;
+    private readonly IUserContext _userContext;
     private readonly DataContext _dbContext;
-    private readonly IHttpContextAccessor _contextAccessor;
 
     public PasteService(IIdProvider idProvider, DataContext dbContext, ILanguageProvider languageProvider,
-        IPastyService pastyService, IAuthService authService, IHttpContextAccessor contextAccessor)
+        IPastyService pastyService, IUserContext userContext)
     {
         _idProvider = idProvider;
         _dbContext = dbContext;
         _languageProvider = languageProvider;
         _pastyService = pastyService;
-        _authService = authService;
-        _contextAccessor = contextAccessor;
+        _userContext = userContext;
     }
 
     public async Task<Paste> CreateAsync(PasteCreateInfo createInfo)
     {
-        var user = await _authService.GetSelfAsync(_contextAccessor.HttpContext);
-
         switch (createInfo.Pinned)
         {
-            case true when user is null:
+            case true when !_userContext.IsLoggedIn():
                 throw new HttpException(HttpStatusCode.Unauthorized,
                     "Can't create a pinned paste while unauthorized.");
             case true when createInfo.Private || createInfo.Anonymous:
@@ -66,12 +62,22 @@ public class PasteService : IPasteService
 
         switch (createInfo.Private)
         {
-            case true when user is null:
+            case true when !_userContext.IsLoggedIn():
                 throw new HttpException(HttpStatusCode.Unauthorized,
                     "Can't create a private paste while unauthorized.");
             case true when createInfo.Anonymous:
                 throw new HttpException(HttpStatusCode.BadRequest,
                     "Can't create a private anonymous paste.");
+        }
+
+        switch (createInfo.Tags.Count != 0)
+        {
+            case true when !_userContext.IsLoggedIn():
+                throw new HttpException(HttpStatusCode.Unauthorized,
+                    "Can't create a tagged paste while unauthorized.");
+            case true when createInfo.Anonymous:
+                throw new HttpException(HttpStatusCode.BadRequest,
+                    "Can't create a tagged anonymous paste.");
         }
 
         var paste = new Paste
@@ -81,9 +87,10 @@ public class PasteService : IPasteService
             ExpiresIn = createInfo.ExpiresIn,
             DeletesAt = ExpiresInUtils.ToDeletesAt(DateTime.UtcNow, createInfo.ExpiresIn),
             Title = createInfo.Title,
-            Owner = createInfo.Anonymous ? null : user,
+            Owner = createInfo.Anonymous ? null : _userContext.Self,
             Private = createInfo.Private,
             Pinned = createInfo.Pinned,
+            Tags = createInfo.Tags.Select(t => t.Trim()).Where(s => !string.IsNullOrEmpty(s)).ToList(),
             Pasties = new List<Pasty>()
         };
 
@@ -108,8 +115,6 @@ public class PasteService : IPasteService
 
     public async Task<Paste> GetAsync(string id)
     {
-        var user = await _authService.GetSelfAsync(_contextAccessor.HttpContext);
-
         var paste = await _dbContext.Pastes
             .Include(p => p.Pasties)
             .Include(p => p.Stars)
@@ -117,8 +122,12 @@ public class PasteService : IPasteService
 
         if (paste is null) throw new HttpException(HttpStatusCode.NotFound, "Paste not found");
 
-        if (paste.Private && (user is null || user.Id != paste.Owner.Id))
+        if (paste.Private && (!_userContext.IsLoggedIn() || _userContext.Self != paste.Owner))
             throw new HttpException(HttpStatusCode.NotFound, "Paste not found");
+
+        // only the paste owner can see the tags
+        if (!_userContext.IsLoggedIn() || _userContext.Self != paste.Owner)
+            paste.Tags = new();
 
         return paste;
     }
@@ -204,14 +213,12 @@ public class PasteService : IPasteService
 
     public async Task DeleteAsync(string id)
     {
-        var user = await _authService.GetSelfAsync(_contextAccessor.HttpContext);
-
-        if (user is null)
+        if (!_userContext.IsLoggedIn())
             throw new HttpException(HttpStatusCode.Unauthorized, "You must be authorized to delete pastes.");
 
         var paste = await GetAsync(id);
 
-        if (paste.Owner is null || paste.Owner.Id != user.Id)
+        if (paste.Owner is null || paste.Owner != _userContext.Self)
         {
             // Returning not found instead of unauthorized to not expose that the paste exists.
             if (paste.Private)
@@ -226,46 +233,42 @@ public class PasteService : IPasteService
 
     public async Task<bool> IsStarredAsync(string id)
     {
-        var user = await _authService.GetSelfAsync(_contextAccessor.HttpContext);
-
-        if (user is null)
+        if (!_userContext.IsLoggedIn())
             throw new HttpException(HttpStatusCode.Unauthorized, "You must be authorized to star pastes.");
 
         var paste = await GetAsync(id);
 
-        if (paste.Owner is null || paste.Owner.Id != user.Id)
+        if (paste.Owner is null || paste.Owner != _userContext.Self)
         {
             // Returning not found instead of unauthorized to not expose that the paste exists.
             if (paste.Private)
                 throw new HttpException(HttpStatusCode.NotFound, "Paste not found.");
         }
 
-        return paste.Stars.Any(u => u.Id == user.Id);
+        return paste.Stars.Any(u => u == _userContext.Self);
     }
 
     public async Task ToggleStarAsync(string id)
     {
-        var user = await _authService.GetSelfAsync(_contextAccessor.HttpContext);
-
-        if (user is null)
+        if (!_userContext.IsLoggedIn())
             throw new HttpException(HttpStatusCode.Unauthorized, "You must be authorized to star pastes.");
 
         var paste = await GetAsync(id);
 
-        if (paste.Owner is null || paste.Owner.Id != user.Id)
+        if (paste.Owner is null || paste.Owner != _userContext.Self)
         {
             // Returning not found instead of unauthorized to not expose that the paste exists.
             if (paste.Private)
                 throw new HttpException(HttpStatusCode.NotFound, "Paste not found.");
         }
 
-        if (paste.Stars.Any(u => u.Id == user.Id))
+        if (paste.Stars.Any(u => u == _userContext.Self))
         {
-            paste.Stars.Remove(user);
+            paste.Stars.Remove(_userContext.Self);
         }
         else
         {
-            paste.Stars.Add(user);
+            paste.Stars.Add(_userContext.Self);
         }
 
         await _dbContext.SaveChangesAsync();
@@ -273,9 +276,7 @@ public class PasteService : IPasteService
 
     public async Task TogglePinnedAsync(string id)
     {
-        var self = await _authService.GetSelfAsync(_contextAccessor.HttpContext);
-
-        if (self is null)
+        if (!_userContext.IsLoggedIn())
         {
             throw new HttpException(HttpStatusCode.Unauthorized, "You must be authorized to pin/unpin pastes.");
         }
@@ -287,13 +288,13 @@ public class PasteService : IPasteService
             throw new HttpException(HttpStatusCode.BadRequest, "Only owned pastes can be pinned.");
         }
 
-        if (paste.Owner != self)
+        if (paste.Owner != _userContext.Self)
         {
             throw new HttpException(HttpStatusCode.Unauthorized, "You can only pin/unpin your own pastes.");
         }
 
         paste.Pinned = !paste.Pinned;
-        
+
         _dbContext.Pastes.Attach(paste);
         _dbContext.Pastes.Entry(paste).Property(p => p.Pinned).IsModified = true;
         await _dbContext.SaveChangesAsync();

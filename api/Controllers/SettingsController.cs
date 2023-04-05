@@ -18,9 +18,9 @@ public class SettingsController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<UserSettings> GetUserSettings()
+    public UserSettings GetUserSettings()
     {
-        return await _settingsService.GetUserSettingsAsync();
+        return _settingsService.GetUserSettings();
     }
 
     [HttpPatch]

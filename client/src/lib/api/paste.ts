@@ -26,6 +26,7 @@ export interface Paste {
     private: boolean;
     pinned: boolean;
     stars: number;
+    tags: string[];
 }
 
 export interface Pasty {
@@ -55,6 +56,7 @@ export interface PasteCreateInfo {
     anonymous: boolean;
     private: boolean;
     pinned: boolean;
+    tags: string[];
 }
 
 export interface PastyCreateInfo {

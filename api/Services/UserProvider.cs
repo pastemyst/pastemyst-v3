@@ -1,6 +1,7 @@
-using System.Linq.Expressions;
+using System.Net;
 using Microsoft.EntityFrameworkCore;
 using pastemyst.DbContexts;
+using pastemyst.Exceptions;
 using pastemyst.Models;
 
 namespace pastemyst.Services;
@@ -13,20 +14,20 @@ public interface IUserProvider
 
     public Task<bool> ExistsByUsernameAsync(string username);
 
-    public Task<Page<Paste>> GetOwnedPastesAsync(string username, bool pinnedOnly, PageRequest pageRequest);
+    public Task<Page<Paste>> GetOwnedPastesAsync(string username, string tag, bool pinnedOnly, PageRequest pageRequest);
+
+    public Task<List<string>> GetTagsAsync(string username);
 }
 
 public class UserProvider : IUserProvider
 {
-    private readonly IAuthService _authService;
-    private readonly IHttpContextAccessor _contextAccessor;
+    private readonly IUserContext _userContext;
     private readonly DataContext _dbContext;
 
-    public UserProvider(DataContext dbContext, IAuthService authService, IHttpContextAccessor contextAccessor)
+    public UserProvider(DataContext dbContext, IUserContext userContext)
     {
         _dbContext = dbContext;
-        _authService = authService;
-        _contextAccessor = contextAccessor;
+        _userContext = userContext;
     }
 
     public async Task<User> GetByUsernameOrIdAsync(string username, string id)
@@ -56,22 +57,31 @@ public class UserProvider : IUserProvider
         return await GetByUsernameAsync(username) is not null;
     }
 
-    public async Task<Page<Paste>> GetOwnedPastesAsync(string username, bool pinnedOnly, PageRequest pageRequest)
+    public async Task<Page<Paste>> GetOwnedPastesAsync(string username, string tag, bool pinnedOnly, PageRequest pageRequest)
     {
-        var self = await _authService.GetSelfAsync(_contextAccessor.HttpContext);
         var user = await GetByUsernameAsync(username);
 
         // If not showing only pinned pastes, and show all pastes is disabled, return an empty list.
-        if (!pinnedOnly && self != user && !user.Settings.ShowAllPastesOnProfile)
+        if (!pinnedOnly && _userContext.Self != user && !user.Settings.ShowAllPastesOnProfile)
         {
             return new Page<Paste>();
         }
 
         var pastesQuery = _dbContext.Pastes
             .Where(p => p.Owner == user) // check owner
-            .Where(p => !p.Private || p.Owner == self) // only get private if self is owner
+            .Where(p => !p.Private || p.Owner == _userContext.Self) // only get private if self is owner
             .Where(p => !pinnedOnly || p.Pinned); // if pinnedOnly, make sure all pasted are pinned
-        
+
+        if (tag is not null)
+        {
+            if (_userContext.Self != user)
+            {
+                throw new HttpException(HttpStatusCode.Unauthorized, "You must be authorized to view paste tags.");
+            }
+
+            pastesQuery = pastesQuery.Where(p => p.Tags.Contains(tag));
+        }
+
         var pastes = pastesQuery.OrderBy(p => p.CreatedAt)
             .Reverse()
             .Include(p => p.Pasties)
@@ -82,6 +92,11 @@ public class UserProvider : IUserProvider
         var totalItems = pastesQuery.Count();
         var totalPages = (int)Math.Ceiling((float)totalItems / pageRequest.PageSize);
 
+        if (_userContext.Self != user)
+        {
+            pastes.ForEach(p => p.Tags = new());
+        }
+
         return new Page<Paste>
         {
             Items = pastes,
@@ -90,5 +105,23 @@ public class UserProvider : IUserProvider
             HasNextPage = pageRequest.Page < totalPages - 1,
             TotalPages = totalPages
         };
+    }
+
+    public async Task<List<string>> GetTagsAsync(string username)
+    {
+        if (!_userContext.IsLoggedIn())
+            throw new HttpException(HttpStatusCode.Unauthorized, "You must be authorized to get your own tags.");
+
+        var user = await GetByUsernameAsync(username);
+
+        if (_userContext.Self != user)
+            throw new HttpException(HttpStatusCode.Unauthorized, "You can only fetch your own tags.");
+
+        return _dbContext.Pastes
+            .Where(p => p.Owner == user)
+            .ToList()
+            .SelectMany(p => p.Tags ?? new List<string>())
+            .Distinct()
+            .ToList();
     }
 }

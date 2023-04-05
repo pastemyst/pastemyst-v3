@@ -32,3 +32,14 @@ export const getUserById = async (
 
     return [null, res.status];
 };
+
+export const getUserTags = async (fetchFunc: FetchFunc, username: string): Promise<string[]> => {
+    const res = await fetchFunc(`${PUBLIC_API_BASE}/users/${username}/tags`, {
+        method: "get",
+        credentials: "include"
+    });
+
+    if (res.ok) return await res.json();
+
+    return [];
+};
