@@ -1,4 +1,4 @@
-import type { User } from "$lib/api/user";
+import { getUserTags, type User } from "$lib/api/user";
 import moment from "moment";
 import type { Page } from "$lib/api/page";
 import type { PageLoad } from "./$types";
@@ -51,12 +51,15 @@ export const load: PageLoad = async ({ params, fetch }) => {
             throw error(userPastesRes.status);
         }
 
+        const tags = await getUserTags(fetch, user.username);
+
         return {
             user: user,
             isCurrentUser: isCurrentUser,
             relativeJoined: relativeJoined,
             pastes: pastes,
-            pinnedPastes: pinnedPastes
+            pinnedPastes: pinnedPastes,
+            tags: tags
         };
     } else {
         throw error(userRes.status);
