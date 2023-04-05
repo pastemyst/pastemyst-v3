@@ -122,8 +122,12 @@ public class PasteService : IPasteService
 
         if (paste is null) throw new HttpException(HttpStatusCode.NotFound, "Paste not found");
 
-        if (paste.Private && (!_userContext.IsLoggedIn() || _userContext.Self.Id != paste.Owner.Id))
+        if (paste.Private && (!_userContext.IsLoggedIn() || _userContext.Self != paste.Owner))
             throw new HttpException(HttpStatusCode.NotFound, "Paste not found");
+
+        // only the paste owner can see the tags
+        if (!_userContext.IsLoggedIn() || _userContext.Self != paste.Owner)
+            paste.Tags = new();
 
         return paste;
     }
