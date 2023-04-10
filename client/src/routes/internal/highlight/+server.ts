@@ -1,6 +1,13 @@
 import { getLangs } from "$lib/api/lang";
 import type { RequestEvent, RequestHandler } from "@sveltejs/kit";
-import { getHighlighter, type Highlighter, loadTheme, type ILanguageRegistration, type IThemedToken, renderToHtml, type IShikiTheme } from "shiki";
+import {
+    getHighlighter,
+    type Highlighter,
+    loadTheme,
+    type ILanguageRegistration,
+    type IThemedToken,
+    type IShikiTheme
+} from "shiki";
 import { readFileSync } from "fs";
 
 let highlighter: Highlighter;
@@ -21,7 +28,7 @@ const highlight = async (content: string, language: string) => {
     let tokens: IThemedToken[][];
 
     if (!lang || !lang.tmScope || lang.tmScope === "none") {
-        tokens = highlighter.codeToThemedTokens(content, '');
+        tokens = highlighter.codeToThemedTokens(content, "");
     } else {
         tokens = highlighter.codeToThemedTokens(content, language);
     }
@@ -84,13 +91,18 @@ const tokensToHtml = (tokens: IThemedToken[][], theme: IShikiTheme): string => {
 };
 
 const escapeHtml = (html: string): string => {
-    return html.replace(/[&<>"']/g, c => {
+    return html.replace(/[&<>"']/g, (c) => {
         switch (c) {
-            case '&': return "&amp;";
-            case '<': return "&lt;";
-            case '>': return "&gt;";
-            case '"': return "&quot;";
-            case "'": return "&#39;";
+            case "&":
+                return "&amp;";
+            case "<":
+                return "&lt;";
+            case ">":
+                return "&gt;";
+            case '"':
+                return "&quot;";
+            case "'":
+                return "&#39;";
         }
 
         return c;
