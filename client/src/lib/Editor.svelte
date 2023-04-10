@@ -331,12 +331,12 @@
             @include transition();
 
             &:hover {
-                background-color: var(--color-bg2);
+                background-color: var(--color-bg1);
                 border-color: var(--color-bg3);
 
                 :global(.cm-gutter),
                 :global(.cm-activeLineGutter) {
-                    background-color: var(--color-bg2);
+                    background-color: var(--color-bg1);
                 }
             }
         }
@@ -347,7 +347,7 @@
 
         :global(.cm-scroller) {
             border-radius: $border-radius;
-            line-height: 1.15rem;
+            line-height: 1.25rem;
         }
 
         :global(.cm-gutter),

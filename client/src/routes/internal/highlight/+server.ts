@@ -1,6 +1,6 @@
 import { getLangs } from "$lib/api/lang";
 import type { RequestEvent, RequestHandler } from "@sveltejs/kit";
-import { getHighlighter, type Highlighter, loadTheme, type ILanguageRegistration, type IThemedToken, renderToHtml } from "shiki";
+import { getHighlighter, type Highlighter, loadTheme, type ILanguageRegistration, type IThemedToken, renderToHtml, type IShikiTheme } from "shiki";
 import { readFileSync } from "fs";
 
 let highlighter: Highlighter;
@@ -14,6 +14,8 @@ export const POST: RequestHandler = async ({ request }: RequestEvent) => {
 const highlight = async (content: string, language: string) => {
     if (!highlighter) await initHighlighter();
 
+    const tomorrowmyst = await loadTheme("../../static/themes/tomorrowmyst.json");
+
     const lang = (await getLangs()).find((l) => l.name === language);
 
     let tokens: IThemedToken[][];
@@ -24,10 +26,7 @@ const highlight = async (content: string, language: string) => {
         tokens = highlighter.codeToThemedTokens(content, language);
     }
 
-    return tokensToHtml(tokens);
-    // return renderToHtml(tokens, {
-    //     bg: '#141414'
-    // });
+    return tokensToHtml(tokens, tomorrowmyst);
 };
 
 const initHighlighter = async () => {
@@ -58,8 +57,8 @@ const initHighlighter = async () => {
     });
 };
 
-const tokensToHtml = (tokens: IThemedToken[][]): string => {
-    let res = `<div class="shiki"><pre class="line-numbers"><code>`;
+const tokensToHtml = (tokens: IThemedToken[][], theme: IShikiTheme): string => {
+    let res = `<div class="shiki" style="background-color: ${theme.bg}"><pre class="line-numbers"><code>`;
 
     for (let i = 0; i < tokens.length; i++) {
         res += `<span>${i + 1}</span>\n`;

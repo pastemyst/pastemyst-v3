@@ -321,9 +321,9 @@ section {
 // shiki
 
 .shiki {
-    background-color: var(--color-bg1);
     display: grid;
     grid-template-columns: 0fr 1fr;
+    line-height: 1.25rem;
 
     .line-numbers {
         user-select: none;
