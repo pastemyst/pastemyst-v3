@@ -4,7 +4,7 @@ import type { Extension } from "@codemirror/state";
 import { HighlightStyle, syntaxHighlighting } from "@codemirror/language";
 import { tags as t } from "@lezer/highlight";
 
-const bg = "#1c1c1c",
+const bg = "#141414",
     cl = "#282a2e",
     sel = "#373b41",
     fg = "#c5c8c6",
