@@ -347,6 +347,7 @@
 
         :global(.cm-scroller) {
             border-radius: $border-radius;
+            line-height: 1.15rem;
         }
 
         :global(.cm-gutter),
@@ -420,35 +421,18 @@
         padding: 0;
         padding-top: 0.2rem;
         padding-left: 0.05rem;
-    }
 
-    :global(.shiki) {
-        margin: 0;
-    }
+        :global(pre) {
+            margin-top: 0;
+        }
 
-    :global(.shiki code) {
-        border: none;
-        font-size: $fs-normal;
-        padding: 0;
-        border-radius: 0;
-        background-color: transparent;
-    }
-
-    :global(.shiki code) {
-        counter-reset: step;
-        counter-increment: step 0;
-    }
-
-    :global(.shiki code .line::before) {
-        content: counter(step);
-        counter-increment: step;
-        width: 1rem;
-        margin-right: 1.1rem;
-        display: inline-block;
-        text-align: right;
-        color: var(--color-bg3);
-        font-size: $fs-normal;
-        padding-left: 0.75rem;
+        :global(code) {
+            border: none;
+            font-size: $fs-normal;
+            padding: 0;
+            border-radius: 0;
+            background-color: transparent;
+        }
     }
 
     @media screen and (max-width: 620px) {

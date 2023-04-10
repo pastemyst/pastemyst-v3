@@ -508,7 +508,6 @@
     }
 
     :global(.shiki) {
-        padding: 0.5rem;
         border-bottom-left-radius: $border-radius;
         border-bottom-right-radius: $border-radius;
         border: 1px solid var(--color-bg2);
