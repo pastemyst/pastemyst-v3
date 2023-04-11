@@ -499,45 +499,45 @@
                 }
             }
         }
+
+        :global(.shiki) {
+            border-bottom-left-radius: $border-radius;
+            border-bottom-right-radius: $border-radius;
+            border: 1px solid var(--color-bg2);
+            border-top: none;
+            margin: 0;
+            overflow-x: auto;
+        }
+
+        :global(.shiki code) {
+            border: none;
+            font-size: $fs-normal;
+            padding: 0;
+            border-radius: 0;
+            background-color: transparent;
+        }
+
+        :global(.shiki code) {
+            counter-reset: step;
+            counter-increment: step 0;
+        }
+
+        :global(.shiki code .line::before) {
+            content: counter(step);
+            counter-increment: step;
+            width: 1rem;
+            margin-right: 1rem;
+            display: inline-block;
+            text-align: right;
+            color: var(--color-bg3);
+            font-size: $fs-normal;
+        }
     }
 
     .sticky {
         position: sticky;
         top: 0;
         z-index: 10;
-    }
-
-    :global(.shiki) {
-        border-bottom-left-radius: $border-radius;
-        border-bottom-right-radius: $border-radius;
-        border: 1px solid var(--color-bg2);
-        border-top: none;
-        margin: 0;
-        overflow-x: auto;
-    }
-
-    :global(.shiki code) {
-        border: none;
-        font-size: $fs-normal;
-        padding: 0;
-        border-radius: 0;
-        background-color: transparent;
-    }
-
-    :global(.shiki code) {
-        counter-reset: step;
-        counter-increment: step 0;
-    }
-
-    :global(.shiki code .line::before) {
-        content: counter(step);
-        counter-increment: step;
-        width: 1rem;
-        margin-right: 1rem;
-        display: inline-block;
-        text-align: right;
-        color: var(--color-bg3);
-        font-size: $fs-normal;
     }
 
     @media screen and (max-width: 620px) {

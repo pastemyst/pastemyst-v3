@@ -331,6 +331,7 @@ section {
         text-align: right;
         margin-right: 1rem;
         margin-top: 0.25rem;
+        margin-bottom: 0.25rem;
         padding-left: 0.25rem;
         color: var(--color-bg3);
         display: grid;
@@ -344,5 +345,6 @@ section {
     .lines {
         display: grid;
         margin-top: 0.25rem;
+        margin-bottom: 0.25rem;
     }
 }
