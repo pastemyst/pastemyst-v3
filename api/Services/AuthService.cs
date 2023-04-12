@@ -30,13 +30,14 @@ public class AuthService : IAuthService
     private readonly IIdProvider _idProvider;
     private readonly IOAuthService _oAuthService;
     private readonly IImageService _imageService;
+    private readonly IActionLogger _actionLogger;
     private readonly IHttpClientFactory _httpClientFactory;
     private readonly DataContext _dbContext;
     private readonly IConfiguration _configuration;
 
     public AuthService(IIdProvider idProvider, IOAuthService oAuthService, IConfiguration configuration,
         IHttpClientFactory httpClientFactory, IImageService imageService,
-        DataContext dbContext)
+        DataContext dbContext, IActionLogger actionLogger)
     {
         _idProvider = idProvider;
         _oAuthService = oAuthService;
@@ -44,6 +45,7 @@ public class AuthService : IAuthService
         _httpClientFactory = httpClientFactory;
         _imageService = imageService;
         _dbContext = dbContext;
+        _actionLogger = actionLogger;
     }
 
     public async Task<string> InitiateLoginFlowAsync(string provider, HttpContext httpContext)
@@ -202,6 +204,8 @@ public class AuthService : IAuthService
         };
 
         httpContext.Response.Cookies.Append("pastemyst", jwtToken, newCookie);
+
+        await _actionLogger.LogActionAsync(ActionLogType.UserCreated, user.Id);
     }
 
     public async Task<User> GetSelfAsync(HttpContext httpContext)
