@@ -67,6 +67,7 @@ builder.Services.AddScoped<IUserSettingsService, UserSettingsService>();
 builder.Services.AddScoped<IPastyService, PastyService>();
 builder.Services.AddScoped<IPasteService, PasteService>();
 builder.Services.AddScoped<IActionLogger, ActionLogger>();
+builder.Services.AddScoped<IStatsService, StatsService>();
 
 builder.Services.AddCors(options =>
 {
