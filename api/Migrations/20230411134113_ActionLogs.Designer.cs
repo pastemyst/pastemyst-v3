@@ -3,27 +3,27 @@ using System;
 using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using pastemyst.DbContexts;
-using pastemyst.Models;
 
 #nullable disable
 
 namespace pastemyst.Migrations
 {
     [DbContext(typeof(DataContext))]
-    partial class UserContextModelSnapshot : ModelSnapshot
+    [Migration("20230411134113_ActionLogs")]
+    partial class ActionLogs
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
                 .HasAnnotation("ProductVersion", "7.0.3")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
-            NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "action_log_type", new[] { "paste_created", "paste_deleted", "user_created" });
-            NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "expires_in", new[] { "never", "one_hour", "two_hours", "ten_hours", "one_day", "two_days", "one_week", "one_month", "one_year" });
             NpgsqlModelBuilderExtensions.HasPostgresExtension(modelBuilder, "citext");
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
@@ -63,8 +63,8 @@ namespace pastemyst.Migrations
                         .HasColumnType("text")
                         .HasColumnName("object_id");
 
-                    b.Property<ActionLogType>("Type")
-                        .HasColumnType("action_log_type")
+                    b.Property<int>("Type")
+                        .HasColumnType("integer")
                         .HasColumnName("type");
 
                     b.HasKey("Id")
@@ -111,8 +111,8 @@ namespace pastemyst.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("deletes_at");
 
-                    b.Property<ExpiresIn>("ExpiresIn")
-                        .HasColumnType("expires_in")
+                    b.Property<int>("ExpiresIn")
+                        .HasColumnType("integer")
                         .HasColumnName("expires_in");
 
                     b.Property<string>("OwnerId")

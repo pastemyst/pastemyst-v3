@@ -36,16 +36,18 @@ public class PasteService : IPasteService
     private readonly ILanguageProvider _languageProvider;
     private readonly IPastyService _pastyService;
     private readonly IUserContext _userContext;
+    private readonly IActionLogger _actionLogger;
     private readonly DataContext _dbContext;
 
     public PasteService(IIdProvider idProvider, DataContext dbContext, ILanguageProvider languageProvider,
-        IPastyService pastyService, IUserContext userContext)
+        IPastyService pastyService, IUserContext userContext, IActionLogger actionLogger)
     {
         _idProvider = idProvider;
         _dbContext = dbContext;
         _languageProvider = languageProvider;
         _pastyService = pastyService;
         _userContext = userContext;
+        _actionLogger = actionLogger;
     }
 
     public async Task<Paste> CreateAsync(PasteCreateInfo createInfo)
@@ -109,6 +111,8 @@ public class PasteService : IPasteService
 
         await _dbContext.Pastes.AddAsync(paste);
         await _dbContext.SaveChangesAsync();
+
+        await _actionLogger.LogActionAsync(ActionLogType.PasteCreated, paste.Id);
 
         return paste;
     }
@@ -229,6 +233,8 @@ public class PasteService : IPasteService
 
         _dbContext.Pastes.Remove(paste);
         await _dbContext.SaveChangesAsync();
+
+        await _actionLogger.LogActionAsync(ActionLogType.PasteDeleted, paste.Id);
     }
 
     public async Task<bool> IsStarredAsync(string id)

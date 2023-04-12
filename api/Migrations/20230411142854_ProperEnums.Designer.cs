@@ -3,19 +3,21 @@ using System;
 using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using pastemyst.DbContexts;
-using pastemyst.Models;
 
 #nullable disable
 
 namespace pastemyst.Migrations
 {
     [DbContext(typeof(DataContext))]
-    partial class UserContextModelSnapshot : ModelSnapshot
+    [Migration("20230411142854_ProperEnums")]
+    partial class ProperEnums
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -63,8 +65,8 @@ namespace pastemyst.Migrations
                         .HasColumnType("text")
                         .HasColumnName("object_id");
 
-                    b.Property<ActionLogType>("Type")
-                        .HasColumnType("action_log_type")
+                    b.Property<int>("Type")
+                        .HasColumnType("integer")
                         .HasColumnName("type");
 
                     b.HasKey("Id")
@@ -111,8 +113,8 @@ namespace pastemyst.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("deletes_at");
 
-                    b.Property<ExpiresIn>("ExpiresIn")
-                        .HasColumnType("expires_in")
+                    b.Property<int>("ExpiresIn")
+                        .HasColumnType("integer")
                         .HasColumnName("expires_in");
 
                     b.Property<string>("OwnerId")
