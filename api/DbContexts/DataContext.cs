@@ -15,8 +15,6 @@ public class DataContext : DbContext
 
     public DataContext(DbContextOptions<DataContext> contextOptions) : base(contextOptions)
     {
-        NpgsqlConnection.GlobalTypeMapper.MapEnum<ExpiresIn>();
-        NpgsqlConnection.GlobalTypeMapper.MapEnum<ActionLogType>();
     }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
