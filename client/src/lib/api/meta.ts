@@ -14,6 +14,9 @@ export interface AppStats {
     totalPastes: number;
     activeUsers: number;
     totalUsers: number;
+
+    activePastesOverTime: Map<Date, number>;
+    totalPastesOverTime: Map<Date, number>;
 }
 
 export const getVersion = async (fetchFunc: FetchFunc): Promise<string> => {

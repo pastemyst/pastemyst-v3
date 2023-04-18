@@ -1,7 +1,39 @@
 <script lang="ts">
+    import { onMount } from "svelte";
     import type { PageData } from "./$types";
+    import * as frappe from "frappe-charts";
 
     export let data: PageData;
+
+    onMount(() => {
+        const labels = Object.keys(data.activePastesOverTime).map(d => new Date(d).toDateString());
+
+        const chartData = {
+            labels: labels,
+            datasets: [
+                {
+                    name: "active pastes",
+                    chartType: "line",
+                    values: Object.values(data.activePastesOverTime)
+                },
+                {
+                    name: "total pastes",
+                    chartType: "line",
+                    values: Object.values(data.totalPastesOverTime)
+                }
+            ]
+        };
+
+        new frappe.Chart("#chart", {
+            data: chartData,
+            type: "line",
+            colors: ["#fff"],
+            lineOptions: {
+                hideDots: 1,
+                regionFill: 1,
+            }
+        });
+    });
 </script>
 
 <svelte:head>
@@ -22,6 +54,8 @@
             <li><span>active users</span><span>{data.activeUsers}</span></li>
         </ul>
     </div>
+
+    <div id="chart" />
 </section>
 
 <style lang="scss">
@@ -58,6 +92,16 @@
                     margin-left: auto;
                 }
             }
+        }
+    }
+
+    :global(#chart) {
+        :global(.chart-legend) {
+            display: none;
+        }
+
+        :global(.y.axis) {
+            stroke: red;
         }
     }
 </style>

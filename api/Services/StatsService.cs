@@ -20,34 +20,57 @@ public class StatsService : IStatsService
 
     public async Task<AppStats> GetAppStatsAsync()
     {
-        var activePastesOverTime = _dbContext.Pastes
-            .GroupBy(p => p.CreatedAt.Date)
-            .ToDictionary(group => group.Key, group => group.Count());
-
-        var totalPastesOverTime = _dbContext.ActionLogs
-            .Where(a => a.Type == ActionLogType.PasteCreated)
-            .GroupBy(a => a.CreatedAt.Date)
-            .ToDictionary(group => group.Key, group => group.Count());
-
-        var activeUsersOverTime = _dbContext.Users
-            .GroupBy(p => p.CreatedAt.Date)
-            .ToDictionary(group => group.Key, group => group.Count());
-
-        var totalUsersOverTime = _dbContext.ActionLogs
-            .Where(a => a.Type == ActionLogType.UserCreated)
-            .GroupBy(a => a.CreatedAt.Date)
-            .ToDictionary(group => group.Key, group => group.Count());
-
         return new()
         {
             ActivePastes = await _dbContext.Pastes.CountAsync(),
             ActiveUsers = await _dbContext.Users.CountAsync(),
             TotalPastes = await _dbContext.ActionLogs.CountAsync(l => l.Type == ActionLogType.PasteCreated),
             TotalUsers = await _dbContext.ActionLogs.CountAsync(l => l.Type == ActionLogType.UserCreated),
-            ActivePastesOverTime = activePastesOverTime,
-            TotalPastesOverTime = totalPastesOverTime,
-            ActiveUsersOverTime = activeUsersOverTime,
-            TotalUsersOverTime = totalUsersOverTime
+            ActivePastesOverTime = await GetActivePasteStatsOverTime(),
+            TotalPastesOverTime = await GetActionLogStatsOverTime(ActionLogType.PasteCreated),
         };
+    }
+
+    private async Task<SortedDictionary<DateTime, int>> GetActionLogStatsOverTime(ActionLogType type)
+    {
+        var statsOverTime = await _dbContext.ActionLogs
+            .Where(a => a.Type == type)
+            .GroupBy(a => a.CreatedAt.Date)
+            .ToDictionaryAsync(group => group.Key, group => group.Count());
+
+        var statsOverTimeSorted = new SortedDictionary<DateTime, int>(statsOverTime);
+
+        for (int i = 1; i < statsOverTimeSorted.Count; i++)
+        {
+            var prev = statsOverTimeSorted.ElementAt(i - 1);
+            var cur = statsOverTimeSorted.ElementAt(i);
+
+            statsOverTimeSorted[cur.Key] += prev.Value;
+        }
+
+        return statsOverTimeSorted;
+    }
+
+    private async Task<SortedDictionary<DateTime, int>> GetActivePasteStatsOverTime()
+    {
+        var statsOverTime = await _dbContext.ActionLogs
+            .Where(a => a.Type == ActionLogType.PasteCreated || a.Type == ActionLogType.PasteDeleted)
+            .GroupBy(a => a.CreatedAt.Date)
+            .ToDictionaryAsync(
+                grp => grp.Key,
+                grp => grp.Count(g => g.Type == ActionLogType.PasteCreated) - grp.Count(g => g.Type == ActionLogType.PasteDeleted)
+            );
+
+        var statsOverTimeSorted = new SortedDictionary<DateTime, int>(statsOverTime);
+
+        for (int i = 1; i < statsOverTimeSorted.Count; i++)
+        {
+            var prev = statsOverTimeSorted.ElementAt(i - 1);
+            var cur = statsOverTimeSorted.ElementAt(i);
+
+            statsOverTimeSorted[cur.Key] += prev.Value;
+        }
+
+        return statsOverTimeSorted;
     }
 }
