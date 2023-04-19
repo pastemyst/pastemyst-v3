@@ -11,13 +11,15 @@ public class MetaController : ControllerBase
     private readonly IVersionProvider _versionProvider;
     private readonly IChangelogProvider _changelogProvider;
     private readonly IPasteService _pasteService;
+    private readonly IStatsService _statsService;
 
     public MetaController(IVersionProvider versionProvider, IChangelogProvider changelogProvider,
-        IPasteService pasteService)
+        IPasteService pasteService, IStatsService statsService)
     {
         _versionProvider = versionProvider;
         _changelogProvider = changelogProvider;
         _pasteService = pasteService;
+        _statsService = statsService;
     }
 
     [HttpGet("version")]
@@ -41,5 +43,11 @@ public class MetaController : ControllerBase
         {
             Count = count
         };
+    }
+
+    [HttpGet("stats")]
+    public async Task<AppStats> GetStats()
+    {
+        return await _statsService.GetAppStatsAsync();
     }
 }

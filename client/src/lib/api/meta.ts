@@ -9,6 +9,16 @@ export interface Release {
     releasedAt: string;
 }
 
+export interface AppStats {
+    activePastes: number;
+    totalPastes: number;
+    activeUsers: number;
+    totalUsers: number;
+
+    activePastesOverTime: Map<Date, number>;
+    totalPastesOverTime: Map<Date, number>;
+}
+
 export const getVersion = async (fetchFunc: FetchFunc): Promise<string> => {
     const res = await fetchFunc(`${PUBLIC_API_BASE}/meta/version`, {
         method: "get"
@@ -37,4 +47,14 @@ export const getActivePastes = async (fetchFunc: FetchFunc): Promise<number> => 
     if (res.ok) return (await res.json()).count;
 
     return 0;
+};
+
+export const getAppStats = async (fetchFunc: FetchFunc): Promise<[AppStats | null, number]> => {
+    const res = await fetchFunc(`${PUBLIC_API_BASE}/meta/stats`, {
+        method: "get"
+    });
+
+    if (res.ok) return [await res.json(), res.status];
+
+    return [null, res.status];
 };
