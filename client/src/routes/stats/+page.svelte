@@ -6,7 +6,9 @@
     export let data: PageData;
 
     onMount(() => {
-        const labels = Object.keys(data.activePastesOverTime).map(d => new Date(d).toDateString());
+        const labels = Object.keys(data.activePastesOverTime).map((d) =>
+            new Date(d).toDateString()
+        );
 
         const chartData = {
             labels: labels,
@@ -30,7 +32,7 @@
             colors: ["#fff"],
             lineOptions: {
                 hideDots: 1,
-                regionFill: 1,
+                spline: 1
             }
         });
     });
@@ -96,12 +98,63 @@
     }
 
     :global(#chart) {
+        background-color: var(--color-bg);
+        border-radius: $border-radius;
+        border: 1px solid var(--color-bg2);
+
+        :global(.dataset-1 .line-graph-path) {
+            stroke: var(--color-primary) !important;
+        }
+
+        :global(.dataset-0 .line-graph-path) {
+            stroke: var(--color-secondary) !important;
+        }
+
+        :global(text),
+        :global(span) {
+            font-size: $fs-small;
+            font-family: $font-stack;
+            font-weight: normal;
+            text-transform: lowercase;
+        }
+
         :global(.chart-legend) {
-            display: none;
+            :global(g:first-child .legend-bar) {
+                fill: var(--color-secondary);
+            }
+
+            :global(g:last-child .legend-bar) {
+                fill: var(--color-primary);
+            }
+        }
+
+        :global(.graph-svg-tip .data-point-list) {
+            :global(li:first-child) {
+                border-top: 3px solid var(--color-secondary) !important;
+            }
+
+            :global(li:last-child) {
+                border-top: 3px solid var(--color-primary) !important;
+            }
         }
 
         :global(.y.axis) {
-            stroke: red;
+            stroke: var(--color-bg3);
+            font-family: $font-stack;
+
+            :global(line) {
+                opacity: 0;
+            }
+        }
+
+        :global(.x.axis) {
+            :global(line) {
+                opacity: 0;
+            }
+
+            :global(text) {
+                fill: var(--color-bg3);
+            }
         }
     }
 </style>
