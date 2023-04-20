@@ -15,7 +15,7 @@ public class VersionProvider : IVersionProvider, IHostedService
     {
         using var repo = new Repository("../");
 
-        Version = repo.Tags.Last().FriendlyName;
+        Version = repo.Tags.OrderBy(t => t.FriendlyName).Last().FriendlyName;
 
         return Task.CompletedTask;
     }
