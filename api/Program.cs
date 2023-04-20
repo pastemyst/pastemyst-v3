@@ -1,10 +1,13 @@
+using LibGit2Sharp;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Npgsql;
 using pastemyst.DbContexts;
+using pastemyst.Jobs;
 using pastemyst.Middleware;
 using pastemyst.Models;
 using pastemyst.Services;
+using Quartz;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -68,6 +71,23 @@ builder.Services.AddScoped<IPastyService, PastyService>();
 builder.Services.AddScoped<IPasteService, PasteService>();
 builder.Services.AddScoped<IActionLogger, ActionLogger>();
 builder.Services.AddScoped<IStatsService, StatsService>();
+
+builder.Services.AddQuartz(q =>
+{
+    q.UseMicrosoftDependencyInjectionJobFactory();
+
+    q.AddJob<ExpirePastesJob>(opts => opts.WithIdentity(nameof(ExpirePastesJob)));
+    q.AddTrigger(opts => opts
+        .ForJob(nameof(ExpirePastesJob))
+        .WithIdentity(nameof(ExpirePastesJob) + "-trigger")
+        .WithCronSchedule("0 * * ? * *") // run every minute
+    );
+});
+
+builder.Services.AddQuartzServer(options =>
+{
+    options.WaitForJobsToComplete = true;
+});
 
 builder.Services.AddCors(options =>
 {

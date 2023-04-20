@@ -4,6 +4,7 @@ public enum ActionLogType
 {
     PasteCreated,
     PasteDeleted,
+    PasteExpired,
     UserCreated,
     UserDeleted
 }

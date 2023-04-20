@@ -126,6 +126,14 @@ public class PasteService : IPasteService
 
         if (paste is null) throw new HttpException(HttpStatusCode.NotFound, "Paste not found");
 
+        if (paste.DeletesAt <= DateTime.UtcNow)
+        {
+            _dbContext.Remove(paste);
+            await _dbContext.SaveChangesAsync();
+
+            throw new HttpException(HttpStatusCode.NotFound, "Paste not found");
+        }
+
         if (paste.Private && (!_userContext.IsLoggedIn() || _userContext.Self != paste.Owner))
             throw new HttpException(HttpStatusCode.NotFound, "Paste not found");
 
