@@ -54,11 +54,11 @@ public class StatsService : IStatsService
     private async Task<SortedDictionary<DateTime, int>> GetActivePasteStatsOverTime()
     {
         var statsOverTime = await _dbContext.ActionLogs
-            .Where(a => a.Type == ActionLogType.PasteCreated || a.Type == ActionLogType.PasteDeleted)
+            .Where(a => a.Type == ActionLogType.PasteCreated || a.Type == ActionLogType.PasteDeleted || a.Type == ActionLogType.PasteExpired)
             .GroupBy(a => a.CreatedAt.Date)
             .ToDictionaryAsync(
                 grp => grp.Key,
-                grp => grp.Count(g => g.Type == ActionLogType.PasteCreated) - grp.Count(g => g.Type == ActionLogType.PasteDeleted)
+                grp => grp.Count(g => g.Type == ActionLogType.PasteCreated) - grp.Count(g => g.Type == ActionLogType.PasteDeleted || g.Type == ActionLogType.PasteExpired)
             );
 
         var statsOverTimeSorted = new SortedDictionary<DateTime, int>(statsOverTime);
