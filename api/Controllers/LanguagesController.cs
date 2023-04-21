@@ -21,6 +21,12 @@ public class LanguagesController : ControllerBase
         return _languageProvider.Languages;
     }
 
+    [HttpGet("popular")]
+    public List<string> Popular()
+    {
+        return _languageProvider.PopularLanguageNames;
+    }
+
     [HttpGet("{name}")]
     public Language FindByName(string name)
     {

@@ -8,7 +8,9 @@ namespace pastemyst.Services;
 
 public interface ILanguageProvider
 {
-    List<Language> Languages { get; }
+    public List<Language> Languages { get; }
+
+    public List<string> PopularLanguageNames { get; }
 
     /// <summary>
     /// Tries to find a language based on the name (it will search names, aliases and extensions).
@@ -22,6 +24,13 @@ public class LanguageProvider : ILanguageProvider, IHostedService
         "https://raw.githubusercontent.com/github/linguist/master/lib/linguist/languages.yml";
 
     public List<Language> Languages { get; private set; } = new();
+
+    public List<string> PopularLanguageNames => new()
+    {
+        "C", "C#", "C++", "CSS", "D", "Go", "HTML", "Java", "JavaScript",
+        "Kotlin", "Objective-C", "Perl", "PHP", "PowerShell", "Python",
+        "Ruby", "Rust", "Scala", "Shell", "Swift", "TypeScript"
+    };
 
     public Language FindByName(string name)
     {
