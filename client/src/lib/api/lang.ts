@@ -1,4 +1,5 @@
 import { PUBLIC_API_BASE } from "$env/static/public";
+import type { FetchFunc } from "./fetch";
 
 export interface Language {
     name: string;
@@ -19,12 +20,20 @@ export interface LangStat {
 
 let langs: Language[] = [];
 
-export const getLangs = async (): Promise<Language[]> => {
+export const getLangs = async (fetchFunc: FetchFunc): Promise<Language[]> => {
     if (langs.length === 0) {
-        const res = await fetch(`${PUBLIC_API_BASE}/langs`);
+        const res = await fetchFunc(`${PUBLIC_API_BASE}/langs`);
 
         if (res.ok) langs = await res.json();
     }
 
     return langs;
+};
+
+export const getPopularLangNames = async (fetchFunc: FetchFunc): Promise<string[]> => {
+    const res = await fetchFunc(`${PUBLIC_API_BASE}/langs/popular`);
+
+    if (res.ok) return await res.json();
+
+    return [];
 };

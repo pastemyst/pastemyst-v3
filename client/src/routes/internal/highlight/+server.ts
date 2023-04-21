@@ -23,7 +23,7 @@ const highlight = async (content: string, language: string) => {
 
     const tomorrowmyst = await loadTheme("../../static/themes/tomorrowmyst.json");
 
-    const lang = (await getLangs()).find((l) => l.name === language);
+    const lang = (await getLangs(fetch)).find((l) => l.name === language);
 
     let tokens: IThemedToken[][];
 
@@ -39,7 +39,7 @@ const highlight = async (content: string, language: string) => {
 const initHighlighter = async () => {
     const tomorrowmyst = await loadTheme("../../static/themes/tomorrowmyst.json");
 
-    const langs = await getLangs();
+    const langs = await getLangs(fetch);
 
     const shikiLangs: ILanguageRegistration[] = [];
 
