@@ -27,9 +27,9 @@ public class LanguageProvider : ILanguageProvider, IHostedService
 
     public List<string> PopularLanguageNames => new()
     {
-        "Text", "C", "C#", "C++", "CSS", "D", "Go", "HTML", "Java", "JavaScript",
-        "Kotlin", "Objective-C", "Perl", "PHP", "PowerShell", "Python",
-        "Ruby", "Rust", "Scala", "Shell", "Swift", "TypeScript"
+        "Text", "C", "C#", "C++", "CSS", "D", "Dart", "Go", "Haskell", "HTML", "Java",
+        "JavaScript", "JSON", "Kotlin", "Markdown", "Objective-C", "Perl", "PHP", "PowerShell",
+        "Python", "Ruby", "Rust", "Scala", "Shell", "Swift", "TypeScript", "Yaml"
     };
 
     public Language FindByName(string name)
