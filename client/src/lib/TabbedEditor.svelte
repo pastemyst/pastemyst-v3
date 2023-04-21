@@ -167,7 +167,7 @@
 
             const content = await file.text();
 
-            const langs = await getLangs();
+            const langs = await getLangs(fetch);
             const lang = langs.find(
                 (lang) =>
                     lang.extensions && lang.extensions.includes(name.slice(name.lastIndexOf(".")))
