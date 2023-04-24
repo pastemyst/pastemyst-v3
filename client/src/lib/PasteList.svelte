@@ -1,23 +1,17 @@
 <script lang="ts">
     import moment from "moment";
     import type { Page } from "./api/page";
-    import { ExpiresIn, getUserPastes, type Paste } from "./api/paste";
+    import { ExpiresIn, getUserPastes, type PasteWithLangStats } from "./api/paste";
     import type { User } from "./api/user";
     import { tooltip } from "./tooltips";
+    import type { LangStat } from "./api/lang";
 
-    export let pastes: Page<Paste>;
+    export let pastes: Page<PasteWithLangStats>;
     export let user: User;
     export let pinned = false;
 
-    const getPasteLangs = (paste: Paste): string => {
-        let langs: string[] = [];
-        for (const pasty of paste.pasties) {
-            if (!langs.some((l) => l === pasty.language)) {
-                langs.push(pasty.language);
-            }
-        }
-
-        return langs.slice(0, 3).join(", ");
+    const getPasteLangs = (langStats: LangStat[]): string => {
+        return langStats.map((s) => s.language.name).join(", ");
     };
 
     const onPrevPage = async () => {
@@ -54,18 +48,18 @@
         {user.username} doesn't have any {pinned ? "pinned" : "public"} pastes yet.
     </p>
 {:else}
-    {#each pastes.items as paste}
-        <a href="/{paste.id}" class="paste btn">
+    {#each pastes.items as pasteWithLangStats}
+        <a href="/{pasteWithLangStats.paste.id}" class="paste btn">
             <div class="flex row center space-between">
                 <p class="title">
-                    {paste.title || "untitled"}
-                    {#if paste.tags?.length > 0}
-                        <span>{paste.tags.join(", ")}</span>
+                    {pasteWithLangStats.paste.title || "untitled"}
+                    {#if pasteWithLangStats.paste.tags?.length > 0}
+                        <span>{pasteWithLangStats.paste.tags.join(", ")}</span>
                     {/if}
                 </p>
 
                 <div>
-                    {#if paste.private}
+                    {#if pasteWithLangStats.paste.private}
                         <div use:tooltip aria-label="private" class="flex">
                             <svg
                                 xmlns="http://www.w3.org/2000/svg"
@@ -80,7 +74,7 @@
                                 />
                             </svg>
                         </div>
-                    {:else if paste.pinned}
+                    {:else if pasteWithLangStats.paste.pinned}
                         <div use:tooltip aria-label="pinned" class="flex">
                             <svg
                                 xmlns="http://www.w3.org/2000/svg"
@@ -101,16 +95,16 @@
 
             <div>
                 <!-- prettier-ignore -->
-                <span use:tooltip aria-label={new Date(paste.createdAt).toString()}>{moment(paste.createdAt).fromNow()}</span>
+                <span use:tooltip aria-label={new Date(pasteWithLangStats.paste.createdAt).toString()}>{moment(pasteWithLangStats.paste.createdAt).fromNow()}</span>
 
-                {#if paste.expiresIn !== ExpiresIn.never}
+                {#if pasteWithLangStats.paste.expiresIn !== ExpiresIn.never}
                     <!-- prettier-ignore -->
-                    <span use:tooltip aria-label={new Date(paste.deletesAt).toString()}> - expires {moment(paste.deletesAt).fromNow()}</span>
+                    <span use:tooltip aria-label={new Date(pasteWithLangStats.paste.deletesAt).toString()}> - expires {moment(pasteWithLangStats.paste.deletesAt).fromNow()}</span>
                 {/if}
             </div>
 
             <div>
-                <span>{getPasteLangs(paste)}</span>
+                <span>{getPasteLangs(pasteWithLangStats.languageStats)}</span>
             </div>
         </a>
     {/each}

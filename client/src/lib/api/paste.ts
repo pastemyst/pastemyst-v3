@@ -65,6 +65,11 @@ export interface PastyCreateInfo {
     language: string;
 }
 
+export interface PasteWithLangStats {
+    paste: Paste;
+    languageStats: LangStat[];
+}
+
 /**
  * Converts a long string to `ExpiresIn` enum.
  */
@@ -217,7 +222,7 @@ export const getUserPastes = async (
     pinned: boolean,
     page: number,
     pageSize: number
-): Promise<Page<Paste> | null> => {
+): Promise<Page<PasteWithLangStats> | null> => {
     const res = await fetchFunc(
         `${PUBLIC_API_BASE}/users/${username}/pastes${pinned ? "/pinned" : ""}` +
             `?page=${page}` +

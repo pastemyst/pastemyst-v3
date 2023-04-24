@@ -14,7 +14,7 @@ public interface IUserProvider
 
     public Task<bool> ExistsByUsernameAsync(string username);
 
-    public Task<Page<Paste>> GetOwnedPastesAsync(string username, string tag, bool pinnedOnly, PageRequest pageRequest);
+    public Task<Page<PasteWithLangStats>> GetOwnedPastesAsync(string username, string tag, bool pinnedOnly, PageRequest pageRequest);
 
     public Task<List<string>> GetTagsAsync(string username);
 }
@@ -22,12 +22,14 @@ public interface IUserProvider
 public class UserProvider : IUserProvider
 {
     private readonly IUserContext _userContext;
+    private readonly IPasteService _pasteService;
     private readonly DataContext _dbContext;
 
-    public UserProvider(DataContext dbContext, IUserContext userContext)
+    public UserProvider(DataContext dbContext, IUserContext userContext, IPasteService pasteService)
     {
         _dbContext = dbContext;
         _userContext = userContext;
+        _pasteService = pasteService;
     }
 
     public async Task<User> GetByUsernameOrIdAsync(string username, string id)
@@ -57,14 +59,14 @@ public class UserProvider : IUserProvider
         return await GetByUsernameAsync(username) is not null;
     }
 
-    public async Task<Page<Paste>> GetOwnedPastesAsync(string username, string tag, bool pinnedOnly, PageRequest pageRequest)
+    public async Task<Page<PasteWithLangStats>> GetOwnedPastesAsync(string username, string tag, bool pinnedOnly, PageRequest pageRequest)
     {
         var user = await GetByUsernameAsync(username);
 
         // If not showing only pinned pastes, and show all pastes is disabled, return an empty list.
         if (!pinnedOnly && _userContext.Self != user && !user.Settings.ShowAllPastesOnProfile)
         {
-            return new Page<Paste>();
+            return new Page<PasteWithLangStats>();
         }
 
         var pastesQuery = _dbContext.Pastes
@@ -97,9 +99,17 @@ public class UserProvider : IUserProvider
             pastes.ForEach(p => p.Tags = new());
         }
 
-        return new Page<Paste>
+        var pastesWithLangStags = new List<PasteWithLangStats>();
+        foreach (var paste in pastes)
         {
-            Items = pastes,
+            var stats = _pasteService.GetLanguageStats(paste);
+
+            pastesWithLangStags.Add(new() { Paste = paste, LanguageStats = stats });
+        }
+
+        return new Page<PasteWithLangStats>
+        {
+            Items = pastesWithLangStags,
             CurrentPage = pageRequest.Page,
             PageSize = pageRequest.PageSize,
             HasNextPage = pageRequest.Page < totalPages - 1,
