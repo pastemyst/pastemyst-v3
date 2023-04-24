@@ -17,6 +17,8 @@ public interface IPasteService
 
     public Task<List<LanguageStat>> GetLanguageStatsAsync(string id);
 
+    public List<LanguageStat> GetLanguageStats(Paste paste);
+
     public Task<int> GetActiveCountAsync();
 
     public Task DeleteAsync(string id);
@@ -177,6 +179,11 @@ public class PasteService : IPasteService
     {
         var paste = await GetAsync(id);
 
+        return GetLanguageStats(paste);
+    }
+
+    public List<LanguageStat> GetLanguageStats(Paste paste)
+    {
         var stats = new List<LanguageStat>();
 
         var charsPerLanguage = new Dictionary<string, int>();

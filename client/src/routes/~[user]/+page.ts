@@ -2,7 +2,7 @@ import { getUserTags, type User } from "$lib/api/user";
 import moment from "moment";
 import type { Page } from "$lib/api/page";
 import type { PageLoad } from "./$types";
-import type { Paste } from "$lib/api/paste";
+import type { Paste, PasteWithLangStats } from "$lib/api/paste";
 import { error } from "@sveltejs/kit";
 import { PUBLIC_API_BASE } from "$env/static/public";
 
@@ -38,8 +38,8 @@ export const load: PageLoad = async ({ params, url, fetch }) => {
     let user: User;
     let relativeJoined: string;
     let isCurrentUser = false;
-    let pastes: Page<Paste>;
-    let pinnedPastes: Page<Paste>;
+    let pastes: Page<PasteWithLangStats>;
+    let pinnedPastes: Page<PasteWithLangStats>;
     if (userRes.ok) {
         user = await userRes.json();
         relativeJoined = moment(user.createdAt).fromNow();
