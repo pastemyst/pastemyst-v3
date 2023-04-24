@@ -11,7 +11,7 @@
     export let pinned = false;
 
     const getPasteLangs = (langStats: LangStat[]): string => {
-        return langStats.map(s => s.language.name).join(", ");
+        return langStats.map((s) => s.language.name).join(", ");
     };
 
     const onPrevPage = async () => {

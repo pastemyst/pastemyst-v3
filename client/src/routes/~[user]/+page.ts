@@ -2,7 +2,7 @@ import { getUserTags, type User } from "$lib/api/user";
 import moment from "moment";
 import type { Page } from "$lib/api/page";
 import type { PageLoad } from "./$types";
-import type { Paste, PasteWithLangStats } from "$lib/api/paste";
+import type { PasteWithLangStats } from "$lib/api/paste";
 import { error } from "@sveltejs/kit";
 import { PUBLIC_API_BASE } from "$env/static/public";
 
