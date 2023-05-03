@@ -33,7 +33,7 @@
     },
     "type": "module",
     "dependencies": {
-        "@codemirror/commands": "^6.2.2",
+        "@codemirror/commands": "^6.2.4",
         "@codemirror/language": "^6.6.0",
         "@codemirror/language-data": "^6.2.0",
         "@codemirror/legacy-modes": "^6.3.2",
