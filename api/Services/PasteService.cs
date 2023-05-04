@@ -1,6 +1,7 @@
 using System.Net;
 using Microsoft.EntityFrameworkCore;
-using pastemyst.DbContexts;
+using MongoDB.Bson;
+using MongoDB.Driver;
 using pastemyst.Exceptions;
 using pastemyst.Models;
 using pastemyst.Utils;
@@ -19,7 +20,7 @@ public interface IPasteService
 
     public List<LanguageStat> GetLanguageStats(Paste paste);
 
-    public Task<int> GetActiveCountAsync();
+    public Task<long> GetActiveCountAsync();
 
     public Task DeleteAsync(string id);
 
@@ -36,20 +37,18 @@ public class PasteService : IPasteService
 {
     private readonly IIdProvider _idProvider;
     private readonly ILanguageProvider _languageProvider;
-    private readonly IPastyService _pastyService;
     private readonly IUserContext _userContext;
     private readonly IActionLogger _actionLogger;
-    private readonly DataContext _dbContext;
+    private readonly IMongoService _mongo;
 
-    public PasteService(IIdProvider idProvider, DataContext dbContext, ILanguageProvider languageProvider,
-        IPastyService pastyService, IUserContext userContext, IActionLogger actionLogger)
+    public PasteService(IIdProvider idProvider, ILanguageProvider languageProvider,
+        IUserContext userContext, IActionLogger actionLogger, IMongoService mongo)
     {
         _idProvider = idProvider;
-        _dbContext = dbContext;
         _languageProvider = languageProvider;
-        _pastyService = pastyService;
         _userContext = userContext;
         _actionLogger = actionLogger;
+        _mongo = mongo;
     }
 
     public async Task<Paste> CreateAsync(PasteCreateInfo createInfo)
@@ -91,7 +90,7 @@ public class PasteService : IPasteService
             ExpiresIn = createInfo.ExpiresIn,
             DeletesAt = ExpiresInUtils.ToDeletesAt(DateTime.UtcNow, createInfo.ExpiresIn),
             Title = createInfo.Title,
-            Owner = createInfo.Anonymous ? null : _userContext.Self,
+            OwnerId = createInfo.Anonymous ? null : _userContext.Self?.Id,
             Private = createInfo.Private,
             Pinned = createInfo.Pinned,
             Tags = createInfo.Tags.Select(t => t.Trim()).Where(s => !string.IsNullOrEmpty(s)).ToList(),
@@ -104,15 +103,14 @@ public class PasteService : IPasteService
 
             paste.Pasties.Add(new Pasty
             {
-                Id = await _idProvider.GenerateId(async id => await _pastyService.ExistsByIdAsync(id)),
+                Id = _idProvider.GenerateId(id => paste.Pasties.Where(p => p.Id == id).Any()),
                 Title = pasty.Title,
                 Content = pasty.Content,
                 Language = langName
             });
         }
 
-        await _dbContext.Pastes.AddAsync(paste);
-        await _dbContext.SaveChangesAsync();
+        await _mongo.Pastes.InsertOneAsync(paste);
 
         await _actionLogger.LogActionAsync(ActionLogType.PasteCreated, paste.Id);
 
@@ -121,26 +119,22 @@ public class PasteService : IPasteService
 
     public async Task<Paste> GetAsync(string id)
     {
-        var paste = await _dbContext.Pastes
-            .Include(p => p.Pasties)
-            .Include(p => p.Stars)
-            .FirstOrDefaultAsync(p => p.Id == id);
+        var paste = await _mongo.Pastes.Find(p => p.Id == id).FirstOrDefaultAsync();
 
         if (paste is null) throw new HttpException(HttpStatusCode.NotFound, "Paste not found");
 
         if (paste.DeletesAt <= DateTime.UtcNow)
         {
-            _dbContext.Remove(paste);
-            await _dbContext.SaveChangesAsync();
+            await _mongo.Pastes.DeleteOneAsync(paste.Id);
 
             throw new HttpException(HttpStatusCode.NotFound, "Paste not found");
         }
 
-        if (paste.Private && (!_userContext.IsLoggedIn() || _userContext.Self != paste.Owner))
+        if (paste.Private && (!_userContext.IsLoggedIn() || _userContext.Self.Id != paste.OwnerId))
             throw new HttpException(HttpStatusCode.NotFound, "Paste not found");
 
         // only the paste owner can see the tags
-        if (!_userContext.IsLoggedIn() || _userContext.Self != paste.Owner)
+        if (!_userContext.IsLoggedIn() || _userContext.Self.Id != paste.OwnerId)
             paste.Tags = new();
 
         return paste;
@@ -225,9 +219,9 @@ public class PasteService : IPasteService
         return stats;
     }
 
-    public async Task<int> GetActiveCountAsync()
+    public async Task<long> GetActiveCountAsync()
     {
-        return await _dbContext.Pastes.CountAsync();
+        return await _mongo.Pastes.CountDocumentsAsync(new BsonDocument());
     }
 
     public async Task DeleteAsync(string id)
@@ -237,7 +231,7 @@ public class PasteService : IPasteService
 
         var paste = await GetAsync(id);
 
-        if (paste.Owner is null || paste.Owner != _userContext.Self)
+        if (paste.OwnerId is null || paste.OwnerId != _userContext.Self.Id)
         {
             // Returning not found instead of unauthorized to not expose that the paste exists.
             if (paste.Private)
@@ -246,8 +240,7 @@ public class PasteService : IPasteService
             throw new HttpException(HttpStatusCode.Unauthorized, "You can only delete your own pastes.");
         }
 
-        _dbContext.Pastes.Remove(paste);
-        await _dbContext.SaveChangesAsync();
+        await _mongo.Pastes.DeleteOneAsync(p => p.Id == paste.Id);
 
         await _actionLogger.LogActionAsync(ActionLogType.PasteDeleted, paste.Id);
     }
@@ -259,14 +252,14 @@ public class PasteService : IPasteService
 
         var paste = await GetAsync(id);
 
-        if (paste.Owner is null || paste.Owner != _userContext.Self)
+        if (paste.OwnerId is null || paste.OwnerId != _userContext.Self.Id)
         {
             // Returning not found instead of unauthorized to not expose that the paste exists.
             if (paste.Private)
                 throw new HttpException(HttpStatusCode.NotFound, "Paste not found.");
         }
 
-        return paste.Stars.Any(u => u == _userContext.Self);
+        return paste.Stars.Any(u => u == _userContext.Self.Id);
     }
 
     public async Task ToggleStarAsync(string id)
@@ -276,23 +269,24 @@ public class PasteService : IPasteService
 
         var paste = await GetAsync(id);
 
-        if (paste.Owner is null || paste.Owner != _userContext.Self)
+        if (paste.OwnerId is null || paste.OwnerId != _userContext.Self.Id)
         {
             // Returning not found instead of unauthorized to not expose that the paste exists.
             if (paste.Private)
                 throw new HttpException(HttpStatusCode.NotFound, "Paste not found.");
         }
 
-        if (paste.Stars.Any(u => u == _userContext.Self))
+        if (paste.Stars.Any(u => u == _userContext.Self.Id))
         {
-            paste.Stars.Remove(_userContext.Self);
+            paste.Stars.Remove(_userContext.Self.Id);
         }
         else
         {
-            paste.Stars.Add(_userContext.Self);
+            paste.Stars.Add(_userContext.Self.Id);
         }
 
-        await _dbContext.SaveChangesAsync();
+        var update = Builders<Paste>.Update.Set(p => p.Stars, paste.Stars);
+        await _mongo.Pastes.UpdateOneAsync(p => p.Id == paste.Id, update);
     }
 
     public async Task TogglePinnedAsync(string id)
@@ -304,25 +298,22 @@ public class PasteService : IPasteService
 
         var paste = await GetAsync(id);
 
-        if (paste.Owner is null)
+        if (paste.OwnerId is null)
         {
             throw new HttpException(HttpStatusCode.BadRequest, "Only owned pastes can be pinned.");
         }
 
-        if (paste.Owner != _userContext.Self)
+        if (paste.OwnerId != _userContext.Self.Id)
         {
             throw new HttpException(HttpStatusCode.Unauthorized, "You can only pin/unpin your own pastes.");
         }
 
-        paste.Pinned = !paste.Pinned;
-
-        _dbContext.Pastes.Attach(paste);
-        _dbContext.Pastes.Entry(paste).Property(p => p.Pinned).IsModified = true;
-        await _dbContext.SaveChangesAsync();
+        var update = Builders<Paste>.Update.Set(p => p.Pinned, !paste.Pinned);
+        await _mongo.Pastes.UpdateOneAsync(p => p.Id == paste.Id, update);
     }
 
     public async Task<bool> ExistsByIdAsync(string id)
     {
-        return await _dbContext.Pastes.AnyAsync(p => p.Id == id);
+        return await _mongo.Pastes.Find(p => p.Id == id).FirstOrDefaultAsync() is not null;
     }
 }

@@ -1,11 +1,6 @@
-using LibGit2Sharp;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection.Extensions;
-using Npgsql;
-using pastemyst.DbContexts;
 using pastemyst.Jobs;
 using pastemyst.Middleware;
-using pastemyst.Models;
 using pastemyst.Services;
 using Quartz;
 
@@ -14,19 +9,6 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Logging.ClearProviders();
 builder.Services.AddLogging();
 builder.Logging.AddConsole();
-
-builder.Services.AddDbContext<DataContext>(options =>
-{
-    var dataSourceBuilder = new NpgsqlDataSourceBuilder(builder.Configuration.GetConnectionString("DefaultDb"));
-
-    dataSourceBuilder
-        .MapEnum<ExpiresIn>()
-        .MapEnum<ActionLogType>();
-
-    var dataSource = dataSourceBuilder.Build();
-
-    options.UseNpgsql(dataSource).UseSnakeCaseNamingConvention();
-});
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
@@ -44,6 +26,8 @@ builder.Services.AddSession(options =>
 });
 
 builder.Services.AddHttpClient();
+
+builder.Services.AddSingleton<IMongoService, MongoService>();
 
 builder.Services.TryAddSingleton<ILanguageProvider, LanguageProvider>();
 builder.Services.AddSingleton(s =>
@@ -67,7 +51,6 @@ builder.Services.AddScoped<IOAuthService, OAuthService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IUserContext, UserContext>();
 builder.Services.AddScoped<IUserSettingsService, UserSettingsService>();
-builder.Services.AddScoped<IPastyService, PastyService>();
 builder.Services.AddScoped<IPasteService, PasteService>();
 builder.Services.AddScoped<IActionLogger, ActionLogger>();
 builder.Services.AddScoped<IStatsService, StatsService>();

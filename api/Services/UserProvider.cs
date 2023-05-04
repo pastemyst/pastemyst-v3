@@ -1,6 +1,6 @@
 using System.Net;
 using Microsoft.EntityFrameworkCore;
-using pastemyst.DbContexts;
+using MongoDB.Driver;
 using pastemyst.Exceptions;
 using pastemyst.Models;
 
@@ -23,13 +23,13 @@ public class UserProvider : IUserProvider
 {
     private readonly IUserContext _userContext;
     private readonly IPasteService _pasteService;
-    private readonly DataContext _dbContext;
+    private readonly IMongoService _mongo;
 
-    public UserProvider(DataContext dbContext, IUserContext userContext, IPasteService pasteService)
+    public UserProvider(IUserContext userContext, IPasteService pasteService, IMongoService mongo)
     {
-        _dbContext = dbContext;
         _userContext = userContext;
         _pasteService = pasteService;
+        _mongo = mongo;
     }
 
     public async Task<User> GetByUsernameOrIdAsync(string username, string id)
@@ -38,11 +38,11 @@ public class UserProvider : IUserProvider
 
         if (username is not null)
         {
-            user = await _dbContext.Users.Where(u => u.Username == username).FirstOrDefaultAsync();
+            return await GetByUsernameAsync(username);
         }
         else if (id is not null)
         {
-            user = await _dbContext.Users.FindAsync(id);
+            user = await _mongo.Users.Find(u => u.Id == id).FirstOrDefaultAsync();
         }
 
         return user;
@@ -50,8 +50,8 @@ public class UserProvider : IUserProvider
 
     public async Task<User> GetByUsernameAsync(string username)
     {
-        return await _dbContext.Users.Include(u => u.Settings)
-            .FirstOrDefaultAsync(user => user.Username.Equals(username));
+        var filter = Builders<User>.Filter.Eq(u => u.Username, username);
+        return await _mongo.Users.Find(filter).FirstOrDefaultAsync();
     }
 
     public async Task<bool> ExistsByUsernameAsync(string username)
@@ -69,10 +69,10 @@ public class UserProvider : IUserProvider
             return new Page<PasteWithLangStats>();
         }
 
-        var pastesQuery = _dbContext.Pastes
-            .Where(p => p.Owner == user) // check owner
-            .Where(p => !p.Private || p.Owner == _userContext.Self) // only get private if self is owner
-            .Where(p => !pinnedOnly || p.Pinned); // if pinnedOnly, make sure all pasted are pinned
+        var filter = Builders<Paste>.Filter.Eq(p => p.OwnerId, user.Id) &
+                     (Builders<Paste>.Filter.Eq(p => p.Private, false) | Builders<Paste>.Filter.Eq(p => p.OwnerId, _userContext.Self.Id));
+
+        if (pinnedOnly) filter &= Builders<Paste>.Filter.Eq(p => p.Pinned, true);
 
         if (tag is not null)
         {
@@ -81,17 +81,16 @@ public class UserProvider : IUserProvider
                 throw new HttpException(HttpStatusCode.Unauthorized, "You must be authorized to view paste tags.");
             }
 
-            pastesQuery = pastesQuery.Where(p => p.Tags.Contains(tag));
+            filter &= Builders<Paste>.Filter.ElemMatch(p => p.Tags, tag);
         }
 
-        var pastes = pastesQuery.OrderBy(p => p.CreatedAt)
-            .Reverse()
-            .Include(p => p.Pasties)
+        var pastes = await _mongo.Pastes.Find(filter)
+            .SortByDescending(p => p.CreatedAt)
             .Skip(pageRequest.Page * pageRequest.PageSize)
-            .Take(pageRequest.PageSize)
-            .ToList();
+            .Limit(pageRequest.PageSize)
+            .ToListAsync();
 
-        var totalItems = pastesQuery.Count();
+        var totalItems = await _mongo.Pastes.CountDocumentsAsync(filter);
         var totalPages = (int)Math.Ceiling((float)totalItems / pageRequest.PageSize);
 
         if (_userContext.Self != user)
@@ -127,10 +126,10 @@ public class UserProvider : IUserProvider
         if (_userContext.Self != user)
             throw new HttpException(HttpStatusCode.Unauthorized, "You can only fetch your own tags.");
 
-        return _dbContext.Pastes
-            .Where(p => p.Owner == user)
-            .ToList()
-            .SelectMany(p => p.Tags ?? new List<string>())
+        var filter = Builders<Paste>.Filter.Eq(p => p.OwnerId, user.Id);
+
+        return (await _mongo.Pastes.Find(filter).Project(p => p.Tags).ToListAsync())
+            .SelectMany(t => t)
             .Distinct()
             .ToList();
     }

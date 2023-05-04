@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
-using pastemyst.DbContexts;
+using MongoDB.Bson;
+using MongoDB.Driver;
 using pastemyst.Models;
 
 namespace pastemyst.Services;
@@ -11,34 +12,40 @@ public interface IStatsService
 
 public class StatsService : IStatsService
 {
-    private readonly DataContext _dbContext;
+    private readonly IMongoService _mongo;
 
-    public StatsService(DataContext dbContext)
+    public StatsService(IMongoService mongo)
     {
-        _dbContext = dbContext;
+        _mongo = mongo;
     }
 
     public async Task<AppStats> GetAppStatsAsync()
     {
+        var totalPastesFilter = Builders<ActionLog>.Filter.Eq(a => a.Type, ActionLogType.PasteCreated);
+        var totalUsersFilter = Builders<ActionLog>.Filter.Eq(a => a.Type, ActionLogType.UserCreated);
+
         return new()
         {
-            ActivePastes = await _dbContext.Pastes.CountAsync(),
-            ActiveUsers = await _dbContext.Users.CountAsync(),
-            TotalPastes = await _dbContext.ActionLogs.CountAsync(l => l.Type == ActionLogType.PasteCreated),
-            TotalUsers = await _dbContext.ActionLogs.CountAsync(l => l.Type == ActionLogType.UserCreated),
+            ActivePastes = await _mongo.Pastes.CountDocumentsAsync(new BsonDocument()),
+            ActiveUsers = await _mongo.Users.CountDocumentsAsync(new BsonDocument()),
+            TotalPastes = await _mongo.ActionLogs.CountDocumentsAsync(totalPastesFilter),
+            TotalUsers = await _mongo.ActionLogs.CountDocumentsAsync(totalUsersFilter),
             ActivePastesOverTime = await GetActivePasteStatsOverTime(),
             TotalPastesOverTime = await GetActionLogStatsOverTime(ActionLogType.PasteCreated),
         };
     }
 
-    private async Task<SortedDictionary<DateTime, int>> GetActionLogStatsOverTime(ActionLogType type)
+    private async Task<SortedDictionary<DateTime, long>> GetActionLogStatsOverTime(ActionLogType type)
     {
-        var statsOverTime = await _dbContext.ActionLogs
-            .Where(a => a.Type == type)
-            .GroupBy(a => a.CreatedAt.Date)
-            .ToDictionaryAsync(group => group.Key, group => group.Count());
+        var filter = Builders<ActionLog>.Filter.Eq(a => a.Type, type);
 
-        var statsOverTimeSorted = new SortedDictionary<DateTime, int>(statsOverTime);
+        var statsOverTime = (await _mongo.ActionLogs
+            .Find(filter)
+            .ToListAsync())
+            .GroupBy(a => a.CreatedAt)
+            .ToDictionary(g => g.Key, g => (long) g.Count());
+
+        var statsOverTimeSorted = new SortedDictionary<DateTime, long>(statsOverTime);
 
         for (int i = 1; i < statsOverTimeSorted.Count; i++)
         {
@@ -51,17 +58,22 @@ public class StatsService : IStatsService
         return statsOverTimeSorted;
     }
 
-    private async Task<SortedDictionary<DateTime, int>> GetActivePasteStatsOverTime()
+    private async Task<SortedDictionary<DateTime, long>> GetActivePasteStatsOverTime()
     {
-        var statsOverTime = await _dbContext.ActionLogs
-            .Where(a => a.Type == ActionLogType.PasteCreated || a.Type == ActionLogType.PasteDeleted || a.Type == ActionLogType.PasteExpired)
-            .GroupBy(a => a.CreatedAt.Date)
-            .ToDictionaryAsync(
+        var filter = Builders<ActionLog>.Filter.Eq(a => a.Type, ActionLogType.PasteCreated) |
+                     Builders<ActionLog>.Filter.Eq(a => a.Type, ActionLogType.PasteDeleted) |
+                     Builders<ActionLog>.Filter.Eq(a => a.Type, ActionLogType.PasteExpired);
+
+        var statsOverTime = (await _mongo.ActionLogs
+            .Find(filter)
+            .ToListAsync())
+            .GroupBy(a => a.CreatedAt)
+            .ToDictionary(
                 grp => grp.Key,
-                grp => grp.Count(g => g.Type == ActionLogType.PasteCreated) - grp.Count(g => g.Type == ActionLogType.PasteDeleted || g.Type == ActionLogType.PasteExpired)
+                grp => (long) grp.Count(g => g.Type == ActionLogType.PasteCreated) - grp.Count(g => g.Type == ActionLogType.PasteDeleted || g.Type == ActionLogType.PasteExpired)
             );
 
-        var statsOverTimeSorted = new SortedDictionary<DateTime, int>(statsOverTime);
+        var statsOverTimeSorted = new SortedDictionary<DateTime, long>(statsOverTime);
 
         for (int i = 1; i < statsOverTimeSorted.Count; i++)
         {

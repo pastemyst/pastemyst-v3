@@ -1,5 +1,5 @@
 using Microsoft.EntityFrameworkCore;
-using pastemyst.DbContexts;
+using MongoDB.Driver;
 using pastemyst.Models;
 using pastemyst.Services;
 using Quartz;
@@ -8,22 +8,22 @@ namespace pastemyst.Jobs;
 
 public class ExpirePastesJob : IJob
 {
-    private readonly DataContext _dbContext;
+    private readonly IMongoService _mongo;
     private readonly IActionLogger _actionLogger;
     private readonly ILogger<ExpirePastesJob> _logger;
 
-    public ExpirePastesJob(DataContext dbContext, ILogger<ExpirePastesJob> logger, IActionLogger actionLogger)
+    public ExpirePastesJob(ILogger<ExpirePastesJob> logger, IActionLogger actionLogger, IMongoService mongo)
     {
-        _dbContext = dbContext;
         _logger = logger;
         _actionLogger = actionLogger;
+        _mongo = mongo;
     }
 
     public async Task Execute(IJobExecutionContext context)
     {
-        var toDelete = await _dbContext.Pastes
-            .Where(p => p.DeletesAt.Value <= DateTime.UtcNow)
-            .ToListAsync();
+        var filter = Builders<Paste>.Filter.Lt(p => p.DeletesAt.Value, DateTime.UtcNow);
+
+        var toDelete = await _mongo.Pastes.Find(filter).ToListAsync();
 
         if (toDelete.Count == 0) return;
 
@@ -32,8 +32,7 @@ public class ExpirePastesJob : IJob
             await _actionLogger.LogActionAsync(ActionLogType.PasteExpired, paste.Id);
         }
 
-        _dbContext.RemoveRange(toDelete);
-        await _dbContext.SaveChangesAsync();
+        await _mongo.Pastes.DeleteManyAsync(filter);
 
         _logger.LogInformation($"Deleted {toDelete.Count} expired paste(s).");
     }
