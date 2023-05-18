@@ -1,8 +1,9 @@
-using MongoDB.Bson;
+using MongoDB.Bson.Serialization;
 using MongoDB.Bson.Serialization.Conventions;
 using MongoDB.Driver;
 using MongoDB.Driver.GridFS;
 using pastemyst.Models;
+using pastemyst.Serializers;
 
 namespace pastemyst.Services;
 
@@ -26,10 +27,15 @@ public class MongoService : IMongoService
 
     public MongoService(IConfiguration configuration)
     {
+        BsonClassMap.RegisterClassMap<Paste>(map =>
+        {
+            map.AutoMap();
+            map.GetMemberMap(p => p.ExpiresIn)
+                .SetSerializer(new CustomEnumStringSerializer<ExpiresIn>());
+        });
+
         var camelCaseConvention = new ConventionPack { new CamelCaseElementNameConvention() };
-        var enumConvention = new ConventionPack { new EnumRepresentationConvention(BsonType.String) };
         ConventionRegistry.Register("CamelCase", camelCaseConvention, type => true);
-        ConventionRegistry.Register("EnumString", enumConvention, type => true);
 
         var mongoClient = new MongoClient(configuration.GetConnectionString("DefaultDb"));
 
@@ -39,15 +45,17 @@ public class MongoService : IMongoService
         Users = mongoDb.GetCollection<User>("users");
         ActionLogs = mongoDb.GetCollection<ActionLog>("actionLogs");
 
-        Images = new GridFSBucket(mongoDb, new() {
+        Images = new GridFSBucket(mongoDb, new()
+        {
             BucketName = "images",
             ChunkSizeBytes = 1_000_000
         });
 
         var usernameIndex = Builders<User>.IndexKeys.Text(u => u.Username);
 
-        Users.Indexes.CreateOne(new CreateIndexModel<User>(usernameIndex, new() {
-                    Unique = true
+        Users.Indexes.CreateOne(new CreateIndexModel<User>(usernameIndex, new()
+        {
+            Unique = true
         }));
     }
 }
