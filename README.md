@@ -41,24 +41,12 @@ this is a guide on how to set the project up, build it and get it running.
 
 the api is written in c# with asp.net core, so you need the dotnet sdk (and the asp.net targeting pack). check the [dotnet download page](https://dotnet.microsoft.com/en-us/download) for a guide on how to install it.
 
-you also need a postgresql database.
+you also need a mongodb database.
 
 set the db connection string as a dotnet secret:
 
 ```
-dotnet user-secrets set ConnectionStrings:DefaultDb "User Id=postgres;Password=[YOUR-PASSWORD];Server=[SERVER-HOST];Port=5432;Database=postgres"
-```
-
-install dotnet ef core tools for running db migrations:
-
-```
-dotnet tool install --global dotnet-ef
-```
-
-update your database to the latest migration:
-
-```
-dotnet ef database update
+dotnet user-secrets set ConnectionStrings:DefaultDb "mongodb://127.0.0.1/27017"
 ```
 
 now you can build and run the api with:
