@@ -3,7 +3,7 @@ using System.Web;
 using JWT.Algorithms;
 using JWT.Builder;
 using Microsoft.EntityFrameworkCore;
-using pastemyst.DbContexts;
+using MongoDB.Driver;
 using pastemyst.Exceptions;
 using pastemyst.Models;
 
@@ -32,20 +32,20 @@ public class AuthService : IAuthService
     private readonly IImageService _imageService;
     private readonly IActionLogger _actionLogger;
     private readonly IHttpClientFactory _httpClientFactory;
-    private readonly DataContext _dbContext;
+    private readonly IMongoService _mongo;
     private readonly IConfiguration _configuration;
 
     public AuthService(IIdProvider idProvider, IOAuthService oAuthService, IConfiguration configuration,
         IHttpClientFactory httpClientFactory, IImageService imageService,
-        DataContext dbContext, IActionLogger actionLogger)
+        IActionLogger actionLogger, IMongoService mongo)
     {
         _idProvider = idProvider;
         _oAuthService = oAuthService;
         _configuration = configuration;
         _httpClientFactory = httpClientFactory;
         _imageService = imageService;
-        _dbContext = dbContext;
         _actionLogger = actionLogger;
+        _mongo = mongo;
     }
 
     public async Task<string> InitiateLoginFlowAsync(string provider, HttpContext httpContext)
@@ -87,10 +87,11 @@ public class AuthService : IAuthService
         var oAuthProvider = _oAuthService.OAuthProviders[provider];
         var accessToken = await _oAuthService.ExchangeTokenAsync(oAuthProvider, code);
         var providerUser = await _oAuthService.GetProviderUserAsync(oAuthProvider, accessToken);
-        var existingUser = await _dbContext.Users.FirstOrDefaultAsync(user =>
-            user.ProviderName == oAuthProvider.Name &&
-            user.ProviderId == providerUser.Id
-        );
+
+        var userFilter = Builders<User>.Filter.Eq(u => u.ProviderName, oAuthProvider.Name) &
+                         Builders<User>.Filter.Eq(u => u.ProviderId, providerUser.Id);
+
+        var existingUser = await _mongo.Users.Find(userFilter).FirstOrDefaultAsync();
 
         var cookie = new CookieOptions
         {
@@ -148,7 +149,10 @@ public class AuthService : IAuthService
             throw new HttpException(HttpStatusCode.BadRequest, "Missing the registration cookie.");
         }
 
-        if (await _dbContext.Users.AnyAsync(user => user.Username == username))
+        var usernameFilter = Builders<User>.Filter.Eq(u => u.Username, username);
+        var existingUser = await _mongo.Users.Find(usernameFilter).FirstOrDefaultAsync();
+
+        if (existingUser is not null)
         {
             throw new HttpException(HttpStatusCode.BadRequest, "Username is already taken.");
         }
@@ -159,13 +163,13 @@ public class AuthService : IAuthService
             .MustVerifySignature()
             .Decode<Dictionary<string, object>>(cookie);
 
-        var id = await _idProvider.GenerateId(async id => await _dbContext.Users.AnyAsync(user => user.Id == id));
+        var id = await _idProvider.GenerateId(async id => await _mongo.Users.Find(u => u.Id == id).FirstOrDefaultAsync() is not null);
 
         var client = _httpClientFactory.CreateClient();
         var response = await client.GetAsync((string)claims["avatarUrl"]);
         var imageBytes = await response.Content.ReadAsByteArrayAsync();
 
-        var avatar = await _imageService.UploadImageAsync(
+        var avatarId = await _imageService.UploadImageAsync(
             imageBytes,
             response.Content.Headers.ContentType?.MediaType ?? "image/png"
         );
@@ -175,14 +179,13 @@ public class AuthService : IAuthService
             Id = id,
             CreatedAt = DateTime.UtcNow,
             Username = username,
-            Avatar = avatar,
+            AvatarId = avatarId,
             ProviderName = (string)claims["providerName"],
             ProviderId = (string)claims["providerId"],
             Settings = new UserSettings()
         };
 
-        await _dbContext.Users.AddAsync(user);
-        await _dbContext.SaveChangesAsync();
+        await _mongo.Users.InsertOneAsync(user);
 
         httpContext.Response.Cookies.Delete("pastemyst-registration");
 
@@ -229,10 +232,7 @@ public class AuthService : IAuthService
 
         var userId = (string)claims["id"];
 
-        return await _dbContext.Users
-            .Include(u => u.Avatar)
-            .Include(u => u.Settings)
-            .FirstAsync(u => u.Id == userId);
+        return await _mongo.Users.Find(u => u.Id == userId).FirstOrDefaultAsync();
     }
 
     public string Logout(HttpContext httpContext)

@@ -1,5 +1,6 @@
 using System.Net;
-using pastemyst.DbContexts;
+using MongoDB.Driver;
+using MongoDB.Bson;
 using pastemyst.Exceptions;
 using pastemyst.Models;
 
@@ -21,15 +22,15 @@ public class UserSettingsService : IUserSettingsService
     private readonly IUserContext _userContext;
     private readonly IUserProvider _userProvider;
     private readonly IImageService _imageService;
-    private readonly DataContext _dataContext;
+    private readonly IMongoService _mongo;
 
-    public UserSettingsService(DataContext dataContext, IUserProvider userProvider, IImageService imageService,
-        IUserContext userContext)
+    public UserSettingsService(IUserProvider userProvider, IImageService imageService,
+        IUserContext userContext, IMongoService mongo)
     {
-        _dataContext = dataContext;
         _userProvider = userProvider;
         _imageService = imageService;
         _userContext = userContext;
+        _mongo = mongo;
     }
 
     public async Task SetUsernameAsync(string username)
@@ -49,11 +50,8 @@ public class UserSettingsService : IUserSettingsService
             throw new HttpException(HttpStatusCode.BadRequest, "Username already taken.");
         }
 
-        _userContext.Self.Username = username;
-
-        _dataContext.Users.Attach(_userContext.Self);
-        _dataContext.Users.Entry(_userContext.Self).Property(u => u.Username).IsModified = true;
-        await _dataContext.SaveChangesAsync();
+        var update = Builders<User>.Update.Set(u => u.Username, username);
+        await _mongo.Users.UpdateOneAsync(u => u.Id == _userContext.Self.Id, update);
     }
 
     public async Task SetAvatarAsync(byte[] bytes, string contentType)
@@ -63,15 +61,12 @@ public class UserSettingsService : IUserSettingsService
             throw new HttpException(HttpStatusCode.Unauthorized, "You need to be authorized to change settings.");
         }
 
-        await _imageService.DeleteAsync(_userContext.Self.Avatar);
+        await _mongo.Images.DeleteAsync(ObjectId.Parse(_userContext.Self.AvatarId));
 
         var newAvatar = await _imageService.UploadImageAsync(bytes, contentType);
 
-        _userContext.Self.Avatar = newAvatar;
-
-        _dataContext.Users.Attach(_userContext.Self);
-        _dataContext.Users.Entry(_userContext.Self).Reference(u => u.Avatar).IsModified = true;
-        await _dataContext.SaveChangesAsync();
+        var update = Builders<User>.Update.Set(u => u.AvatarId, newAvatar);
+        await _mongo.Users.UpdateOneAsync(u => u.Id == _userContext.Self.Id, update);
     }
 
     public UserSettings GetUserSettings()
@@ -87,10 +82,7 @@ public class UserSettingsService : IUserSettingsService
         if (!_userContext.IsLoggedIn())
             throw new HttpException(HttpStatusCode.Unauthorized, "You must be authorized to update user settings.");
 
-        _userContext.Self.Settings = settings;
-
-        _dataContext.Users.Attach(_userContext.Self);
-        _dataContext.Users.Entry(_userContext.Self).Reference(u => u.Settings).IsModified = true;
-        await _dataContext.SaveChangesAsync();
+        var update = Builders<User>.Update.Set(u => u.Settings, settings);
+        await _mongo.Users.UpdateOneAsync(u => u.Id == _userContext.Self.Id, update);
     }
 }

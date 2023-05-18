@@ -1,55 +1,62 @@
-using pastemyst.DbContexts;
-using pastemyst.Models;
+using MongoDB.Bson;
+using MongoDB.Driver;
+using MongoDB.Driver.GridFS;
 
 namespace pastemyst.Services;
 
 public interface IImageService
 {
-    Task<Image> UploadImageAsync(byte[] bytes, string contentType);
+    Task<string> UploadImageAsync(byte[] bytes, string contentType);
 
-    Task<Image> FindByIdAsync(string id);
+    Task<GridFSFileInfo<ObjectId>> FindByIdAsync(string id);
 
-    Task DeleteAsync(Image image);
+    Task<byte[]> DownloadByIdAsync(string id);
 
-    bool ExistsById(string id);
+    Task DeleteAsync(string id);
+
+    Task<bool> ExistsByIdAsync(string id);
 }
 
 public class ImageService : IImageService
 {
-    private readonly DataContext _context;
+    private readonly IMongoService _mongo;
 
     private readonly IIdProvider _idProvider;
 
-    public ImageService(DataContext context, IIdProvider idProvider)
+    public ImageService(IIdProvider idProvider, IMongoService mongo)
     {
-        _context = context;
         _idProvider = idProvider;
+        _mongo = mongo;
     }
 
-    public async Task<Image> UploadImageAsync(byte[] bytes, string contentType)
+    public async Task<string> UploadImageAsync(byte[] bytes, string contentType)
     {
-        var image = new Image
+        var image = await _mongo.Images.UploadFromBytesAsync("", bytes, new()
         {
-            Id = _idProvider.GenerateId(ExistsById),
-            CreatedAt = DateTime.UtcNow,
-            ContentType = contentType,
-            Bytes = bytes
-        };
+            Metadata = new BsonDocument(new Dictionary<string, string>
+            {
+                { "Content-Type", contentType }
+            })
+        });
 
-        await _context.Images.AddAsync(image);
-
-        await _context.SaveChangesAsync();
-
-        return image;
+        return image.ToString();
     }
 
-    public async Task<Image> FindByIdAsync(string id) => await _context.Images.FindAsync(id);
-    
-    public async Task DeleteAsync(Image image)
+    public async Task<GridFSFileInfo<ObjectId>> FindByIdAsync(string id)
     {
-        _context.Images.Remove(image);
-        await _context.SaveChangesAsync();
+        var filter = Builders<GridFSFileInfo<ObjectId>>.Filter.Eq(fs => fs.Id, ObjectId.Parse(id));
+        return await _mongo.Images.Find(filter).FirstOrDefaultAsync();
     }
 
-    public bool ExistsById(string id) => _context.Images.Any(img => img.Id == id);
+    public async Task<byte[]> DownloadByIdAsync(string id)
+    {
+        return await _mongo.Images.DownloadAsBytesAsync(new ObjectId(id));
+    }
+
+    public async Task DeleteAsync(string id)
+    {
+        await _mongo.Images.DeleteAsync(new ObjectId(id));
+    }
+
+    public async Task<bool> ExistsByIdAsync(string id) => await FindByIdAsync(id) is not null;
 }

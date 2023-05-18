@@ -1,8 +1,13 @@
+using MongoDB.Bson;
+using MongoDB.Bson.Serialization.Attributes;
+
 namespace pastemyst.Models;
 
 public class ActionLog
 {
-    public int Id { get; set; }
+    [BsonId]
+    [BsonRepresentation(BsonType.ObjectId)]
+    public string Id { get; set; }
 
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 

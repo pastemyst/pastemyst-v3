@@ -1,4 +1,3 @@
-using pastemyst.DbContexts;
 using pastemyst.Models;
 
 namespace pastemyst.Services;
@@ -10,11 +9,11 @@ public interface IActionLogger
 
 public class ActionLogger : IActionLogger
 {
-    private readonly DataContext _dbContext;
+    private readonly IMongoService _mongo;
 
-    public ActionLogger(DataContext dbContext)
+    public ActionLogger(IMongoService mongo)
     {
-        _dbContext = dbContext;
+        _mongo = mongo;
     }
 
     public async Task LogActionAsync(ActionLogType type, string objectId)
@@ -25,7 +24,6 @@ public class ActionLogger : IActionLogger
             ObjectId = objectId
         };
 
-        await _dbContext.ActionLogs.AddAsync(actionLog);
-        await _dbContext.SaveChangesAsync();
+        await _mongo.ActionLogs.InsertOneAsync(actionLog);
     }
 }

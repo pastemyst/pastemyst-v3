@@ -5,7 +5,7 @@ namespace pastemyst.Models;
 public class PastyCreateInfo
 {
     [MaxLength(50)]
-    public string Title { get; set; }
+    public string Title { get; set; } = "";
     
     [Required]
     public string Content { get; set; }

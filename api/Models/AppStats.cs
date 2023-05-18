@@ -2,11 +2,11 @@ namespace pastemyst.Models;
 
 public class AppStats
 {
-    public int ActivePastes { get; set; }
-    public int TotalPastes { get; set; }
-    public int ActiveUsers { get; set; }
-    public int TotalUsers { get; set; }
+    public long ActivePastes { get; set; }
+    public long TotalPastes { get; set; }
+    public long ActiveUsers { get; set; }
+    public long TotalUsers { get; set; }
 
-    public SortedDictionary<DateTime, int> ActivePastesOverTime { get; set; }
-    public SortedDictionary<DateTime, int> TotalPastesOverTime { get; set; }
+    public SortedDictionary<DateTime, long> ActivePastesOverTime { get; set; }
+    public SortedDictionary<DateTime, long> TotalPastesOverTime { get; set; }
 }

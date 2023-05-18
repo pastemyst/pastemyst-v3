@@ -17,10 +17,11 @@ public class ImageController : ControllerBase
     [HttpGet("{imageId}")]
     public async Task<IActionResult> GetImage(string imageId)
     {
-        var image = await _imageService.FindByIdAsync(imageId);
+        var imageMeta = await _imageService.FindByIdAsync(imageId);
+        var imageBytes = await _imageService.DownloadByIdAsync(imageId);
 
-        if (image is null) return NotFound();
+        if (imageMeta is null || imageBytes is null) return NotFound();
 
-        return File(image.Bytes, image.ContentType);
+        return File(imageBytes, imageMeta.Metadata["Content-Type"].ToString());
     }
 }
