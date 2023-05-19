@@ -58,7 +58,9 @@
             langs.splice(textLangIndex, 1);
             langs.unshift(textLang);
 
-            selectedLanguage = textLang;
+            if (!selectedLanguage) {
+                selectedLanguage = textLang;
+            }
         })();
 
         const editorUpdateListener = EditorView.updateListener.of((update) => {
@@ -108,6 +110,16 @@
                 ]
             });
         }
+    };
+
+    export const setIndentaion = (unit: IndentUnit, width: number) => {
+        selectedIndentUnit = unit;
+        selectedIndentWidth = width;
+        setEditorIndentation();
+    };
+
+    export const getIndentation = (): [IndentUnit, number] => {
+        return [selectedIndentUnit, selectedIndentWidth];
     };
 
     export const replaceIndentation = (previousUnit: IndentUnit, previousWidth: number) => {
