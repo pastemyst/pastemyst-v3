@@ -110,11 +110,13 @@
 
         let newtab = new TabData(tabCounter, name, new Editor({ target: editorTarget }));
 
-        // if a tab already exists, set the new tab's language as the previous one
         await tick();
 
+        // set the language and indentation same as the previous tab
         if (tabs.length > 0) {
-            newtab.editor.setSelectedLang(tabs[tabs.length - 1].editor.getSelectedLang());
+            const previousEditor = tabs[tabs.length - 1].editor;
+            newtab.editor.setSelectedLang(previousEditor.getSelectedLang());
+            newtab.editor.setIndentaion(...previousEditor.getIndentation());
         }
 
         tabs = [...tabs, newtab];
