@@ -2,7 +2,9 @@ using System.Net;
 using System.Web;
 using JWT.Algorithms;
 using JWT.Builder;
+using JWT.Exceptions;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.ObjectPool;
 using MongoDB.Driver;
 using pastemyst.Exceptions;
 using pastemyst.Models;
@@ -224,11 +226,19 @@ public class AuthService : IAuthService
             jwtToken = authHeader["Bearer ".Length..];
         }
 
-        var claims = JwtBuilder.Create()
-            .WithAlgorithm(new HMACSHA512Algorithm())
-            .WithSecret(_configuration["JwtSecret"])
-            .MustVerifySignature()
-            .Decode<Dictionary<string, object>>(jwtToken);
+        Dictionary<string, object> claims;
+        try
+        {
+            claims = JwtBuilder.Create()
+                .WithAlgorithm(new HMACSHA512Algorithm())
+                .WithSecret(_configuration["JwtSecret"])
+                .MustVerifySignature()
+                .Decode<Dictionary<string, object>>(jwtToken);
+        }
+        catch (TokenExpiredException)
+        {
+            throw new HttpException(HttpStatusCode.Unauthorized, "JWT token has expired.");
+        }
 
         var userId = (string)claims["id"];
 
