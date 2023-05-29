@@ -39,7 +39,7 @@
         "@codemirror/legacy-modes": "^6.3.2",
         "@codemirror/state": "^6.2.0",
         "@codemirror/view": "^6.11.2",
-        "@lezer/highlight": "^1.1.4",
+        "@lezer/highlight": "^1.1.6",
         "@types/sortablejs": "^1.15.1",
         "codemirror": "^6.0.1",
         "frappe-charts": "^1.6.2",
