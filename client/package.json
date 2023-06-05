@@ -37,7 +37,7 @@
         "@codemirror/language": "^6.6.0",
         "@codemirror/language-data": "^6.3.1",
         "@codemirror/legacy-modes": "^6.3.2",
-        "@codemirror/state": "^6.2.0",
+        "@codemirror/state": "^6.2.1",
         "@codemirror/view": "^6.11.2",
         "@lezer/highlight": "^1.1.6",
         "@types/sortablejs": "^1.15.1",
