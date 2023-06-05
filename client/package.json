@@ -43,7 +43,7 @@
         "@types/sortablejs": "^1.15.1",
         "codemirror": "^6.0.1",
         "frappe-charts": "^1.6.2",
-        "highlight-words": "^1.2.1",
+        "highlight-words": "^1.2.2",
         "moment": "^2.29.4",
         "shiki": "^0.14.1",
         "sortablejs": "^1.15.0",
