@@ -9,8 +9,14 @@ updates:
     directory: "/client"
     schedule:
       interval: "weekly"
+    ignore:
+      - dependency-name: "*"
+        update-types: ["version-update:semver-patch"]
       
   - package-ecosystem: "nuget"
     directory: "/api"
     schedule:
       interval: "weekly"
+    ignore:
+      - dependency-name: "*"
+        update-types: ["version-update:semver-patch"]
