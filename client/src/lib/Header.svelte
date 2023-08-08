@@ -1,7 +1,7 @@
 <script lang="ts">
     import { cmdPalOpen, currentUserStore } from "./stores";
     import { tooltip } from "./tooltips";
-    import { PUBLIC_API_BASE } from "$env/static/public";
+    import { env } from "$env/dynamic/public";
 
     const onMenuClick = () => {
         cmdPalOpen.set(true);
@@ -18,7 +18,7 @@
         {#if $currentUserStore != null}
             <a href="/~{$currentUserStore.username}" class="nav-item user btn btn-icon">
                 <img
-                    src="{PUBLIC_API_BASE}/images/{$currentUserStore.avatarId}"
+                    src="{env.PUBLIC_API_BASE}/images/{$currentUserStore.avatarId}"
                     alt="{$currentUserStore.username}'s avatar"
                 />
             </a>

@@ -1,4 +1,4 @@
-import { PUBLIC_API_BASE } from "$env/static/public";
+import { env } from "$env/dynamic/public";
 import type { FetchFunc } from "./fetch";
 import type { LangStat } from "./lang";
 import type { Page } from "./page";
@@ -125,7 +125,7 @@ export const expiresInToLongString = (exp: ExpiresIn): string => {
 };
 
 export const createPaste = async (skeleton: PasteCreateInfo): Promise<Paste | null> => {
-    const res = await fetch(`${PUBLIC_API_BASE}/pastes/`, {
+    const res = await fetch(`${env.PUBLIC_API_BASE}/pastes/`, {
         method: "post",
         credentials: "include",
         headers: {
@@ -143,7 +143,7 @@ export const getPaste = async (
     fetchFunc: FetchFunc,
     id: string
 ): Promise<[Paste | null, number]> => {
-    const res = await fetchFunc(`${PUBLIC_API_BASE}/pastes/${id}`, {
+    const res = await fetchFunc(`${env.PUBLIC_API_BASE}/pastes/${id}`, {
         method: "get",
         credentials: "include"
     });
@@ -154,7 +154,7 @@ export const getPaste = async (
 };
 
 export const deletePaste = async (id: string): Promise<boolean> => {
-    const res = await fetch(`${PUBLIC_API_BASE}/pastes/${id}`, {
+    const res = await fetch(`${env.PUBLIC_API_BASE}/pastes/${id}`, {
         method: "delete",
         credentials: "include"
     });
@@ -163,7 +163,7 @@ export const deletePaste = async (id: string): Promise<boolean> => {
 };
 
 export const starPaste = async (id: string): Promise<boolean> => {
-    const res = await fetch(`${PUBLIC_API_BASE}/pastes/${id}/star`, {
+    const res = await fetch(`${env.PUBLIC_API_BASE}/pastes/${id}/star`, {
         method: "post",
         credentials: "include"
     });
@@ -172,7 +172,7 @@ export const starPaste = async (id: string): Promise<boolean> => {
 };
 
 export const pinPaste = async (id: string): Promise<boolean> => {
-    const res = await fetch(`${PUBLIC_API_BASE}/pastes/${id}/pin`, {
+    const res = await fetch(`${env.PUBLIC_API_BASE}/pastes/${id}/pin`, {
         method: "post",
         credentials: "include"
     });
@@ -181,7 +181,7 @@ export const pinPaste = async (id: string): Promise<boolean> => {
 };
 
 export const isPasteStarred = async (fetchFunc: FetchFunc, id: string): Promise<boolean> => {
-    const res = await fetchFunc(`${PUBLIC_API_BASE}/pastes/${id}/star`, {
+    const res = await fetchFunc(`${env.PUBLIC_API_BASE}/pastes/${id}/star`, {
         method: "get",
         credentials: "include"
     });
@@ -195,7 +195,7 @@ export const getPasteStats = async (
     fetchFunc: FetchFunc,
     id: string
 ): Promise<PasteStats | null> => {
-    const res = await fetchFunc(`${PUBLIC_API_BASE}/pastes/${id}/stats`, {
+    const res = await fetchFunc(`${env.PUBLIC_API_BASE}/pastes/${id}/stats`, {
         method: "get",
         credentials: "include"
     });
@@ -206,7 +206,7 @@ export const getPasteStats = async (
 };
 
 export const getPasteLangs = async (fetchFunc: FetchFunc, id: string): Promise<LangStat[]> => {
-    const res = await fetchFunc(`${PUBLIC_API_BASE}/pastes/${id}/langs`, {
+    const res = await fetchFunc(`${env.PUBLIC_API_BASE}/pastes/${id}/langs`, {
         method: "get",
         credentials: "include"
     });
@@ -224,7 +224,7 @@ export const getUserPastes = async (
     pageSize: number
 ): Promise<Page<PasteWithLangStats> | null> => {
     const res = await fetchFunc(
-        `${PUBLIC_API_BASE}/users/${username}/pastes${pinned ? "/pinned" : ""}` +
+        `${env.PUBLIC_API_BASE}/users/${username}/pastes${pinned ? "/pinned" : ""}` +
             `?page=${page}` +
             `&pageSize=${pageSize}`,
         {
