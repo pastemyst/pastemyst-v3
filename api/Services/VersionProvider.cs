@@ -13,7 +13,13 @@ public class VersionProvider : IVersionProvider, IHostedService
 
     public Task StartAsync(CancellationToken cancellationToken)
     {
-        using var repo = new Repository("../");
+        var repoPath = "../";
+        if (!Repository.IsValid("../"))
+        {
+            repoPath = ".";
+        }
+
+        using var repo = new Repository(repoPath);
 
         Version = repo.Tags.OrderBy(t => t.FriendlyName).Last().FriendlyName;
 

@@ -1,7 +1,7 @@
 <script lang="ts">
     import type { PageData } from "./$types";
     import { tooltip } from "$lib/tooltips";
-    import { PUBLIC_API_BASE } from "$env/static/public";
+    import { env } from "$env/dynamic/public";
     import PasteList from "$lib/PasteList.svelte";
 
     export let data: PageData;
@@ -16,7 +16,7 @@
         <section class="user-header">
             <img
                 class="avatar"
-                src="{PUBLIC_API_BASE}/images/{data.user.avatarId}"
+                src="{env.PUBLIC_API_BASE}/images/{data.user.avatarId}"
                 alt="${data.user.username}'s avatar"
             />
 
@@ -85,7 +85,7 @@
                             </a>
 
                             <a
-                                href="{PUBLIC_API_BASE}/auth/logout"
+                                href="{env.PUBLIC_API_BASE}/auth/logout"
                                 use:tooltip
                                 aria-label="log out"
                                 class="logout btn btn-danger"

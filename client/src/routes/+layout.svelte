@@ -7,7 +7,7 @@
     import { Close, setBaseCommands, type Command } from "$lib/command";
     import { afterNavigate, beforeNavigate, goto } from "$app/navigation";
     import ThemeContext from "$lib/ThemeContext.svelte";
-    import { PUBLIC_API_BASE } from "$env/static/public";
+    import { env } from "$env/dynamic/public";
 
     import "tippy.js/dist/tippy.css";
     import "tippy.js/dist/svg-arrow.css";
@@ -48,7 +48,7 @@
                 {
                     name: "logout",
                     action: () => {
-                        window.location.href = `${PUBLIC_API_BASE}/auth/logout`;
+                        window.location.href = `${env.PUBLIC_API_BASE}/auth/logout`;
                         return Close.yes;
                     }
                 }
