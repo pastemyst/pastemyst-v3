@@ -80,6 +80,8 @@ install all dependencies:
 npm i
 ```
 
+copy the `.env.example` file to `.env` in the `/client` directory and change the variables.
+
 run the client with:
 
 ```
