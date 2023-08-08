@@ -1,4 +1,4 @@
-import { PUBLIC_API_BASE } from "$env/static/public";
+import { env } from "$env/dynamic/public";
 import type { FetchFunc } from "./fetch";
 
 export type SettingsContext = "browser" | "profile";
@@ -8,7 +8,7 @@ export interface UserSettings {
 }
 
 export const getUserSettings = async (fetchFunc: FetchFunc): Promise<UserSettings> => {
-    const res = await fetchFunc(`${PUBLIC_API_BASE}/settings`, {
+    const res = await fetchFunc(`${env.PUBLIC_API_BASE}/settings`, {
         method: "get",
         credentials: "include"
     });
@@ -17,7 +17,7 @@ export const getUserSettings = async (fetchFunc: FetchFunc): Promise<UserSetting
 };
 
 export const updateUserSettings = async (fetchFunc: FetchFunc, userSettings: UserSettings) => {
-    await fetchFunc(`${PUBLIC_API_BASE}/settings`, {
+    await fetchFunc(`${env.PUBLIC_API_BASE}/settings`, {
         method: "patch",
         credentials: "include",
         headers: {

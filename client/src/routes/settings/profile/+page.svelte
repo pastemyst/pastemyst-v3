@@ -1,5 +1,5 @@
 <script lang="ts">
-    import { PUBLIC_API_BASE } from "$env/static/public";
+    import { env } from "$env/dynamic/public";
     import { getSelf } from "$lib/api/auth";
     import { updateUserSettings } from "$lib/api/settings";
     import { getUserByUsername } from "$lib/api/user";
@@ -23,7 +23,7 @@
     };
 
     const onAvatarChange = async () => {
-        await fetch(`${PUBLIC_API_BASE}/settings/avatar`, {
+        await fetch(`${env.PUBLIC_API_BASE}/settings/avatar`, {
             method: "PATCH",
             credentials: "include",
             body: new FormData(avatarForm)
@@ -73,7 +73,7 @@
             username: usernameInputValue
         };
 
-        await fetch(`${PUBLIC_API_BASE}/settings/username`, {
+        await fetch(`${env.PUBLIC_API_BASE}/settings/username`, {
             method: "PATCH",
             credentials: "include",
             body: JSON.stringify(usernameData),
@@ -108,7 +108,7 @@
 <h4>avatar</h4>
 
 <div class="avatar flex sm-row center">
-    <img src="{PUBLIC_API_BASE}/images/{data.self?.avatarId}" alt="{data.self.username}'s avatar" />
+    <img src="{env.PUBLIC_API_BASE}/images/{data.self?.avatarId}" alt="{data.self.username}'s avatar" />
 
     <button on:click={onAvatarEditClick}>
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" class="icon">

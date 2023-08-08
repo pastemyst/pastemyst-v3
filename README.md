@@ -46,7 +46,7 @@ you also need a mongodb database.
 set the db connection string as a dotnet secret:
 
 ```
-dotnet user-secrets set ConnectionStrings:DefaultDb "mongodb://127.0.0.1/27017"
+dotnet user-secrets set ConnectionStrings:DefaultDb "mongodb://127.0.0.1:27017"
 ```
 
 now you can build and run the api with:
@@ -79,8 +79,6 @@ install all dependencies:
 ```
 npm i
 ```
-
-copy `.env.example` to `.env` and change all fields that are needed.
 
 run the client with:
 

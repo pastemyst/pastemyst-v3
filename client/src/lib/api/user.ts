@@ -1,4 +1,4 @@
-import { PUBLIC_API_BASE } from "$env/static/public";
+import { env } from "$env/dynamic/public";
 import type { FetchFunc } from "./fetch";
 
 export interface User {
@@ -11,7 +11,7 @@ export interface User {
 }
 
 export const getUserByUsername = async (username: string): Promise<User | null> => {
-    const res = await fetch(`${PUBLIC_API_BASE}/users/${username}`, {
+    const res = await fetch(`${env.PUBLIC_API_BASE}/users/${username}`, {
         method: "get"
     });
 
@@ -24,7 +24,7 @@ export const getUserById = async (
     fetchFunc: FetchFunc,
     id: string
 ): Promise<[User | null, number]> => {
-    const res = await fetchFunc(`${PUBLIC_API_BASE}/users?id=${id}`, {
+    const res = await fetchFunc(`${env.PUBLIC_API_BASE}/users?id=${id}`, {
         method: "get"
     });
 
@@ -34,7 +34,7 @@ export const getUserById = async (
 };
 
 export const getUserTags = async (fetchFunc: FetchFunc, username: string): Promise<string[]> => {
-    const res = await fetchFunc(`${PUBLIC_API_BASE}/users/${username}/tags`, {
+    const res = await fetchFunc(`${env.PUBLIC_API_BASE}/users/${username}/tags`, {
         method: "get",
         credentials: "include"
     });

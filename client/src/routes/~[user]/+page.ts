@@ -4,23 +4,23 @@ import type { Page } from "$lib/api/page";
 import type { PageLoad } from "./$types";
 import type { PasteWithLangStats } from "$lib/api/paste";
 import { error } from "@sveltejs/kit";
-import { PUBLIC_API_BASE } from "$env/static/public";
+import { env } from "$env/dynamic/public";
 
 export const load: PageLoad = async ({ params, url, fetch }) => {
     const tag: string | null = url.searchParams.get("tag");
     const tagQuery = tag == null ? "" : "&tag=" + tag;
 
-    const userRes = await fetch(`${PUBLIC_API_BASE}/users/${params.user}`, {
+    const userRes = await fetch(`${env.PUBLIC_API_BASE}/users/${params.user}`, {
         method: "get"
     });
 
-    const meRes = await fetch(`${PUBLIC_API_BASE}/auth/self`, {
+    const meRes = await fetch(`${env.PUBLIC_API_BASE}/auth/self`, {
         method: "get",
         credentials: "include"
     });
 
     const userPastesRes = await fetch(
-        `${PUBLIC_API_BASE}/users/${params.user}/pastes?pageSize=5${tagQuery}`,
+        `${env.PUBLIC_API_BASE}/users/${params.user}/pastes?pageSize=5${tagQuery}`,
         {
             method: "get",
             credentials: "include"
@@ -28,7 +28,7 @@ export const load: PageLoad = async ({ params, url, fetch }) => {
     );
 
     const userPinnedPastesRes = await fetch(
-        `${PUBLIC_API_BASE}/users/${params.user}/pastes/pinned?pageSize=5`,
+        `${env.PUBLIC_API_BASE}/users/${params.user}/pastes/pinned?pageSize=5`,
         {
             method: "get",
             credentials: "include"

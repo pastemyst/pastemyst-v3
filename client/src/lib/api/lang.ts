@@ -1,4 +1,4 @@
-import { PUBLIC_API_BASE } from "$env/static/public";
+import { env } from "$env/dynamic/public";
 import type { FetchFunc } from "./fetch";
 
 export interface Language {
@@ -22,7 +22,7 @@ let langs: Language[] = [];
 
 export const getLangs = async (fetchFunc: FetchFunc): Promise<Language[]> => {
     if (langs.length === 0) {
-        const res = await fetchFunc(`${PUBLIC_API_BASE}/langs`);
+        const res = await fetchFunc(`${env.PUBLIC_API_BASE}/langs`);
 
         if (res.ok) langs = await res.json();
     }
@@ -31,7 +31,7 @@ export const getLangs = async (fetchFunc: FetchFunc): Promise<Language[]> => {
 };
 
 export const getPopularLangNames = async (fetchFunc: FetchFunc): Promise<string[]> => {
-    const res = await fetchFunc(`${PUBLIC_API_BASE}/langs/popular`);
+    const res = await fetchFunc(`${env.PUBLIC_API_BASE}/langs/popular`);
 
     if (res.ok) return await res.json();
 
