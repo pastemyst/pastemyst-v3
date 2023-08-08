@@ -108,7 +108,10 @@
 <h4>avatar</h4>
 
 <div class="avatar flex sm-row center">
-    <img src="{env.PUBLIC_API_BASE}/images/{data.self?.avatarId}" alt="{data.self.username}'s avatar" />
+    <img
+        src="{env.PUBLIC_API_BASE}/images/{data.self?.avatarId}"
+        alt="{data.self.username}'s avatar"
+    />
 
     <button on:click={onAvatarEditClick}>
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" class="icon">
