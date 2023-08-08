@@ -85,3 +85,19 @@ run the client with:
 ```
 npm run dev
 ```
+
+## docker
+
+you can also run the entire project (db, api and client) using docker.
+
+copy the `.env.example` file to `.env` and change the variables.
+
+if you're running this locally only (no outside internet access), docker will use the host.docker.internal domain to make requests to the api from the browser, so you need to add an entry to /etc/hosts (linux and mac only) so it properly redirects to localhost:
+
+```
+127.0.0.1 host.docker.internal
+```
+
+otherwise the api url should be set to the public domain you're using to host the project.
+
+finally run `docker-compose up`.
