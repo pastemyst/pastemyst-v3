@@ -18,25 +18,6 @@
 
 * {
     box-sizing: border-box;
-    scrollbar-color: var(--color-bg3) transparent;
-
-    &::-webkit-scrollbar {
-        width: 10px;
-
-        &:hover {
-            width: 15px;
-        }
-    }
-
-    &::-webkit-scrollbar-track {
-        border: solid 3px transparent;
-    }
-
-    &::-webkit-scrollbar-thumb {
-        box-shadow: inset 0 0 10px 10px var(--color-bg3);
-        border: solid 3px transparent;
-        border-radius: 5px;
-    }
 }
 
 body {
