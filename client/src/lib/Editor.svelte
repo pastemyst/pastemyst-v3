@@ -11,6 +11,7 @@
     import { Close, setTempCommands, type Command } from "./command";
     import { cmdPalOpen } from "./stores";
     import { languages as cmLangs } from "@codemirror/language-data";
+    import SvelteMarkdown from "svelte-markdown";
 
     type IndentUnit = "tabs" | "spaces";
 
@@ -301,7 +302,13 @@
 <div class:hidden>
     {#if previewEnabled}
         <div class="preview">
-            {@html currentPreviewContent}
+            {#if selectedLanguage.name === "Markdown"}
+                <div class="markdown">
+                    <SvelteMarkdown source={getContent()} />
+                </div>
+            {:else}
+                {@html currentPreviewContent}
+            {/if}
         </div>
     {/if}
 
@@ -460,6 +467,10 @@
             padding: 0;
             border-radius: 0;
             background-color: transparent;
+        }
+
+        .markdown {
+            padding: 0 1rem;
         }
     }
 
