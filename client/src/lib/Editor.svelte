@@ -301,6 +301,7 @@
 <div class:hidden>
     {#if previewEnabled}
         <div class="preview">
+            <!-- eslint-disable-next-line svelte/no-at-html-tags -->
             {@html currentPreviewContent}
         </div>
     {/if}

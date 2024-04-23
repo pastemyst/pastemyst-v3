@@ -329,6 +329,7 @@
                     </div>
                 </div>
 
+                <!-- eslint-disable-next-line svelte/no-at-html-tags -->
                 {@html data.highlightedCode[i]}
             </div>
         {/each}
@@ -361,6 +362,7 @@
         </div>
 
         <!-- prettier-ignore -->
+        <!-- eslint-disable-next-line svelte/no-at-html-tags -->
         {@html data.highlightedCode[data.paste.pasties.findIndex((p) => p.id === activePastyId)]}
     {/if}
 </div>
