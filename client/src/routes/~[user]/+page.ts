@@ -65,7 +65,7 @@ export const load: PageLoad = async ({ params, url, fetch }) => {
                 pinnedPastes = await userPinnedPastesRes.json();
             }
         } else {
-            throw error(userPastesRes.status);
+            error(userPastesRes.status);
         }
 
         const tags = await getUserTags(fetch, user.username);
@@ -80,6 +80,6 @@ export const load: PageLoad = async ({ params, url, fetch }) => {
             tag: tag
         };
     } else {
-        throw error(userRes.status);
+        error(userRes.status);
     }
 };
