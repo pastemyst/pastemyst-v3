@@ -9,7 +9,7 @@ export const load: PageLoad = async ({ params, fetch }) => {
 
     if (!paste) {
         // TODO: error handling
-        throw error(pasteStatus);
+        error(pasteStatus);
     }
 
     const relativeCreatedAt = moment(paste.createdAt).fromNow();
@@ -23,7 +23,7 @@ export const load: PageLoad = async ({ params, fetch }) => {
 
     if (paste.ownerId !== null && !owner) {
         // TODO: error handling
-        throw error(ownerStatus);
+        error(ownerStatus);
     }
 
     const highlightedCode: string[] = [];
@@ -41,7 +41,7 @@ export const load: PageLoad = async ({ params, fetch }) => {
         });
 
         // TODO: error handling
-        if (!res.ok) throw error(500);
+        if (!res.ok) error(500);
 
         highlightedCode.push(await res.text());
     }
