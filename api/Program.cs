@@ -15,6 +15,8 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddHttpContextAccessor();
 
+builder.Services.AddHttpLogging(o => {});
+
 builder.Services.AddDistributedMemoryCache();
 
 builder.Services.AddSession(options =>

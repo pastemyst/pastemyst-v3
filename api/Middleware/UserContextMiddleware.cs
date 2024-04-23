@@ -17,7 +17,7 @@ public class UserContextMiddleware
 
         var userContext = context.RequestServices.GetRequiredService<IUserContext>();
         userContext.LoginUser(self);
-        
+
         context.Features.Set(userContext);
 
         await _next(context);
