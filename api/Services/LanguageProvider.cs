@@ -21,7 +21,7 @@ public interface ILanguageProvider
 public class LanguageProvider : ILanguageProvider, IHostedService
 {
     private const string LanguagesUri =
-        "https://raw.githubusercontent.com/github/linguist/master/lib/linguist/languages.yml";
+        "https://raw.githubusercontent.com/github-linguist/linguist/v7.29.0/lib/linguist/languages.yml";
 
     public List<Language> Languages { get; private set; } = new();
 

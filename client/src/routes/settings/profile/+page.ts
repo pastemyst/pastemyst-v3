@@ -7,7 +7,7 @@ export const load: PageLoad = async ({ fetch }) => {
     const self = await getSelf(fetch);
 
     if (!self) {
-        throw error(401, "You must be logged in to access settings.");
+        error(401, "You must be logged in to access settings.");
     }
 
     const userSettings = await getUserSettings(fetch);

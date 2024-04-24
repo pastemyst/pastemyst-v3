@@ -20,7 +20,7 @@
 
     let activeTabId = 0;
 
-    let isDragedOver = false;
+    let isDraggedOver = false;
 
     beforeNavigate((navigation) => {
         if ($creatingPasteStore) {
@@ -147,12 +147,12 @@
         }
     };
 
-    const closeDragContainer = () => (isDragedOver = false);
+    const closeDragContainer = () => (isDraggedOver = false);
 
     const handleDragOver = (e: DragEvent) => {
         e.preventDefault();
         if (!e.dataTransfer?.types.includes("Files")) return;
-        isDragedOver = true;
+        isDraggedOver = true;
     };
 
     const handleDragDrop = (e: DragEvent) => {
@@ -216,13 +216,14 @@
     on:dragleave={closeDragContainer}
 />
 
-<div class="drop-container" class:drop-container--shown={isDragedOver}>
+<div class="drop-container" class:drop-container--shown={isDraggedOver}>
     <div class="drop-container__cover" />
     <p>drop files here</p>
 </div>
 
 <div class="tabs flex row center">
     <div class="tabgroup flex row" bind:this={tabGroupElement}>
+        <!-- eslint-disable-next-line @typescript-eslint/no-unused-vars -->
         {#each tabs as tab, _ (tab.id)}
             <Tab
                 id={tab.id.toString()}

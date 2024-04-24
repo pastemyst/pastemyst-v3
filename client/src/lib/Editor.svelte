@@ -307,6 +307,7 @@
                     <SvelteMarkdown source={getContent()} />
                 </div>
             {:else}
+                <!-- eslint-disable-next-line svelte/no-at-html-tags -->
                 {@html currentPreviewContent}
             {/if}
         </div>
