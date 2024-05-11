@@ -30,6 +30,8 @@ public interface IPasteService
 
     public Task TogglePinnedAsync(string id);
 
+    public Task TogglePrivateAsync(string id);
+
     public Task<bool> ExistsByIdAsync(string id);
 }
 
@@ -265,7 +267,9 @@ public class PasteService : IPasteService
     public async Task ToggleStarAsync(string id)
     {
         if (!_userContext.IsLoggedIn())
+        {
             throw new HttpException(HttpStatusCode.Unauthorized, "You must be authorized to star pastes.");
+        }
 
         var paste = await GetAsync(id);
 
@@ -273,7 +277,9 @@ public class PasteService : IPasteService
         {
             // Returning not found instead of unauthorized to not expose that the paste exists.
             if (paste.Private)
+            {
                 throw new HttpException(HttpStatusCode.NotFound, "Paste not found.");
+            }
         }
 
         if (paste.Stars.Any(u => u == _userContext.Self.Id))
@@ -309,6 +315,29 @@ public class PasteService : IPasteService
         }
 
         var update = Builders<Paste>.Update.Set(p => p.Pinned, !paste.Pinned);
+        await _mongo.Pastes.UpdateOneAsync(p => p.Id == paste.Id, update);
+    }
+
+    public async Task TogglePrivateAsync(string id)
+    {
+        if (!_userContext.IsLoggedIn())
+        {
+            throw new HttpException(HttpStatusCode.Unauthorized, "You must be authorized to change the private status of pastes.");
+        }
+
+        var paste = await GetAsync(id);
+
+        if (paste.OwnerId is null)
+        {
+            throw new HttpException(HttpStatusCode.BadRequest, "Only owned pastes can be set/unset to private.");
+        }
+
+        if (paste.OwnerId != _userContext.Self.Id)
+        {
+            throw new HttpException(HttpStatusCode.Unauthorized, "You can only change the private status of your own pastes.");
+        }
+
+        var update = Builders<Paste>.Update.Set(p => p.Private, !paste.Private);
         await _mongo.Pastes.UpdateOneAsync(p => p.Id == paste.Id, update);
     }
 
