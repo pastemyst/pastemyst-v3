@@ -11,7 +11,7 @@
     import { Close, setTempCommands, type Command } from "./command";
     import { cmdPalOpen } from "./stores";
     import { languages as cmLangs } from "@codemirror/language-data";
-    import SvelteMarkdown from "svelte-markdown";
+    import Markdown from "./Markdown.svelte";
 
     type IndentUnit = "tabs" | "spaces";
 
@@ -304,7 +304,7 @@
         <div class="preview">
             {#if selectedLanguage.name === "Markdown"}
                 <div class="markdown">
-                    <SvelteMarkdown source={getContent()} />
+                    <Markdown content={getContent()} />
                 </div>
             {:else}
                 <!-- eslint-disable-next-line svelte/no-at-html-tags -->
