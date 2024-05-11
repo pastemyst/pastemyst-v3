@@ -1,6 +1,6 @@
 <script lang="ts">
+    import Markdown from "$lib/Markdown.svelte";
     import type { PageData } from "./$types";
-    import SvelteMarkdown from "svelte-markdown";
 
     export let data: PageData;
 </script>
@@ -37,7 +37,7 @@
                 </p>
 
                 <p class="content">
-                    <SvelteMarkdown source={release.content} />
+                    <Markdown content={release.content} />
                 </p>
             </div>
         {/each}

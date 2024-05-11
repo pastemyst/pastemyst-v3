@@ -6,11 +6,16 @@
     import { tooltip } from "$lib/tooltips";
     import { currentUserStore } from "$lib/stores";
     import { goto } from "$app/navigation";
+    import Markdown from "$lib/Markdown.svelte";
+    import { isLanguageMarkdown } from "$lib/utils/markdown";
 
     export let data: PageData;
 
     let activePastyId: string = data.paste.pasties[0].id;
     let activePasty: Pasty = data.paste.pasties[0];
+
+    let previewMarkdownStacked: boolean[] = [];
+    let previewMarkdownTabbed: boolean;
 
     let linkCopied = false;
 
@@ -323,14 +328,21 @@
                                     {pasty}
                                     langStats={data.langStats}
                                     stats={data.pasteStats.pasties[pasty.id]}
+                                    bind:previewMarkdown={previewMarkdownStacked[i]}
                                 />
                             </div>
                         {/if}
                     </div>
                 </div>
 
-                <!-- eslint-disable-next-line svelte/no-at-html-tags -->
-                {@html data.highlightedCode[i]}
+                {#if isLanguageMarkdown(pasty.language) && previewMarkdownStacked[i]}
+                    <div class="markdown">
+                        <Markdown content={pasty.content} />
+                    </div>
+                {:else}
+                    <!-- eslint-disable-next-line svelte/no-at-html-tags -->
+                    {@html data.highlightedCode[i]}
+                {/if}
             </div>
         {/each}
     {:else}
@@ -356,14 +368,23 @@
                         pasty={activePasty}
                         langStats={data.langStats}
                         stats={data.pasteStats.pasties[activePastyId]}
+                        bind:previewMarkdown={previewMarkdownTabbed}
                     />
                 </div>
             {/if}
         </div>
 
-        <!-- prettier-ignore -->
         <!-- eslint-disable-next-line svelte/no-at-html-tags -->
-        {@html data.highlightedCode[data.paste.pasties.findIndex((p) => p.id === activePastyId)]}
+        {#if isLanguageMarkdown(activePasty.language) && previewMarkdownTabbed}
+            <div class="markdown">
+                <Markdown content={activePasty.content} />
+            </div>
+        {:else}
+            <!-- eslint-disable-next-line svelte/no-at-html-tags -->
+            {@html data.highlightedCode[
+                data.paste.pasties.findIndex((p) => p.id === activePastyId)
+            ]}
+        {/if}
     {/if}
 </div>
 
@@ -502,7 +523,8 @@
             }
         }
 
-        :global(.shiki) {
+        :global(.shiki),
+        .markdown {
             border-bottom-left-radius: $border-radius;
             border-bottom-right-radius: $border-radius;
             border: 1px solid var(--color-bg2);

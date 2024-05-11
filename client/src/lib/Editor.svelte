@@ -11,6 +11,8 @@
     import { Close, setTempCommands, type Command } from "./command";
     import { cmdPalOpen } from "./stores";
     import { languages as cmLangs } from "@codemirror/language-data";
+    import Markdown from "./Markdown.svelte";
+    import { isLanguageMarkdown } from "./utils/markdown";
 
     type IndentUnit = "tabs" | "spaces";
 
@@ -301,8 +303,14 @@
 <div class:hidden>
     {#if previewEnabled}
         <div class="preview">
-            <!-- eslint-disable-next-line svelte/no-at-html-tags -->
-            {@html currentPreviewContent}
+            {#if isLanguageMarkdown(selectedLanguage.name)}
+                <div class="markdown">
+                    <Markdown content={getContent()} />
+                </div>
+            {:else}
+                <!-- eslint-disable-next-line svelte/no-at-html-tags -->
+                {@html currentPreviewContent}
+            {/if}
         </div>
     {/if}
 
@@ -461,6 +469,10 @@
             padding: 0;
             border-radius: 0;
             background-color: transparent;
+        }
+
+        .markdown {
+            padding: 0 1rem;
         }
     }
 
