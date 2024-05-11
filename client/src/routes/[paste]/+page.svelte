@@ -2,7 +2,14 @@
     import type { PageData } from "./$types";
     import Tab from "$lib/Tab.svelte";
     import PastyMeta from "$lib/PastyMeta.svelte";
-    import { deletePaste, ExpiresIn, pinPaste, starPaste, type Pasty, togglePrivatePaste } from "$lib/api/paste";
+    import {
+        deletePaste,
+        ExpiresIn,
+        pinPaste,
+        starPaste,
+        type Pasty,
+        togglePrivatePaste
+    } from "$lib/api/paste";
     import { tooltip } from "$lib/tooltips";
     import { currentUserStore } from "$lib/stores";
     import { goto } from "$app/navigation";
