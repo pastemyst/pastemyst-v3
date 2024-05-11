@@ -381,7 +381,9 @@
             </div>
         {:else}
             <!-- eslint-disable-next-line svelte/no-at-html-tags -->
-            {@html data.highlightedCode[data.paste.pasties.findIndex((p) => p.id === activePastyId)]}
+            {@html data.highlightedCode[
+                data.paste.pasties.findIndex((p) => p.id === activePastyId)
+            ]}
         {/if}
     {/if}
 </div>
@@ -521,7 +523,8 @@
             }
         }
 
-        :global(.shiki), .markdown {
+        :global(.shiki),
+        .markdown {
             border-bottom-left-radius: $border-radius;
             border-bottom-right-radius: $border-radius;
             border: 1px solid var(--color-bg2);

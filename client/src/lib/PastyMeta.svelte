@@ -137,14 +137,14 @@
         button,
         .btn {
             margin-left: 0.5rem;
+        }
 
-            &.enabled {
+        button.enabled {
+            color: var(--color-secondary);
+            border-color: var(--color-secondary);
+
+            .icon {
                 color: var(--color-secondary);
-                border-color: var(--color-secondary);
-
-                .icon {
-                    color: var(--color-secondary);
-                }
             }
         }
     }
