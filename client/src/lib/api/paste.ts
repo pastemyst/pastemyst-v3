@@ -191,6 +191,15 @@ export const isPasteStarred = async (fetchFunc: FetchFunc, id: string): Promise<
     return false;
 };
 
+export const togglePrivatePaste = async (id: string): Promise<boolean> => {
+    const res = await fetch(`${env.PUBLIC_API_BASE}/pastes/${id}/private`, {
+        method: "post",
+        credentials: "include"
+    });
+
+    return res.ok;
+};
+
 export const getPasteStats = async (
     fetchFunc: FetchFunc,
     id: string
