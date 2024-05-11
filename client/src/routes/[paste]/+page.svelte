@@ -7,11 +7,15 @@
     import { currentUserStore } from "$lib/stores";
     import { goto } from "$app/navigation";
     import Markdown from "$lib/Markdown.svelte";
+    import { isLanguageMarkdown } from "$lib/utils/markdown";
 
     export let data: PageData;
 
     let activePastyId: string = data.paste.pasties[0].id;
     let activePasty: Pasty = data.paste.pasties[0];
+
+    let previewMarkdownStacked: boolean[] = [];
+    let previewMarkdownTabbed: boolean;
 
     let linkCopied = false;
 
@@ -324,13 +328,14 @@
                                     {pasty}
                                     langStats={data.langStats}
                                     stats={data.pasteStats.pasties[pasty.id]}
+                                    bind:previewMarkdown={previewMarkdownStacked[i]}
                                 />
                             </div>
                         {/if}
                     </div>
                 </div>
 
-                {#if pasty.language === "Markdown"}
+                {#if isLanguageMarkdown(pasty.language) && previewMarkdownStacked[i]}
                     <div class="markdown">
                         <Markdown content={pasty.content} />
                     </div>
@@ -363,13 +368,14 @@
                         pasty={activePasty}
                         langStats={data.langStats}
                         stats={data.pasteStats.pasties[activePastyId]}
+                        bind:previewMarkdown={previewMarkdownTabbed}
                     />
                 </div>
             {/if}
         </div>
 
         <!-- eslint-disable-next-line svelte/no-at-html-tags -->
-        {#if activePasty.language === "Markdown"}
+        {#if isLanguageMarkdown(activePasty.language) && previewMarkdownTabbed}
             <div class="markdown">
                 <Markdown content={activePasty.content} />
             </div>

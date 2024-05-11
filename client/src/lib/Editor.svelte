@@ -12,6 +12,7 @@
     import { cmdPalOpen } from "./stores";
     import { languages as cmLangs } from "@codemirror/language-data";
     import Markdown from "./Markdown.svelte";
+    import { isLanguageMarkdown } from "./utils/markdown";
 
     type IndentUnit = "tabs" | "spaces";
 
@@ -302,7 +303,7 @@
 <div class:hidden>
     {#if previewEnabled}
         <div class="preview">
-            {#if selectedLanguage.name === "Markdown"}
+            {#if isLanguageMarkdown(selectedLanguage.name)}
                 <div class="markdown">
                     <Markdown content={getContent()} />
                 </div>
