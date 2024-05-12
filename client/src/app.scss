@@ -329,3 +329,48 @@ section {
         margin-bottom: 0.25rem;
     }
 }
+
+.markdown {
+    text-align: justify;
+    line-height: 1.5rem;
+    font-size: $fs-normal;
+
+    h1 {
+        margin-top: 0;
+    }
+
+    h1:first-child {
+        margin-top: 1rem;
+    }
+
+    h1,
+    h2,
+    h3 {
+        border-bottom: 1px solid var(--color-bg2);
+        padding-bottom: 0.5rem;
+        margin-top: 2rem;
+    }
+
+    blockquote {
+        border-left: 4px solid var(--color-secondary);
+        padding-left: 1rem;
+        margin-left: 0;
+    }
+
+    pre {
+        background-color: var(--color-bg1);
+        border-radius: $border-radius;
+        border: 1px solid var(--color-bg2);
+        line-height: initial;
+        padding: 1rem;
+
+        code {
+            border: none;
+            background-color: initial;
+        }
+    }
+
+    img {
+        max-width: 100%;
+    }
+}

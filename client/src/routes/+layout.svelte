@@ -5,7 +5,7 @@
     import { activePastesStores, currentUserStore, versionStore } from "$lib/stores";
     import CommandPalette from "$lib/CommandPalette.svelte";
     import { Close, setBaseCommands, type Command } from "$lib/command";
-    import { afterNavigate, beforeNavigate, goto } from "$app/navigation";
+    import { beforeNavigate, goto } from "$app/navigation";
     import ThemeContext from "$lib/ThemeContext.svelte";
     import { env } from "$env/dynamic/public";
 
@@ -80,26 +80,18 @@
     beforeNavigate(() => {
         setBaseCommands(getCommands());
     });
-
-    let loaded = false;
-
-    afterNavigate(() => {
-        loaded = true;
-    });
 </script>
 
 <ThemeContext>
-    {#if loaded}
-        <div id="container">
-            <Header />
+    <div id="container">
+        <Header />
 
-            <main>
-                <slot />
-            </main>
+        <main>
+            <slot />
+        </main>
 
-            <Footer />
-        </div>
-    {/if}
+        <Footer />
+    </div>
 </ThemeContext>
 
 <CommandPalette />
