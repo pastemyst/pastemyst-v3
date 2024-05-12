@@ -562,6 +562,10 @@
             }
         }
 
+        .markdown {
+            padding: 0rem 1rem;
+        }
+
         :global(.shiki),
         .markdown {
             border-bottom-left-radius: $border-radius;

@@ -82,6 +82,5 @@
 
     .content {
         margin-top: 1.5rem;
-        font-size: $fs-normal;
     }
 </style>
