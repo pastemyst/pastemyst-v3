@@ -43,3 +43,12 @@ export const getUserTags = async (fetchFunc: FetchFunc, username: string): Promi
 
     return [];
 };
+
+export const deleteUser = async (username: string): Promise<boolean> => {
+    const res = await fetch(`${env.PUBLIC_API_BASE}/users/${username}`, {
+        method: "delete",
+        credentials: "include"
+    });
+
+    return res.ok;
+};
