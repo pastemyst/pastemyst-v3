@@ -4,7 +4,6 @@ using JWT.Algorithms;
 using JWT.Builder;
 using JWT.Exceptions;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.ObjectPool;
 using MongoDB.Driver;
 using pastemyst.Exceptions;
 using pastemyst.Models;

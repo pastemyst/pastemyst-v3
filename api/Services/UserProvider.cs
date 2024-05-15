@@ -17,18 +17,24 @@ public interface IUserProvider
     public Task<Page<PasteWithLangStats>> GetOwnedPastesAsync(string username, string tag, bool pinnedOnly, PageRequest pageRequest);
 
     public Task<List<string>> GetTagsAsync(string username);
+
+    public Task DeleteUserAsync(string username);
 }
 
 public class UserProvider : IUserProvider
 {
     private readonly IUserContext _userContext;
     private readonly IPasteService _pasteService;
+    private readonly IActionLogger _actionLogger;
+    private readonly IImageService _imageService;
     private readonly IMongoService _mongo;
 
-    public UserProvider(IUserContext userContext, IPasteService pasteService, IMongoService mongo)
+    public UserProvider(IUserContext userContext, IPasteService pasteService, IMongoService mongo, IActionLogger actionLogger, IImageService imageService)
     {
         _userContext = userContext;
         _pasteService = pasteService;
+        _actionLogger = actionLogger;
+        _imageService = imageService;
         _mongo = mongo;
     }
 
@@ -76,7 +82,7 @@ public class UserProvider : IUserProvider
 
         if (tag is not null)
         {
-            if (_userContext.Self != user)
+            if (_userContext.Self.Id != user.Id)
             {
                 throw new HttpException(HttpStatusCode.Unauthorized, "You must be authorized to view paste tags.");
             }
@@ -93,7 +99,7 @@ public class UserProvider : IUserProvider
         var totalItems = await _mongo.Pastes.CountDocumentsAsync(filter);
         var totalPages = (int)Math.Ceiling((float)totalItems / pageRequest.PageSize);
 
-        if (_userContext.Self != user)
+        if (_userContext.Self.Id != user.Id)
         {
             pastes.ForEach(p => p.Tags = new());
         }
@@ -123,7 +129,7 @@ public class UserProvider : IUserProvider
 
         var user = await GetByUsernameAsync(username);
 
-        if (_userContext.Self != user)
+        if (_userContext.Self.Id != user.Id)
             throw new HttpException(HttpStatusCode.Unauthorized, "You can only fetch your own tags.");
 
         var filter = Builders<Paste>.Filter.Eq(p => p.OwnerId, user.Id);
@@ -132,5 +138,28 @@ public class UserProvider : IUserProvider
             .SelectMany(t => t)
             .Distinct()
             .ToList();
+    }
+
+    public async Task DeleteUserAsync(string username)
+    {
+        if (!_userContext.IsLoggedIn())
+            throw new HttpException(HttpStatusCode.Unauthorized, "You must be authorized to delete your account.");
+
+        var user = await GetByUsernameAsync(username);
+
+        if (_userContext.Self.Id != user.Id)
+            throw new HttpException(HttpStatusCode.Unauthorized, "You can delete only your account.");
+
+        await _imageService.DeleteAsync(user.AvatarId);
+
+        await _mongo.Pastes.DeleteManyAsync(p => p.OwnerId == user.Id);
+        await _mongo.Users.DeleteOneAsync(u => u.Id == user.Id);
+
+        // Delete all stars of this user
+        var starsFilter = Builders<Paste>.Filter.AnyEq(p => p.Stars, user.Id);
+        var starsUpdate = Builders<Paste>.Update.Pull(p => p.Stars, user.Id);
+        await _mongo.Pastes.UpdateManyAsync(starsFilter, starsUpdate);
+
+        await _actionLogger.LogActionAsync(ActionLogType.UserDeleted, user.Id);
     }
 }

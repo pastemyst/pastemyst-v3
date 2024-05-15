@@ -25,6 +25,12 @@ public class UserController : ControllerBase
         return user is not null ? Ok(user) : NotFound();
     }
 
+    [HttpDelete("{username}")]
+    public async Task DeleteUser(string username)
+    {
+        await _userProvider.DeleteUserAsync(username);
+    }
+
     [HttpGet("{username}/pastes")]
     public async Task<Page<PasteWithLangStats>> GetUserOwnedPastes(string username, [FromQuery] PageRequest pageRequest, [FromQuery] string tag)
     {

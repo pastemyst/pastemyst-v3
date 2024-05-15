@@ -23,7 +23,7 @@ public class Paste
     public string OwnerId { get; set; }
 
     public bool Private { get; set; }
-    
+
     public bool Pinned { get; set; }
 
     public List<string> Tags { get; set; } = new();

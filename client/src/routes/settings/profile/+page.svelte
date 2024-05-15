@@ -2,7 +2,7 @@
     import { env } from "$env/dynamic/public";
     import { getSelf } from "$lib/api/auth";
     import { updateUserSettings } from "$lib/api/settings";
-    import { getUserByUsername } from "$lib/api/user";
+    import { getUserByUsername, deleteUser } from "$lib/api/user";
     import Checkbox from "$lib/Checkbox.svelte";
     import { usernameRegex } from "$lib/patterns";
     import { currentUserStore } from "$lib/stores";
@@ -94,6 +94,21 @@
 
     const saveSettings = async () => {
         await updateUserSettings(fetch, data.userSettings);
+    };
+
+    const onAccountDelete = async () => {
+        // TODO: better confirm dialog
+        if (
+            confirm(
+                "are you sure you want to delete your account? this will delete your account and all the associated data, including the pastes"
+            )
+        ) {
+            const ok = await deleteUser(data.self.username);
+
+            if (!ok) return;
+
+            window.location.href = `${env.PUBLIC_API_BASE}/auth/logout`;
+        }
     };
 </script>
 
@@ -203,6 +218,11 @@
     <span class="hint">
         toggle whether to show only your pinned pastes or all your public pastes on your profile
     </span>
+
+    <button class="delete-account btn btn-danger" on:click={onAccountDelete}>delete account</button>
+    <span class="hint">
+        this will delete your account and all the associated data, including the pastes
+    </span>
 </div>
 
 <style lang="scss">
@@ -250,6 +270,10 @@
 
     .privacy {
         margin-bottom: 2rem;
+
+        .delete-account {
+            margin-top: 2rem;
+        }
     }
 
     button {
