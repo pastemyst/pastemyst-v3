@@ -98,7 +98,11 @@
 
     const onAccountDelete = async () => {
         // TODO: better confirm dialog
-        if (confirm("are you sure you want to delete your account? this will delete your account and all the associated data, including the pastes")) {
+        if (
+            confirm(
+                "are you sure you want to delete your account? this will delete your account and all the associated data, including the pastes"
+            )
+        ) {
             const ok = await deleteUser(data.self.username);
 
             if (!ok) return;
