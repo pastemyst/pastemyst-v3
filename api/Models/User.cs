@@ -21,9 +21,11 @@ public class User
 
     public bool IsSupporter { get; set; }
 
+    public bool isAdmin { get; set; }
+
     [JsonIgnore] public string ProviderName { get; set; }
 
     [JsonIgnore] public string ProviderId { get; set; }
-    
+
     [JsonIgnore] public UserSettings Settings { get; set; }
 }

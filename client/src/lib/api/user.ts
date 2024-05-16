@@ -6,8 +6,9 @@ export interface User {
     username: string;
     avatarId: string;
     createdAt: string;
-    contributor: boolean;
-    supporter: number;
+    isContributor: boolean;
+    isSupporter: boolean;
+    isAdmin: boolean;
 }
 
 export const getUserByUsername = async (username: string): Promise<User | null> => {
