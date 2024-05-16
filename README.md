@@ -74,7 +74,9 @@ dotnet user-secrets set JwtSecret "..."
 
 the client is written with sveltekit, so install node and npm (or yarn).
 
-you will also need ruby (including the ruby-dev or ruby-devel package), ruby bundler and docker installed to be able to generate the grammars for all the languages, which is done by running `generate-grammars.sh`.
+here is the list of packages you need to install on ubuntu to generate the grammar files for all the languages: `ruby`, `ruby-dev`, `ruby-bundler`, `docker`, `libssl-dev`, `build-essentials`, `cmake`, `libzip-dev`, `libicu-dev`, `pkg-config`.
+
+then to generate the grammar files, run the `generate-grammars.sh` script.
 
 install all dependencies:
 
