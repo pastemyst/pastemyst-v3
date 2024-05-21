@@ -98,22 +98,26 @@
     };
 
     const onAccountDelete = async () => {
-        setTempCommands(getConfirmActionCommands(() => {
-            (async () => {
-                const ok = await deleteUser(data.self.username);
+        setTempCommands(
+            getConfirmActionCommands(() => {
+                (async () => {
+                    const ok = await deleteUser(data.self.username);
 
-                if (!ok) {
-                    // TODO: nicer error handling
-                    alert("failed to delete user. try again later.");
-                }
+                    if (!ok) {
+                        // TODO: nicer error handling
+                        alert("failed to delete user. try again later.");
+                    }
 
-                window.location.href = `${env.PUBLIC_API_BASE}/auth/logout`;
-            })();
+                    window.location.href = `${env.PUBLIC_API_BASE}/auth/logout`;
+                })();
 
-            return Close.yes;
-        }));
+                return Close.yes;
+            })
+        );
 
-        cmdPalTitle.set("are you sure you want to delete your account? this will delete your account and all the associated data, including the pastes");
+        cmdPalTitle.set(
+            "are you sure you want to delete your account? this will delete your account and all the associated data, including the pastes"
+        );
         cmdPalOpen.set(true);
     };
 </script>

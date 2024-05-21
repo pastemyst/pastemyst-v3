@@ -53,20 +53,22 @@
     };
 
     const onDeleteClick = async () => {
-        setTempCommands(getConfirmActionCommands(() => {
-            (async () => {
-                const success = await deletePaste(data.paste.id);
+        setTempCommands(
+            getConfirmActionCommands(() => {
+                (async () => {
+                    const success = await deletePaste(data.paste.id);
 
-                if (success) {
-                    goto("/");
-                } else {
-                    // TODO: nicer error reporting.
-                    alert("failed to delete the paste. try again later.");
-            }
-            })();
+                    if (success) {
+                        goto("/");
+                    } else {
+                        // TODO: nicer error reporting.
+                        alert("failed to delete the paste. try again later.");
+                    }
+                })();
 
-            return Close.yes;
-        }));
+                return Close.yes;
+            })
+        );
 
         cmdPalTitle.set("are you sure you want to delete this paste? this action can't be undone.");
         cmdPalOpen.set(true);
