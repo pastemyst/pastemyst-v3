@@ -7,4 +7,4 @@ RUN npm run build
 
 EXPOSE 3000
 
-ENTRYPOINT [ "node", "build/index.js" ]
+ENTRYPOINT [ "node", "build" ]
