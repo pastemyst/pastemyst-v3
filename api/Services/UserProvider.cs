@@ -87,7 +87,7 @@ public class UserProvider : IUserProvider
                 throw new HttpException(HttpStatusCode.Unauthorized, "You must be authorized to view paste tags.");
             }
 
-            filter &= Builders<Paste>.Filter.ElemMatch(p => p.Tags, tag);
+            filter &= Builders<Paste>.Filter.AnyStringIn(p => p.Tags, tag);
         }
 
         var pastes = await _mongo.Pastes.Find(filter)
