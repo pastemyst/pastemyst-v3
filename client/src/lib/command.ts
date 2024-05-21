@@ -37,3 +37,14 @@ export const addBaseCommands = (commands: Command[]) => {
 export const setTempCommands = (commands: Command[]) => {
     tempCommandsStore.set(commands);
 };
+
+export const getConfirmActionCommands = (confirmAction: CommandAction): Command[] => [
+    {
+        name: "yes",
+        action: confirmAction
+    },
+    {
+        name: "no",
+        action: () => Close.yes
+    }
+];

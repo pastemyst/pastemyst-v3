@@ -4,8 +4,9 @@
     import { updateUserSettings } from "$lib/api/settings";
     import { getUserByUsername, deleteUser } from "$lib/api/user";
     import Checkbox from "$lib/Checkbox.svelte";
+    import { Close, getConfirmActionCommands, setTempCommands } from "$lib/command";
     import { usernameRegex } from "$lib/patterns";
-    import { currentUserStore } from "$lib/stores";
+    import { cmdPalOpen, cmdPalTitle, currentUserStore } from "$lib/stores";
     import type { PageData } from "./$types";
 
     export let data: PageData;
@@ -97,18 +98,27 @@
     };
 
     const onAccountDelete = async () => {
-        // TODO: better confirm dialog
-        if (
-            confirm(
-                "are you sure you want to delete your account? this will delete your account and all the associated data, including the pastes"
-            )
-        ) {
-            const ok = await deleteUser(data.self.username);
+        setTempCommands(
+            getConfirmActionCommands(() => {
+                (async () => {
+                    const ok = await deleteUser(data.self.username);
 
-            if (!ok) return;
+                    if (!ok) {
+                        // TODO: nicer error handling
+                        alert("failed to delete user. try again later.");
+                    }
 
-            window.location.href = `${env.PUBLIC_API_BASE}/auth/logout`;
-        }
+                    window.location.href = `${env.PUBLIC_API_BASE}/auth/logout`;
+                })();
+
+                return Close.yes;
+            })
+        );
+
+        cmdPalTitle.set(
+            "are you sure you want to delete your account? this will delete your account and all the associated data, including the pastes"
+        );
+        cmdPalOpen.set(true);
     };
 </script>
 

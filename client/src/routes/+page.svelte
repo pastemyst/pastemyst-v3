@@ -9,7 +9,7 @@
     } from "$lib/api/paste";
     import { addBaseCommands, Close, setTempCommands, type Command } from "$lib/command";
     import PasteOptions from "$lib/PasteOptions.svelte";
-    import { cmdPalOpen, creatingPasteStore, currentUserStore } from "$lib/stores";
+    import { cmdPalOpen, cmdPalTitle, creatingPasteStore, currentUserStore } from "$lib/stores";
     import TabbedEditor from "$lib/TabbedEditor.svelte";
     import type TabData from "$lib/TabData";
     import TagInput from "$lib/TagInput.svelte";
@@ -122,6 +122,7 @@
     const openExpiresSelect = () => {
         setTempCommands(getExpiresInCommands());
 
+        cmdPalTitle.set("select when the paste will expire");
         cmdPalOpen.set(true);
     };
 </script>

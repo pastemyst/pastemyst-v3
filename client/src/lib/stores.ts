@@ -9,6 +9,7 @@ export const versionStore = writable("undefined");
 export const activePastesStores = writable(0);
 
 export const cmdPalOpen = writable(false);
+export const cmdPalTitle = writable<string | null>(null);
 
 export const themeStore = writable(themes[0]);
 

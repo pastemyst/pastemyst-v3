@@ -9,9 +9,10 @@
         tempCommandsStore,
         type Command
     } from "./command";
-    import { cmdPalOpen } from "./stores";
+    import { cmdPalOpen, cmdPalTitle } from "./stores";
 
     let isOpen = false;
+    let title: string | null = null;
 
     let commands: Command[] = [];
     let filteredCommands: Command[] = [];
@@ -51,6 +52,10 @@
             } else {
                 close();
             }
+        });
+
+        cmdPalTitle.subscribe((val) => {
+            title = val;
         });
     });
 
@@ -255,6 +260,10 @@
 
 <div role="dialog" aria-modal="true" class="palette-bg" class:open={isOpen}>
     <div class="palette">
+        {#if title}
+            <div class="title flex row center">{title}</div>
+        {/if}
+
         <div class="search flex row center">
             <input
                 type="text"
@@ -344,8 +353,13 @@
         border: 1px solid var(--color-bg2);
         position: relative;
         top: 25%;
-        max-height: 20rem;
+        max-height: 25rem;
         @include shadow-big();
+    }
+
+    .title {
+        padding: 0.5rem;
+        border-bottom: 1px solid var(--color-bg2);
     }
 
     .search {
