@@ -347,7 +347,7 @@
 {#if data.paste.tags}
     <div class="tags flex row center">
         {#each data.paste.tags as tag}
-            <a href="/~{data.self?.username}/{tag}" class="btn">{tag}</a>
+            <a href="/~{data.self?.username}?tag={tag}" class="btn">{tag}</a>
         {/each}
     </div>
 {/if}
