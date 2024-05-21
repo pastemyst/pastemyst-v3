@@ -9,7 +9,7 @@
     import { getLangs, getPopularLangNames, type Language } from "./api/lang";
     import { tooltip } from "$lib/tooltips";
     import { Close, setTempCommands, type Command } from "./command";
-    import { cmdPalOpen } from "./stores";
+    import { cmdPalOpen, cmdPalTitle } from "./stores";
     import { languages as cmLangs } from "@codemirror/language-data";
     import Markdown from "./Markdown.svelte";
     import { isLanguageMarkdown } from "./utils/markdown";
@@ -183,6 +183,7 @@
                     let prevUnit = selectedIndentUnit;
                     selectedIndentUnit = "spaces";
                     setEditorIndentation();
+                    cmdPalTitle.set("select indentation width (spaces)");
                     setTempCommands(getIndentWidthCommands(prevUnit, convertIndent));
 
                     return Close.no;
@@ -194,6 +195,7 @@
                     let prevUnit = selectedIndentUnit;
                     selectedIndentUnit = "tabs";
                     setEditorIndentation();
+                    cmdPalTitle.set("select indentation width (tabs)");
                     setTempCommands(getIndentWidthCommands(prevUnit, convertIndent));
 
                     return Close.no;
@@ -231,12 +233,14 @@
     const onLanguageClick = async () => {
         setTempCommands(await getLanguageCommands());
 
+        cmdPalTitle.set("select language");
         cmdPalOpen.set(true);
     };
 
     const onIndentClick = () => {
         setTempCommands(getIndentUnitCommands());
 
+        cmdPalTitle.set("select indentation unit");
         cmdPalOpen.set(true);
     };
 

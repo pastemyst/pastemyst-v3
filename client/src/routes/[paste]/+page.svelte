@@ -11,10 +11,11 @@
         togglePrivatePaste
     } from "$lib/api/paste";
     import { tooltip } from "$lib/tooltips";
-    import { currentUserStore } from "$lib/stores";
+    import { cmdPalOpen, cmdPalTitle, currentUserStore } from "$lib/stores";
     import { goto } from "$app/navigation";
     import Markdown from "$lib/Markdown.svelte";
     import { isLanguageMarkdown } from "$lib/utils/markdown";
+    import { setTempCommands, getConfirmActionCommands, Close } from "$lib/command";
 
     export let data: PageData;
 
@@ -52,17 +53,23 @@
     };
 
     const onDeleteClick = async () => {
-        // TODO: nicer confirm (use modal from cmd palette)
-        if (confirm("are you sure you want to delete this paste? this action can't be undone.")) {
-            const success = await deletePaste(data.paste.id);
+        setTempCommands(getConfirmActionCommands(() => {
+            (async () => {
+                const success = await deletePaste(data.paste.id);
 
-            if (success) {
-                goto("/");
-            } else {
-                // TODO: nicer error reporting.
-                alert("failed to delete the paste. try again later.");
+                if (success) {
+                    goto("/");
+                } else {
+                    // TODO: nicer error reporting.
+                    alert("failed to delete the paste. try again later.");
             }
-        }
+            })();
+
+            return Close.yes;
+        }));
+
+        cmdPalTitle.set("are you sure you want to delete this paste? this action can't be undone.");
+        cmdPalOpen.set(true);
     };
 
     const onStarClick = async () => {

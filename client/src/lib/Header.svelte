@@ -1,9 +1,10 @@
 <script lang="ts">
-    import { cmdPalOpen, currentUserStore } from "./stores";
+    import { cmdPalOpen, cmdPalTitle, currentUserStore } from "./stores";
     import { tooltip } from "./tooltips";
     import { env } from "$env/dynamic/public";
 
     const onMenuClick = () => {
+        cmdPalTitle.set(null);
         cmdPalOpen.set(true);
     };
 </script>
