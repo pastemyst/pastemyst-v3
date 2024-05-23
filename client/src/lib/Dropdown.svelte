@@ -7,7 +7,15 @@
     let tip: Instance<Props>;
 
     onMount(() => {
-        tip = tippy(buttonNode, { content: dropdownNode, theme: "myst-dropdown", interactive: true, trigger: "click", arrow: false, placement: "bottom-end", allowHTML: true });
+        tip = tippy(buttonNode, {
+            content: dropdownNode,
+            theme: "myst-dropdown",
+            interactive: true,
+            trigger: "click",
+            arrow: false,
+            placement: "bottom-end",
+            allowHTML: true
+        });
     });
 
     onDestroy(() => {

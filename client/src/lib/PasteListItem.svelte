@@ -44,7 +44,9 @@
 <div class="paste">
     <div class="flex row center space-between">
         <p class="title">
-            <a href="/{pasteWithLangStats.paste.id}">{pasteWithLangStats.paste.title || "untitled"}</a>
+            <a href="/{pasteWithLangStats.paste.id}"
+                >{pasteWithLangStats.paste.title || "untitled"}</a
+            >
             {#if pasteWithLangStats.paste.tags?.length > 0}
                 <span>{pasteWithLangStats.paste.tags.join(", ")}</span>
             {/if}
@@ -53,11 +55,7 @@
         <div class="flex row center gap-m">
             {#if pasteWithLangStats.paste.private}
                 <div use:tooltip aria-label="private" class="flex">
-                    <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        viewBox="0 0 16 16"
-                        class="icon"
-                    >
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" class="icon">
                         <title>Lock Closed Icon</title>
                         <path
                             fill="currentColor"
@@ -68,11 +66,7 @@
                 </div>
             {:else if pasteWithLangStats.paste.pinned}
                 <div use:tooltip aria-label="pinned" class="flex">
-                    <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        viewBox="0 0 16 16"
-                        class="icon"
-                    >
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" class="icon">
                         <title>Pin Icon</title>
                         <path
                             fill="currentColor"
@@ -85,7 +79,12 @@
 
             {#if $currentUserStore !== null}
                 <Dropdown bind:this={dropdown}>
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" class="icon" slot="button">
+                    <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        viewBox="0 0 16 16"
+                        class="icon"
+                        slot="button"
+                    >
                         <title>Dots Horizontal Icon</title>
                         <path
                             fill="currentColor"
@@ -96,7 +95,11 @@
                     <div slot="dropdown">
                         <div class="dropdown flex col gap-s">
                             <button class="dropdown-option delete flex gap-s" on:click={onDelete}>
-                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" class="icon">
+                                <svg
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    viewBox="0 0 16 16"
+                                    class="icon"
+                                >
                                     <title>Trash Icon</title>
                                     <path
                                         fill="currentColor"
