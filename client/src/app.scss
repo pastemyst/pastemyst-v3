@@ -98,6 +98,14 @@ code {
         justify-content: space-between;
     }
 
+    &.gap-s {
+        gap: 0.5rem;
+    }
+
+    &.gap-m {
+        gap: 1rem;
+    }
+
     @media screen and (max-width: $break-med) {
         &.sm-row,
         &.sm-row-rev {
@@ -288,7 +296,12 @@ section {
 
 // tooltips themes
 
-.tippy-box[data-theme~="myst"] {
+.tippy-box[data-theme~="myst-dropdown"] .tippy-content {
+    padding: 0;
+}
+
+.tippy-box[data-theme~="myst"],
+.tippy-box[data-theme~="myst-dropdown"] {
     background-color: var(--color-bg1);
     border: 1px solid var(--color-bg2);
     border-radius: $border-radius;
