@@ -1,18 +1,12 @@
 <script lang="ts">
-    import moment from "moment";
     import type { Page } from "./api/page";
-    import { ExpiresIn, getUserPastes, type PasteWithLangStats } from "./api/paste";
+    import { getUserPastes, type PasteWithLangStats } from "./api/paste";
     import type { User } from "./api/user";
-    import { tooltip } from "./tooltips";
-    import type { LangStat } from "./api/lang";
+    import PasteListItem from "./PasteListItem.svelte";
 
     export let pastes: Page<PasteWithLangStats>;
     export let user: User;
     export let pinned = false;
-
-    const getPasteLangs = (langStats: LangStat[]): string => {
-        return langStats.map((s) => s.language.name).join(", ");
-    };
 
     const onPrevPage = async () => {
         if (pastes.currentPage === 0) return;
@@ -49,64 +43,7 @@
     </p>
 {:else}
     {#each pastes.items as pasteWithLangStats}
-        <a href="/{pasteWithLangStats.paste.id}" class="paste btn">
-            <div class="flex row center space-between">
-                <p class="title">
-                    {pasteWithLangStats.paste.title || "untitled"}
-                    {#if pasteWithLangStats.paste.tags?.length > 0}
-                        <span>{pasteWithLangStats.paste.tags.join(", ")}</span>
-                    {/if}
-                </p>
-
-                <div>
-                    {#if pasteWithLangStats.paste.private}
-                        <div use:tooltip aria-label="private" class="flex">
-                            <svg
-                                xmlns="http://www.w3.org/2000/svg"
-                                viewBox="0 0 16 16"
-                                class="icon"
-                            >
-                                <title>Lock Closed Icon</title>
-                                <path
-                                    fill="currentColor"
-                                    fill-rule="evenodd"
-                                    d="M4 4v2h-.25A1.75 1.75 0 002 7.75v5.5c0 .966.784 1.75 1.75 1.75h8.5A1.75 1.75 0 0014 13.25v-5.5A1.75 1.75 0 0012.25 6H12V4a4 4 0 10-8 0zm6.5 2V4a2.5 2.5 0 00-5 0v2h5zM12 7.5h.25a.25.25 0 01.25.25v5.5a.25.25 0 01-.25.25h-8.5a.25.25 0 01-.25-.25v-5.5a.25.25 0 01.25-.25H12z"
-                                />
-                            </svg>
-                        </div>
-                    {:else if pasteWithLangStats.paste.pinned}
-                        <div use:tooltip aria-label="pinned" class="flex">
-                            <svg
-                                xmlns="http://www.w3.org/2000/svg"
-                                viewBox="0 0 16 16"
-                                class="icon"
-                            >
-                                <title>Pin Icon</title>
-                                <path
-                                    fill="currentColor"
-                                    fill-rule="evenodd"
-                                    d="M4.456.734a1.75 1.75 0 012.826.504l.613 1.327a3.081 3.081 0 002.084 1.707l2.454.584c1.332.317 1.8 1.972.832 2.94L11.06 10l3.72 3.72a.75.75 0 11-1.061 1.06L10 11.06l-2.204 2.205c-.968.968-2.623.5-2.94-.832l-.584-2.454a3.081 3.081 0 00-1.707-2.084l-1.327-.613a1.75 1.75 0 01-.504-2.826L4.456.734zM5.92 1.866a.25.25 0 00-.404-.072L1.794 5.516a.25.25 0 00.072.404l1.328.613A4.582 4.582 0 015.73 9.63l.584 2.454a.25.25 0 00.42.12l5.47-5.47a.25.25 0 00-.12-.42L9.63 5.73a4.581 4.581 0 01-3.098-2.537L5.92 1.866z"
-                                />
-                            </svg>
-                        </div>
-                    {/if}
-                </div>
-            </div>
-
-            <div>
-                <!-- prettier-ignore -->
-                <span use:tooltip aria-label={new Date(pasteWithLangStats.paste.createdAt).toString()}>{moment(pasteWithLangStats.paste.createdAt).fromNow()}</span>
-
-                {#if pasteWithLangStats.paste.expiresIn !== ExpiresIn.never}
-                    <!-- prettier-ignore -->
-                    <span use:tooltip aria-label={new Date(pasteWithLangStats.paste.deletesAt).toString()}> - expires {moment(pasteWithLangStats.paste.deletesAt).fromNow()}</span>
-                {/if}
-            </div>
-
-            <div>
-                <span>{getPasteLangs(pasteWithLangStats.languageStats)}</span>
-            </div>
-        </a>
+        <PasteListItem {pasteWithLangStats} />
     {/each}
 
     {#if pastes.totalPages > 1}
@@ -141,43 +78,6 @@
         text-align: center;
         margin: 0;
         font-size: $fs-normal;
-    }
-
-    .paste {
-        display: block;
-        background-color: var(--color-bg);
-        margin-top: 1rem;
-        border-radius: $border-radius;
-        padding: 0.5rem;
-        text-decoration: none;
-        font-size: $fs-medium;
-        border: 1px solid var(--color-bg2);
-        color: var(--color-primary);
-
-        &:hover {
-            color: var(--color-secondary);
-            background-color: var(--color-bg2);
-            border-color: var(--color-bg3);
-        }
-
-        &:focus {
-            color: var(--color-secondary);
-            background-color: var(--color-bg2);
-            border-color: var(--color-primary);
-        }
-
-        p {
-            margin: 0;
-        }
-
-        .icon {
-            color: var(--color-bg3);
-        }
-
-        span {
-            font-size: $fs-small;
-            color: var(--color-bg3);
-        }
     }
 
     .pager {
