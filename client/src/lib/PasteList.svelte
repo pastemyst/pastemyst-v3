@@ -49,10 +49,10 @@
     </p>
 {:else}
     {#each pastes.items as pasteWithLangStats}
-        <a href="/{pasteWithLangStats.paste.id}" class="paste btn">
+        <div class="paste">
             <div class="flex row center space-between">
                 <p class="title">
-                    {pasteWithLangStats.paste.title || "untitled"}
+                    <a href="/{pasteWithLangStats.paste.id}">{pasteWithLangStats.paste.title || "untitled"}</a>
                     {#if pasteWithLangStats.paste.tags?.length > 0}
                         <span>{pasteWithLangStats.paste.tags.join(", ")}</span>
                     {/if}
@@ -106,7 +106,7 @@
             <div>
                 <span>{getPasteLangs(pasteWithLangStats.languageStats)}</span>
             </div>
-        </a>
+        </div>
     {/each}
 
     {#if pastes.totalPages > 1}
@@ -154,16 +154,8 @@
         border: 1px solid var(--color-bg2);
         color: var(--color-primary);
 
-        &:hover {
-            color: var(--color-secondary);
-            background-color: var(--color-bg2);
-            border-color: var(--color-bg3);
-        }
-
-        &:focus {
-            color: var(--color-secondary);
-            background-color: var(--color-bg2);
-            border-color: var(--color-primary);
+        a {
+            text-decoration: none;
         }
 
         p {
