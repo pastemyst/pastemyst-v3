@@ -31,6 +31,8 @@
     let isPrivate: boolean;
     let pinned: boolean;
 
+    $: if (anonymous) tags = [];
+
     onMount(() => {
         const commands: Command[] = [
             {
@@ -149,7 +151,7 @@
 </div>
 
 {#if $currentUserStore}
-    <TagInput bind:tags existingTags={data.userTags} />
+    <TagInput bind:tags existingTags={data.userTags} anonymousPaste={anonymous} />
 {/if}
 
 <TabbedEditor bind:tabs bind:activeTab />

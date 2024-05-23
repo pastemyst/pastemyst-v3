@@ -2,6 +2,7 @@
     import { tick } from "svelte";
     import { tooltip } from "./tooltips";
 
+    export let anonymousPaste = false;
     export let tags: string[] = [];
     export let existingTags: string[];
 
@@ -19,6 +20,8 @@
     };
 
     const onAddTag = async () => {
+        if (anonymousPaste) return;
+
         addingTag = true;
         await tick();
         tagInputElement.focus();
@@ -82,10 +85,11 @@
 
     <button
         class="add-tag flex row"
-        aria-label="add tag"
+        aria-label={anonymousPaste ? "can't tag anonymous pastes" : "add tag"}
         use:tooltip
         on:click={onAddTag}
         bind:this={addTagElement}
+        class:disabled={anonymousPaste}
     >
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" class="icon">
             <path

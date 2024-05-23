@@ -223,7 +223,8 @@ button,
         padding: 0.5rem;
     }
 
-    &[disabled] {
+    &[disabled],
+    &.disabled {
         cursor: not-allowed;
         background-color: var(--color-bg2);
         border-color: var(--color-bg2);
