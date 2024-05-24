@@ -1,7 +1,7 @@
 <script lang="ts">
     import moment from "moment";
     import Dropdown from "./Dropdown.svelte";
-    import { ExpiresIn, deletePaste, type PasteWithLangStats, pinPaste } from "./api/paste";
+    import { ExpiresIn, deletePaste, type PasteWithLangStats, pinPaste, togglePrivatePaste } from "./api/paste";
     import { cmdPalOpen, cmdPalTitle, currentUserStore } from "./stores";
     import { tooltip } from "./tooltips";
     import type { LangStat } from "./api/lang";
@@ -43,6 +43,12 @@
     const onPin = async () => {
         dropdown.hide();
         await pinPaste(pasteWithLangStats.paste.id);
+        invalidateAll();
+    };
+
+    const onPrivate = async () => {
+        dropdown.hide();
+        await togglePrivatePaste(pasteWithLangStats.paste.id);
         invalidateAll();
     };
 </script>
@@ -100,7 +106,7 @@
 
                     <div slot="dropdown">
                         <div class="dropdown flex col gap-s">
-                            <button class="dropdown-option flex gap-s" on:click={onPin}>
+                            <button class="dropdown-option flex gap-s" on:click={onPin} disabled={pasteWithLangStats.paste.private}>
                                 {#if pasteWithLangStats.paste.pinned}
                                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" class="icon">
                                         <title>Unpin Icon</title>
@@ -125,6 +131,28 @@
                                 {/if}
 
                                 <p>{pasteWithLangStats.paste.pinned ? "unpin" : "pin"}</p>
+                            </button>
+
+                            <button class="dropdown-option flex gap-s" on:click={onPrivate} disabled={pasteWithLangStats.paste.pinned}>
+                                {#if pasteWithLangStats.paste.private}
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" class="icon">
+                                        <title>Unlock Icon</title>
+                                        <path
+                                            fill="currentColor"
+                                            d="M5.5 4v2h7A1.5 1.5 0 0 1 14 7.5v6a1.5 1.5 0 0 1-1.5 1.5h-9A1.5 1.5 0 0 1 2 13.5v-6A1.5 1.5 0 0 1 3.499 6H4V4a4 4 0 0 1 7.371-2.154.75.75 0 0 1-1.264.808A2.5 2.5 0 0 0 5.5 4Zm-2 3.5v6h9v-6h-9Z"
+                                        />
+                                    </svg>
+                                {:else}
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" class="icon">
+                                        <title>Lock Icon</title>
+                                        <path
+                                            fill="currentColor"
+                                            d="M4 4a4 4 0 0 1 8 0v2h.25c.966 0 1.75.784 1.75 1.75v5.5A1.75 1.75 0 0 1 12.25 15h-8.5A1.75 1.75 0 0 1 2 13.25v-5.5C2 6.784 2.784 6 3.75 6H4Zm8.25 3.5h-8.5a.25.25 0 0 0-.25.25v5.5c0 .138.112.25.25.25h8.5a.25.25 0 0 0 .25-.25v-5.5a.25.25 0 0 0-.25-.25ZM10.5 6V4a2.5 2.5 0 1 0-5 0v2Z"
+                                        />
+                                    </svg>
+                                {/if}
+
+                                <p>{pasteWithLangStats.paste.private ? "set to public" : "set to private"}</p>
                             </button>
 
                             <button class="dropdown-option delete flex gap-s" on:click={onDelete}>
