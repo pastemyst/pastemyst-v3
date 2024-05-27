@@ -314,6 +314,11 @@ public class PasteService : IPasteService
             throw new HttpException(HttpStatusCode.Unauthorized, "You can only pin/unpin your own pastes.");
         }
 
+        if (paste.Private)
+        {
+            throw new HttpException(HttpStatusCode.BadRequest, "You can't pin private pastes.");
+        }
+
         var update = Builders<Paste>.Update.Set(p => p.Pinned, !paste.Pinned);
         await _mongo.Pastes.UpdateOneAsync(p => p.Id == paste.Id, update);
     }
@@ -335,6 +340,11 @@ public class PasteService : IPasteService
         if (paste.OwnerId != _userContext.Self.Id)
         {
             throw new HttpException(HttpStatusCode.Unauthorized, "You can only change the private status of your own pastes.");
+        }
+
+        if (paste.Pinned)
+        {
+            throw new HttpException(HttpStatusCode.BadRequest, "You can't private pinned pastes.");
         }
 
         var update = Builders<Paste>.Update.Set(p => p.Private, !paste.Private);
