@@ -147,9 +147,17 @@
     <div class="options flex row center">
         {#if $currentUserStore?.id === data.paste.ownerId}
             <button
-                aria-label={data.paste.private ? "can't pin a private paste" : (data.paste.pinned ? "unpin" : "pin")}
+                aria-label={data.paste.private
+                    ? "can't pin a private paste"
+                    : data.paste.pinned
+                    ? "unpin"
+                    : "pin"}
                 use:tooltip={{
-                    content: data.paste.private ? "can't pin a private paste" : (data.paste.pinned ? "unpin" : "pin"),
+                    content: data.paste.private
+                        ? "can't pin a private paste"
+                        : data.paste.pinned
+                        ? "unpin"
+                        : "pin",
                     hideOnClick: false
                 }}
                 on:click={onPinClick}
