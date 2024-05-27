@@ -21,22 +21,13 @@ public interface IUserProvider
     public Task DeleteUserAsync(string username);
 }
 
-public class UserProvider : IUserProvider
+public class UserProvider(IUserContext userContext, IPasteService pasteService, IMongoService mongo, IActionLogger actionLogger, IImageService imageService) : IUserProvider
 {
-    private readonly IUserContext _userContext;
-    private readonly IPasteService _pasteService;
-    private readonly IActionLogger _actionLogger;
-    private readonly IImageService _imageService;
-    private readonly IMongoService _mongo;
-
-    public UserProvider(IUserContext userContext, IPasteService pasteService, IMongoService mongo, IActionLogger actionLogger, IImageService imageService)
-    {
-        _userContext = userContext;
-        _pasteService = pasteService;
-        _actionLogger = actionLogger;
-        _imageService = imageService;
-        _mongo = mongo;
-    }
+    private readonly IUserContext _userContext = userContext;
+    private readonly IPasteService _pasteService = pasteService;
+    private readonly IActionLogger _actionLogger = actionLogger;
+    private readonly IImageService _imageService = imageService;
+    private readonly IMongoService _mongo = mongo;
 
     public async Task<User> GetByUsernameOrIdAsync(string username, string id)
     {
@@ -67,22 +58,26 @@ public class UserProvider : IUserProvider
 
     public async Task<Page<PasteWithLangStats>> GetOwnedPastesAsync(string username, string tag, bool pinnedOnly, PageRequest pageRequest)
     {
-        var user = await GetByUsernameAsync(username);
+        var user = await GetByUsernameAsync(username) ?? throw new HttpException(HttpStatusCode.NotFound, "User not found.");
 
         // If not showing only pinned pastes, and show all pastes is disabled, return an empty list.
-        if (!pinnedOnly && _userContext.Self != user && !user.Settings.ShowAllPastesOnProfile)
+        if (!pinnedOnly && !_userContext.UserIsSelf(user) && !user.Settings.ShowAllPastesOnProfile)
         {
             return new Page<PasteWithLangStats>();
         }
 
-        var filter = Builders<Paste>.Filter.Eq(p => p.OwnerId, user.Id) &
-                     (Builders<Paste>.Filter.Eq(p => p.Private, false) | Builders<Paste>.Filter.Eq(p => p.OwnerId, _userContext.Self.Id));
+        var filter = Builders<Paste>.Filter.Eq(p => p.OwnerId, user.Id);
+
+        if (!_userContext.UserIsSelf(user))
+        {
+            filter &= Builders<Paste>.Filter.Eq(p => p.Private, false);
+        }
 
         if (pinnedOnly) filter &= Builders<Paste>.Filter.Eq(p => p.Pinned, true);
 
         if (tag is not null)
         {
-            if (_userContext.Self.Id != user.Id)
+            if (!_userContext.UserIsSelf(user))
             {
                 throw new HttpException(HttpStatusCode.Unauthorized, "You must be authorized to view paste tags.");
             }
@@ -99,9 +94,10 @@ public class UserProvider : IUserProvider
         var totalItems = await _mongo.Pastes.CountDocumentsAsync(filter);
         var totalPages = (int)Math.Ceiling((float)totalItems / pageRequest.PageSize);
 
-        if (_userContext.Self.Id != user.Id)
+        // hide all tags for everyone except the owner
+        if (!_userContext.UserIsSelf(user))
         {
-            pastes.ForEach(p => p.Tags = new());
+            pastes.ForEach(p => p.Tags = []);
         }
 
         var pastesWithLangStags = new List<PasteWithLangStats>();
@@ -129,7 +125,7 @@ public class UserProvider : IUserProvider
 
         var user = await GetByUsernameAsync(username);
 
-        if (_userContext.Self.Id != user.Id)
+        if (_userContext.UserIsSelf(user))
             throw new HttpException(HttpStatusCode.Unauthorized, "You can only fetch your own tags.");
 
         var filter = Builders<Paste>.Filter.Eq(p => p.OwnerId, user.Id);
@@ -147,7 +143,7 @@ public class UserProvider : IUserProvider
 
         var user = await GetByUsernameAsync(username);
 
-        if (_userContext.Self.Id != user.Id)
+        if (_userContext.UserIsSelf(user))
             throw new HttpException(HttpStatusCode.Unauthorized, "You can delete only your account.");
 
         await _imageService.DeleteAsync(user.AvatarId);
