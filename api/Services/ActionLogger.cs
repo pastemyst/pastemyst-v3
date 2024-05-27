@@ -7,15 +7,8 @@ public interface IActionLogger
     public Task LogActionAsync(ActionLogType type, string objectId);
 }
 
-public class ActionLogger : IActionLogger
+public class ActionLogger(IMongoService mongo) : IActionLogger
 {
-    private readonly IMongoService _mongo;
-
-    public ActionLogger(IMongoService mongo)
-    {
-        _mongo = mongo;
-    }
-
     public async Task LogActionAsync(ActionLogType type, string objectId)
     {
         var actionLog = new ActionLog
@@ -24,6 +17,6 @@ public class ActionLogger : IActionLogger
             ObjectId = objectId
         };
 
-        await _mongo.ActionLogs.InsertOneAsync(actionLog);
+        await mongo.ActionLogs.InsertOneAsync(actionLog);
     }
 }

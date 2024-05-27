@@ -4,22 +4,13 @@ using pastemyst.Models;
 
 namespace pastemyst.Middleware;
 
-public class ExceptionMiddleware
+public class ExceptionMiddleware(RequestDelegate next, ILogger<ExceptionMiddleware> logger)
 {
-    private readonly RequestDelegate _next;
-    private readonly ILogger<ExceptionMiddleware> _logger;
-
-    public ExceptionMiddleware(RequestDelegate next, ILogger<ExceptionMiddleware> logger)
-    {
-        _next = next;
-        _logger = logger;
-    }
-
     public async Task InvokeAsync(HttpContext context)
     {
         try
         {
-            await _next(context);
+            await next(context);
         }
         catch (HttpException e)
         {
@@ -43,7 +34,7 @@ public class ExceptionMiddleware
 
     private async Task HandleDefaultExceptionAsync(HttpContext context, Exception exception)
     {
-        _logger.LogError("Unhandled exception: {}", exception);
+        logger.LogError("Unhandled exception: {}", exception);
 
         context.Response.ContentType = "application/json";
         context.Response.StatusCode = (int)HttpStatusCode.InternalServerError;

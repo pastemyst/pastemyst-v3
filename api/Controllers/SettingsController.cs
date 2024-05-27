@@ -8,31 +8,24 @@ namespace pastemyst.Controllers;
 
 [ApiController]
 [Route("/api/v3/settings")]
-public class SettingsController : ControllerBase
+public class SettingsController(IUserSettingsService settingsService) : ControllerBase
 {
-    private readonly IUserSettingsService _settingsService;
-
-    public SettingsController(IUserSettingsService settingsService)
-    {
-        _settingsService = settingsService;
-    }
-
     [HttpGet]
     public UserSettings GetUserSettings()
     {
-        return _settingsService.GetUserSettings();
+        return settingsService.GetUserSettings();
     }
 
     [HttpPatch]
     public async Task UpdateUserSettings([FromBody] UserSettings userSettings)
     {
-        await _settingsService.UpdateUserSettingsAsync(userSettings);
+        await settingsService.UpdateUserSettingsAsync(userSettings);
     }
 
     [HttpPatch("username")]
     public async Task SetUsername([FromBody] SetUsernameRequest setUsernameRequest)
     {
-        await _settingsService.SetUsernameAsync(setUsernameRequest.Username);
+        await settingsService.SetUsernameAsync(setUsernameRequest.Username);
     }
 
     [HttpPatch("avatar")]
@@ -41,6 +34,6 @@ public class SettingsController : ControllerBase
         await using var stream = file.OpenReadStream();
         var bytes = new byte[file.Length];
         _ = await stream.ReadAsync(bytes, 0, (int)file.Length);
-        await _settingsService.SetAvatarAsync(bytes, file.ContentType);
+        await settingsService.SetAvatarAsync(bytes, file.ContentType);
     }
 }

@@ -8,19 +8,19 @@ public class Paste
 {
     [BsonId]
     [BsonRepresentation(BsonType.String)]
-    public string Id { get; set; }
+    public string Id { get; init; }
 
-    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+    public DateTime CreatedAt { get; init; } = DateTime.UtcNow;
 
-    public ExpiresIn ExpiresIn { get; set; } = ExpiresIn.Never;
+    public ExpiresIn ExpiresIn { get; init; } = ExpiresIn.Never;
 
-    public DateTime? DeletesAt { get; set; }
+    public DateTime? DeletesAt { get; init; }
 
     public string Title { get; set; } = "";
 
     public List<Pasty> Pasties { get; set; }
 
-    public string OwnerId { get; set; }
+    public string OwnerId { get; init; }
 
     public bool Private { get; set; }
 

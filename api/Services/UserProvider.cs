@@ -1,5 +1,4 @@
 using System.Net;
-using Microsoft.EntityFrameworkCore;
 using MongoDB.Driver;
 using pastemyst.Exceptions;
 using pastemyst.Models;
@@ -23,32 +22,25 @@ public interface IUserProvider
 
 public class UserProvider(IUserContext userContext, IPasteService pasteService, IMongoService mongo, IActionLogger actionLogger, IImageService imageService) : IUserProvider
 {
-    private readonly IUserContext _userContext = userContext;
-    private readonly IPasteService _pasteService = pasteService;
-    private readonly IActionLogger _actionLogger = actionLogger;
-    private readonly IImageService _imageService = imageService;
-    private readonly IMongoService _mongo = mongo;
-
     public async Task<User> GetByUsernameOrIdAsync(string username, string id)
     {
-        User user = null;
-
         if (username is not null)
         {
             return await GetByUsernameAsync(username);
         }
-        else if (id is not null)
+
+        if (id is not null)
         {
-            user = await _mongo.Users.Find(u => u.Id == id).FirstOrDefaultAsync();
+            return await mongo.Users.Find(u => u.Id == id).FirstOrDefaultAsync();
         }
 
-        return user;
+        return null;
     }
 
     public async Task<User> GetByUsernameAsync(string username)
     {
         var filter = Builders<User>.Filter.Eq(u => u.Username, username);
-        return await _mongo.Users.Find(filter).FirstOrDefaultAsync();
+        return await mongo.Users.Find(filter).FirstOrDefaultAsync();
     }
 
     public async Task<bool> ExistsByUsernameAsync(string username)
@@ -61,14 +53,14 @@ public class UserProvider(IUserContext userContext, IPasteService pasteService, 
         var user = await GetByUsernameAsync(username) ?? throw new HttpException(HttpStatusCode.NotFound, "User not found.");
 
         // If not showing only pinned pastes, and show all pastes is disabled, return an empty list.
-        if (!pinnedOnly && !_userContext.UserIsSelf(user) && !user.Settings.ShowAllPastesOnProfile)
+        if (!pinnedOnly && !userContext.UserIsSelf(user) && !user.Settings.ShowAllPastesOnProfile)
         {
             return new Page<PasteWithLangStats>();
         }
 
         var filter = Builders<Paste>.Filter.Eq(p => p.OwnerId, user.Id);
 
-        if (!_userContext.UserIsSelf(user))
+        if (!userContext.UserIsSelf(user))
         {
             filter &= Builders<Paste>.Filter.Eq(p => p.Private, false);
         }
@@ -77,7 +69,7 @@ public class UserProvider(IUserContext userContext, IPasteService pasteService, 
 
         if (tag is not null)
         {
-            if (!_userContext.UserIsSelf(user))
+            if (!userContext.UserIsSelf(user))
             {
                 throw new HttpException(HttpStatusCode.Unauthorized, "You must be authorized to view paste tags.");
             }
@@ -85,17 +77,17 @@ public class UserProvider(IUserContext userContext, IPasteService pasteService, 
             filter &= Builders<Paste>.Filter.AnyStringIn(p => p.Tags, tag);
         }
 
-        var pastes = await _mongo.Pastes.Find(filter)
+        var pastes = await mongo.Pastes.Find(filter)
             .SortByDescending(p => p.CreatedAt)
             .Skip(pageRequest.Page * pageRequest.PageSize)
             .Limit(pageRequest.PageSize)
             .ToListAsync();
 
-        var totalItems = await _mongo.Pastes.CountDocumentsAsync(filter);
+        var totalItems = await mongo.Pastes.CountDocumentsAsync(filter);
         var totalPages = (int)Math.Ceiling((float)totalItems / pageRequest.PageSize);
 
         // hide all tags for everyone except the owner
-        if (!_userContext.UserIsSelf(user))
+        if (!userContext.UserIsSelf(user))
         {
             pastes.ForEach(p => p.Tags = []);
         }
@@ -103,7 +95,7 @@ public class UserProvider(IUserContext userContext, IPasteService pasteService, 
         var pastesWithLangStags = new List<PasteWithLangStats>();
         foreach (var paste in pastes)
         {
-            var stats = _pasteService.GetLanguageStats(paste);
+            var stats = pasteService.GetLanguageStats(paste);
 
             pastesWithLangStags.Add(new() { Paste = paste, LanguageStats = stats });
         }
@@ -120,17 +112,17 @@ public class UserProvider(IUserContext userContext, IPasteService pasteService, 
 
     public async Task<List<string>> GetTagsAsync(string username)
     {
-        if (!_userContext.IsLoggedIn())
+        if (!userContext.IsLoggedIn())
             throw new HttpException(HttpStatusCode.Unauthorized, "You must be authorized to get your own tags.");
 
         var user = await GetByUsernameAsync(username);
 
-        if (_userContext.UserIsSelf(user))
+        if (userContext.UserIsSelf(user))
             throw new HttpException(HttpStatusCode.Unauthorized, "You can only fetch your own tags.");
 
         var filter = Builders<Paste>.Filter.Eq(p => p.OwnerId, user.Id);
 
-        return (await _mongo.Pastes.Find(filter).Project(p => p.Tags).ToListAsync())
+        return (await mongo.Pastes.Find(filter).Project(p => p.Tags).ToListAsync())
             .SelectMany(t => t)
             .Distinct()
             .ToList();
@@ -138,24 +130,24 @@ public class UserProvider(IUserContext userContext, IPasteService pasteService, 
 
     public async Task DeleteUserAsync(string username)
     {
-        if (!_userContext.IsLoggedIn())
+        if (!userContext.IsLoggedIn())
             throw new HttpException(HttpStatusCode.Unauthorized, "You must be authorized to delete your account.");
 
         var user = await GetByUsernameAsync(username);
 
-        if (_userContext.UserIsSelf(user))
+        if (userContext.UserIsSelf(user))
             throw new HttpException(HttpStatusCode.Unauthorized, "You can delete only your account.");
 
-        await _imageService.DeleteAsync(user.AvatarId);
+        await imageService.DeleteAsync(user.AvatarId);
 
-        await _mongo.Pastes.DeleteManyAsync(p => p.OwnerId == user.Id);
-        await _mongo.Users.DeleteOneAsync(u => u.Id == user.Id);
+        await mongo.Pastes.DeleteManyAsync(p => p.OwnerId == user.Id);
+        await mongo.Users.DeleteOneAsync(u => u.Id == user.Id);
 
         // Delete all stars of this user
         var starsFilter = Builders<Paste>.Filter.AnyEq(p => p.Stars, user.Id);
         var starsUpdate = Builders<Paste>.Update.Pull(p => p.Stars, user.Id);
-        await _mongo.Pastes.UpdateManyAsync(starsFilter, starsUpdate);
+        await mongo.Pastes.UpdateManyAsync(starsFilter, starsUpdate);
 
-        await _actionLogger.LogActionAsync(ActionLogType.UserDeleted, user.Id);
+        await actionLogger.LogActionAsync(ActionLogType.UserDeleted, user.Id);
     }
 }

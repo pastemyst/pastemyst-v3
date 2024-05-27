@@ -17,21 +17,11 @@ public interface IImageService
     Task<bool> ExistsByIdAsync(string id);
 }
 
-public class ImageService : IImageService
+public class ImageService(IMongoService mongo) : IImageService
 {
-    private readonly IMongoService _mongo;
-
-    private readonly IIdProvider _idProvider;
-
-    public ImageService(IIdProvider idProvider, IMongoService mongo)
-    {
-        _idProvider = idProvider;
-        _mongo = mongo;
-    }
-
     public async Task<string> UploadImageAsync(byte[] bytes, string contentType)
     {
-        var image = await _mongo.Images.UploadFromBytesAsync("", bytes, new()
+        var image = await mongo.Images.UploadFromBytesAsync("", bytes, new()
         {
             Metadata = new BsonDocument(new Dictionary<string, string>
             {
@@ -45,17 +35,17 @@ public class ImageService : IImageService
     public async Task<GridFSFileInfo<ObjectId>> FindByIdAsync(string id)
     {
         var filter = Builders<GridFSFileInfo<ObjectId>>.Filter.Eq(fs => fs.Id, ObjectId.Parse(id));
-        return await _mongo.Images.Find(filter).FirstOrDefaultAsync();
+        return await (await mongo.Images.FindAsync(filter)).FirstOrDefaultAsync();
     }
 
     public async Task<byte[]> DownloadByIdAsync(string id)
     {
-        return await _mongo.Images.DownloadAsBytesAsync(new ObjectId(id));
+        return await mongo.Images.DownloadAsBytesAsync(new ObjectId(id));
     }
 
     public async Task DeleteAsync(string id)
     {
-        await _mongo.Images.DeleteAsync(new ObjectId(id));
+        await mongo.Images.DeleteAsync(new ObjectId(id));
     }
 
     public async Task<bool> ExistsByIdAsync(string id) => await FindByIdAsync(id) is not null;

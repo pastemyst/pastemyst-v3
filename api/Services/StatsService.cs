@@ -1,4 +1,3 @@
-using Microsoft.EntityFrameworkCore;
 using MongoDB.Bson;
 using MongoDB.Driver;
 using pastemyst.Models;
@@ -10,15 +9,8 @@ public interface IStatsService
     public Task<AppStats> GetAppStatsAsync();
 }
 
-public class StatsService : IStatsService
+public class StatsService(IMongoService mongo) : IStatsService
 {
-    private readonly IMongoService _mongo;
-
-    public StatsService(IMongoService mongo)
-    {
-        _mongo = mongo;
-    }
-
     public async Task<AppStats> GetAppStatsAsync()
     {
         var totalPastesFilter = Builders<ActionLog>.Filter.Eq(a => a.Type, ActionLogType.PasteCreated);
@@ -26,10 +18,10 @@ public class StatsService : IStatsService
 
         return new()
         {
-            ActivePastes = await _mongo.Pastes.CountDocumentsAsync(new BsonDocument()),
-            ActiveUsers = await _mongo.Users.CountDocumentsAsync(new BsonDocument()),
-            TotalPastes = await _mongo.ActionLogs.CountDocumentsAsync(totalPastesFilter),
-            TotalUsers = await _mongo.ActionLogs.CountDocumentsAsync(totalUsersFilter),
+            ActivePastes = await mongo.Pastes.CountDocumentsAsync(new BsonDocument()),
+            ActiveUsers = await mongo.Users.CountDocumentsAsync(new BsonDocument()),
+            TotalPastes = await mongo.ActionLogs.CountDocumentsAsync(totalPastesFilter),
+            TotalUsers = await mongo.ActionLogs.CountDocumentsAsync(totalUsersFilter),
             ActivePastesOverTime = await GetActivePasteStatsOverTime(),
             TotalPastesOverTime = await GetActionLogStatsOverTime(ActionLogType.PasteCreated),
         };
@@ -39,7 +31,7 @@ public class StatsService : IStatsService
     {
         var filter = Builders<ActionLog>.Filter.Eq(a => a.Type, type);
 
-        var statsOverTime = (await _mongo.ActionLogs
+        var statsOverTime = (await mongo.ActionLogs
             .Find(filter)
             .ToListAsync())
             .GroupBy(a => a.CreatedAt)
@@ -64,7 +56,7 @@ public class StatsService : IStatsService
                      Builders<ActionLog>.Filter.Eq(a => a.Type, ActionLogType.PasteDeleted) |
                      Builders<ActionLog>.Filter.Eq(a => a.Type, ActionLogType.PasteExpired);
 
-        var statsOverTime = (await _mongo.ActionLogs
+        var statsOverTime = (await mongo.ActionLogs
             .Find(filter)
             .ToListAsync())
             .GroupBy(a => a.CreatedAt)

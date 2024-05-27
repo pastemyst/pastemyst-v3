@@ -2,7 +2,7 @@ using pastemyst.Models;
 
 namespace pastemyst.Utils;
 
-public class ExpiresInUtils
+public static class ExpiresInUtils
 {
     public static DateTime? ToDeletesAt(DateTime start, ExpiresIn expiresIn)
     {
