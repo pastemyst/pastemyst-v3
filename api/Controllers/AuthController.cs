@@ -6,38 +6,31 @@ namespace pastemyst.Controllers;
 
 [ApiController]
 [Route("/api/v3")]
-public class AuthController : ControllerBase
+public class AuthController(IAuthService authService) : ControllerBase
 {
-    private readonly IAuthService _authService;
-
-    public AuthController(IAuthService authService)
-    {
-        _authService = authService;
-    }
-
     [HttpGet("login/{provider}")]
     public async Task<IActionResult> Login(string provider)
     {
-        return Redirect(await _authService.InitiateLoginFlowAsync(provider, HttpContext));
+        return Redirect(await authService.InitiateLoginFlowAsync(provider, HttpContext));
     }
 
     [HttpGet("login/{provider}/callback")]
     public async Task<IActionResult> HandleCallback(string provider, [FromQuery] string state, [FromQuery] string code)
     {
-        return Redirect(await _authService.HandleCallbackAsync(provider, state, code, HttpContext));
+        return Redirect(await authService.HandleCallbackAsync(provider, state, code, HttpContext));
     }
 
     [HttpPost("auth/register")]
     public async Task<IActionResult> Register([FromBody] RegisterRequest registerRequest)
     {
-        await _authService.RegisterUserAsync(registerRequest.Username, HttpContext);
+        await authService.RegisterUserAsync(registerRequest.Username, HttpContext);
         return Ok();
     }
 
     [HttpGet("auth/self")]
     public async Task<IActionResult> GetSelf()
     {
-        var self = await _authService.GetSelfAsync(HttpContext);
+        var self = await authService.GetSelfAsync(HttpContext);
 
         if (self is null) return Unauthorized();
         return Ok(self);
@@ -46,6 +39,6 @@ public class AuthController : ControllerBase
     [HttpGet("auth/logout")]
     public IActionResult Logout()
     {
-        return Redirect(_authService.Logout(HttpContext));
+        return Redirect(authService.Logout(HttpContext));
     }
 }

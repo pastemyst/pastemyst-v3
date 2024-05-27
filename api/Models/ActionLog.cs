@@ -11,7 +11,7 @@ public class ActionLog
 
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
-    public ActionLogType Type { get; set; }
+    public ActionLogType Type { get; init; }
 
     public string ObjectId { get; set; }
 }

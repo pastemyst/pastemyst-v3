@@ -19,8 +19,8 @@ public class OAuthService : IOAuthService
 {
     public Dictionary<string, OAuthProviderConfig> OAuthProviders { get; }
 
-    public OAuthProviderConfig GitHubProvider { get; }
-    public OAuthProviderConfig GitLabProvider { get; }
+    private OAuthProviderConfig GitHubProvider { get; }
+    private OAuthProviderConfig GitLabProvider { get; }
 
     private readonly ILogger<OAuthService> _logger;
     private readonly IHttpClientFactory _httpClientFactory;
@@ -38,7 +38,7 @@ public class OAuthService : IOAuthService
             AuthUrl = "https://github.com/login/oauth/authorize",
             TokenUrl = "https://github.com/login/oauth/access_token",
             RedirectUrl = configuration["Host"] + "/api/v3/login/github/callback",
-            Scopes = new[] { "read:user" },
+            Scopes = ["read:user"],
             Name = "GitHub",
             UserUrl = "https://api.github.com/user",
             IdJsonField = "id",
@@ -53,7 +53,7 @@ public class OAuthService : IOAuthService
             AuthUrl = "https://gitlab.com/oauth/authorize",
             TokenUrl = "https://gitlab.com/oauth/token",
             RedirectUrl = configuration["Host"] + "/api/v3/login/gitlab/callback",
-            Scopes = new[] { "read_user" },
+            Scopes = ["read_user"],
             Name = "GitLab",
             UserUrl = "https://gitlab.com/api/v4/user",
             IdJsonField = "id",

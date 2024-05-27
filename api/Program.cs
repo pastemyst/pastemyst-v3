@@ -83,7 +83,7 @@ builder.Services.AddCors(options =>
     );
 
     options.AddPolicy("client", policy =>
-        policy.WithOrigins(builder.Configuration["ClientUrl"])
+        policy.WithOrigins(builder.Configuration["ClientUrl"] ?? throw new InvalidOperationException("Missing ClientUrl configuration"))
         .AllowAnyHeader()
         .AllowAnyMethod()
         .AllowCredentials()

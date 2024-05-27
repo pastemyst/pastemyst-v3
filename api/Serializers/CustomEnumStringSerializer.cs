@@ -13,9 +13,9 @@ public class CustomEnumStringSerializer<TEnum> : EnumSerializer<TEnum>
         var enumValue = typeof(TEnum)
             .GetTypeInfo()
             .GetFields()
-            .SingleOrDefault(e => e.Name == value.ToString())
+            .SingleOrDefault(e => e.Name == value.ToString())!
             .GetCustomAttribute<EnumMemberAttribute>(false)
-            .Value;
+            ?.Value;
 
         context.Writer.WriteString(enumValue);
     }
@@ -28,6 +28,6 @@ public class CustomEnumStringSerializer<TEnum> : EnumSerializer<TEnum>
             .GetTypeInfo()
             .GetFields()
             .SingleOrDefault(e => e?.GetCustomAttribute<EnumMemberAttribute>()?.Value == enumValue)
-            .GetValue(null);
+            ?.GetValue(null)!;
     }
 }

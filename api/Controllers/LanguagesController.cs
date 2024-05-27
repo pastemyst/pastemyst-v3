@@ -6,30 +6,23 @@ namespace pastemyst.Controllers;
 
 [ApiController]
 [Route("/api/v3/langs")]
-public class LanguagesController : ControllerBase
+public class LanguagesController(ILanguageProvider languageProvider) : ControllerBase
 {
-    private readonly ILanguageProvider _languageProvider;
-
-    public LanguagesController(ILanguageProvider languageProvider)
-    {
-        _languageProvider = languageProvider;
-    }
-
     [HttpGet]
     public List<Language> All()
     {
-        return _languageProvider.Languages;
+        return languageProvider.Languages;
     }
 
     [HttpGet("popular")]
     public List<string> Popular()
     {
-        return _languageProvider.PopularLanguageNames;
+        return languageProvider.PopularLanguageNames;
     }
 
     [HttpGet("{name}")]
     public Language FindByName(string name)
     {
-        return _languageProvider.FindByName(name);
+        return languageProvider.FindByName(name);
     }
 }

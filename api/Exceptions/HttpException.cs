@@ -3,12 +3,7 @@ using System.Text.Json.Serialization;
 
 namespace pastemyst.Exceptions;
 
-public class HttpException : Exception
+public class HttpException(HttpStatusCode status, string message) : Exception(message)
 {
-    [JsonIgnore] public HttpStatusCode Status { get; }
-
-    public HttpException(HttpStatusCode status, string message) : base(message)
-    {
-        Status = status;
-    }
+    [JsonIgnore] public HttpStatusCode Status { get; } = status;
 }

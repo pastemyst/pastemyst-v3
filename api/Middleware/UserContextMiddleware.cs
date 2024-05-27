@@ -2,15 +2,8 @@ using pastemyst.Services;
 
 namespace pastemyst.Middleware;
 
-public class UserContextMiddleware
+public class UserContextMiddleware(RequestDelegate next)
 {
-    private readonly RequestDelegate _next;
-
-    public UserContextMiddleware(RequestDelegate next)
-    {
-        _next = next;
-    }
-
     public async Task InvokeAsync(HttpContext context, IAuthService authService)
     {
         var self = await authService.GetSelfAsync(context);
@@ -20,6 +13,6 @@ public class UserContextMiddleware
 
         context.Features.Set(userContext);
 
-        await _next(context);
+        await next(context);
     }
 }

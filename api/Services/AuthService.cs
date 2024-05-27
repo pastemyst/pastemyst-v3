@@ -3,7 +3,6 @@ using System.Web;
 using JWT.Algorithms;
 using JWT.Builder;
 using JWT.Exceptions;
-using Microsoft.EntityFrameworkCore;
 using MongoDB.Driver;
 using pastemyst.Exceptions;
 using pastemyst.Models;
@@ -26,38 +25,25 @@ public interface IAuthService
     public string Logout(HttpContext httpContext);
 }
 
-public class AuthService : IAuthService
+public class AuthService(
+    IIdProvider idProvider,
+    IOAuthService oAuthService,
+    IConfiguration configuration,
+    IHttpClientFactory httpClientFactory,
+    IImageService imageService,
+    IActionLogger actionLogger,
+    IMongoService mongo)
+    : IAuthService
 {
-    private readonly IIdProvider _idProvider;
-    private readonly IOAuthService _oAuthService;
-    private readonly IImageService _imageService;
-    private readonly IActionLogger _actionLogger;
-    private readonly IHttpClientFactory _httpClientFactory;
-    private readonly IMongoService _mongo;
-    private readonly IConfiguration _configuration;
-
-    public AuthService(IIdProvider idProvider, IOAuthService oAuthService, IConfiguration configuration,
-        IHttpClientFactory httpClientFactory, IImageService imageService,
-        IActionLogger actionLogger, IMongoService mongo)
-    {
-        _idProvider = idProvider;
-        _oAuthService = oAuthService;
-        _configuration = configuration;
-        _httpClientFactory = httpClientFactory;
-        _imageService = imageService;
-        _actionLogger = actionLogger;
-        _mongo = mongo;
-    }
-
     public async Task<string> InitiateLoginFlowAsync(string provider, HttpContext httpContext)
     {
         // Random state string used to validate that the acquired token was requested from here.
-        var state = _idProvider.GenerateId();
+        var state = idProvider.GenerateId();
 
         httpContext.Session.SetString("state", state);
         await httpContext.Session.CommitAsync();
 
-        var oauthProvider = _oAuthService.OAuthProviders[provider];
+        var oauthProvider = oAuthService.OAuthProviders[provider];
 
         return oauthProvider.AuthUrl +
                "?client_id=" + oauthProvider.ClientId +
@@ -85,21 +71,21 @@ public class AuthService : IAuthService
             throw new HttpException(HttpStatusCode.BadRequest, "The OAuth states don't match.");
         }
 
-        var oAuthProvider = _oAuthService.OAuthProviders[provider];
-        var accessToken = await _oAuthService.ExchangeTokenAsync(oAuthProvider, code);
-        var providerUser = await _oAuthService.GetProviderUserAsync(oAuthProvider, accessToken);
+        var oAuthProvider = oAuthService.OAuthProviders[provider];
+        var accessToken = await oAuthService.ExchangeTokenAsync(oAuthProvider, code);
+        var providerUser = await oAuthService.GetProviderUserAsync(oAuthProvider, accessToken);
 
         var userFilter = Builders<User>.Filter.Eq(u => u.ProviderName, oAuthProvider.Name) &
                          Builders<User>.Filter.Eq(u => u.ProviderId, providerUser.Id);
 
-        var existingUser = await _mongo.Users.Find(userFilter).FirstOrDefaultAsync();
+        var existingUser = await mongo.Users.Find(userFilter).FirstOrDefaultAsync();
 
         var cookie = new CookieOptions
         {
             Path = "/",
             HttpOnly = true,
             SameSite = SameSiteMode.Strict,
-            Secure = _configuration.GetValue<bool>("Https")
+            Secure = configuration.GetValue<bool>("Https")
         };
 
         if (existingUser is not null)
@@ -111,14 +97,14 @@ public class AuthService : IAuthService
                 .AddClaim("exp", cookieExpirationTime.ToUnixTimeSeconds())
                 .AddClaim("id", existingUser.Id)
                 .AddClaim("username", existingUser.Username)
-                .WithSecret(_configuration["JwtSecret"])
+                .WithSecret(configuration["JwtSecret"])
                 .Encode();
 
             cookie.Expires = cookieExpirationTime;
 
             httpContext.Response.Cookies.Append("pastemyst", jwtToken, cookie);
 
-            return _configuration["ClientUrl"]!;
+            return configuration["ClientUrl"]!;
         }
         else
         {
@@ -130,14 +116,14 @@ public class AuthService : IAuthService
                 .AddClaim("providerName", oAuthProvider.Name)
                 .AddClaim("providerId", providerUser.Id)
                 .AddClaim("avatarUrl", providerUser.AvatarUrl)
-                .WithSecret(_configuration["JwtSecret"])
+                .WithSecret(configuration["JwtSecret"])
                 .Encode();
 
             cookie.Expires = cookieExpirationTime;
 
             httpContext.Response.Cookies.Append("pastemyst-registration", jwtToken, cookie);
 
-            return $"{_configuration["ClientUrl"]}/create-account?username={providerUser.Username}";
+            return $"{configuration["ClientUrl"]}/create-account?username={providerUser.Username}";
         }
     }
 
@@ -151,7 +137,7 @@ public class AuthService : IAuthService
         }
 
         var usernameFilter = Builders<User>.Filter.Eq(u => u.Username, username);
-        var existingUser = await _mongo.Users.Find(usernameFilter).FirstOrDefaultAsync();
+        var existingUser = await mongo.Users.Find(usernameFilter).FirstOrDefaultAsync();
 
         if (existingUser is not null)
         {
@@ -160,17 +146,17 @@ public class AuthService : IAuthService
 
         var claims = JwtBuilder.Create()
             .WithAlgorithm(new HMACSHA512Algorithm())
-            .WithSecret(_configuration["JwtSecret"])
+            .WithSecret(configuration["JwtSecret"])
             .MustVerifySignature()
             .Decode<Dictionary<string, object>>(cookie);
 
-        var id = await _idProvider.GenerateId(async id => await _mongo.Users.Find(u => u.Id == id).FirstOrDefaultAsync() is not null);
+        var id = await idProvider.GenerateId(async id => await mongo.Users.Find(u => u.Id == id).FirstOrDefaultAsync() is not null);
 
-        var client = _httpClientFactory.CreateClient();
+        var client = httpClientFactory.CreateClient();
         var response = await client.GetAsync((string)claims["avatarUrl"]);
         var imageBytes = await response.Content.ReadAsByteArrayAsync();
 
-        var avatarId = await _imageService.UploadImageAsync(
+        var avatarId = await imageService.UploadImageAsync(
             imageBytes,
             response.Content.Headers.ContentType?.MediaType ?? "image/png"
         );
@@ -186,7 +172,7 @@ public class AuthService : IAuthService
             Settings = new UserSettings()
         };
 
-        await _mongo.Users.InsertOneAsync(user);
+        await mongo.Users.InsertOneAsync(user);
 
         httpContext.Response.Cookies.Delete("pastemyst-registration");
 
@@ -195,7 +181,7 @@ public class AuthService : IAuthService
             .AddClaim("exp", DateTimeOffset.Now.AddDays(30).ToUnixTimeSeconds())
             .AddClaim("id", user.Id)
             .AddClaim("username", user.Username)
-            .WithSecret(_configuration["JwtSecret"])
+            .WithSecret(configuration["JwtSecret"])
             .Encode();
 
         var newCookie = new CookieOptions
@@ -204,12 +190,12 @@ public class AuthService : IAuthService
             HttpOnly = true,
             SameSite = SameSiteMode.Strict,
             Expires = DateTimeOffset.Now.AddDays(30),
-            Secure = _configuration.GetValue<bool>("Https")
+            Secure = configuration.GetValue<bool>("Https")
         };
 
         httpContext.Response.Cookies.Append("pastemyst", jwtToken, newCookie);
 
-        await _actionLogger.LogActionAsync(ActionLogType.UserCreated, user.Id);
+        await actionLogger.LogActionAsync(ActionLogType.UserCreated, user.Id);
     }
 
     public async Task<User> GetSelfAsync(HttpContext httpContext)
@@ -230,7 +216,7 @@ public class AuthService : IAuthService
         {
             claims = JwtBuilder.Create()
                 .WithAlgorithm(new HMACSHA512Algorithm())
-                .WithSecret(_configuration["JwtSecret"])
+                .WithSecret(configuration["JwtSecret"])
                 .MustVerifySignature()
                 .Decode<Dictionary<string, object>>(jwtToken);
         }
@@ -241,13 +227,13 @@ public class AuthService : IAuthService
 
         var userId = (string)claims["id"];
 
-        return await _mongo.Users.Find(u => u.Id == userId).FirstOrDefaultAsync();
+        return await mongo.Users.Find(u => u.Id == userId).FirstOrDefaultAsync();
     }
 
     public string Logout(HttpContext httpContext)
     {
         httpContext.Response.Cookies.Delete("pastemyst");
 
-        return _configuration["ClientUrl"];
+        return configuration["ClientUrl"];
     }
 }

@@ -25,12 +25,12 @@ public class LanguageProvider : ILanguageProvider, IHostedService
 
     public List<Language> Languages { get; private set; } = new();
 
-    public List<string> PopularLanguageNames => new()
-    {
+    public List<string> PopularLanguageNames =>
+    [
         "Text", "C", "C#", "C++", "CSS", "D", "Dart", "Go", "Haskell", "HTML", "Java",
         "JavaScript", "JSON", "Kotlin", "Markdown", "Objective-C", "Perl", "PHP", "PowerShell",
         "Python", "Ruby", "Rust", "Scala", "Shell", "Swift", "TypeScript", "Yaml"
-    };
+    ];
 
     public Language FindByName(string name)
     {

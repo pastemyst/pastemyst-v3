@@ -1,4 +1,3 @@
-using System.ComponentModel.DataAnnotations.Schema;
 using System.Text.Json.Serialization;
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
@@ -9,7 +8,7 @@ public class User
 {
     [BsonId]
     [BsonRepresentation(BsonType.String)]
-    public string Id { get; set; }
+    public string Id { get; init; }
 
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
@@ -21,7 +20,7 @@ public class User
 
     public bool IsSupporter { get; set; }
 
-    public bool isAdmin { get; set; }
+    public bool IsAdmin { get; set; }
 
     [JsonIgnore] public string ProviderName { get; set; }
 
