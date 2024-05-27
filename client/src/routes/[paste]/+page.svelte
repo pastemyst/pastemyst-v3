@@ -147,13 +147,22 @@
     <div class="options flex row center">
         {#if $currentUserStore?.id === data.paste.ownerId}
             <button
-                aria-label={data.paste.pinned ? "unpin" : "pin"}
+                aria-label={data.paste.private
+                    ? "can't pin a private paste"
+                    : data.paste.pinned
+                    ? "unpin"
+                    : "pin"}
                 use:tooltip={{
-                    content: data.paste.pinned ? "unpin" : "pin",
+                    content: data.paste.private
+                        ? "can't pin a private paste"
+                        : data.paste.pinned
+                        ? "unpin"
+                        : "pin",
                     hideOnClick: false
                 }}
                 on:click={onPinClick}
                 class:pinned={data.paste.pinned}
+                class:disabled={data.paste.private}
             >
                 {#if data.paste.pinned}
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" class="icon">
@@ -221,7 +230,15 @@
                 </svg>
             </button>
         {:else}
-            <button aria-label="set to private" use:tooltip on:click={onPrivateClick}>
+            <button
+                aria-label={data.paste.pinned ? "can't private a pinned paste" : "set to private"}
+                use:tooltip={{
+                    content: data.paste.pinned ? "can't private a pinned paste" : "set to private",
+                    hideOnClick: false
+                }}
+                on:click={onPrivateClick}
+                class:disabled={data.paste.pinned}
+            >
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" class="icon">
                     <title>Lock Icon</title>
                     <path
