@@ -316,32 +316,8 @@ section {
 // shiki
 
 .shiki {
-    display: grid;
-    grid-template-columns: 0fr 1fr;
     line-height: 1.25rem;
-
-    .line-numbers {
-        user-select: none;
-        font-size: $fs-normal;
-        text-align: right;
-        margin-right: 1rem;
-        margin-top: 0.25rem;
-        margin-bottom: 0.25rem;
-        padding-left: 0.25rem;
-        color: var(--color-bg3);
-        display: grid;
-
-        span {
-            position: relative;
-            top: 1px;
-        }
-    }
-
-    .lines {
-        display: grid;
-        margin-top: 0.25rem;
-        margin-bottom: 0.25rem;
-    }
+    padding: 0.25rem;
 }
 
 .markdown {
