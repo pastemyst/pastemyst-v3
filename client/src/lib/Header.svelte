@@ -2,6 +2,7 @@
     import { cmdPalOpen, cmdPalTitle, currentUserStore } from "./stores";
     import { tooltip } from "./tooltips";
     import { env } from "$env/dynamic/public";
+    import { isMacOs } from "./utils/userAgent";
 
     const isAlphaRelease = env.PUBLIC_ALPHA_RELEASE === "true";
 
@@ -77,7 +78,7 @@
         <button
             class="nav-item btn-icon"
             on:click={onMenuClick}
-            aria-label="menu"
+            aria-label={`menu (${isMacOs() ? "cmd" : "ctrl"}+k)`}
             role="menu"
             use:tooltip
         >

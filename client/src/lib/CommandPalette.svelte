@@ -10,6 +10,7 @@
         type Command
     } from "./command";
     import { cmdPalOpen, cmdPalTitle } from "./stores";
+    import { isMacOs } from "./utils/userAgent";
 
     let isOpen = false;
     let title: string | null = null;
@@ -60,7 +61,9 @@
     });
 
     const handleKeys = (e: KeyboardEvent) => {
-        if (e.ctrlKey && e.key === "k") {
+        const modifier = isMacOs() ? e.metaKey : e.ctrlKey;
+
+        if (modifier && e.key === "k") {
             e.preventDefault();
             toggle();
         }
