@@ -1,3 +1,9 @@
+import { browser } from "$app/environment";
+
 export const isMacOs = () => {
-    return window.navigator.userAgent.includes("Mac");
+    if (browser) {
+        return window.navigator.userAgent.includes("Mac");
+    } else {
+        return false;
+    }
 };
