@@ -244,7 +244,7 @@
         cmdPalOpen.set(true);
     };
 
-    const onPreviewClick = async () => {
+    const preview = async () => {
         const res = await fetch("/internal/highlight", {
             method: "post",
             body: JSON.stringify({
@@ -254,6 +254,10 @@
         });
 
         currentPreviewContent = await res.text();
+    };
+
+    const onPreviewClick = async () => {
+        await preview();
 
         previewEnabled = !previewEnabled;
     };
@@ -301,6 +305,8 @@
                 effects: langCompartment.reconfigure([])
             });
         }
+
+        if (previewEnabled) preview();
     };
 </script>
 
