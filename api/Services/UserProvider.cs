@@ -117,7 +117,7 @@ public class UserProvider(IUserContext userContext, IPasteService pasteService, 
 
         var user = await GetByUsernameAsync(username);
 
-        if (userContext.UserIsSelf(user))
+        if (!userContext.UserIsSelf(user))
             throw new HttpException(HttpStatusCode.Unauthorized, "You can only fetch your own tags.");
 
         var filter = Builders<Paste>.Filter.Eq(p => p.OwnerId, user.Id);
