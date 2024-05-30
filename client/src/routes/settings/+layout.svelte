@@ -1,10 +1,39 @@
 <script lang="ts">
-    import type { SettingsContext } from "$lib/api/settings";
+    import { updateSettings, type SettingsContext } from "$lib/api/settings";
+    import { onMount } from "svelte";
     import type { LayoutData } from "./$types";
+    import { settingsContextStore } from "$lib/stores";
+    import { tooltip } from "$lib/tooltips";
 
     export let data: LayoutData;
 
     let settingsContext: SettingsContext = data.self ? "profile" : "browser";
+
+    let synced = false;
+
+    $: settingsContextStore.set(settingsContext);
+
+    onMount(() => {
+        settingsContextStore.set(settingsContext);
+    });
+
+    const onSyncClick = async () => {
+        if (data.settings) {
+            await updateSettings(fetch, "browser", data.settings);
+
+            synced = true;
+
+            setTimeout(() => {
+                synced = false;
+            }, 1000);
+
+            // hack to force reload the settings if the browser tab is opened
+            if (settingsContext === "browser") {
+                settingsContextStore.set("profile");
+                settingsContextStore.set("browser");
+            }
+        }
+    };
 </script>
 
 <section class="settings-header flex sm-row space-between center">
@@ -19,6 +48,7 @@
                 on:click={() => (settingsContext = "browser")}
             >
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="icon">
+                    <title>Browser Icon</title>
                     <path
                         fill="currentColor"
                         fill-rule="evenodd"
@@ -31,10 +61,11 @@
             <button
                 class:active={settingsContext === "profile" || data.category === "profile"}
                 class="profile"
-                disabled={data.category === "profile"}
+                disabled={data.category === "profile" || !data.self}
                 on:click={() => (settingsContext = "profile")}
             >
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="icon">
+                    <title>Profile Icon</title>
                     <path
                         fill="currentColor"
                         fill-rule="evenodd"
@@ -43,12 +74,39 @@
                 </svg>
                 profile
             </button>
+
+            {#if data.self}
+                <button
+                    class="sync"
+                    aria-label="resets all browser settings to match the profile settings"
+                    use:tooltip={{
+                        content: synced
+                            ? "synced"
+                            : "resets all browser settings to match the profile settings",
+                        hideOnClick: false
+                    }}
+                    on:click={onSyncClick}
+                >
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" class="icon">
+                        <title>Sync Icon</title>
+                        <path
+                            fill="currentColor"
+                            d="M1.705 8.005a.75.75 0 0 1 .834.656 5.5 5.5 0 0 0 9.592 2.97l-1.204-1.204a.25.25 0 0 1 .177-.427h3.646a.25.25 0 0 1 .25.25v3.646a.25.25 0 0 1-.427.177l-1.38-1.38A7.002 7.002 0 0 1 1.05 8.84a.75.75 0 0 1 .656-.834ZM8 2.5a5.487 5.487 0 0 0-4.131 1.869l1.204 1.204A.25.25 0 0 1 4.896 6H1.25A.25.25 0 0 1 1 5.75V2.104a.25.25 0 0 1 .427-.177l1.38 1.38A7.002 7.002 0 0 1 14.95 7.16a.75.75 0 0 1-1.49.178A5.5 5.5 0 0 0 8 2.5Z"
+                        />
+                    </svg>
+                    sync
+                </button>
+            {/if}
         </div>
 
         {#if settingsContext === "profile" || data.category === "profile"}
             <p>settings will be saved on your profile</p>
         {:else if settingsContext === "browser"}
-            <p>settings will be saved in your browser</p>
+            <p>
+                settings will be saved in your browser {data.self
+                    ? "(higher priority than profile settings)"
+                    : ""}
+            </p>
         {/if}
     </div>
 </section>
@@ -139,7 +197,6 @@
 
             p {
                 margin: 0;
-                margin-right: 0.5rem;
                 margin-top: 0.25rem;
                 font-size: $fs-small;
                 color: var(--color-bg3);
@@ -164,6 +221,10 @@
                     margin-right: 0.5rem;
                 }
             }
+        }
+
+        .sync {
+            margin-left: 1rem;
         }
     }
 

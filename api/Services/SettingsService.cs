@@ -6,7 +6,7 @@ using pastemyst.Models;
 
 namespace pastemyst.Services;
 
-public interface IUserSettingsService
+public interface ISettingsService
 {
     public Task SetUsernameAsync(string username);
 
@@ -15,14 +15,18 @@ public interface IUserSettingsService
     public UserSettings GetUserSettings();
 
     public Task UpdateUserSettingsAsync(UserSettings settings);
+
+    public Settings GetSettings();
+
+    public Task UpdateSettingsAsync(Settings settings);
 }
 
-public class UserSettingsService(
+public class SettingsService(
     IUserProvider userProvider,
     IImageService imageService,
     IUserContext userContext,
     IMongoService mongo)
-    : IUserSettingsService
+    : ISettingsService
 {
     public async Task SetUsernameAsync(string username)
     {
@@ -65,13 +69,30 @@ public class UserSettingsService(
         if (!userContext.IsLoggedIn())
             throw new HttpException(HttpStatusCode.Unauthorized, "You must be authorized to fetch user settings.");
 
-        return userContext.Self.Settings;
+        return userContext.Self.UserSettings;
     }
 
     public async Task UpdateUserSettingsAsync(UserSettings settings)
     {
         if (!userContext.IsLoggedIn())
             throw new HttpException(HttpStatusCode.Unauthorized, "You must be authorized to update user settings.");
+
+        var update = Builders<User>.Update.Set(u => u.UserSettings, settings);
+        await mongo.Users.UpdateOneAsync(u => u.Id == userContext.Self.Id, update);
+    }
+
+    public Settings GetSettings()
+    {
+        if (!userContext.IsLoggedIn())
+            throw new HttpException(HttpStatusCode.Unauthorized, "You must be authorized to fetch settings.");
+
+        return userContext.Self.Settings;
+    }
+
+    public async Task UpdateSettingsAsync(Settings settings)
+    {
+        if (!userContext.IsLoggedIn())
+            throw new HttpException(HttpStatusCode.Unauthorized, "You must be authorized to update settings.");
 
         var update = Builders<User>.Update.Set(u => u.Settings, settings);
         await mongo.Users.UpdateOneAsync(u => u.Id == userContext.Self.Id, update);

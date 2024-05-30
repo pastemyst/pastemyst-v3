@@ -1,6 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace pastemyst.Models.Settings;
+namespace pastemyst.Models;
 
 public class SetUsernameRequest
 {

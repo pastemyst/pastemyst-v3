@@ -169,7 +169,8 @@ public class AuthService(
             AvatarId = avatarId,
             ProviderName = (string)claims["providerName"],
             ProviderId = (string)claims["providerId"],
-            Settings = new UserSettings()
+            UserSettings = new UserSettings(),
+            Settings = new Settings()
         };
 
         await mongo.Users.InsertOneAsync(user);
