@@ -52,7 +52,7 @@ builder.Services.AddScoped<IUserProvider, UserProvider>();
 builder.Services.AddScoped<IOAuthService, OAuthService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IUserContext, UserContext>();
-builder.Services.AddScoped<IUserSettingsService, UserSettingsService>();
+builder.Services.AddScoped<ISettingsService, SettingsService>();
 builder.Services.AddScoped<IPasteService, PasteService>();
 builder.Services.AddScoped<IActionLogger, ActionLogger>();
 builder.Services.AddScoped<IStatsService, StatsService>();

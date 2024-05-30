@@ -9,12 +9,11 @@
     import { getLangs, getPopularLangNames, type Language } from "./api/lang";
     import { tooltip } from "$lib/tooltips";
     import { Close, setTempCommands, type Command } from "./command";
-    import { cmdPalOpen, cmdPalTitle } from "./stores";
+    import { cmdPalOpen, cmdPalTitle, settingsStore } from "./stores";
     import { languages as cmLangs } from "@codemirror/language-data";
     import Markdown from "./Markdown.svelte";
     import { isLanguageMarkdown } from "./utils/markdown";
-
-    type IndentUnit = "tabs" | "spaces";
+    import type { IndentUnit } from "./indentation";
 
     export let hidden = false;
 
@@ -64,6 +63,9 @@
                 selectedLanguage = textLang;
             }
         })();
+
+        selectedIndentUnit = $settingsStore.defaultIndentationUnit;
+        selectedIndentWidth = $settingsStore.defaultIndentationWidth;
 
         const editorUpdateListener = EditorView.updateListener.of((update) => {
             // get the current line

@@ -53,7 +53,7 @@ public class UserProvider(IUserContext userContext, IPasteService pasteService, 
         var user = await GetByUsernameAsync(username) ?? throw new HttpException(HttpStatusCode.NotFound, "User not found.");
 
         // If not showing only pinned pastes, and show all pastes is disabled, return an empty list.
-        if (!pinnedOnly && !userContext.UserIsSelf(user) && !user.Settings.ShowAllPastesOnProfile)
+        if (!pinnedOnly && !userContext.UserIsSelf(user) && !user.UserSettings.ShowAllPastesOnProfile)
         {
             return new Page<PasteWithLangStats>();
         }

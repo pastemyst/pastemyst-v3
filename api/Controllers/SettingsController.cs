@@ -1,22 +1,33 @@
 using System.ComponentModel.DataAnnotations;
 using Microsoft.AspNetCore.Mvc;
 using pastemyst.Models;
-using pastemyst.Models.Settings;
 using pastemyst.Services;
 
 namespace pastemyst.Controllers;
 
 [ApiController]
 [Route("/api/v3/settings")]
-public class SettingsController(IUserSettingsService settingsService) : ControllerBase
+public class SettingsController(ISettingsService settingsService) : ControllerBase
 {
     [HttpGet]
+    public Settings GetSettings()
+    {
+        return settingsService.GetSettings();
+    }
+
+    [HttpPatch]
+    public async Task UpdateSettings([FromBody] Settings settings)
+    {
+        await settingsService.UpdateSettingsAsync(settings);
+    }
+
+    [HttpGet("user")]
     public UserSettings GetUserSettings()
     {
         return settingsService.GetUserSettings();
     }
 
-    [HttpPatch]
+    [HttpPatch("user")]
     public async Task UpdateUserSettings([FromBody] UserSettings userSettings)
     {
         await settingsService.UpdateUserSettingsAsync(userSettings);

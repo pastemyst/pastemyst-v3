@@ -2,12 +2,14 @@
     import Header from "$lib/Header.svelte";
     import Footer from "$lib/Footer.svelte";
     import type { LayoutData } from "./$types";
-    import { activePastesStores, currentUserStore, versionStore } from "$lib/stores";
+    import { activePastesStores, currentUserStore, settingsStore, versionStore } from "$lib/stores";
     import CommandPalette from "$lib/CommandPalette.svelte";
     import { Close, setBaseCommands, type Command } from "$lib/command";
     import { beforeNavigate, goto } from "$app/navigation";
     import ThemeContext from "$lib/ThemeContext.svelte";
     import { env } from "$env/dynamic/public";
+    import { onMount } from "svelte";
+    import { getLocalSettings } from "$lib/api/settings";
 
     import "tippy.js/dist/tippy.css";
     import "tippy.js/dist/svg-arrow.css";
@@ -17,6 +19,10 @@
     $: currentUserStore.set(data.self);
     $: versionStore.set(data.version);
     $: activePastesStores.set(data.activePastes);
+
+    onMount(() => {
+        settingsStore.set(getLocalSettings());
+    });
 
     const getCommands = (): Command[] => {
         const commands: Command[] = [
