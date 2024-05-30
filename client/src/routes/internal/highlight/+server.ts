@@ -1,7 +1,7 @@
 import { getLangs } from "$lib/api/lang";
 import type { RequestEvent, RequestHandler } from "@sveltejs/kit";
 import { readFileSync } from "fs";
-import { getHighlighter } from "shiki";
+import { getHighlighter, type LanguageRegistration } from "shiki";
 
 export const POST: RequestHandler = async ({ request }: RequestEvent) => {
     const json = await request.json();
@@ -20,20 +20,20 @@ const highlight = async (content: string, language: string): Promise<string> => 
         langs: []
     });
 
-    let actualLanguage = language;
-    if (!lang || !lang.tmScope || lang.tmScope === "none") {
-        actualLanguage = "text";
-    }
-
+    let actualLanguage: string = language;
     if (lang?.tmScope !== "none") {
-        const langJson = JSON.parse(readFileSync(`static/grammars/${lang?.tmScope}.json`, "utf8"));
+        const langJson: LanguageRegistration = JSON.parse(readFileSync(`static/grammars/${lang?.tmScope}.json`, "utf8"));
         await highlighter.loadLanguage(langJson);
+
+        actualLanguage = langJson.name;
+    } else if (!lang || !lang.tmScope || lang.tmScope === "none") {
+        actualLanguage = "text";
     }
 
     await highlighter.loadTheme(tomorrowmyst);
 
     return highlighter.codeToHtml(content, {
-        lang: actualLanguage.toLowerCase(),
+        lang: actualLanguage,
         theme: "TomorrowMyst"
     });
 };
