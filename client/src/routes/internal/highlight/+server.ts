@@ -22,7 +22,9 @@ const highlight = async (content: string, language: string): Promise<string> => 
 
     let actualLanguage: string = language;
     if (lang?.tmScope !== "none") {
-        const langJson: LanguageRegistration = JSON.parse(readFileSync(`static/grammars/${lang?.tmScope}.json`, "utf8"));
+        const langJson: LanguageRegistration = JSON.parse(
+            readFileSync(`static/grammars/${lang?.tmScope}.json`, "utf8")
+        );
         await highlighter.loadLanguage(langJson);
 
         actualLanguage = langJson.name;
