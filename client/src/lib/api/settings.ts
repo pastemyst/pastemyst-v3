@@ -10,11 +10,13 @@ export interface UserSettings {
 }
 
 export interface Settings {
+    defaultLanguage: string;
     defaultIndentationUnit: IndentUnit;
     defaultIndentationWidth: number;
 }
 
 export const defaultSettings: Settings = {
+    defaultLanguage: "Text",
     defaultIndentationUnit: "spaces",
     defaultIndentationWidth: 4
 };
@@ -24,7 +26,19 @@ export const getLocalSettings = (): Settings => {
 
     if (!settings) return defaultSettings;
 
-    return JSON.parse(settings) as Settings;
+    const settingsObj = JSON.parse(settings) as Settings;
+
+    // if there are any undefined settings set them to default
+    // this can happen if new settings are added over time
+    // but the localstorage settings doesn't contain the new settings
+    let setting: keyof typeof settingsObj;
+    for (setting in defaultSettings) {
+        if (!settingsObj[setting]) {
+            settingsObj[setting] = defaultSettings[setting] as never;
+        }
+    }
+
+    return settingsObj;
 };
 
 export const updateSettings = async (

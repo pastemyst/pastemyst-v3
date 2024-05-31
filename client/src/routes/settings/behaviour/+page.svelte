@@ -1,4 +1,5 @@
 <script lang="ts">
+    import { getLangs, getPopularLangNames } from "$lib/api/lang";
     import { getLocalSettings, updateSettings } from "$lib/api/settings";
     import { Close, setTempCommands, type Command } from "$lib/command";
     import { cmdPalOpen, cmdPalTitle, settingsContextStore } from "$lib/stores";
@@ -57,6 +58,52 @@
         return commands;
     };
 
+    const getLanguageCommands = async (): Promise<Command[]> => {
+        const commands: Command[] = [];
+
+        const langs = await getLangs(fetch);
+
+        const popularLangs = await getPopularLangNames(fetch);
+
+        // make sure popular languages are at the top
+        langs.sort((a, b) => {
+            const aPopular = popularLangs.includes(a.name) ? 1 : 0;
+            const bPopular = popularLangs.includes(b.name) ? 1 : 0;
+
+            return bPopular - aPopular;
+        });
+
+        const textLangIndex = langs.findIndex((l) => l.name === "Text");
+        const textLang = langs[textLangIndex];
+
+        // place text on the top of the lang list
+        langs.splice(textLangIndex, 1);
+        langs.unshift(textLang);
+
+        for (const lang of langs) {
+            commands.push({
+                name: lang.name,
+                description: lang.aliases?.join(", "),
+                action: () => {
+                    settings.defaultLanguage = lang.name;
+
+                    updateSettings(fetch, $settingsContextStore, settings);
+
+                    return Close.yes;
+                }
+            });
+        }
+
+        return commands;
+    };
+
+    const onDefaultLanguageClicked = async () => {
+        setTempCommands(await getLanguageCommands());
+
+        cmdPalTitle.set("select language");
+        cmdPalOpen.set(true);
+    };
+
     const onDefaultIndentationClicked = () => {
         setTempCommands(getIndentUnitCommands());
 
@@ -76,13 +123,20 @@
 <h4>editor</h4>
 
 <div class="flex row center gap-s">
+    <p>default language:</p>
+    <button on:click={onDefaultLanguageClicked}>{settings.defaultLanguage}</button>
+</div>
+
+<span class="hint">set the default language for the text editor</span>
+
+<div class="flex row center gap-s">
     <p>default indentation:</p>
     <button on:click={onDefaultIndentationClicked}
         >{settings.defaultIndentationUnit}: {settings.defaultIndentationWidth}</button
     >
 </div>
 
-<span class="hint"> set the default indentation unit and width for the text editor </span>
+<span class="hint">set the default indentation unit and width for the text editor</span>
 
 <style lang="scss">
     p {

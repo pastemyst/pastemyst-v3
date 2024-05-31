@@ -38,31 +38,29 @@
 
     let langs: Language[];
 
-    onMount(() => {
-        (async () => {
-            langs = await getLangs(fetch);
+    onMount(async () => {
+        langs = await getLangs(fetch);
 
-            const popularLangs = await getPopularLangNames(fetch);
+        const popularLangs = await getPopularLangNames(fetch);
 
-            // make sure popular languages are at the top
-            langs.sort((a, b) => {
-                const aPopular = popularLangs.includes(a.name) ? 1 : 0;
-                const bPopular = popularLangs.includes(b.name) ? 1 : 0;
+        // make sure popular languages are at the top
+        langs.sort((a, b) => {
+            const aPopular = popularLangs.includes(a.name) ? 1 : 0;
+            const bPopular = popularLangs.includes(b.name) ? 1 : 0;
 
-                return bPopular - aPopular;
-            });
+            return bPopular - aPopular;
+        });
 
-            const textLangIndex = langs.findIndex((l) => l.name === "Text");
-            const textLang = langs[textLangIndex];
+        const textLangIndex = langs.findIndex((l) => l.name === "Text");
+        const textLang = langs[textLangIndex];
 
-            // place text on the top of the lang list
-            langs.splice(textLangIndex, 1);
-            langs.unshift(textLang);
+        // place text on the top of the lang list
+        langs.splice(textLangIndex, 1);
+        langs.unshift(textLang);
 
-            if (!selectedLanguage) {
-                selectedLanguage = textLang;
-            }
-        })();
+        if (!selectedLanguage) {
+            selectedLanguage = textLang;
+        }
 
         selectedIndentUnit = $settingsStore.defaultIndentationUnit;
         selectedIndentWidth = $settingsStore.defaultIndentationWidth;
@@ -91,6 +89,10 @@
             }),
             parent: editorElement
         });
+
+        const settingsLang =
+            langs.find((l) => l.name === $settingsStore.defaultLanguage) || textLang;
+        setSelectedLang(settingsLang);
 
         setEditorIndentation();
 
