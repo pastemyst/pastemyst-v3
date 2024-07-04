@@ -95,6 +95,6 @@ public class SettingsService(
             throw new HttpException(HttpStatusCode.Unauthorized, "You must be authorized to update settings.");
 
         var update = Builders<User>.Update.Set(u => u.Settings, settings);
-        await mongo.Users.UpdateOneAsync(u => u.Id == userContext.Self.Id, update);
+        var res = await mongo.Users.UpdateOneAsync(u => u.Id == userContext.Self.Id, update);
     }
 }

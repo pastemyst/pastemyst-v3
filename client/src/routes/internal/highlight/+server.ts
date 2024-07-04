@@ -6,10 +6,10 @@ import { getHighlighter, type LanguageRegistration } from "shiki";
 export const POST: RequestHandler = async ({ request }: RequestEvent) => {
     const json = await request.json();
 
-    return new Response(await highlight(json.content, json.language));
+    return new Response(await highlight(json.content, json.language, json.wrap));
 };
 
-const highlight = async (content: string, language: string): Promise<string> => {
+const highlight = async (content: string, language: string, wrap: boolean): Promise<string> => {
     const tomorrowmyst = JSON.parse(readFileSync("static/themes/tomorrowmyst.json", "utf8"));
 
     const langs = await getLangs(fetch);
@@ -36,6 +36,13 @@ const highlight = async (content: string, language: string): Promise<string> => 
 
     return highlighter.codeToHtml(content, {
         lang: actualLanguage,
-        theme: "TomorrowMyst"
+        theme: "TomorrowMyst",
+        transformers: [
+            {
+                pre(pre) {
+                    if (wrap) this.addClassToHast(pre, "wrap");
+                }
+            }
+        ]
     });
 };
