@@ -11,11 +11,12 @@
         togglePrivatePaste
     } from "$lib/api/paste";
     import { tooltip } from "$lib/tooltips";
-    import { cmdPalOpen, cmdPalTitle, currentUserStore } from "$lib/stores";
+    import { cmdPalOpen, cmdPalTitle, currentUserStore, settingsStore } from "$lib/stores";
     import { goto } from "$app/navigation";
     import Markdown from "$lib/Markdown.svelte";
     import { isLanguageMarkdown } from "$lib/utils/markdown";
     import { setTempCommands, getConfirmActionCommands, Close } from "$lib/command";
+    import { onMount } from "svelte";
 
     export let data: PageData;
 
@@ -31,6 +32,15 @@
         const p = data.paste.pasties.find((p) => p.id === activePastyId);
         if (p) activePasty = p;
     }
+
+    onMount(() => {
+        if ($settingsStore.textWrap) {
+            const editors = document.querySelectorAll(".shiki");
+            for (const e of editors) {
+                e.classList.add("wrap");
+            }
+        }
+    });
 
     let stackedView = false;
 

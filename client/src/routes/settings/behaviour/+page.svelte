@@ -1,14 +1,18 @@
 <script lang="ts">
+    import Checkbox from "$lib/Checkbox.svelte";
     import { getLangs, getPopularLangNames } from "$lib/api/lang";
-    import { getLocalSettings, updateSettings } from "$lib/api/settings";
+    import { getLocalSettings, updateSettings, type Settings } from "$lib/api/settings";
     import { Close, setTempCommands, type Command } from "$lib/command";
     import { cmdPalOpen, cmdPalTitle, settingsContextStore } from "$lib/stores";
     import type { PageData } from "./$types";
 
     export let data: PageData;
 
-    $: settings =
-        $settingsContextStore === "profile" && data.settings ? data.settings : getLocalSettings();
+    let settings: Settings;
+
+    settingsContextStore.subscribe((context) => {
+        settings = context === "profile" && data.settings ? data.settings : getLocalSettings();
+    });
 
     const getIndentUnitCommands = (): Command[] => {
         return [
@@ -110,6 +114,10 @@
         cmdPalTitle.set("select indentation unit");
         cmdPalOpen.set(true);
     };
+
+    const onTextWrapClicked = async () => {
+        await updateSettings(fetch, $settingsContextStore, settings);
+    };
 </script>
 
 <svelte:head>
@@ -137,6 +145,12 @@
 </div>
 
 <span class="hint">set the default indentation unit and width for the text editor</span>
+
+<div class="flex row center gap-s">
+    <Checkbox label="text wrap" bind:checked={settings.textWrap} on:change={onTextWrapClicked} />
+</div>
+
+<span class="hint">text wrapping in the editor</span>
 
 <style lang="scss">
     p {

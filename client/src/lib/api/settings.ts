@@ -13,12 +13,14 @@ export interface Settings {
     defaultLanguage: string;
     defaultIndentationUnit: IndentUnit;
     defaultIndentationWidth: number;
+    textWrap: boolean;
 }
 
 export const defaultSettings: Settings = {
     defaultLanguage: "Text",
     defaultIndentationUnit: "spaces",
-    defaultIndentationWidth: 4
+    defaultIndentationWidth: 4,
+    textWrap: true
 };
 
 export const getLocalSettings = (): Settings => {
@@ -33,7 +35,7 @@ export const getLocalSettings = (): Settings => {
     // but the localstorage settings doesn't contain the new settings
     let setting: keyof typeof settingsObj;
     for (setting in defaultSettings) {
-        if (!settingsObj[setting]) {
+        if (settingsObj[setting] === null || settingsObj === undefined) {
             settingsObj[setting] = defaultSettings[setting] as never;
         }
     }

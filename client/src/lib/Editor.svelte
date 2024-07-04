@@ -84,7 +84,8 @@
                     indentUnitCompartment.of(
                         indentUnit.of(selectedIndentUnit === "spaces" ? " " : "\t")
                     ),
-                    indentWidthCompartment.of(EditorState.tabSize.of(selectedIndentWidth))
+                    indentWidthCompartment.of(EditorState.tabSize.of(selectedIndentWidth)),
+                    $settingsStore.textWrap ? [EditorView.lineWrapping] : []
                 ]
             }),
             parent: editorElement
@@ -253,7 +254,8 @@
             method: "post",
             body: JSON.stringify({
                 content: getContent(),
-                language: getSelectedLang().name
+                language: getSelectedLang().name,
+                wrap: $settingsStore.textWrap
             })
         });
 
