@@ -11,7 +11,13 @@
         togglePrivatePaste
     } from "$lib/api/paste";
     import { tooltip } from "$lib/tooltips";
-    import { cmdPalOpen, cmdPalTitle, copyLinkToClipboardStore, currentUserStore, settingsStore } from "$lib/stores";
+    import {
+        cmdPalOpen,
+        cmdPalTitle,
+        copyLinkToClipboardStore,
+        currentUserStore,
+        settingsStore
+    } from "$lib/stores";
     import { goto } from "$app/navigation";
     import Markdown from "$lib/Markdown.svelte";
     import { isLanguageMarkdown } from "$lib/utils/markdown";

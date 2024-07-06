@@ -157,7 +157,11 @@
 <span class="hint">text wrapping in the editor</span>
 
 <div class="flex row center gap-s">
-    <Checkbox label="copy link on create" bind:checked={settings.copyLinkOnCreate} on:change={onCopyLinkOnCreateClicked} />
+    <Checkbox
+        label="copy link on create"
+        bind:checked={settings.copyLinkOnCreate}
+        on:change={onCopyLinkOnCreateClicked}
+    />
 </div>
 
 <span class="hint">copies the link to the paste when you create a paste</span>
