@@ -11,12 +11,13 @@
         togglePrivatePaste
     } from "$lib/api/paste";
     import { tooltip } from "$lib/tooltips";
-    import { cmdPalOpen, cmdPalTitle, currentUserStore, settingsStore } from "$lib/stores";
+    import { cmdPalOpen, cmdPalTitle, copyLinkToClipboardStore, currentUserStore, settingsStore } from "$lib/stores";
     import { goto } from "$app/navigation";
     import Markdown from "$lib/Markdown.svelte";
     import { isLanguageMarkdown } from "$lib/utils/markdown";
     import { setTempCommands, getConfirmActionCommands, Close } from "$lib/command";
     import { onMount } from "svelte";
+    import toast from "svelte-french-toast";
 
     export let data: PageData;
 
@@ -39,6 +40,21 @@
             for (const e of editors) {
                 e.classList.add("wrap");
             }
+        }
+
+        if ($copyLinkToClipboardStore) {
+            // TODO: maybe implement custom toast messages...
+            toast.success("copied paste link to clipboard", {
+                style: `
+                    background-color: var(--color-bg);
+                    border: 1px solid var(--color-bg2);
+                    color: var(--color-fg);
+                    border-radius: 0.2rem;
+                    padding: 0.5rem;
+                    font-size: 1rem;
+                `
+            });
+            copyLinkToClipboardStore.set(false);
         }
     });
 

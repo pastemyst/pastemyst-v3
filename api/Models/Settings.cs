@@ -6,4 +6,5 @@ public class Settings
     public string DefaultIndentationUnit { get; set; } = "spaces";
     public uint DefaultIndentationWidth { get; set; } = 4;
     public bool TextWrap { get; set; } = true;
+    public bool CopyLinkOnCreate { get; set; } = false;
 }
