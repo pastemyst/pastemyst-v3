@@ -50,6 +50,7 @@
         "moment": "^2.29.4",
         "shiki": "^1.6.1",
         "sortablejs": "^1.15.0",
+        "svelte-french-toast": "^1.2.0",
         "tippy.js": "^6.3.7"
     }
 }

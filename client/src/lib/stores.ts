@@ -18,3 +18,4 @@ export const creatingPasteStore = writable(false);
 
 export const settingsContextStore = writable<SettingsContext>("browser");
 export const settingsStore = writable<Settings>();
+export const copyLinkToClipboardStore = writable<boolean>(false);

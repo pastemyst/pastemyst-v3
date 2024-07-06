@@ -10,6 +10,7 @@
     import { env } from "$env/dynamic/public";
     import { onMount } from "svelte";
     import { getLocalSettings } from "$lib/api/settings";
+    import { Toaster } from "svelte-french-toast";
 
     import "tippy.js/dist/tippy.css";
     import "tippy.js/dist/svg-arrow.css";
@@ -89,6 +90,8 @@
 </script>
 
 <ThemeContext>
+    <Toaster />
+
     <div id="container">
         <Header />
 

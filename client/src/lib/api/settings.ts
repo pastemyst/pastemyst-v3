@@ -14,13 +14,15 @@ export interface Settings {
     defaultIndentationUnit: IndentUnit;
     defaultIndentationWidth: number;
     textWrap: boolean;
+    copyLinkOnCreate: boolean;
 }
 
 export const defaultSettings: Settings = {
     defaultLanguage: "Text",
     defaultIndentationUnit: "spaces",
     defaultIndentationWidth: 4,
-    textWrap: true
+    textWrap: true,
+    copyLinkOnCreate: false
 };
 
 export const getLocalSettings = (): Settings => {

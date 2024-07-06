@@ -9,7 +9,14 @@
     } from "$lib/api/paste";
     import { addBaseCommands, Close, setTempCommands, type Command } from "$lib/command";
     import PasteOptions from "$lib/PasteOptions.svelte";
-    import { cmdPalOpen, cmdPalTitle, creatingPasteStore, currentUserStore } from "$lib/stores";
+    import {
+        cmdPalOpen,
+        cmdPalTitle,
+        copyLinkToClipboardStore,
+        creatingPasteStore,
+        currentUserStore,
+        settingsStore
+    } from "$lib/stores";
     import TabbedEditor from "$lib/TabbedEditor.svelte";
     import type TabData from "$lib/TabData";
     import TagInput from "$lib/TagInput.svelte";
@@ -99,6 +106,11 @@
         // TODO: handle if creating paste failed.
 
         $creatingPasteStore = true;
+
+        if ($settingsStore.copyLinkOnCreate) {
+            navigator.clipboard.writeText(`${window.location}${paste?.id}`);
+            copyLinkToClipboardStore.set(true);
+        }
 
         goto(`/${paste?.id}`);
     };

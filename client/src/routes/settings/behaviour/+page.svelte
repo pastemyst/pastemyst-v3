@@ -118,6 +118,10 @@
     const onTextWrapClicked = async () => {
         await updateSettings(fetch, $settingsContextStore, settings);
     };
+
+    const onCopyLinkOnCreateClicked = async () => {
+        await updateSettings(fetch, $settingsContextStore, settings);
+    };
 </script>
 
 <svelte:head>
@@ -151,6 +155,16 @@
 </div>
 
 <span class="hint">text wrapping in the editor</span>
+
+<div class="flex row center gap-s">
+    <Checkbox
+        label="copy link on create"
+        bind:checked={settings.copyLinkOnCreate}
+        on:change={onCopyLinkOnCreateClicked}
+    />
+</div>
+
+<span class="hint">copies the link to the paste when you create a paste</span>
 
 <style lang="scss">
     p {
