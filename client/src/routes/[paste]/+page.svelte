@@ -41,7 +41,7 @@
     }
 
     onMount(() => {
-        if ($settingsStore.textWrap) {
+        if ($settingsStore && $settingsStore.textWrap) {
             const editors = document.querySelectorAll(".shiki");
             for (const e of editors) {
                 e.classList.add("wrap");
@@ -64,14 +64,8 @@
         }
     });
 
-    let stackedView = false;
-
     const setActiveTab = (id: string) => {
         activePastyId = id;
-    };
-
-    const togglePastiesView = () => {
-        stackedView = !stackedView;
     };
 
     const onCopyLink = async () => {
@@ -329,36 +323,6 @@
             </svg>
         </button>
 
-        <button
-            class="toggle-view"
-            on:click={togglePastiesView}
-            use:tooltip={{
-                hideOnClick: false,
-                content: `switch to ${stackedView ? "tabbed" : "stacked"} view`
-            }}
-            aria-label="switch to {stackedView ? 'tabbed' : 'stacked'} view"
-        >
-            {#if stackedView}
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" class="icon">
-                    <title>Columns Icon</title>
-                    <path
-                        fill="currentColor"
-                        fill-rule="evenodd"
-                        d="M2.75 0A1.75 1.75 0 001 1.75v12.5c0 .966.784 1.75 1.75 1.75h2.5A1.75 1.75 0 007 14.25V1.75A1.75 1.75 0 005.25 0h-2.5zM2.5 1.75a.25.25 0 01.25-.25h2.5a.25.25 0 01.25.25v12.5a.25.25 0 01-.25.25h-2.5a.25.25 0 01-.25-.25V1.75zM10.75 0A1.75 1.75 0 009 1.75v12.5c0 .966.784 1.75 1.75 1.75h2.5A1.75 1.75 0 0015 14.25V1.75A1.75 1.75 0 0013.25 0h-2.5zm-.25 1.75a.25.25 0 01.25-.25h2.5a.25.25 0 01.25.25v12.5a.25.25 0 01-.25.25h-2.5a.25.25 0 01-.25-.25V1.75z"
-                    />
-                </svg>
-            {:else}
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" class="icon">
-                    <title>Rows Icon</title>
-                    <path
-                        fill="currentColor"
-                        fill-rule="evenodd"
-                        d="M16 2.75A1.75 1.75 0 0014.25 1H1.75A1.75 1.75 0 000 2.75v2.5A1.75 1.75 0 001.75 7h12.5A1.75 1.75 0 0016 5.25v-2.5zm-1.75-.25a.25.25 0 01.25.25v2.5a.25.25 0 01-.25.25H1.75a.25.25 0 01-.25-.25v-2.5a.25.25 0 01.25-.25h12.5zM16 10.75A1.75 1.75 0 0014.25 9H1.75A1.75 1.75 0 000 10.75v2.5A1.75 1.75 0 001.75 15h12.5A1.75 1.75 0 0016 13.25v-2.5zm-1.75-.25a.25.25 0 01.25.25v2.5a.25.25 0 01-.25.25H1.75a.25.25 0 01-.25-.25v-2.5a.25.25 0 01.25-.25h12.5z"
-                    />
-                </svg>
-            {/if}
-        </button>
-
         {#if data.paste.ownerId === $currentUserStore?.id}
             <button
                 use:tooltip
@@ -410,7 +374,7 @@
 {/if}
 
 <div class="pasties">
-    {#if stackedView}
+    {#if $settingsStore && $settingsStore.defaultPasteView === "stacked"}
         {#each data.paste.pasties as pasty, i}
             <div class="pasty">
                 <div class="sticky">

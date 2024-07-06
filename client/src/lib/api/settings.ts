@@ -15,6 +15,7 @@ export interface Settings {
     defaultIndentationWidth: number;
     textWrap: boolean;
     copyLinkOnCreate: boolean;
+    defaultPasteView: "tabbed" | "stacked";
 }
 
 export const defaultSettings: Settings = {
@@ -22,7 +23,8 @@ export const defaultSettings: Settings = {
     defaultIndentationUnit: "spaces",
     defaultIndentationWidth: 4,
     textWrap: true,
-    copyLinkOnCreate: false
+    copyLinkOnCreate: false,
+    defaultPasteView: "tabbed"
 };
 
 export const getLocalSettings = (): Settings => {
@@ -37,7 +39,7 @@ export const getLocalSettings = (): Settings => {
     // but the localstorage settings doesn't contain the new settings
     let setting: keyof typeof settingsObj;
     for (setting in defaultSettings) {
-        if (settingsObj[setting] === null || settingsObj === undefined) {
+        if (settingsObj[setting] === null || settingsObj[setting] === undefined) {
             settingsObj[setting] = defaultSettings[setting] as never;
         }
     }

@@ -7,4 +7,5 @@ public class Settings
     public uint DefaultIndentationWidth { get; set; } = 4;
     public bool TextWrap { get; set; } = true;
     public bool CopyLinkOnCreate { get; set; } = false;
+    public string DefaultPasteView { get; set; } = "tabbed";
 }
