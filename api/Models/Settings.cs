@@ -8,4 +8,5 @@ public class Settings
     public bool TextWrap { get; set; } = true;
     public bool CopyLinkOnCreate { get; set; } = false;
     public string PasteView { get; set; } = "tabbed";
+    public string Theme { get; set; } = "myst";
 }

@@ -1,8 +1,9 @@
 <script lang="ts">
     import { getLocalSettings, updateSettings, type Settings } from "$lib/api/settings";
     import type { PageData } from "./$types";
-    import { cmdPalOpen, cmdPalTitle, settingsContextStore } from "$lib/stores";
+    import { cmdPalOpen, cmdPalTitle, settingsContextStore, themeStore } from "$lib/stores";
     import { Close, setTempCommands, type Command } from "$lib/command";
+    import { themes } from "$lib/themes";
 
     export let data: PageData;
 
@@ -35,9 +36,34 @@
         ];
     };
 
+    const getThemeCommands = (): Command[] => {
+        const commands: Command[] = [];
+        for (const theme of themes) {
+            commands.push({
+                name: theme.name,
+                action: () => {
+                    (settings.theme = theme.name),
+                        updateSettings(fetch, $settingsContextStore, settings);
+
+                    themeStore.set(theme);
+
+                    return Close.yes;
+                }
+            });
+        }
+
+        return commands;
+    };
+
     const onPasteViewClicked = () => {
         setTempCommands(getPasteViewCommands());
         cmdPalTitle.set("select default paste view");
+        cmdPalOpen.set(true);
+    };
+
+    const onThemeClicked = () => {
+        setTempCommands(getThemeCommands());
+        cmdPalTitle.set("select the theme");
         cmdPalOpen.set(true);
     };
 </script>
@@ -49,6 +75,15 @@
 <h3>appearance settings</h3>
 
 <p>various settings to customize the look and feel of pastemyst.</p>
+
+<h4>general</h4>
+
+<div class="flex row center gap-s">
+    <p>theme:</p>
+    <button on:click={onThemeClicked}>{settings.theme}</button>
+</div>
+
+<span class="hint">change the theme of pastemyst</span>
 
 <h4>paste</h4>
 
