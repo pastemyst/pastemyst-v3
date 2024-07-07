@@ -15,7 +15,7 @@ export interface Settings {
     defaultIndentationWidth: number;
     textWrap: boolean;
     copyLinkOnCreate: boolean;
-    defaultPasteView: "tabbed" | "stacked";
+    pasteView: "tabbed" | "stacked";
 }
 
 export const defaultSettings: Settings = {
@@ -24,7 +24,7 @@ export const defaultSettings: Settings = {
     defaultIndentationWidth: 4,
     textWrap: true,
     copyLinkOnCreate: false,
-    defaultPasteView: "tabbed"
+    pasteView: "tabbed"
 };
 
 export const getLocalSettings = (): Settings => {

@@ -374,7 +374,7 @@
 {/if}
 
 <div class="pasties">
-    {#if $settingsStore && $settingsStore.defaultPasteView === "stacked"}
+    {#if $settingsStore && $settingsStore.pasteView === "stacked"}
         {#each data.paste.pasties as pasty, i}
             <div class="pasty">
                 <div class="sticky">
