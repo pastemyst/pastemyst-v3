@@ -17,7 +17,7 @@
             {
                 name: "tabbed",
                 action: () => {
-                    settings.defaultPasteView = "tabbed";
+                    settings.pasteView = "tabbed";
                     updateSettings(fetch, $settingsContextStore, settings);
 
                     return Close.yes;
@@ -26,7 +26,7 @@
             {
                 name: "stacked",
                 action: () => {
-                    settings.defaultPasteView = "stacked";
+                    settings.pasteView = "stacked";
                     updateSettings(fetch, $settingsContextStore, settings);
 
                     return Close.yes;
@@ -35,7 +35,7 @@
         ];
     };
 
-    const onDefaultPasteViewClicked = () => {
+    const onPasteViewClicked = () => {
         setTempCommands(getPasteViewCommands());
         cmdPalTitle.set("select default paste view");
         cmdPalOpen.set(true);
@@ -53,11 +53,11 @@
 <h4>paste</h4>
 
 <div class="flex row center gap-s">
-    <p>default paste view:</p>
-    <button on:click={onDefaultPasteViewClicked}>{settings.defaultPasteView}</button>
+    <p>paste view:</p>
+    <button on:click={onPasteViewClicked}>{settings.pasteView}</button>
 </div>
 
-<span class="hint">set the default paste view: tabbed or stacked</span>
+<span class="hint">change how the files look when viewing a paste: tabbed or stacked</span>
 
 <style lang="scss">
     p {
