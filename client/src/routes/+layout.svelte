@@ -2,7 +2,13 @@
     import Header from "$lib/Header.svelte";
     import Footer from "$lib/Footer.svelte";
     import type { LayoutData } from "./$types";
-    import { activePastesStores, currentUserStore, settingsStore, versionStore } from "$lib/stores";
+    import {
+        activePastesStores,
+        currentUserStore,
+        settingsStore,
+        themeStore,
+        versionStore
+    } from "$lib/stores";
     import CommandPalette from "$lib/CommandPalette.svelte";
     import { Close, setBaseCommands, type Command } from "$lib/command";
     import { beforeNavigate, goto } from "$app/navigation";
@@ -15,6 +21,7 @@
     import "tippy.js/dist/tippy.css";
     import "tippy.js/dist/svg-arrow.css";
     import "../app.scss";
+    import { themes } from "$lib/themes";
 
     export let data: LayoutData;
     $: currentUserStore.set(data.self);
@@ -23,6 +30,9 @@
 
     onMount(() => {
         settingsStore.set(getLocalSettings());
+
+        const theme = themes.find((t) => t.name === $settingsStore.theme);
+        if (theme) themeStore.set(theme);
     });
 
     const getCommands = (): Command[] => {
