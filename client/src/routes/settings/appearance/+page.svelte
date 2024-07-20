@@ -42,8 +42,8 @@
             commands.push({
                 name: theme.name,
                 action: () => {
-                    (settings.theme = theme.name),
-                        updateSettings(fetch, $settingsContextStore, settings);
+                    settings.theme = theme.name;
+                    updateSettings(fetch, $settingsContextStore, settings);
 
                     themeStore.set(theme);
 
