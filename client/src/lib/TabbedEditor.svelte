@@ -184,8 +184,8 @@
             await addTab(name);
 
             // Doesn't update if set on tab creation
-            content && tabs[tabs.length - 1].editor.setContent(content);
-            lang && tabs[tabs.length - 1].editor.setSelectedLang(lang);
+            if (content) tabs[tabs.length - 1].editor.setContent(content);
+            if (lang) tabs[tabs.length - 1].editor.setSelectedLang(lang);
 
             const firstTab = tabs[0];
             if (!firstTab.editor.getContent() || firstTab.title === "untitled") {

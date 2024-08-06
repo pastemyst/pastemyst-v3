@@ -168,14 +168,14 @@
                 aria-label={data.paste.private
                     ? "can't pin a private paste"
                     : data.paste.pinned
-                    ? "unpin"
-                    : "pin"}
+                      ? "unpin"
+                      : "pin"}
                 use:tooltip={{
                     content: data.paste.private
                         ? "can't pin a private paste"
                         : data.paste.pinned
-                        ? "unpin"
-                        : "pin",
+                          ? "unpin"
+                          : "pin",
                     hideOnClick: false
                 }}
                 on:click={onPinClick}
