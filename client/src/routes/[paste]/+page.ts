@@ -4,7 +4,7 @@ import type { PageLoad } from "./$types";
 import moment from "moment";
 import { getUserById } from "$lib/api/user";
 
-export const load: PageLoad = async ({ params, fetch }) => {
+export const load: PageLoad = async ({ params, fetch, parent }) => {
     const [paste, pasteStatus] = await getPaste(fetch, params.paste);
 
     if (!paste) {
@@ -26,6 +26,8 @@ export const load: PageLoad = async ({ params, fetch }) => {
         error(ownerStatus);
     }
 
+    const { settings } = await parent();
+
     const highlightedCode: string[] = [];
 
     for (const pasty of paste.pasties) {
@@ -36,7 +38,8 @@ export const load: PageLoad = async ({ params, fetch }) => {
             },
             body: JSON.stringify({
                 content: pasty.content,
-                language: pasty.language
+                language: pasty.language,
+                wrap: settings.textWrap
             })
         });
 

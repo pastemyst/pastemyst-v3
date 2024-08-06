@@ -3,19 +3,22 @@
     import { themeStore } from "./stores";
     import { themes, type Theme } from "./themes";
 
-    let currentTheme = themes[0];
+    export let currentTheme: string;
 
     let mounted = false;
 
     themeStore.subscribe((theme) => {
-        currentTheme = theme;
-        if (mounted) setRootColors(currentTheme);
+        if (!theme) return;
+
+        currentTheme = theme.name;
+        if (mounted) setRootColors(theme);
     });
 
     onMount(() => {
         mounted = true;
 
-        setRootColors(currentTheme);
+        const themeObj = themes.find((t) => t.name === currentTheme) || themes[0];
+        themeStore.set(themeObj);
     });
 
     const setRootColors = (theme: Theme) => {
@@ -26,4 +29,6 @@
     };
 </script>
 
-<slot />
+<div id="theme-context" data-theme={currentTheme}>
+    <slot />
+</div>

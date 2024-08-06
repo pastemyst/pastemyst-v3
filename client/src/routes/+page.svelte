@@ -14,8 +14,7 @@
         cmdPalTitle,
         copyLinkToClipboardStore,
         creatingPasteStore,
-        currentUserStore,
-        settingsStore
+        currentUserStore
     } from "$lib/stores";
     import TabbedEditor from "$lib/TabbedEditor.svelte";
     import type TabData from "$lib/TabData";
@@ -107,7 +106,7 @@
 
         $creatingPasteStore = true;
 
-        if ($settingsStore.copyLinkOnCreate) {
+        if (data.settings.copyLinkOnCreate) {
             navigator.clipboard.writeText(`${window.location}${paste?.id}`);
             copyLinkToClipboardStore.set(true);
         }
@@ -166,7 +165,7 @@
     <TagInput bind:tags existingTags={data.userTags} anonymousPaste={anonymous} />
 {/if}
 
-<TabbedEditor bind:tabs bind:activeTab />
+<TabbedEditor bind:tabs bind:activeTab settings={data.settings} />
 
 <div class="paste-options">
     <PasteOptions on:create={onCreatePaste} bind:anonymous bind:isPrivate bind:pinned />

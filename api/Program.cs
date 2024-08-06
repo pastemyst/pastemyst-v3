@@ -67,6 +67,13 @@ builder.Services.AddQuartz(q =>
         .WithIdentity(nameof(ExpirePastesJob) + "-trigger")
         .WithCronSchedule("0 * * ? * *") // run every minute
     );
+
+    q.AddJob<ExpireSesssionSettingsJob>(opts => opts.WithIdentity(nameof(ExpireSesssionSettingsJob)));
+    q.AddTrigger(opts => opts
+        .ForJob(nameof(ExpireSesssionSettingsJob))
+        .WithIdentity(nameof(ExpireSesssionSettingsJob) + "-trigger")
+        .WithCronSchedule("0 * * ? * *") // run every minute
+    );
 });
 
 builder.Services.AddQuartzServer(options =>

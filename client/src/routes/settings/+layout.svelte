@@ -1,114 +1,11 @@
 <script lang="ts">
-    import { updateSettings, type SettingsContext } from "$lib/api/settings";
-    import { onMount } from "svelte";
     import type { LayoutData } from "./$types";
-    import { settingsContextStore } from "$lib/stores";
-    import { tooltip } from "$lib/tooltips";
 
     export let data: LayoutData;
-
-    let settingsContext: SettingsContext = data.self ? "profile" : "browser";
-
-    let synced = false;
-
-    $: settingsContextStore.set(settingsContext);
-
-    onMount(() => {
-        settingsContextStore.set(settingsContext);
-    });
-
-    const onSyncClick = async () => {
-        if (data.settings) {
-            await updateSettings(fetch, "browser", data.settings);
-
-            synced = true;
-
-            setTimeout(() => {
-                synced = false;
-            }, 1000);
-
-            // hack to force reload the settings if the browser tab is opened
-            if (settingsContext === "browser") {
-                settingsContextStore.set("profile");
-                settingsContextStore.set("browser");
-            }
-        }
-    };
 </script>
 
 <section class="settings-header flex sm-row space-between center">
     <h2>settings</h2>
-
-    <div class="settings-context flex col">
-        <div class="flex row center">
-            <button
-                class:active={settingsContext === "browser" && data.category !== "profile"}
-                class="browser"
-                disabled={data.category === "profile"}
-                on:click={() => (settingsContext = "browser")}
-            >
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="icon">
-                    <title>Browser Icon</title>
-                    <path
-                        fill="currentColor"
-                        fill-rule="evenodd"
-                        d="M0 3.75C0 2.784.784 2 1.75 2h20.5c.966 0 1.75.784 1.75 1.75v16.5A1.75 1.75 0 0122.25 22H1.75A1.75 1.75 0 010 20.25V3.75zm1.75-.25a.25.25 0 00-.25.25V5.5h4v-2H1.75zM7 3.5v2h4v-2H7zm5.5 0v2h10V3.75a.25.25 0 00-.25-.25H12.5zm10 3.5h-21v13.25c0 .138.112.25.25.25h20.5a.25.25 0 00.25-.25V7z"
-                    />
-                </svg>
-                browser
-            </button>
-
-            <button
-                class:active={settingsContext === "profile" || data.category === "profile"}
-                class="profile"
-                disabled={data.category === "profile" || !data.self}
-                on:click={() => (settingsContext = "profile")}
-            >
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="icon">
-                    <title>Profile Icon</title>
-                    <path
-                        fill="currentColor"
-                        fill-rule="evenodd"
-                        d="M12 2.5a5.5 5.5 0 00-3.096 10.047 9.005 9.005 0 00-5.9 8.18.75.75 0 001.5.045 7.5 7.5 0 0114.993 0 .75.75 0 101.499-.044 9.005 9.005 0 00-5.9-8.181A5.5 5.5 0 0012 2.5zM8 8a4 4 0 118 0 4 4 0 01-8 0z"
-                    />
-                </svg>
-                profile
-            </button>
-
-            {#if data.self}
-                <button
-                    class="sync"
-                    aria-label="resets all browser settings to match the profile settings"
-                    use:tooltip={{
-                        content: synced
-                            ? "synced"
-                            : "resets all browser settings to match the profile settings",
-                        hideOnClick: false
-                    }}
-                    on:click={onSyncClick}
-                >
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" class="icon">
-                        <title>Sync Icon</title>
-                        <path
-                            fill="currentColor"
-                            d="M1.705 8.005a.75.75 0 0 1 .834.656 5.5 5.5 0 0 0 9.592 2.97l-1.204-1.204a.25.25 0 0 1 .177-.427h3.646a.25.25 0 0 1 .25.25v3.646a.25.25 0 0 1-.427.177l-1.38-1.38A7.002 7.002 0 0 1 1.05 8.84a.75.75 0 0 1 .656-.834ZM8 2.5a5.487 5.487 0 0 0-4.131 1.869l1.204 1.204A.25.25 0 0 1 4.896 6H1.25A.25.25 0 0 1 1 5.75V2.104a.25.25 0 0 1 .427-.177l1.38 1.38A7.002 7.002 0 0 1 14.95 7.16a.75.75 0 0 1-1.49.178A5.5 5.5 0 0 0 8 2.5Z"
-                        />
-                    </svg>
-                    sync
-                </button>
-            {/if}
-        </div>
-
-        {#if settingsContext === "profile" || data.category === "profile"}
-            <p>settings will be saved on your profile</p>
-        {:else if settingsContext === "browser"}
-            <p>
-                settings will be saved in your browser {data.self
-                    ? "(higher priority than profile settings)"
-                    : ""}
-            </p>
-        {/if}
-    </div>
 </section>
 
 <div class="flex sm-row">
@@ -190,42 +87,6 @@
         h2 {
             margin: 0;
         }
-
-        .settings-context {
-            align-items: flex-start;
-            margin-top: 0.5rem;
-
-            p {
-                margin: 0;
-                margin-top: 0.25rem;
-                font-size: $fs-small;
-                color: var(--color-bg3);
-            }
-
-            button {
-                &.browser {
-                    border-top-right-radius: 0;
-                    border-bottom-right-radius: 0;
-                }
-
-                &.profile {
-                    border-top-left-radius: 0;
-                    border-bottom-left-radius: 0;
-                }
-
-                &.active {
-                    border-color: var(--color-primary);
-                }
-
-                .icon {
-                    margin-right: 0.5rem;
-                }
-            }
-        }
-
-        .sync {
-            margin-left: 1rem;
-        }
     }
 
     .categories {
@@ -266,13 +127,6 @@
     }
 
     @media screen and (min-width: $break-med) {
-        .settings-header {
-            .settings-context {
-                align-items: flex-end;
-                margin-top: 0;
-            }
-        }
-
         .categories {
             min-width: 256px;
             max-width: 33.33%;

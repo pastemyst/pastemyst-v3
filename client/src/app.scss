@@ -1,6 +1,6 @@
 @import "normalize.css";
 
-:root {
+#theme-context[data-theme="myst"] {
     --color-bg: #141414;
     --color-bg1: #1c1c1c;
     --color-bg2: #222222;
@@ -16,15 +16,32 @@
     --color-pink: #cb6dce;
 }
 
-* {
-    box-sizing: border-box;
+#theme-context[data-theme="test"] {
+    --color-bg: #000000;
+    --color-bg1: #111111;
+    --color-bg2: #222222;
+    --color-bg3: #333333;
+
+    --color-fg: #ffffff;
+
+    --color-primary: blue;
+    --color-secondary: red;
+
+    --color-danger: red;
+    --color-success: green;
+    --color-pink: pink;
 }
 
+#theme-context,
 body {
     background-color: var(--color-bg);
     color: var(--color-fg);
     font-family: $font-stack;
     font-size: $fs-medium;
+}
+
+* {
+    box-sizing: border-box;
 }
 
 a {
@@ -321,6 +338,7 @@ section {
 
     &.wrap {
         white-space: pre-wrap;
+        word-break: break-all;
     }
 }
 
