@@ -12,6 +12,7 @@ public interface IMongoService
     public IMongoCollection<Paste> Pastes { get; }
     public IMongoCollection<User> Users { get; }
     public IMongoCollection<ActionLog> ActionLogs { get; }
+    public IMongoCollection<SessionSettings> SessionSettings { get; }
     public GridFSBucket Images { get; }
 }
 
@@ -22,6 +23,8 @@ public class MongoService : IMongoService
     public IMongoCollection<User> Users { get; private set; }
 
     public IMongoCollection<ActionLog> ActionLogs { get; private set; }
+
+    public IMongoCollection<SessionSettings> SessionSettings { get; private set; }
 
     public GridFSBucket Images { get; private set; }
 
@@ -44,6 +47,7 @@ public class MongoService : IMongoService
         Pastes = mongoDb.GetCollection<Paste>("pastes");
         Users = mongoDb.GetCollection<User>("users");
         ActionLogs = mongoDb.GetCollection<ActionLog>("actionLogs");
+        SessionSettings = mongoDb.GetCollection<SessionSettings>("sessionSettings");
 
         Images = new GridFSBucket(mongoDb, new()
         {

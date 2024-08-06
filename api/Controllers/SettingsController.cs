@@ -10,15 +10,15 @@ namespace pastemyst.Controllers;
 public class SettingsController(ISettingsService settingsService) : ControllerBase
 {
     [HttpGet]
-    public Settings GetSettings()
+    public async Task<Settings> GetSettings()
     {
-        return settingsService.GetSettings();
+        return await settingsService.GetSettingsAsync(HttpContext);
     }
 
     [HttpPatch]
     public async Task UpdateSettings([FromBody] Settings settings)
     {
-        await settingsService.UpdateSettingsAsync(settings);
+        await settingsService.UpdateSettingsAsync(HttpContext, settings);
     }
 
     [HttpGet("user")]

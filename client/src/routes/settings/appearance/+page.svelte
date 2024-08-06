@@ -1,25 +1,19 @@
 <script lang="ts">
-    import { getLocalSettings, updateSettings, type Settings } from "$lib/api/settings";
+    import { updateSettings } from "$lib/api/settings";
     import type { PageData } from "./$types";
-    import { cmdPalOpen, cmdPalTitle, settingsContextStore, themeStore } from "$lib/stores";
+    import { cmdPalOpen, cmdPalTitle, themeStore } from "$lib/stores";
     import { Close, setTempCommands, type Command } from "$lib/command";
     import { themes } from "$lib/themes";
 
     export let data: PageData;
-
-    let settings: Settings;
-
-    settingsContextStore.subscribe((context) => {
-        settings = context === "profile" && data.settings ? data.settings : getLocalSettings();
-    });
 
     const getPasteViewCommands = (): Command[] => {
         return [
             {
                 name: "tabbed",
                 action: () => {
-                    settings.pasteView = "tabbed";
-                    updateSettings(fetch, $settingsContextStore, settings);
+                    data.settings.pasteView = "tabbed";
+                    updateSettings(fetch, data.settings);
 
                     return Close.yes;
                 }
@@ -27,8 +21,8 @@
             {
                 name: "stacked",
                 action: () => {
-                    settings.pasteView = "stacked";
-                    updateSettings(fetch, $settingsContextStore, settings);
+                    data.settings.pasteView = "stacked";
+                    updateSettings(fetch, data.settings);
 
                     return Close.yes;
                 }
@@ -42,8 +36,8 @@
             commands.push({
                 name: theme.name,
                 action: () => {
-                    (settings.theme = theme.name),
-                        updateSettings(fetch, $settingsContextStore, settings);
+                    data.settings.theme = theme.name;
+                    updateSettings(fetch, data.settings);
 
                     themeStore.set(theme);
 
@@ -80,7 +74,7 @@
 
 <div class="flex row center gap-s">
     <p>theme:</p>
-    <button on:click={onThemeClicked}>{settings.theme}</button>
+    <button on:click={onThemeClicked}>{data.settings.theme}</button>
 </div>
 
 <span class="hint">change the theme of pastemyst</span>
@@ -89,7 +83,7 @@
 
 <div class="flex row center gap-s">
     <p>paste view:</p>
-    <button on:click={onPasteViewClicked}>{settings.pasteView}</button>
+    <button on:click={onPasteViewClicked}>{data.settings.pasteView}</button>
 </div>
 
 <span class="hint">change how the files look when viewing a paste: tabbed or stacked</span>

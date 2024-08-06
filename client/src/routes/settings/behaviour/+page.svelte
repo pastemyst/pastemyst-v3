@@ -1,29 +1,24 @@
 <script lang="ts">
     import Checkbox from "$lib/Checkbox.svelte";
     import { getLangs, getPopularLangNames } from "$lib/api/lang";
-    import { getLocalSettings, updateSettings, type Settings } from "$lib/api/settings";
+    import { updateSettings } from "$lib/api/settings";
     import { Close, setTempCommands, type Command } from "$lib/command";
-    import { cmdPalOpen, cmdPalTitle, settingsContextStore } from "$lib/stores";
+    import { cmdPalOpen, cmdPalTitle } from "$lib/stores";
     import type { PageData } from "./$types";
 
     export let data: PageData;
-
-    let settings: Settings;
-
-    settingsContextStore.subscribe((context) => {
-        settings = context === "profile" && data.settings ? data.settings : getLocalSettings();
-    });
 
     const getIndentUnitCommands = (): Command[] => {
         return [
             {
                 name: "spaces",
                 action: () => {
-                    settings.defaultIndentationUnit = "spaces";
+                    data.settings.defaultIndentationUnit = "spaces";
                     cmdPalTitle.set("select indentation width (spaces)");
+
                     setTempCommands(getIndentWidthCommands());
 
-                    updateSettings(fetch, $settingsContextStore, settings);
+                    updateSettings(fetch, data.settings);
 
                     return Close.no;
                 }
@@ -31,11 +26,11 @@
             {
                 name: "tabs",
                 action: () => {
-                    settings.defaultIndentationUnit = "tabs";
+                    data.settings.defaultIndentationUnit = "tabs";
                     cmdPalTitle.set("select indentation width (tabs)");
                     setTempCommands(getIndentWidthCommands());
 
-                    updateSettings(fetch, $settingsContextStore, settings);
+                    updateSettings(fetch, data.settings);
 
                     return Close.no;
                 }
@@ -50,9 +45,9 @@
             commands.push({
                 name: i.toString(),
                 action: () => {
-                    settings.defaultIndentationWidth = i;
+                    data.settings.defaultIndentationWidth = i;
 
-                    updateSettings(fetch, $settingsContextStore, settings);
+                    updateSettings(fetch, data.settings);
 
                     return Close.yes;
                 }
@@ -89,9 +84,9 @@
                 name: lang.name,
                 description: lang.aliases?.join(", "),
                 action: () => {
-                    settings.defaultLanguage = lang.name;
+                    data.settings.defaultLanguage = lang.name;
 
-                    updateSettings(fetch, $settingsContextStore, settings);
+                    updateSettings(fetch, data.settings);
 
                     return Close.yes;
                 }
@@ -116,11 +111,11 @@
     };
 
     const onTextWrapClicked = async () => {
-        await updateSettings(fetch, $settingsContextStore, settings);
+        await updateSettings(fetch, data.settings);
     };
 
     const onCopyLinkOnCreateClicked = async () => {
-        await updateSettings(fetch, $settingsContextStore, settings);
+        await updateSettings(fetch, data.settings);
     };
 </script>
 
@@ -136,7 +131,7 @@
 
 <div class="flex row center gap-s">
     <p>default language:</p>
-    <button on:click={onDefaultLanguageClicked}>{settings.defaultLanguage}</button>
+    <button on:click={onDefaultLanguageClicked}>{data.settings.defaultLanguage}</button>
 </div>
 
 <span class="hint">set the default language for the text editor</span>
@@ -144,14 +139,18 @@
 <div class="flex row center gap-s">
     <p>default indentation:</p>
     <button on:click={onDefaultIndentationClicked}
-        >{settings.defaultIndentationUnit}: {settings.defaultIndentationWidth}</button
+        >{data.settings.defaultIndentationUnit}: {data.settings.defaultIndentationWidth}</button
     >
 </div>
 
 <span class="hint">set the default indentation unit and width for the text editor</span>
 
 <div class="flex row center gap-s">
-    <Checkbox label="text wrap" bind:checked={settings.textWrap} on:change={onTextWrapClicked} />
+    <Checkbox
+        label="text wrap"
+        bind:checked={data.settings.textWrap}
+        on:change={onTextWrapClicked}
+    />
 </div>
 
 <span class="hint">text wrapping in the editor</span>
@@ -159,7 +158,7 @@
 <div class="flex row center gap-s">
     <Checkbox
         label="copy link on create"
-        bind:checked={settings.copyLinkOnCreate}
+        bind:checked={data.settings.copyLinkOnCreate}
         on:change={onCopyLinkOnCreateClicked}
     />
 </div>

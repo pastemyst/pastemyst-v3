@@ -16,15 +16,17 @@ public interface ISettingsService
 
     public Task UpdateUserSettingsAsync(UserSettings settings);
 
-    public Settings GetSettings();
+    public Task<Settings> GetSettingsAsync(HttpContext httpContext);
 
-    public Task UpdateSettingsAsync(Settings settings);
+    public Task UpdateSettingsAsync(HttpContext httpContext, Settings settings);
 }
 
 public class SettingsService(
+    IConfiguration configuration,
     IUserProvider userProvider,
     IImageService imageService,
     IUserContext userContext,
+    IIdProvider idProvider,
     IMongoService mongo)
     : ISettingsService
 {
@@ -81,20 +83,83 @@ public class SettingsService(
         await mongo.Users.UpdateOneAsync(u => u.Id == userContext.Self.Id, update);
     }
 
-    public Settings GetSettings()
+    public async Task<Settings> GetSettingsAsync(HttpContext httpContext)
     {
-        if (!userContext.IsLoggedIn())
-            throw new HttpException(HttpStatusCode.Unauthorized, "You must be authorized to fetch settings.");
+        // If a logged in user is requesting the settings, send the user's settings
+        if (userContext.IsLoggedIn())
+        {
+            return userContext.Self.Settings;
+        }
 
-        return userContext.Self.Settings;
+        var sessionSettingsCookie = httpContext.Request.Cookies["pastemyst_session_settings"];
+
+        // If an anonymous user is requesting the settings, and the session cookie exists, send that
+        if (sessionSettingsCookie is not null)
+        {
+            var sessionSettings = await mongo.SessionSettings.Find(s => s.Id == sessionSettingsCookie).FirstOrDefaultAsync();
+
+            if (sessionSettings is not null)
+            {
+                // modify the last accessed field
+                var update = Builders<SessionSettings>.Update.Set(s => s.LastAccessed, DateTime.UtcNow);
+                await mongo.SessionSettings.UpdateOneAsync(s => s.Id == sessionSettingsCookie, update);
+
+                return sessionSettings.Settings;
+            }
+        }
+
+        // Else, create a new session settings cookie and send that
+        var newSessionSettings = new SessionSettings
+        {
+            Id = await idProvider.GenerateId(async id => await ExistsSessionSettingsByIdAsync(id))
+        };
+
+        await mongo.SessionSettings.InsertOneAsync(newSessionSettings);
+
+        var newSessionSettingsCookie = new CookieOptions
+        {
+            Path = "/",
+            HttpOnly = true,
+            SameSite = SameSiteMode.Strict,
+            Secure = configuration.GetValue<bool>("Https"),
+            Expires = DateTimeOffset.MaxValue
+        };
+
+        httpContext.Response.Cookies.Append("pastemyst_session_settings", newSessionSettings.Id, newSessionSettingsCookie);
+
+        return newSessionSettings.Settings;
     }
 
-    public async Task UpdateSettingsAsync(Settings settings)
+    public async Task UpdateSettingsAsync(HttpContext httpContext, Settings settings)
     {
-        if (!userContext.IsLoggedIn())
-            throw new HttpException(HttpStatusCode.Unauthorized, "You must be authorized to update settings.");
+        if (userContext.IsLoggedIn())
+        {
+            var update = Builders<User>.Update.Set(u => u.Settings, settings);
+            await mongo.Users.UpdateOneAsync(u => u.Id == userContext.Self.Id, update);
+        }
+        else
+        {
+            var sessionSettingsCookie = httpContext.Request.Cookies["pastemyst_session_settings"];
 
-        var update = Builders<User>.Update.Set(u => u.Settings, settings);
-        var res = await mongo.Users.UpdateOneAsync(u => u.Id == userContext.Self.Id, update);
+            if (sessionSettingsCookie is null)
+            {
+                throw new HttpException(HttpStatusCode.BadRequest, "Can't update the settings since the user is not logged in and the session settings cookie is missing.");
+            }
+
+            var sessionSettings = await mongo.SessionSettings.Find(s => s.Id == sessionSettingsCookie).FirstOrDefaultAsync();
+
+            if (sessionSettings is null)
+            {
+                throw new HttpException(HttpStatusCode.BadRequest, "The session settings cookie has probably expired.");
+            }
+
+            var update = Builders<SessionSettings>.Update.Set(s => s.Settings, settings).Set(s => s.LastAccessed, DateTime.UtcNow);
+            await mongo.SessionSettings.UpdateOneAsync(s => s.Id == sessionSettings.Id, update);
+        }
+    }
+
+    private async Task<bool> ExistsSessionSettingsByIdAsync(string id)
+    {
+        return await mongo.SessionSettings.Find(p => p.Id == id).FirstOrDefaultAsync() is not null;
     }
 }

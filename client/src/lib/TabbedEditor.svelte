@@ -7,7 +7,9 @@
     import { getLangs } from "./api/lang";
     import { beforeNavigate } from "$app/navigation";
     import { creatingPasteStore } from "./stores";
+    import type { Settings } from "./api/settings";
 
+    export let settings: Settings;
     export let tabs: TabData[] = new Array<TabData>();
     export let activeTab: TabData | undefined = undefined;
     $: activeTab = tabs.find((t) => t.id === activeTabId);
@@ -108,7 +110,11 @@
     const addTab = async (title?: string) => {
         const name = title || "untitled";
 
-        let newtab = new TabData(tabCounter, name, new Editor({ target: editorTarget }));
+        let newtab = new TabData(
+            tabCounter,
+            name,
+            new Editor({ target: editorTarget, props: { settings } })
+        );
 
         await tick();
 

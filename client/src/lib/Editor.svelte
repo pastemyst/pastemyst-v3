@@ -9,13 +9,15 @@
     import { getLangs, getPopularLangNames, type Language } from "./api/lang";
     import { tooltip } from "$lib/tooltips";
     import { Close, setTempCommands, type Command } from "./command";
-    import { cmdPalOpen, cmdPalTitle, settingsStore } from "./stores";
+    import { cmdPalOpen, cmdPalTitle } from "./stores";
     import { languages as cmLangs } from "@codemirror/language-data";
     import Markdown from "./Markdown.svelte";
     import { isLanguageMarkdown } from "./utils/markdown";
     import type { IndentUnit } from "./indentation";
+    import type { Settings } from "./api/settings";
 
     export let hidden = false;
+    export let settings: Settings;
 
     let editorElement: HTMLElement;
 
@@ -62,8 +64,8 @@
             selectedLanguage = textLang;
         }
 
-        selectedIndentUnit = $settingsStore.defaultIndentationUnit;
-        selectedIndentWidth = $settingsStore.defaultIndentationWidth;
+        selectedIndentUnit = settings.defaultIndentationUnit;
+        selectedIndentWidth = settings.defaultIndentationWidth;
 
         const editorUpdateListener = EditorView.updateListener.of((update) => {
             // get the current line
@@ -85,14 +87,13 @@
                         indentUnit.of(selectedIndentUnit === "spaces" ? " " : "\t")
                     ),
                     indentWidthCompartment.of(EditorState.tabSize.of(selectedIndentWidth)),
-                    $settingsStore.textWrap ? [EditorView.lineWrapping] : []
+                    settings.textWrap ? [EditorView.lineWrapping] : []
                 ]
             }),
             parent: editorElement
         });
 
-        const settingsLang =
-            langs.find((l) => l.name === $settingsStore.defaultLanguage) || textLang;
+        const settingsLang = langs.find((l) => l.name === settings.defaultLanguage) || textLang;
         setSelectedLang(settingsLang);
 
         setEditorIndentation();
@@ -255,7 +256,7 @@
             body: JSON.stringify({
                 content: getContent(),
                 language: getSelectedLang().name,
-                wrap: $settingsStore.textWrap
+                wrap: settings.textWrap
             })
         });
 

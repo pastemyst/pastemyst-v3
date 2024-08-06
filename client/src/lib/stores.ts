@@ -1,7 +1,6 @@
 import { writable, type Writable } from "svelte/store";
 import type { User } from "./api/user";
-import { themes } from "./themes";
-import { type Settings, type SettingsContext } from "./api/settings";
+import { type Theme } from "./themes";
 
 export const currentUserStore: Writable<User | null> = writable();
 
@@ -12,10 +11,8 @@ export const activePastesStores = writable(0);
 export const cmdPalOpen = writable(false);
 export const cmdPalTitle = writable<string | null>(null);
 
-export const themeStore = writable(themes[0]);
+export const themeStore = writable<Theme | null>(null);
 
 export const creatingPasteStore = writable(false);
 
-export const settingsContextStore = writable<SettingsContext>("browser");
-export const settingsStore = writable<Settings>();
 export const copyLinkToClipboardStore = writable<boolean>(false);

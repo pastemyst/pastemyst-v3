@@ -15,8 +15,7 @@
         cmdPalOpen,
         cmdPalTitle,
         copyLinkToClipboardStore,
-        currentUserStore,
-        settingsStore
+        currentUserStore
     } from "$lib/stores";
     import { goto } from "$app/navigation";
     import Markdown from "$lib/Markdown.svelte";
@@ -41,13 +40,6 @@
     }
 
     onMount(() => {
-        if ($settingsStore && $settingsStore.textWrap) {
-            const editors = document.querySelectorAll(".shiki");
-            for (const e of editors) {
-                e.classList.add("wrap");
-            }
-        }
-
         if ($copyLinkToClipboardStore) {
             // TODO: maybe implement custom toast messages...
             toast.success("copied paste link to clipboard", {
@@ -374,7 +366,7 @@
 {/if}
 
 <div class="pasties">
-    {#if $settingsStore && $settingsStore.pasteView === "stacked"}
+    {#if data.settings.pasteView === "stacked"}
         {#each data.paste.pasties as pasty, i}
             <div class="pasty">
                 <div class="sticky">

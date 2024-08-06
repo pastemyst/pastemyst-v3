@@ -2,38 +2,22 @@
     import Header from "$lib/Header.svelte";
     import Footer from "$lib/Footer.svelte";
     import type { LayoutData } from "./$types";
-    import {
-        activePastesStores,
-        currentUserStore,
-        settingsStore,
-        themeStore,
-        versionStore
-    } from "$lib/stores";
+    import { activePastesStores, currentUserStore, versionStore } from "$lib/stores";
     import CommandPalette from "$lib/CommandPalette.svelte";
     import { Close, setBaseCommands, type Command } from "$lib/command";
     import { beforeNavigate, goto } from "$app/navigation";
     import ThemeContext from "$lib/ThemeContext.svelte";
     import { env } from "$env/dynamic/public";
-    import { onMount } from "svelte";
-    import { getLocalSettings } from "$lib/api/settings";
     import { Toaster } from "svelte-french-toast";
 
     import "tippy.js/dist/tippy.css";
     import "tippy.js/dist/svg-arrow.css";
     import "../app.scss";
-    import { themes } from "$lib/themes";
 
     export let data: LayoutData;
     $: currentUserStore.set(data.self);
     $: versionStore.set(data.version);
     $: activePastesStores.set(data.activePastes);
-
-    onMount(() => {
-        settingsStore.set(getLocalSettings());
-
-        const theme = themes.find((t) => t.name === $settingsStore.theme);
-        if (theme) themeStore.set(theme);
-    });
 
     const getCommands = (): Command[] => {
         const commands: Command[] = [
@@ -99,7 +83,7 @@
     });
 </script>
 
-<ThemeContext>
+<ThemeContext currentTheme={data.settings.theme}>
     <Toaster />
 
     <div id="container">
