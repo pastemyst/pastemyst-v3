@@ -18,6 +18,7 @@
 
     export let hidden = false;
     export let settings: Settings;
+    export let onMounted: (() => void) | undefined = undefined;
 
     let editorElement: HTMLElement;
 
@@ -99,6 +100,8 @@
         setEditorIndentation();
 
         focus();
+
+        if (onMounted) onMounted();
     });
 
     const setEditorIndentation = () => {

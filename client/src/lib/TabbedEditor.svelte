@@ -110,25 +110,32 @@
     const addTab = async (title?: string) => {
         const name = title || "untitled";
 
-        let newtab = new TabData(
+        let newtab: TabData = new TabData(
             tabCounter,
             name,
-            new Editor({ target: editorTarget, props: { settings } })
+            new Editor({
+                target: editorTarget,
+                props: {
+                    settings,
+                    onMounted: () => copyPreviousTabSettings(newtab.editor)
+                }
+            })
         );
-
-        await tick();
-
-        // set the language and indentation same as the previous tab
-        if (tabs.length > 0) {
-            const previousEditor = tabs[tabs.length - 1].editor;
-            newtab.editor.setSelectedLang(previousEditor.getSelectedLang());
-            newtab.editor.setIndentaion(...previousEditor.getIndentation());
-        }
 
         tabs = [...tabs, newtab];
         await setActiveTab(tabs[tabs.length - 1].id);
 
         tabCounter++;
+    };
+
+    // set the language and indentation same as the previous tab
+    const copyPreviousTabSettings = (newTabEditor: Editor) => {
+        if (tabs.length > 1) {
+            const previousEditor = tabs[tabs.length - 2].editor;
+
+            newTabEditor.setSelectedLang(previousEditor.getSelectedLang());
+            newTabEditor.setIndentaion(...previousEditor.getIndentation());
+        }
     };
 
     const setActiveTab = async (id: number) => {
