@@ -1,4 +1,5 @@
 using LibGit2Sharp;
+using Semver;
 
 namespace pastemyst.Services;
 
@@ -21,7 +22,11 @@ public class VersionProvider : IVersionProvider, IHostedService
 
         using var repo = new Repository(repoPath);
 
-        Version = repo.Tags.OrderBy(t => t.FriendlyName).Last().FriendlyName;
+        Version = repo.Tags
+            .Select(t => SemVersion.Parse(t.FriendlyName, SemVersionStyles.Strict))
+            .OrderDescending()
+            .First()
+            .ToString();
 
         return Task.CompletedTask;
     }
