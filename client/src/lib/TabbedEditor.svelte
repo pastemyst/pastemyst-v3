@@ -110,12 +110,15 @@
     const addTab = async (title?: string) => {
         const name = title || "untitled";
 
-        let newtab = new TabData(
+        let newtab: TabData = new TabData(
             tabCounter,
             name,
-            new Editor({ target: editorTarget, props: {
-                settings,
-                onMounted: () => copyPreviousTabSettings(newtab.editor) }
+            new Editor({
+                target: editorTarget,
+                props: {
+                    settings,
+                    onMounted: () => copyPreviousTabSettings(newtab.editor)
+                }
             })
         );
 
