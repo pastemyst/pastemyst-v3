@@ -1,10 +1,10 @@
 import { getUserTags, type User } from "$lib/api/user";
-import moment from "moment";
 import type { Page } from "$lib/api/page";
 import type { PageLoad } from "./$types";
 import type { PasteWithLangStats } from "$lib/api/paste";
 import { error } from "@sveltejs/kit";
 import { env } from "$env/dynamic/public";
+import { formatDistanceToNow } from "date-fns";
 
 export const load: PageLoad = async ({ params, url, fetch }) => {
     const tag: string | null = url.searchParams.get("tag");
@@ -42,7 +42,7 @@ export const load: PageLoad = async ({ params, url, fetch }) => {
     let pinnedPastes: Page<PasteWithLangStats>;
     if (userRes.ok) {
         user = await userRes.json();
-        relativeJoined = moment(user.createdAt).fromNow();
+        relativeJoined = formatDistanceToNow(new Date(user.createdAt), { addSuffix: true });
 
         if (meRes.ok) {
             const loggedInUser: User = await meRes.json();

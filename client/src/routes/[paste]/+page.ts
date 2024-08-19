@@ -1,8 +1,8 @@
 import { error } from "@sveltejs/kit";
 import { ExpiresIn, getPaste, getPasteLangs, getPasteStats, isPasteStarred } from "$lib/api/paste";
 import type { PageLoad } from "./$types";
-import moment from "moment";
 import { getUserById } from "$lib/api/user";
+import { formatDistanceToNow } from "date-fns";
 
 export const load: PageLoad = async ({ params, fetch, parent }) => {
     const [paste, pasteStatus] = await getPaste(fetch, params.paste);
@@ -12,9 +12,9 @@ export const load: PageLoad = async ({ params, fetch, parent }) => {
         error(pasteStatus);
     }
 
-    const relativeCreatedAt = moment(paste.createdAt).fromNow();
+    const relativeCreatedAt = formatDistanceToNow(new Date(paste.createdAt), { addSuffix: true });
     const relativesExpiresIn =
-        paste.expiresIn !== ExpiresIn.never ? moment(paste.deletesAt).fromNow() : "";
+        paste.expiresIn !== ExpiresIn.never ? formatDistanceToNow(new Date(paste.deletesAt), { addSuffix: true }) : "";
     const pasteStats = await getPasteStats(fetch, paste.id);
     const langStats = await getPasteLangs(fetch, paste.id);
     const [owner, ownerStatus] =

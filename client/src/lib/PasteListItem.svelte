@@ -1,5 +1,4 @@
 <script lang="ts">
-    import moment from "moment";
     import Dropdown from "./Dropdown.svelte";
     import {
         ExpiresIn,
@@ -13,6 +12,7 @@
     import type { LangStat } from "./api/lang";
     import { Close, getConfirmActionCommands, setTempCommands } from "./command";
     import { invalidateAll } from "$app/navigation";
+    import { formatDistanceToNow } from "date-fns";
 
     export let pasteWithLangStats: PasteWithLangStats;
 
@@ -214,11 +214,11 @@
 
     <div>
         <!-- prettier-ignore -->
-        <span use:tooltip aria-label={new Date(pasteWithLangStats.paste.createdAt).toString()}>{moment(pasteWithLangStats.paste.createdAt).fromNow()}</span>
+        <span use:tooltip aria-label={new Date(pasteWithLangStats.paste.createdAt).toString()}>{formatDistanceToNow(new Date(pasteWithLangStats.paste.createdAt), { addSuffix: true })}</span>
 
         {#if pasteWithLangStats.paste.expiresIn !== ExpiresIn.never}
             <!-- prettier-ignore -->
-            <span use:tooltip aria-label={new Date(pasteWithLangStats.paste.deletesAt).toString()}> - expires {moment(pasteWithLangStats.paste.deletesAt).fromNow()}</span>
+            <span use:tooltip aria-label={new Date(pasteWithLangStats.paste.deletesAt).toString()}> - expires {formatDistanceToNow(new Date(pasteWithLangStats.paste.deletesAt), { addSuffix: true })}</span>
         {/if}
     </div>
 
