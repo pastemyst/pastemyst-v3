@@ -14,7 +14,9 @@ export const load: PageLoad = async ({ params, fetch, parent }) => {
 
     const relativeCreatedAt = formatDistanceToNow(new Date(paste.createdAt), { addSuffix: true });
     const relativesExpiresIn =
-        paste.expiresIn !== ExpiresIn.never ? formatDistanceToNow(new Date(paste.deletesAt), { addSuffix: true }) : "";
+        paste.expiresIn !== ExpiresIn.never
+            ? formatDistanceToNow(new Date(paste.deletesAt), { addSuffix: true })
+            : "";
     const pasteStats = await getPasteStats(fetch, paste.id);
     const langStats = await getPasteLangs(fetch, paste.id);
     const [owner, ownerStatus] =
