@@ -1,4 +1,6 @@
+using System.IO.Compression;
 using System.Net;
+using System.Text;
 using MongoDB.Bson;
 using MongoDB.Driver;
 using pastemyst.Exceptions;
@@ -32,6 +34,8 @@ public interface IPasteService
     public Task TogglePrivateAsync(string id);
 
     public Task<bool> ExistsByIdAsync(string id);
+
+    public Task<(byte[] zip, string title)> GetPasteAsZip(string id);
 }
 
 public class PasteService(
@@ -343,5 +347,30 @@ public class PasteService(
     public async Task<bool> ExistsByIdAsync(string id)
     {
         return await mongo.Pastes.Find(p => p.Id == id).FirstOrDefaultAsync() is not null;
+    }
+
+    public async Task<(byte[] zip, string title)> GetPasteAsZip(string id)
+    {
+        var paste = await GetAsync(id);
+
+        using var memoryStream = new MemoryStream();
+
+        using (var zipArchive = new ZipArchive(memoryStream, ZipArchiveMode.Create, true))
+        {
+            foreach (var pasty in paste.Pasties)
+            {
+                var lang = languageProvider.FindByName(pasty.Language);
+
+                var zipEntry = zipArchive.CreateEntry(pasty.Title + lang.Extensions.First());
+
+                using var entryStream = zipEntry.Open();
+                using var writer = new StreamWriter(entryStream, Encoding.UTF8);
+                await writer.WriteAsync(pasty.Content);
+            }
+        }
+
+        memoryStream.Position = 0;
+
+        return (memoryStream.ToArray(), paste.Title);
     }
 }
