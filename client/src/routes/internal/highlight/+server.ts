@@ -1,7 +1,7 @@
 import { getLangs } from "$lib/api/lang";
 import type { RequestEvent, RequestHandler } from "@sveltejs/kit";
 import { readFileSync } from "fs";
-import { getHighlighter, type LanguageRegistration } from "shiki";
+import { getSingletonHighlighter, type LanguageRegistration } from "shiki";
 
 export const POST: RequestHandler = async ({ request }: RequestEvent) => {
     const json = await request.json();
@@ -15,7 +15,7 @@ const highlight = async (content: string, language: string, wrap: boolean): Prom
     const langs = await getLangs(fetch);
     const lang = langs.find((l) => l.name === language);
 
-    const highlighter = await getHighlighter({
+    const highlighter = await getSingletonHighlighter({
         themes: [],
         langs: []
     });
