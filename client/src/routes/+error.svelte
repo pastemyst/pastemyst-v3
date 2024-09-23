@@ -13,4 +13,3 @@
 
     <p>you can go back to the <a href="/">home page</a></p>
 </section>
-
