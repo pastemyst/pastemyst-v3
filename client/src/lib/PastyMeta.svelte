@@ -41,11 +41,11 @@
         </span>
 
         <span>
-            {stats.lines} lines
+            {stats.lines} line{stats.lines > 1 ? "s" : ""}
         </span>
 
         <span>
-            {stats.words} words
+            {stats.words} word{stats.words > 1 ? "s" : ""}
         </span>
 
         <span>

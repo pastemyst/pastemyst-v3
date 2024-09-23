@@ -24,6 +24,7 @@
     import { onMount } from "svelte";
     import toast from "svelte-french-toast";
     import { env } from "$env/dynamic/public";
+    import { humanFileSize } from "$lib/strings";
 
     export let data: PageData;
 
@@ -120,13 +121,29 @@
             data.paste.private = !data.paste.private;
         }
     };
+
+    function colorIsDarkAdvanced(bgColor: string): boolean {
+        let color = bgColor.charAt(0) === "#" ? bgColor.substring(1, 7) : bgColor;
+        let r = parseInt(color.substring(0, 2), 16); // hexToR
+        let g = parseInt(color.substring(2, 4), 16); // hexToG
+        let b = parseInt(color.substring(4, 6), 16); // hexToB
+        let uicolors = [r / 255, g / 255, b / 255];
+        let c = uicolors.map((col) => {
+            if (col <= 0.03928) {
+                return col / 12.92;
+            }
+            return Math.pow((col + 0.055) / 1.055, 2.4);
+        });
+        let L = 0.2126 * c[0] + 0.7152 * c[1] + 0.0722 * c[2];
+        return L <= 0.179;
+    }
 </script>
 
 <svelte:head>
     <title>pastemyst | {data.paste.title || "untitled"}</title>
 </svelte:head>
 
-<section class="paste-header flex column center space-between">
+<section class="paste-header flex row center space-between">
     <div class="title flex col">
         <div class="flex row center">
             {#if data.paste.private}
@@ -163,7 +180,7 @@
         </span>
     </div>
 
-    <div class="options flex row center">
+    <div class="options flex wrap row center gap-s">
         {#if $currentUserStore?.id === data.paste.ownerId}
             <button
                 aria-label={data.paste.private
@@ -352,30 +369,39 @@
                 </svg>
             </button>
         {/if}
-
-        <button aria-label="more options" use:tooltip>
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" class="icon">
-                <title>Dots Horizontal Icon</title>
-                <path
-                    fill="currentColor"
-                    d="M8 9a1.5 1.5 0 100-3 1.5 1.5 0 000 3zM1.5 9a1.5 1.5 0 100-3 1.5 1.5 0 000 3zm13 0a1.5 1.5 0 100-3 1.5 1.5 0 000 3z"
-                />
-            </svg>
-        </button>
     </div>
 </section>
 
-<div class="lang-stats flex">
-    {#each data.langStats as lang}
-        <div
-            class="lang"
-            style="width:{lang.percentage}%; background-color:{lang.language.color ??
-                'var(--color-fg)'};"
-            use:tooltip
-            aria-label="{lang.language.name} {lang.percentage.toFixed(2)}%"
-        />
-    {/each}
-</div>
+{#if data.pasteStats}
+    <div class="paste-stats flex row center space-between">
+        <div class="size-stats">
+            <span>
+                {data.pasteStats.lines} line{data.pasteStats.lines > 1 ? "s" : ""}
+            </span>
+
+            <span>
+                {data.pasteStats.words} word{data.pasteStats.words > 1 ? "s" : ""}
+            </span>
+
+            <span>
+                {humanFileSize(data.pasteStats.bytes).toLowerCase()}
+            </span>
+        </div>
+
+        <div class="lang-stats flex wrap row center gap-m">
+            {#each data.langStats as lang}
+                <div
+                    class="lang flex row center gap-s"
+                    style="background-color: {lang.language.color ?? 'var(--color-fg)'}"
+                    class:dark={colorIsDarkAdvanced(lang.language.color ?? "#ffffff")}
+                >
+                    <span>{lang.language.name}</span>
+                    <span>{lang.percentage.toFixed(2)}%</span>
+                </div>
+            {/each}
+        </div>
+    </div>
+{/if}
 
 {#if data.paste.tags}
     <div class="tags flex row center">
@@ -498,8 +524,6 @@
         .options {
             button,
             .btn {
-                margin-left: 0.5rem;
-
                 svg {
                     max-width: 20px;
                     max-height: 20px;
@@ -521,20 +545,37 @@
         }
     }
 
-    .lang-stats {
-        height: 5px;
-        margin-bottom: 1rem;
+    .paste-stats {
+        font-size: $fs-small;
+        border: 1px solid var(--color-bg2);
+        border-bottom-left-radius: $border-radius;
+        border-bottom-right-radius: $border-radius;
+        color: var(--color-bg3);
+        background-color: var(--color-bg1);
+        padding: 0.25rem 1rem;
 
-        .lang {
-            border-right: 2px solid var(--color-bg);
-
-            &:first-child {
-                border-bottom-left-radius: $border-radius;
+        .size-stats {
+            span::after {
+                content: "|";
+                opacity: 0.3;
+                font-size: $fs-medium;
+                margin: 0 0.25rem;
             }
 
-            &:last-child {
-                border-bottom-right-radius: $border-radius;
-                border-right: none;
+            span:last-child::after {
+                content: "";
+            }
+        }
+
+        .lang-stats {
+            .lang {
+                border-radius: $border-radius;
+                padding: 0.25rem 0.5rem;
+                color: var(--color-bg2);
+
+                &.dark {
+                    color: var(--color-fg);
+                }
             }
         }
     }
@@ -662,11 +703,18 @@
             .title {
                 margin-bottom: 1rem;
             }
+        }
 
-            .options {
-                button:first-child {
-                    margin-left: 0;
-                }
+        .paste-stats {
+            flex-direction: column;
+            align-items: baseline;
+
+            .size-stats {
+                margin-bottom: 1rem;
+            }
+
+            .lang-stats {
+                margin-bottom: 1rem;
             }
         }
     }

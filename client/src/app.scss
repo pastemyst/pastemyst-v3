@@ -123,6 +123,10 @@ code {
         gap: 1rem;
     }
 
+    &.wrap {
+        flex-wrap: wrap;
+    }
+
     @media screen and (max-width: $break-med) {
         &.sm-row,
         &.sm-row-rev {
