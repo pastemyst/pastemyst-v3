@@ -57,12 +57,19 @@
         const textLangIndex = langs.findIndex((l) => l.name === "Text");
         const textLang = langs[textLangIndex];
 
-        // place text on the top of the lang list
+        // place text on the top of the lang list below autodetect
         langs.splice(textLangIndex, 1);
         langs.unshift(textLang);
 
+        const autodetectLangIndex = langs.findIndex((l) => l.name === "Autodetect");
+        const autodetectLang = langs[autodetectLangIndex];
+
+        // place autodetect on the top of the lang list
+        langs.splice(autodetectLangIndex, 1);
+        langs.unshift(autodetectLang);
+
         if (!selectedLanguage) {
-            selectedLanguage = textLang;
+            selectedLanguage = autodetectLang;
         }
 
         selectedIndentUnit = settings.defaultIndentationUnit;
@@ -309,7 +316,9 @@
             });
         } else {
             langSupported = false;
-            if (selectedLanguage.name === "Text") langSupported = true;
+            if (["Text", "Autodetect"].includes(selectedLanguage.name)) {
+                langSupported = true;
+            }
 
             editorView.dispatch({
                 effects: langCompartment.reconfigure([])
