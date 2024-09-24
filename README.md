@@ -70,6 +70,10 @@ dotnet user-secrets set GitLab:ClientSecret "..."
 dotnet user-secrets set JwtSecret "..."
 ```
 
+### language autodetection
+
+to enable language autodetection, you need to install the [guesslang-bun](https://github.com/CodeMyst/guesslang-bun) executable. if you're using docker you don't need to do this.
+
 ### client
 
 the client is written with sveltekit, so install node and npm (or yarn).
