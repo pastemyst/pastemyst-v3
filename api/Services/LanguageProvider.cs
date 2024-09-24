@@ -27,7 +27,7 @@ public class LanguageProvider : ILanguageProvider, IHostedService
 
     public List<string> PopularLanguageNames =>
     [
-        "Text", "C", "C#", "C++", "CSS", "D", "Dart", "Go", "Haskell", "HTML", "Java",
+        "Autodetect", "Text", "C", "C#", "C++", "CSS", "D", "Dart", "Go", "Haskell", "HTML", "Java",
         "JavaScript", "JSON", "Kotlin", "Markdown", "Objective-C", "Perl", "PHP", "PowerShell",
         "Python", "Ruby", "Rust", "Scala", "Shell", "Swift", "TypeScript", "Yaml"
     ];
@@ -55,7 +55,7 @@ public class LanguageProvider : ILanguageProvider, IHostedService
             {
                 foundLang = language;
             }
-            
+
             if (language.Aliases is not null &&
                 language.Aliases.Any(name.EqualsIgnoreCase))
             {
@@ -96,5 +96,12 @@ public class LanguageProvider : ILanguageProvider, IHostedService
 
         Languages = res.Values.ToList();
         Languages.Sort((a, b) => string.CompareOrdinal(a.Name, b.Name));
+
+        Languages.Insert(0, new Language
+        {
+            Name = "Autodetect",
+            Aliases = new List<string> { "autodetect" },
+            Extensions = new List<string> {}
+        });
     }
 }
