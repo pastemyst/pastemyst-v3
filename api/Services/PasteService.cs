@@ -1,4 +1,3 @@
-using System.Diagnostics;
 using System.IO.Compression;
 using System.Net;
 using System.Text;
@@ -99,7 +98,7 @@ public class PasteService(
 
             if (langName == "Autodetect")
             {
-                langName = (await AutodetectLanguage(pasty.Content)).Name;
+                langName = (await languageProvider.AutodetectLanguageAsync(pasty.Content)).Name;
             }
 
             paste.Pasties.Add(new Pasty
@@ -378,31 +377,5 @@ public class PasteService(
         memoryStream.Position = 0;
 
         return (memoryStream.ToArray(), paste.Title);
-    }
-
-    private async Task<Language> AutodetectLanguage(string content)
-    {
-        var tempFile = Path.GetTempFileName();
-        await File.WriteAllTextAsync(tempFile, content);
-
-        var process = new Process
-        {
-            StartInfo = new ProcessStartInfo
-            {
-                FileName = "guesslang-bun",
-                Arguments = tempFile,
-                RedirectStandardOutput = true,
-                UseShellExecute = false,
-                CreateNoWindow = true
-            }
-        };
-
-        process.Start();
-
-        var languageName = (await process.StandardOutput.ReadToEndAsync()).Trim();
-
-        Console.WriteLine(languageName);
-
-        return languageProvider.FindByName(languageName);
     }
 }
