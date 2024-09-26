@@ -42,7 +42,7 @@ export const autodetectLanguage = async (content: string): Promise<Language> => 
     const res = await fetch(`${env.PUBLIC_API_BASE}/langs/autodetect`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(content),
+        body: JSON.stringify(content)
     });
 
     if (res.ok) return await res.json();

@@ -94,7 +94,7 @@
                 autodetectLanguage(content).then((lang) => {
                     setSelectedLang(lang);
                 });
-            },
+            }
         });
 
         editorView = new EditorView({
