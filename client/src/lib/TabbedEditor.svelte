@@ -4,7 +4,7 @@
     import Tab from "./Tab.svelte";
     import Editor from "./Editor.svelte";
     import TabData from "./TabData";
-    import { getLangs } from "./api/lang";
+    import { getLangs, type Language } from "./api/lang";
     import { beforeNavigate } from "$app/navigation";
     import { creatingPasteStore } from "./stores";
     import type { Settings } from "./api/settings";
@@ -107,7 +107,7 @@
         tabs[idx].editor.focus();
     };
 
-    const addTab = async (title?: string) => {
+    const addTab = async (title?: string, content?: string, language?: Language) => {
         const name = title || "untitled";
 
         let newtab: TabData = new TabData(
@@ -117,7 +117,20 @@
                 target: editorTarget,
                 props: {
                     settings,
-                    onMounted: () => copyPreviousTabSettings(newtab.editor)
+                    onMounted: () => {
+                        copyPreviousTabSettings(newtab.editor);
+
+                        if (content && language) {
+                            newtab.editor.setContent(content);
+                            newtab.editor.setSelectedLang(language);
+
+                            // if the first tab is empty, remove it
+                            const firstTab = tabs[0];
+                            if (!firstTab.editor.getContent() || firstTab.title === "untitled") {
+                                tabs = tabs.slice(1);
+                            }
+                        }
+                    }
                 }
             })
         );
@@ -188,16 +201,7 @@
                     lang.extensions && lang.extensions.includes(name.slice(name.lastIndexOf(".")))
             );
 
-            await addTab(name);
-
-            // Doesn't update if set on tab creation
-            if (content) tabs[tabs.length - 1].editor.setContent(content);
-            if (lang) tabs[tabs.length - 1].editor.setSelectedLang(lang);
-
-            const firstTab = tabs[0];
-            if (!firstTab.editor.getContent() || firstTab.title === "untitled") {
-                tabs = tabs.slice(1);
-            }
+            await addTab(name, content, lang);
         });
     };
 
