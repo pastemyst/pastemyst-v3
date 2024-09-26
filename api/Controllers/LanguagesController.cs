@@ -25,4 +25,10 @@ public class LanguagesController(ILanguageProvider languageProvider) : Controlle
     {
         return languageProvider.FindByName(name);
     }
+
+    [HttpPost("autodetect")]
+    public Task<Language> AutodetectLanguage([FromBody] string content)
+    {
+        return languageProvider.AutodetectLanguageAsync(content);
+    }
 }

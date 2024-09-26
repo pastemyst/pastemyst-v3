@@ -6,7 +6,7 @@
     import { mystCMTheme } from "./codemirror-myst-theme";
     import { indentUnit } from "@codemirror/language";
     import { Compartment, EditorState } from "@codemirror/state";
-    import { getLangs, getPopularLangNames, type Language } from "./api/lang";
+    import { getLangs, getPopularLangNames, autodetectLanguage, type Language } from "./api/lang";
     import { tooltip } from "$lib/tooltips";
     import { Close, setTempCommands, type Command } from "./command";
     import { cmdPalOpen, cmdPalTitle } from "./stores";
@@ -83,6 +83,20 @@
             cursorCol = update.state.selection.main.head - line.from;
         });
 
+        const autodetectLanguageOnPasteExtension = EditorView.domEventHandlers({
+            paste(event) {
+                if (selectedLanguage.name !== "Autodetect") return;
+
+                const content = event.clipboardData?.getData("text/plain");
+
+                if (!content) return;
+
+                autodetectLanguage(content).then((lang) => {
+                    setSelectedLang(lang);
+                });
+            },
+        });
+
         editorView = new EditorView({
             state: EditorState.create({
                 extensions: [
@@ -95,7 +109,8 @@
                         indentUnit.of(selectedIndentUnit === "spaces" ? " " : "\t")
                     ),
                     indentWidthCompartment.of(EditorState.tabSize.of(selectedIndentWidth)),
-                    settings.textWrap ? [EditorView.lineWrapping] : []
+                    settings.textWrap ? [EditorView.lineWrapping] : [],
+                    autodetectLanguageOnPasteExtension
                 ]
             }),
             parent: editorElement

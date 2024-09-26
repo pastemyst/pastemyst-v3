@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using pastemyst.Exceptions;
 using pastemyst.Extensions;
 using pastemyst.Models;
@@ -16,6 +17,8 @@ public interface ILanguageProvider
     /// Tries to find a language based on the name (it will search names, aliases and extensions).
     /// </summary>
     public Language FindByName(string name);
+
+    public Task<Language> AutodetectLanguageAsync(string content);
 }
 
 public class LanguageProvider : ILanguageProvider, IHostedService
@@ -66,6 +69,30 @@ public class LanguageProvider : ILanguageProvider, IHostedService
         if (foundLang is null) throw new LanguageNotFoundException();
 
         return foundLang;
+    }
+
+    public async Task<Language> AutodetectLanguageAsync(string content)
+    {
+        var tempFile = Path.GetTempFileName();
+        await File.WriteAllTextAsync(tempFile, content);
+
+        var process = new Process
+        {
+            StartInfo = new ProcessStartInfo
+            {
+                FileName = "guesslang-bun",
+                Arguments = tempFile,
+                RedirectStandardOutput = true,
+                UseShellExecute = false,
+                CreateNoWindow = true
+            }
+        };
+
+        process.Start();
+
+        var languageName = (await process.StandardOutput.ReadToEndAsync()).Trim();
+
+        return FindByName(languageName);
     }
 
     public async Task StartAsync(CancellationToken cancellationToken)
