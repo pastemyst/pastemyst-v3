@@ -14,6 +14,8 @@ public interface IMongoService
     public IMongoCollection<ActionLog> ActionLogs { get; }
     public IMongoCollection<SessionSettings> SessionSettings { get; }
     public GridFSBucket Images { get; }
+
+    public void DeleteTestDatabase();
 }
 
 public class MongoService : IMongoService
@@ -28,6 +30,8 @@ public class MongoService : IMongoService
 
     public GridFSBucket Images { get; private set; }
 
+    private MongoClient mongoClient;
+
     public MongoService(IConfiguration configuration)
     {
         BsonClassMap.RegisterClassMap<Paste>(map =>
@@ -40,9 +44,13 @@ public class MongoService : IMongoService
         var camelCaseConvention = new ConventionPack { new CamelCaseElementNameConvention() };
         ConventionRegistry.Register("CamelCase", camelCaseConvention, type => true);
 
-        var mongoClient = new MongoClient(configuration.GetConnectionString("DefaultDb"));
+        mongoClient = new MongoClient(configuration.GetConnectionString("DefaultDb"));
 
-        var mongoDb = mongoClient.GetDatabase("pastemyst");
+        var databaseName = "pastemyst";
+        if (configuration["ASPNETCORE_ENVIRONMENT"] == "Test")
+            databaseName += "_test";
+
+        var mongoDb = mongoClient.GetDatabase(databaseName);
 
         Pastes = mongoDb.GetCollection<Paste>("pastes");
         Users = mongoDb.GetCollection<User>("users");
@@ -61,5 +69,10 @@ public class MongoService : IMongoService
         {
             Unique = true
         }));
+    }
+
+    public void DeleteTestDatabase()
+    {
+        mongoClient.DropDatabase("pastemyst_test");
     }
 }

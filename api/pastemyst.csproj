@@ -17,6 +17,7 @@
           <PrivateAssets>all</PrivateAssets>
           <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
+        <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.11.1" />
         <PackageReference Include="MongoDB.Driver" Version="2.25.0" />
         <PackageReference Include="MongoDB.Driver.GridFS" Version="2.25.0" />
         <PackageReference Include="Octokit" Version="11.0.1" />
@@ -24,6 +25,11 @@
         <PackageReference Include="Quartz.AspNetCore" Version="3.6.2" />
         <PackageReference Include="Semver" Version="2.3.0" />
         <PackageReference Include="Swashbuckle.AspNetCore" Version="6.5.0" />
+        <PackageReference Include="xunit" Version="2.9.2" />
+        <PackageReference Include="xunit.runner.visualstudio" Version="2.8.2">
+          <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+          <PrivateAssets>all</PrivateAssets>
+        </PackageReference>
         <PackageReference Include="YamlDotNet" Version="13.7.1" />
     </ItemGroup>
 
