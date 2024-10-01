@@ -13,11 +13,22 @@ jobs:
 
     steps:
     - uses: actions/checkout@v3
+
+    - name: Start MongoDB
+      uses: supercharge/mongodb-github-action@1.11.0
+      with:
+        mongodb-version: '8.0'
+
     - name: Setup .NET
       uses: actions/setup-dotnet@v3
       with:
         dotnet-version: 8.0.x
+
     - name: Restore dependencies
       run: dotnet restore api
+
     - name: Build
       run: dotnet build --no-restore api
+
+    - name: Test
+      run: dotnet test --no-build api
