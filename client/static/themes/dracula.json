@@ -1,0 +1,330 @@
+{
+    "name": "Dracula",
+    "settings": [
+        {
+            "settings": {
+                "background": "#282a36",
+                "caret": "#f8f8f0",
+                "foreground": "#f8f8f2",
+                "invisibles": "#3B3A32",
+                "lineHighlight": "#44475a",
+                "selection": "#44475a",
+                "findHighlight": "#effb7b",
+                "findHighlightForeground": "#000000",
+                "selectionBorder": "#222218",
+                "activeGuide": "#9D550FB0",
+                "bracketsForeground": "#F8F8F2A5",
+                "bracketsOptions": "underline",
+                "bracketContentsForeground": "#F8F8F2A5",
+                "bracketContentsOptions": "underline",
+                "tagsOptions": "stippled_underline"
+            }
+        },
+        {
+            "name": "Comment",
+            "scope": "comment",
+            "settings": {
+                "foreground": "#6272a4",
+                "fontStyle": ""
+            }
+        },
+        {
+            "name": "String",
+            "scope": "string",
+            "settings": {
+                "foreground": "#f1fa8c"
+            }
+        },
+        {
+            "name": "Number",
+            "scope": "constant.numeric",
+            "settings": {
+                "foreground": "#bd93f9"
+            }
+        },
+        {
+            "name": "Built-in constant",
+            "scope": "constant.language",
+            "settings": {
+                "foreground": "#bd93f9"
+            }
+        },
+        {
+            "name": "User-defined constant",
+            "scope": ["constant.character", "constant.other"],
+            "settings": {
+                "foreground": "#bd93f9"
+            }
+        },
+        {
+            "name": "Variable",
+            "scope": "variable",
+            "settings": {
+                "fontStyle": ""
+            }
+        },
+        {
+            "name": "Ruby's @variable",
+            "scope": "variable.other.readwrite.instance",
+            "settings": {
+                "fontStyle": "",
+                "foreground": "#ffb86c"
+            }
+        },
+        {
+            "name": "String interpolation",
+            "scope": [
+                "constant.character.escaped",
+                "constant.character.escape",
+                "string source",
+                "string source.ruby"
+            ],
+            "settings": {
+                "fontStyle": "",
+                "foreground": "#ff79c6"
+            }
+        },
+        {
+            "name": "Keyword",
+            "scope": "keyword",
+            "settings": {
+                "foreground": "#ff79c6"
+            }
+        },
+        {
+            "name": "Storage",
+            "scope": "storage",
+            "settings": {
+                "fontStyle": "",
+                "foreground": "#ff79c6"
+            }
+        },
+        {
+            "name": "Storage type",
+            "scope": "storage.type",
+            "settings": {
+                "fontStyle": "italic",
+                "foreground": "#8be9fd"
+            }
+        },
+        {
+            "name": "Class name",
+            "scope": "entity.name.class",
+            "settings": {
+                "fontStyle": "underline",
+                "foreground": "#50fa7b"
+            }
+        },
+        {
+            "name": "Inherited class",
+            "scope": "entity.other.inherited-class",
+            "settings": {
+                "fontStyle": "italic underline",
+                "foreground": "#50fa7b"
+            }
+        },
+        {
+            "name": "Function name",
+            "scope": "entity.name.function",
+            "settings": {
+                "fontStyle": "",
+                "foreground": "#50fa7b"
+            }
+        },
+        {
+            "name": "Function argument",
+            "scope": "variable.parameter",
+            "settings": {
+                "fontStyle": "italic",
+                "foreground": "#ffb86c"
+            }
+        },
+        {
+            "name": "Tag name",
+            "scope": "entity.name.tag",
+            "settings": {
+                "fontStyle": "",
+                "foreground": "#ff79c6"
+            }
+        },
+        {
+            "name": "Tag attribute",
+            "scope": "entity.other.attribute-name",
+            "settings": {
+                "fontStyle": "",
+                "foreground": "#50fa7b"
+            }
+        },
+        {
+            "name": "Library function",
+            "scope": "support.function",
+            "settings": {
+                "fontStyle": "",
+                "foreground": "#8be9fd"
+            }
+        },
+        {
+            "name": "Library constant",
+            "scope": "support.constant",
+            "settings": {
+                "fontStyle": "",
+                "foreground": "#6be5fd"
+            }
+        },
+        {
+            "name": "Library class/type",
+            "scope": ["support.type", "support.class"],
+            "settings": {
+                "fontStyle": " italic",
+                "foreground": "#66d9ef"
+            }
+        },
+        {
+            "name": "Library variable",
+            "scope": "support.other.variable",
+            "settings": {
+                "fontStyle": ""
+            }
+        },
+        {
+            "name": "Invalid",
+            "scope": "invalid",
+            "settings": {
+                "background": "#ff79c6",
+                "fontStyle": "",
+                "foreground": "#F8F8F0"
+            }
+        },
+        {
+            "name": "Invalid deprecated",
+            "scope": "invalid.deprecated",
+            "settings": {
+                "background": "#bd93f9",
+                "foreground": "#F8F8F0"
+            }
+        },
+        {
+            "name": "JSON String",
+            "scope": "meta.structure.dictionary.json string.quoted.double.json",
+            "settings": {
+                "foreground": "#CFCFC2"
+            }
+        },
+        {
+            "name": "diff.header",
+            "scope": ["meta.diff", "meta.diff.header"],
+            "settings": {
+                "foreground": "#6272a4"
+            }
+        },
+        {
+            "name": "diff.deleted",
+            "scope": "markup.deleted",
+            "settings": {
+                "foreground": "#ff79c6"
+            }
+        },
+        {
+            "name": "diff.inserted",
+            "scope": "markup.inserted",
+            "settings": {
+                "foreground": "#50fa7b"
+            }
+        },
+        {
+            "name": "diff.changed",
+            "scope": "markup.changed",
+            "settings": {
+                "foreground": "#E6DB74"
+            }
+        },
+        {
+            "scope": "constant.numeric.line-number.find-in-files - match",
+            "settings": {
+                "foreground": "#bd93f9"
+            }
+        },
+        {
+            "scope": "entity.name.filename",
+            "settings": {
+                "foreground": "#E6DB74"
+            }
+        },
+        {
+            "scope": "message.error",
+            "settings": {
+                "foreground": "#F83333"
+            }
+        },
+        {
+            "name": "JSON Punctuation",
+            "scope": [
+                "punctuation.definition.string.begin.json - meta.structure.dictionary.value.json",
+                "punctuation.definition.string.end.json - meta.structure.dictionary.value.json"
+            ],
+            "settings": {
+                "foreground": "#EEEEEE"
+            }
+        },
+        {
+            "name": "JSON Structure",
+            "scope": "meta.structure.dictionary.json string.quoted.double.json",
+            "settings": {
+                "foreground": "#8be9fd"
+            }
+        },
+        {
+            "name": "JSON String",
+            "scope": "meta.structure.dictionary.value.json string.quoted.double.json",
+            "settings": {
+                "foreground": "#f1fa8c"
+            }
+        },
+        {
+            "name": "JSON: 6 deep",
+            "scope": "meta meta meta meta meta meta meta.structure.dictionary.value string",
+            "settings": {
+                "foreground": "#50fa7b"
+            }
+        },
+        {
+            "name": "JSON: 5 deep",
+            "scope": "meta meta meta meta meta meta.structure.dictionary.value string",
+            "settings": {
+                "foreground": "#ffb86c"
+            }
+        },
+        {
+            "name": "JSON: 4 deep",
+            "scope": "meta meta meta meta meta.structure.dictionary.value string",
+            "settings": {
+                "foreground": "#ff79c6"
+            }
+        },
+        {
+            "name": "JSON: 3 deep",
+            "scope": "meta meta meta meta.structure.dictionary.value string",
+            "settings": {
+                "foreground": "#bd93f9"
+            }
+        },
+        {
+            "name": "JSON: 2 deep",
+            "scope": "meta meta meta.structure.dictionary.value string",
+            "settings": {
+                "foreground": "#50fa7b"
+            }
+        },
+        {
+            "name": "JSON:  1 deep",
+            "scope": "meta meta.structure.dictionary.value string",
+            "settings": {
+                "foreground": "#ffb86c"
+            }
+        }
+    ],
+    "uuid": "83091B89-765E-4F0D-9275-0EC6CB084126",
+    "colorSpaceName": "sRGB",
+    "semanticClass": "theme.dark.dracula",
+    "author": "Zeno Rocha"
+}

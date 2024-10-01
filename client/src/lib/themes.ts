@@ -1,6 +1,12 @@
+import type { Extension } from "@codemirror/state";
+import { dracula } from "./codemirror-themes/dracula";
+import { myst } from "./codemirror-themes/myst";
+
 export interface Theme {
     name: string;
     colors: ThemeColors;
+    codemirrorTheme: Extension;
+    shikiTheme: string;
 }
 
 export interface ThemeColors {
@@ -33,21 +39,25 @@ export const themes: Theme[] = [
             danger: "#ff4c4c",
             success: "#2ec933",
             pink: "#cb6dce"
-        }
+        },
+        codemirrorTheme: myst,
+        shikiTheme: "tomorrowmyst"
     },
     {
-        name: "test",
+        name: "dracula",
         colors: {
-            bg: "#000000",
-            bg1: "#111111",
-            bg2: "#222222",
-            bg3: "#333333",
-            fg: "#ffffff",
-            primary: "blue",
-            secondary: "red",
-            danger: "red",
-            success: "green",
-            pink: "pink"
-        }
+            bg: "#16171e",
+            bg1: "#282a36",
+            bg2: "#44475a",
+            bg3: "#777777",
+            fg: "#F8F8F2",
+            primary: "#FFB86C",
+            secondary: "#BD93F9",
+            danger: "#FF5555",
+            success: "#50FA7B",
+            pink: "#FF79C6"
+        },
+        codemirrorTheme: dracula,
+        shikiTheme: "dracula"
     }
 ];

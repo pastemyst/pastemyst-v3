@@ -28,6 +28,6 @@ export default [
         }
     },
     {
-        ignores: ["build/", ".svelte-kit/", "dist/", "src/lib/codemirror-myst-theme.ts"]
+        ignores: ["build/", ".svelte-kit/", "dist/"]
     }
 ];
