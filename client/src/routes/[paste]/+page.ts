@@ -41,7 +41,8 @@ export const load: PageLoad = async ({ params, fetch, parent }) => {
             body: JSON.stringify({
                 content: pasty.content,
                 language: pasty.language,
-                wrap: settings.textWrap
+                wrap: settings.textWrap,
+                theme: settings.theme
             })
         });
 

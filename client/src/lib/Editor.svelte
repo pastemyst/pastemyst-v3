@@ -3,7 +3,6 @@
     import { basicSetup } from "codemirror";
     import { EditorView, keymap } from "@codemirror/view";
     import { indentWithTab } from "@codemirror/commands";
-    import { mystCMTheme } from "./codemirror-myst-theme";
     import { indentUnit } from "@codemirror/language";
     import { Compartment, EditorState } from "@codemirror/state";
     import { getLangs, getPopularLangNames, autodetectLanguage, type Language } from "./api/lang";
@@ -15,6 +14,7 @@
     import { isLanguageMarkdown } from "./utils/markdown";
     import type { IndentUnit } from "./indentation";
     import type { Settings } from "./api/settings";
+    import { themes } from "./themes";
 
     export let hidden = false;
     export let settings: Settings;
@@ -97,12 +97,22 @@
             }
         });
 
+        const codemirrorTheme = (themes.find((t) => t.name === settings.theme) || themes[0])
+            .codemirrorTheme;
+
+        const baseTheme = EditorView.theme({
+            "*": {
+                fontFamily: '"Ubuntu Mono", monospace'
+            }
+        });
+
         editorView = new EditorView({
             state: EditorState.create({
                 extensions: [
+                    baseTheme,
                     basicSetup,
                     keymap.of([indentWithTab]),
-                    mystCMTheme,
+                    codemirrorTheme,
                     editorUpdateListener,
                     langCompartment.of([]),
                     indentUnitCompartment.of(

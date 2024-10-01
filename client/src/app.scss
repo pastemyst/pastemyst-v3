@@ -16,20 +16,20 @@
     --color-pink: #cb6dce;
 }
 
-#theme-context[data-theme="test"] {
-    --color-bg: #000000;
-    --color-bg1: #111111;
-    --color-bg2: #222222;
-    --color-bg3: #333333;
+#theme-context[data-theme="dracula"] {
+    --color-bg: #16171e;
+    --color-bg1: #282a36;
+    --color-bg2: #44475a;
+    --color-bg3: #777777;
 
-    --color-fg: #ffffff;
+    --color-fg: #f8f8f2;
 
-    --color-primary: blue;
-    --color-secondary: red;
+    --color-primary: #ffb86c;
+    --color-secondary: #bd93f9;
 
-    --color-danger: red;
-    --color-success: green;
-    --color-pink: pink;
+    --color-danger: #ff5555;
+    --color-success: #50fa7b;
+    --color-pink: #ff79c6;
 }
 
 #theme-context,
