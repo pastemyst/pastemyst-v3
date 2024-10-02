@@ -29,7 +29,7 @@ public class PasteTests : IClassFixture<DatabaseFixture>
     }
 
     [Fact]
-    public async Task Test_ShouldCreate_WhenSimplePaste_WhileLoggedOut()
+    public async Task TestCreate_ShouldCreate_WhenSimplePaste_WhileLoggedOut()
     {
         var createInfo = new PasteCreateInfo
         {
@@ -48,7 +48,7 @@ public class PasteTests : IClassFixture<DatabaseFixture>
     }
 
     [Fact]
-    public async Task Test_ShouldThrow_WhenPinnedPaste_WhileLoggedOut()
+    public async Task TestCreate_ShouldThrow_WhenPinnedPaste_WhileLoggedOut()
     {
         var createInfo = new PasteCreateInfo
         {
@@ -66,7 +66,7 @@ public class PasteTests : IClassFixture<DatabaseFixture>
     }
 
     [Fact]
-    public async Task Test_ShouldNotThrow_WhenPinnedPaste_WhileLoggedIn()
+    public async Task TestCreate_ShouldNotThrow_WhenPinnedPaste_WhileLoggedIn()
     {
         var createInfo = new PasteCreateInfo
         {
@@ -90,7 +90,7 @@ public class PasteTests : IClassFixture<DatabaseFixture>
     }
 
     [Fact]
-    public async Task Test_ShouldThrow_WhenPinnedAndPrivatePaste_WhileLoggedIn()
+    public async Task TestCreate_ShouldThrow_WhenPinnedAndPrivatePaste_WhileLoggedIn()
     {
         var createInfo = new PasteCreateInfo
         {
@@ -113,7 +113,7 @@ public class PasteTests : IClassFixture<DatabaseFixture>
     }
 
     [Fact]
-    public async Task Test_ShouldThrow_WhenPinnedAndAnonymousPaste_WhileLoggedIn()
+    public async Task TestCreate_ShouldThrow_WhenPinnedAndAnonymousPaste_WhileLoggedIn()
     {
         var createInfo = new PasteCreateInfo
         {
@@ -136,7 +136,7 @@ public class PasteTests : IClassFixture<DatabaseFixture>
     }
 
     [Fact]
-    public async Task Test_ShouldThrow_WhenPrivatePaste_WhileLoggedOut()
+    public async Task TestCreate_ShouldThrow_WhenPrivatePaste_WhileLoggedOut()
     {
         var createInfo = new PasteCreateInfo
         {
@@ -154,7 +154,7 @@ public class PasteTests : IClassFixture<DatabaseFixture>
     }
 
     [Fact]
-    public async Task Test_ShouldThrow_WhenPrivateAndAnonymousPaste_WhileLoggedIn()
+    public async Task TestCreate_ShouldThrow_WhenPrivateAndAnonymousPaste_WhileLoggedIn()
     {
         var createInfo = new PasteCreateInfo
         {
@@ -177,7 +177,7 @@ public class PasteTests : IClassFixture<DatabaseFixture>
     }
 
     [Fact]
-    public async Task Test_ShouldThrow_WhenTaggedPaste_WhileLoggedOut()
+    public async Task TestCreate_ShouldThrow_WhenTaggedPaste_WhileLoggedOut()
     {
         var createInfo = new PasteCreateInfo
         {
@@ -195,7 +195,7 @@ public class PasteTests : IClassFixture<DatabaseFixture>
     }
 
     [Fact]
-    public async Task Test_ShouldThrow_WhenTaggedAndAnonymousPaste_WhileLoggedIn()
+    public async Task TestCreate_ShouldThrow_WhenTaggedAndAnonymousPaste_WhileLoggedIn()
     {
         var createInfo = new PasteCreateInfo
         {
@@ -218,7 +218,7 @@ public class PasteTests : IClassFixture<DatabaseFixture>
     }
 
     [Fact]
-    public async Task Test_ShouldSetEmptyOwner_WhenAnonymousPaste_WhileLoggedIn()
+    public async Task TestCreate_ShouldSetEmptyOwner_WhenAnonymousPaste_WhileLoggedIn()
     {
         var createInfo = new PasteCreateInfo
         {
@@ -242,7 +242,7 @@ public class PasteTests : IClassFixture<DatabaseFixture>
     }
 
     [Fact]
-    public async Task Test_ShouldCreatePrivatePaste_WhenPrivatePaste_WhileLoggedIn()
+    public async Task TestCreate_ShouldCreatePrivatePaste_WhenPrivatePaste_WhileLoggedIn()
     {
         var createInfo = new PasteCreateInfo
         {
@@ -266,7 +266,7 @@ public class PasteTests : IClassFixture<DatabaseFixture>
     }
 
     [Fact]
-    public async Task Test_ShouldSetDeletesAt_WhenSetExpiredInPaste()
+    public async Task TestCreate_ShouldSetDeletesAt_WhenSetExpiredInPaste()
     {
         var createInfo = new PasteCreateInfo
         {
@@ -286,7 +286,7 @@ public class PasteTests : IClassFixture<DatabaseFixture>
     }
 
     [Fact]
-    public async Task Test_ShouldSetLanguageToText_WhenLanguageNull()
+    public async Task TestCreate_ShouldSetLanguageToText_WhenLanguageNull()
     {
         var createInfo = new PasteCreateInfo
         {
@@ -305,7 +305,7 @@ public class PasteTests : IClassFixture<DatabaseFixture>
     }
 
     [Fact]
-    public async Task Test_ShouldSetProperLanguage_WhenProvidedLanguageExtension()
+    public async Task TestCreate_ShouldSetProperLanguage_WhenProvidedLanguageExtension()
     {
         var createInfo = new PasteCreateInfo
         {
@@ -325,13 +325,13 @@ public class PasteTests : IClassFixture<DatabaseFixture>
     }
 
     [Fact]
-    public async Task Test_ShouldThrow_WhenPasteDoesntExist()
+    public async Task TestGet_ShouldThrow_WhenPasteDoesntExist()
     {
         await Assert.ThrowsAsync<HttpException>(async () => await pasteService.GetAsync("1"));
     }
 
     [Fact]
-    public async Task Test_ShouldThrowAndDeletePaste_WhenPasteIsExpired()
+    public async Task TestGet_ShouldThrowAndDeletePaste_WhenPasteIsExpired()
     {
         var createInfo = new PasteCreateInfo
         {
@@ -358,7 +358,7 @@ public class PasteTests : IClassFixture<DatabaseFixture>
     }
 
     [Fact]
-    public async Task Test_ShouldThrow_WhenPasteIsPrivateAndLoggedOut()
+    public async Task TestGet_ShouldThrow_WhenPasteIsPrivateAndLoggedOut()
     {
         var createInfo = new PasteCreateInfo
         {
@@ -382,7 +382,7 @@ public class PasteTests : IClassFixture<DatabaseFixture>
     }
 
     [Fact]
-    public async Task Test_ShouldThrow_WhenPasteIsPrivateAndNotOwner()
+    public async Task TestGet_ShouldThrow_WhenPasteIsPrivateAndNotOwner()
     {
         var createInfo = new PasteCreateInfo
         {
@@ -408,7 +408,7 @@ public class PasteTests : IClassFixture<DatabaseFixture>
     }
 
     [Fact]
-    public async Task Test_ShouldReturnEmptyTags_WhenNotOwner()
+    public async Task TestGet_ShouldReturnEmptyTags_WhenNotOwner()
     {
         var createInfo = new PasteCreateInfo
         {
