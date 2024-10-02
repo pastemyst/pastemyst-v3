@@ -1,3 +1,4 @@
+using System.Net;
 using MongoDB.Driver;
 using pastemyst.Exceptions;
 using pastemyst.Models;
@@ -435,5 +436,611 @@ public class PasteTests : IClassFixture<DatabaseFixture>
         fetchedPaste = await pasteService.GetAsync(paste.Id);
 
         Assert.Empty(fetchedPaste.Tags);
+    }
+
+    [Fact]
+    public async Task TestDelete_ShouldThrow_WhenLoggedOut()
+    {
+        var createInfo = new PasteCreateInfo
+        {
+            Pasties = new()
+            {
+                new()
+                {
+                    Content = "Hello, World!"
+                }
+            },
+        };
+
+        var paste = await pasteService.CreateAsync(createInfo);
+
+        await Assert.ThrowsAsync<HttpException>(async () => await pasteService.DeleteAsync(paste.Id));
+    }
+
+    [Fact]
+    public async Task TestDelete_ShouldThrow_WhenNotOwnedPaste()
+    {
+        var createInfo = new PasteCreateInfo
+        {
+            Pasties = new()
+            {
+                new()
+                {
+                    Content = "Hello, World!"
+                }
+            },
+        };
+
+        var paste = await pasteService.CreateAsync(createInfo);
+
+        userContext.LoginUser(new User { Id = "1" });
+
+        await Assert.ThrowsAsync<HttpException>(async () => await pasteService.DeleteAsync(paste.Id));
+
+        userContext.LogoutUser();
+    }
+
+    [Fact]
+    public async Task TestDelete_ShouldThrow_WhenNotOwner()
+    {
+        var createInfo = new PasteCreateInfo
+        {
+            Pasties = new()
+            {
+                new()
+                {
+                    Content = "Hello, World!"
+                }
+            },
+        };
+
+        userContext.LoginUser(new User { Id = "1" });
+
+        var paste = await pasteService.CreateAsync(createInfo);
+
+        userContext.LoginUser(new User { Id = "2" });
+
+        await Assert.ThrowsAsync<HttpException>(async () => await pasteService.DeleteAsync(paste.Id));
+
+        userContext.LogoutUser();
+    }
+
+    [Fact]
+    public async Task TestDelete_ShouldThrowNotFound_WhenNotOwnerAndPrivate()
+    {
+        var createInfo = new PasteCreateInfo
+        {
+            Private = true,
+            Pasties = new()
+            {
+                new()
+                {
+                    Content = "Hello, World!"
+                }
+            },
+        };
+
+        userContext.LoginUser(new User { Id = "1" });
+
+        var paste = await pasteService.CreateAsync(createInfo);
+
+        userContext.LoginUser(new User { Id = "2" });
+
+        var exception = await Assert.ThrowsAsync<HttpException>(async () => await pasteService.DeleteAsync(paste.Id));
+
+        Assert.Equal(HttpStatusCode.NotFound, exception.Status);
+
+        userContext.LogoutUser();
+    }
+
+    [Fact]
+    public async Task TestDelete_ShouldDelete_WhenOwner()
+    {
+        var createInfo = new PasteCreateInfo
+        {
+            Pasties = new()
+            {
+                new()
+                {
+                    Content = "Hello, World!"
+                }
+            },
+        };
+
+        userContext.LoginUser(new User { Id = "1" });
+
+        var paste = await pasteService.CreateAsync(createInfo);
+
+        await pasteService.DeleteAsync(paste.Id);
+
+        Assert.False(await pasteService.ExistsByIdAsync(paste.Id));
+
+        userContext.LogoutUser();
+    }
+
+    [Fact]
+    public async Task TestToggleStar_ShouldThrow_WhenLoggedOut()
+    {
+        var createInfo = new PasteCreateInfo
+        {
+            Pasties = new()
+            {
+                new()
+                {
+                    Content = "Hello, World!"
+                }
+            },
+        };
+
+        var paste = await pasteService.CreateAsync(createInfo);
+
+        await Assert.ThrowsAsync<HttpException>(async () => await pasteService.ToggleStarAsync(paste.Id));
+    }
+
+    [Fact]
+    public async Task TestToggleStar_ShouldThrow_WhenPrivateAndNotOwner()
+    {
+        var createInfo = new PasteCreateInfo
+        {
+            Private = true,
+            Pasties = new()
+            {
+                new()
+                {
+                    Content = "Hello, World!"
+                }
+            },
+        };
+
+        userContext.LoginUser(new User { Id = "1" });
+
+        var paste = await pasteService.CreateAsync(createInfo);
+
+        userContext.LoginUser(new User { Id = "2" });
+
+        await Assert.ThrowsAsync<HttpException>(async () => await pasteService.ToggleStarAsync(paste.Id));
+
+        userContext.LogoutUser();
+    }
+
+    [Fact]
+    public async Task TestToggleStar_ShouldStar_WhenNotStarred()
+    {
+        var createInfo = new PasteCreateInfo
+        {
+            Pasties = new()
+            {
+                new()
+                {
+                    Content = "Hello, World!"
+                }
+            },
+        };
+
+        var paste = await pasteService.CreateAsync(createInfo);
+
+        userContext.LoginUser(new User { Id = "1" });
+        await pasteService.ToggleStarAsync(paste.Id);
+
+        var fetchedPaste = await pasteService.GetAsync(paste.Id);
+
+        Assert.Contains(userContext.Self.Id, fetchedPaste.Stars);
+
+        userContext.LogoutUser();
+    }
+
+    [Fact]
+    public async Task TestToggleStar_ShouldUnstar_WhenStarred()
+    {
+        var createInfo = new PasteCreateInfo
+        {
+            Pasties = new()
+            {
+                new()
+                {
+                    Content = "Hello, World!"
+                }
+            },
+        };
+
+        var paste = await pasteService.CreateAsync(createInfo);
+
+        userContext.LoginUser(new User { Id = "1" });
+        await pasteService.ToggleStarAsync(paste.Id);
+        await pasteService.ToggleStarAsync(paste.Id);
+
+        var fetchedPaste = await pasteService.GetAsync(paste.Id);
+
+        Assert.DoesNotContain(userContext.Self.Id, fetchedPaste.Stars);
+
+        userContext.LogoutUser();
+    }
+
+    [Fact]
+    public async Task TestIsStarred_ShouldThrow_WhenLoggedOut()
+    {
+        var createInfo = new PasteCreateInfo
+        {
+            Pasties = new()
+            {
+                new()
+                {
+                    Content = "Hello, World!"
+                }
+            },
+        };
+
+        var paste = await pasteService.CreateAsync(createInfo);
+
+        await Assert.ThrowsAsync<HttpException>(async () => await pasteService.IsStarredAsync(paste.Id));
+    }
+
+    [Fact]
+    public async Task TestIsStarred_ShouldThrow_WhenPrivateAndNotOwner()
+    {
+        var createInfo = new PasteCreateInfo
+        {
+            Private = true,
+            Pasties = new()
+            {
+                new()
+                {
+                    Content = "Hello, World!"
+                }
+            },
+        };
+
+        userContext.LoginUser(new User { Id = "1" });
+
+        var paste = await pasteService.CreateAsync(createInfo);
+
+        userContext.LoginUser(new User { Id = "2" });
+
+        await Assert.ThrowsAsync<HttpException>(async () => await pasteService.IsStarredAsync(paste.Id));
+
+        userContext.LogoutUser();
+    }
+
+    [Fact]
+    public async Task TestIsStarred_ShouldReturnFalse_WhenNotStarred()
+    {
+        var createInfo = new PasteCreateInfo
+        {
+            Pasties = new()
+            {
+                new()
+                {
+                    Content = "Hello, World!"
+                }
+            },
+        };
+
+        var paste = await pasteService.CreateAsync(createInfo);
+
+        userContext.LoginUser(new User { Id = "1" });
+
+        var isStarred = await pasteService.IsStarredAsync(paste.Id);
+
+        Assert.False(isStarred);
+
+        userContext.LogoutUser();
+    }
+
+    [Fact]
+    public async Task TestIsStarred_ShouldReturnTrue_WhenStarred()
+    {
+        var createInfo = new PasteCreateInfo
+        {
+            Pasties = new()
+            {
+                new()
+                {
+                    Content = "Hello, World!"
+                }
+            },
+        };
+
+        var paste = await pasteService.CreateAsync(createInfo);
+
+        userContext.LoginUser(new User { Id = "1" });
+        await pasteService.ToggleStarAsync(paste.Id);
+
+        var isStarred = await pasteService.IsStarredAsync(paste.Id);
+
+        Assert.True(isStarred);
+
+        userContext.LogoutUser();
+    }
+
+    [Fact]
+    public async Task TestPin_ShouldThrow_WhenLoggedOut()
+    {
+        var createInfo = new PasteCreateInfo
+        {
+            Pasties = new()
+            {
+                new()
+                {
+                    Content = "Hello, World!"
+                }
+            },
+        };
+
+        var paste = await pasteService.CreateAsync(createInfo);
+
+        await Assert.ThrowsAsync<HttpException>(async () => await pasteService.TogglePinnedAsync(paste.Id));
+    }
+
+    [Fact]
+    public async Task TestPin_ShouldThrow_WhenNotOwnedPaste()
+    {
+        var createInfo = new PasteCreateInfo
+        {
+            Pasties = new()
+            {
+                new()
+                {
+                    Content = "Hello, World!"
+                }
+            },
+        };
+
+        var paste = await pasteService.CreateAsync(createInfo);
+
+        userContext.LoginUser(new User { Id = "1" });
+
+        await Assert.ThrowsAsync<HttpException>(async () => await pasteService.TogglePinnedAsync(paste.Id));
+
+        userContext.LogoutUser();
+    }
+
+    [Fact]
+    public async Task TestPin_ShouldThrow_WhenNotOwner()
+    {
+        var createInfo = new PasteCreateInfo
+        {
+            Pasties = new()
+            {
+                new()
+                {
+                    Content = "Hello, World!"
+                }
+            },
+        };
+
+        userContext.LoginUser(new User { Id = "1" });
+
+        var paste = await pasteService.CreateAsync(createInfo);
+
+        userContext.LoginUser(new User { Id = "2" });
+
+        await Assert.ThrowsAsync<HttpException>(async () => await pasteService.TogglePinnedAsync(paste.Id));
+
+        userContext.LogoutUser();
+    }
+
+    [Fact]
+    public async Task TestPin_ShouldThrow_WhenPrivate()
+    {
+        var createInfo = new PasteCreateInfo
+        {
+            Private = true,
+            Pasties = new()
+            {
+                new()
+                {
+                    Content = "Hello, World!"
+                }
+            },
+        };
+
+        userContext.LoginUser(new User { Id = "1" });
+
+        var paste = await pasteService.CreateAsync(createInfo);
+
+        await Assert.ThrowsAsync<HttpException>(async () => await pasteService.TogglePinnedAsync(paste.Id));
+
+        userContext.LogoutUser();
+    }
+
+    [Fact]
+    public async Task TestPin_ShouldPin_WhenNotPinned()
+    {
+        var createInfo = new PasteCreateInfo
+        {
+            Pasties = new()
+            {
+                new()
+                {
+                    Content = "Hello, World!"
+                }
+            },
+        };
+
+        userContext.LoginUser(new User { Id = "1" });
+
+        var paste = await pasteService.CreateAsync(createInfo);
+
+        await pasteService.TogglePinnedAsync(paste.Id);
+
+        var fetchedPaste = await pasteService.GetAsync(paste.Id);
+
+        Assert.True(fetchedPaste.Pinned);
+
+        userContext.LogoutUser();
+    }
+
+    [Fact]
+    public async Task TestPin_ShouldUnpin_WhenPinned()
+    {
+        var createInfo = new PasteCreateInfo
+        {
+            Pinned = true,
+            Pasties = new()
+            {
+                new()
+                {
+                    Content = "Hello, World!"
+                }
+            },
+        };
+
+        userContext.LoginUser(new User { Id = "1" });
+
+        var paste = await pasteService.CreateAsync(createInfo);
+
+        await pasteService.TogglePinnedAsync(paste.Id);
+
+        var fetchedPaste = await pasteService.GetAsync(paste.Id);
+
+        Assert.False(fetchedPaste.Pinned);
+
+        userContext.LogoutUser();
+    }
+
+    [Fact]
+    public async Task TestPrivate_ShouldThrow_WhenLoggedOut()
+    {
+        var createInfo = new PasteCreateInfo
+        {
+            Pasties = new()
+            {
+                new()
+                {
+                    Content = "Hello, World!"
+                }
+            },
+        };
+
+        var paste = await pasteService.CreateAsync(createInfo);
+
+        await Assert.ThrowsAsync<HttpException>(async () => await pasteService.TogglePrivateAsync(paste.Id));
+    }
+
+    [Fact]
+    public async Task TestPrivate_ShouldThrow_WhenNotOwnedPaste()
+    {
+        var createInfo = new PasteCreateInfo
+        {
+            Pasties = new()
+            {
+                new()
+                {
+                    Content = "Hello, World!"
+                }
+            },
+        };
+
+        var paste = await pasteService.CreateAsync(createInfo);
+
+        userContext.LoginUser(new User { Id = "1" });
+
+        await Assert.ThrowsAsync<HttpException>(async () => await pasteService.TogglePrivateAsync(paste.Id));
+
+        userContext.LogoutUser();
+    }
+
+    [Fact]
+    public async Task TestPrivate_ShouldThrow_WhenNotOwner()
+    {
+        var createInfo = new PasteCreateInfo
+        {
+            Pasties = new()
+            {
+                new()
+                {
+                    Content = "Hello, World!"
+                }
+            },
+        };
+
+        userContext.LoginUser(new User { Id = "1" });
+
+        var paste = await pasteService.CreateAsync(createInfo);
+
+        userContext.LoginUser(new User { Id = "2" });
+
+        await Assert.ThrowsAsync<HttpException>(async () => await pasteService.TogglePrivateAsync(paste.Id));
+
+        userContext.LogoutUser();
+    }
+
+    [Fact]
+    public async Task TestPrivate_ShouldThrow_WhenPinned()
+    {
+        var createInfo = new PasteCreateInfo
+        {
+            Pinned = true,
+            Pasties = new()
+            {
+                new()
+                {
+                    Content = "Hello, World!"
+                }
+            },
+        };
+
+        userContext.LoginUser(new User { Id = "1" });
+
+        var paste = await pasteService.CreateAsync(createInfo);
+
+        await Assert.ThrowsAsync<HttpException>(async () => await pasteService.TogglePrivateAsync(paste.Id));
+
+        userContext.LogoutUser();
+    }
+
+    [Fact]
+    public async Task TestPrivate_ShouldPrivate_WhenNotPrivate()
+    {
+        var createInfo = new PasteCreateInfo
+        {
+            Pasties = new()
+            {
+                new()
+                {
+                    Content = "Hello, World!"
+                }
+            },
+        };
+
+        userContext.LoginUser(new User { Id = "1" });
+
+        var paste = await pasteService.CreateAsync(createInfo);
+
+        await pasteService.TogglePrivateAsync(paste.Id);
+
+        var fetchedPaste = await pasteService.GetAsync(paste.Id);
+
+        Assert.True(fetchedPaste.Private);
+
+        userContext.LogoutUser();
+    }
+
+    [Fact]
+    public async Task TestPrivate_ShouldUnprivate_WhenPrivate()
+    {
+        var createInfo = new PasteCreateInfo
+        {
+            Private = true,
+            Pasties = new()
+            {
+                new()
+                {
+                    Content = "Hello, World!"
+                }
+            },
+        };
+
+        userContext.LoginUser(new User { Id = "1" });
+
+        var paste = await pasteService.CreateAsync(createInfo);
+
+        await pasteService.TogglePrivateAsync(paste.Id);
+
+        var fetchedPaste = await pasteService.GetAsync(paste.Id);
+
+        Assert.False(fetchedPaste.Private);
+
+        userContext.LogoutUser();
     }
 }
