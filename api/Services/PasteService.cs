@@ -127,7 +127,7 @@ public class PasteService(
 
         if (paste.DeletesAt <= DateTime.UtcNow)
         {
-            await mongo.Pastes.DeleteOneAsync(paste.Id);
+            await mongo.Pastes.DeleteOneAsync(p => p.Id == paste.Id);
 
             throw new HttpException(HttpStatusCode.NotFound, "Paste not found");
         }
