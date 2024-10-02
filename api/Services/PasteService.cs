@@ -78,12 +78,14 @@ public class PasteService(
                     "Can't create a tagged anonymous paste.");
         }
 
+        var createdAt = DateTime.UtcNow;
+
         var paste = new Paste
         {
             Id = await idProvider.GenerateId(async id => await ExistsByIdAsync(id)),
-            CreatedAt = DateTime.UtcNow,
+            CreatedAt = createdAt,
             ExpiresIn = createInfo.ExpiresIn,
-            DeletesAt = ExpiresInUtils.ToDeletesAt(DateTime.UtcNow, createInfo.ExpiresIn),
+            DeletesAt = ExpiresInUtils.ToDeletesAt(createdAt, createInfo.ExpiresIn),
             Title = createInfo.Title,
             OwnerId = createInfo.Anonymous ? null : userContext.Self?.Id,
             Private = createInfo.Private,
