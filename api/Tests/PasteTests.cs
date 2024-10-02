@@ -1,3 +1,4 @@
+using MongoDB.Driver;
 using pastemyst.Exceptions;
 using pastemyst.Models;
 using pastemyst.Services;
@@ -301,5 +302,138 @@ public class PasteTests : IClassFixture<DatabaseFixture>
         var paste = await pasteService.CreateAsync(createInfo);
 
         Assert.Equal("Text", paste.Pasties[0].Language);
+    }
+
+    [Fact]
+    public async Task Test_ShouldSetProperLanguage_WhenProvidedLanguageExtension()
+    {
+        var createInfo = new PasteCreateInfo
+        {
+            Pasties = new()
+            {
+                new()
+                {
+                    Content = "Hello, World!",
+                    Language = "cs"
+                }
+            },
+        };
+
+        var paste = await pasteService.CreateAsync(createInfo);
+
+        Assert.Equal("C#", paste.Pasties[0].Language);
+    }
+
+    [Fact]
+    public async Task Test_ShouldThrow_WhenPasteDoesntExist()
+    {
+        await Assert.ThrowsAsync<HttpException>(async () => await pasteService.GetAsync("1"));
+    }
+
+    [Fact]
+    public async Task Test_ShouldThrowAndDeletePaste_WhenPasteIsExpired()
+    {
+        var createInfo = new PasteCreateInfo
+        {
+            ExpiresIn = ExpiresIn.OneHour,
+            Pasties = new()
+            {
+                new()
+                {
+                    Content = "Hello, World!"
+                }
+            },
+        };
+
+        var paste = await pasteService.CreateAsync(createInfo);
+
+        Assert.True(await pasteService.ExistsByIdAsync(paste.Id));
+
+        var update = Builders<Paste>.Update.Set(p => p.DeletesAt, DateTime.UtcNow.AddHours(-2));
+        await databaseFixture.MongoService.Pastes.UpdateOneAsync(p => p.Id == paste.Id, update);
+
+        await Assert.ThrowsAsync<HttpException>(async () => await pasteService.GetAsync(paste.Id));
+
+        Assert.False(await pasteService.ExistsByIdAsync(paste.Id));
+    }
+
+    [Fact]
+    public async Task Test_ShouldThrow_WhenPasteIsPrivateAndLoggedOut()
+    {
+        var createInfo = new PasteCreateInfo
+        {
+            Private = true,
+            Pasties = new()
+            {
+                new()
+                {
+                    Content = "Hello, World!"
+                }
+            },
+        };
+
+        userContext.LoginUser(new User { Id = "1" });
+
+        var paste = await pasteService.CreateAsync(createInfo);
+
+        userContext.LogoutUser();
+
+        await Assert.ThrowsAsync<HttpException>(async () => await pasteService.GetAsync(paste.Id));
+    }
+
+    [Fact]
+    public async Task Test_ShouldThrow_WhenPasteIsPrivateAndNotOwner()
+    {
+        var createInfo = new PasteCreateInfo
+        {
+            Private = true,
+            Pasties = new()
+            {
+                new()
+                {
+                    Content = "Hello, World!"
+                }
+            },
+        };
+
+        userContext.LoginUser(new User { Id = "1" });
+
+        var paste = await pasteService.CreateAsync(createInfo);
+
+        userContext.LoginUser(new User { Id = "2" });
+
+        await Assert.ThrowsAsync<HttpException>(async () => await pasteService.GetAsync(paste.Id));
+
+        userContext.LogoutUser();
+    }
+
+    [Fact]
+    public async Task Test_ShouldReturnEmptyTags_WhenNotOwner()
+    {
+        var createInfo = new PasteCreateInfo
+        {
+            Tags = ["tag"],
+            Pasties = new()
+            {
+                new()
+                {
+                    Content = "Hello, World!"
+                }
+            },
+        };
+
+        userContext.LoginUser(new User { Id = "1" });
+
+        var paste = await pasteService.CreateAsync(createInfo);
+
+        var fetchedPaste = await pasteService.GetAsync(paste.Id);
+
+        Assert.Equal(["tag"], fetchedPaste.Tags);
+
+        userContext.LogoutUser();
+
+        fetchedPaste = await pasteService.GetAsync(paste.Id);
+
+        Assert.Empty(fetchedPaste.Tags);
     }
 }
