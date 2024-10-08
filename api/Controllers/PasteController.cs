@@ -64,6 +64,12 @@ public class PasteController(PasteService pasteService) : ControllerBase
         await pasteService.TogglePrivateAsync(pasteId);
     }
 
+    [HttpPatch("{pasteId}")]
+    public async Task<Paste> EditPaste(string pasteId, [FromBody] PasteEditInfo editInfo)
+    {
+        return await pasteService.EditAsync(pasteId, editInfo);
+    }
+
     [HttpPost]
     public async Task<IActionResult> CreatePaste([FromBody] PasteCreateInfo createInfo)
     {
