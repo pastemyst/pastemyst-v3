@@ -350,4 +350,62 @@ public class PasteService(
 
         return (memoryStream.ToArray(), paste.Title);
     }
+
+    public async Task<Paste> EditAsync(string id, PasteEditInfo editInfo)
+    {
+        if (!userContext.IsLoggedIn())
+        {
+            throw new HttpException(HttpStatusCode.Unauthorized, "You must be authorized to edit pastes.");
+        }
+
+        var paste = await GetAsync(id);
+
+        if (paste.OwnerId is null)
+        {
+            throw new HttpException(HttpStatusCode.BadRequest, "Only owned pastes can be edited.");
+        }
+
+        if (paste.OwnerId != userContext.Self.Id)
+        {
+            throw new HttpException(HttpStatusCode.Unauthorized, "You can only edit your own pastes.");
+        }
+
+        var pasteHistory = new PasteHistory
+        {
+            EditedAt = DateTime.UtcNow,
+            Title = paste.Title.Clone() as string,
+            Pasties = new List<Pasty>(paste.Pasties)
+        };
+
+        paste.Title = editInfo.Title;
+        paste.Pasties = new();
+
+        foreach (var pasty in editInfo.Pasties)
+        {
+            var langName = pasty.Language is null ? "Text" : languageProvider.FindByName(pasty.Language).Name;
+
+            if (langName == "Autodetect")
+            {
+                langName = (await languageProvider.AutodetectLanguageAsync(pasty.Content)).Name;
+            }
+
+            paste.Pasties.Add(new Pasty
+            {
+                Id = pasty.Id ?? idProvider.GenerateId(id => paste.Pasties.Any(p => p.Id == id)),
+                Title = pasty.Title,
+                Content = pasty.Content,
+                Language = langName
+            });
+        }
+
+        paste.History.Add(pasteHistory);
+
+        var update = Builders<Paste>.Update
+            .Set(p => p.Title, paste.Title)
+            .Set(p => p.Pasties, paste.Pasties)
+            .Set(p => p.History, paste.History);
+        await mongo.Pastes.UpdateOneAsync(p => p.Id == paste.Id, update);
+
+        return paste;
+    }
 }
