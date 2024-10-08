@@ -1,16 +1,13 @@
 using System.ComponentModel.DataAnnotations;
-using MongoDB.Bson;
-using MongoDB.Bson.Serialization.Attributes;
 
 namespace pastemyst.Models;
 
-public class Pasty
+public class PastyEditInfo
 {
-    [BsonId]
-    [BsonRepresentation(BsonType.String)]
     public string Id { get; init; }
 
-    public string Title { get; set; } = "";
+    [MaxLength(50)]
+    public string Title { get; set; }
 
     [Required]
     public string Content { get; set; }

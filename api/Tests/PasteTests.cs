@@ -1043,4 +1043,156 @@ public class PasteTests : IClassFixture<DatabaseFixture>
 
         userContext.LogoutUser();
     }
+
+    [Fact]
+    public async Task TestEdit_ShouldThrow_WhenLoggedOut()
+    {
+        var createInfo = new PasteCreateInfo
+        {
+            Pasties = new()
+            {
+                new()
+                {
+                    Content = "Hello, World!"
+                }
+            },
+        };
+
+        var paste = await pasteService.CreateAsync(createInfo);
+
+        var editInfo = new PasteEditInfo
+        {
+            Title = "New Title",
+            Pasties = new()
+            {
+                new()
+                {
+                    Id = paste.Pasties[0].Id,
+                    Content = "New Content"
+                }
+            }
+        };
+
+        await Assert.ThrowsAsync<HttpException>(async () => await pasteService.EditAsync(paste.Id, editInfo));
+    }
+
+    [Fact]
+    public async Task TestEdit_ShouldThrow_WhenNotOwnedPaste()
+    {
+        var createInfo = new PasteCreateInfo
+        {
+            Pasties = new()
+            {
+                new()
+                {
+                    Content = "Hello, World!"
+                }
+            },
+        };
+
+        var paste = await pasteService.CreateAsync(createInfo);
+
+        var editInfo = new PasteEditInfo
+        {
+            Title = "New Title",
+            Pasties = new()
+            {
+                new()
+                {
+                    Id = paste.Pasties[0].Id,
+                    Content = "New Content"
+                }
+            }
+        };
+
+        userContext.LoginUser(new User { Id = "1" });
+
+        await Assert.ThrowsAsync<HttpException>(async () => await pasteService.EditAsync(paste.Id, editInfo));
+
+        userContext.LogoutUser();
+    }
+
+    [Fact]
+    public async Task TestEdit_ShouldThrow_WhenNotOwner()
+    {
+        var createInfo = new PasteCreateInfo
+        {
+            Pasties = new()
+            {
+                new()
+                {
+                    Content = "Hello, World!"
+                }
+            },
+        };
+
+        userContext.LoginUser(new User { Id = "1" });
+
+        var paste = await pasteService.CreateAsync(createInfo);
+
+        var editInfo = new PasteEditInfo
+        {
+            Title = "New Title",
+            Pasties = new()
+            {
+                new()
+                {
+                    Id = paste.Pasties[0].Id,
+                    Content = "New Content"
+                }
+            }
+        };
+
+        userContext.LoginUser(new User { Id = "2" });
+
+        await Assert.ThrowsAsync<HttpException>(async () => await pasteService.EditAsync(paste.Id, editInfo));
+
+        userContext.LogoutUser();
+    }
+
+    [Fact]
+    public async Task TestEdit_ShouldUpdateTitleAndContent()
+    {
+        var createInfo = new PasteCreateInfo
+        {
+            Pasties = new()
+            {
+                new()
+                {
+                    Content = "Hello, World!"
+                }
+            },
+        };
+
+        userContext.LoginUser(new User { Id = "1" });
+
+        var paste = await pasteService.CreateAsync(createInfo);
+
+        var editInfo = new PasteEditInfo
+        {
+            Title = "New Title",
+            Pasties = new()
+            {
+                new()
+                {
+                    Id = paste.Pasties[0].Id,
+                    Content = "New Content"
+                }
+            }
+        };
+
+        await pasteService.EditAsync(paste.Id, editInfo);
+
+        var fetchedPaste = await pasteService.GetAsync(paste.Id);
+
+        Assert.Equal("New Title", fetchedPaste.Title);
+        Assert.Equal("New Content", fetchedPaste.Pasties[0].Content);
+
+        Assert.Single(fetchedPaste.History);
+        Assert.Equal(paste.Title, fetchedPaste.History[0].Title);
+        Assert.Equal(paste.Pasties[0].Content, fetchedPaste.History[0].Pasties[0].Content);
+        Assert.Equal(fetchedPaste.Pasties[0].Id, fetchedPaste.History[0].Pasties[0].Id);
+
+        userContext.LogoutUser();
+    }
 }

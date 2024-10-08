@@ -6,7 +6,7 @@ public class PasteCreateInfo
 {
     [MaxLength(128)]
     public string Title { get; set; } = "";
-    
+
     [MinLength(1)]
     [Required]
     public List<PastyCreateInfo> Pasties { get; set; }
@@ -18,6 +18,6 @@ public class PasteCreateInfo
     public bool Private { get; set; } = false;
 
     public bool Pinned { get; set; } = false;
-    
+
     public List<string> Tags { get; set; } = new();
 }
