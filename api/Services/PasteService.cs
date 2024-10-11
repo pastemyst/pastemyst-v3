@@ -108,7 +108,7 @@ public class PasteService(
             paste.Pasties.Add(new Pasty
             {
                 Id = idProvider.GenerateId(id => paste.Pasties.Any(p => p.Id == id)),
-                Title = pasty.Title,
+                Title = pasty.Title ?? "",
                 Content = pasty.Content,
                 Language = langName
             });
@@ -424,7 +424,7 @@ public class PasteService(
             paste.Pasties.Add(new Pasty
             {
                 Id = pasty.Id ?? idProvider.GenerateId(id => paste.Pasties.Any(p => p.Id == id)),
-                Title = pasty.Title,
+                Title = pasty.Title ?? "",
                 Content = pasty.Content,
                 Language = langName
             });
@@ -433,9 +433,10 @@ public class PasteService(
         paste.History.Add(pasteHistory);
 
         var update = Builders<Paste>.Update
-            .Set(p => p.Title, paste.Title)
+            .Set(p => p.Title, paste.Title ?? "")
             .Set(p => p.Pasties, paste.Pasties)
-            .Set(p => p.History, paste.History);
+            .Set(p => p.History, paste.History)
+            .Set(p => p.Tags, editInfo.Tags.Select(t => t.Trim()).Where(s => !string.IsNullOrEmpty(s)).ToList());
         await mongo.Pastes.UpdateOneAsync(p => p.Id == paste.Id, update);
 
         return paste;
