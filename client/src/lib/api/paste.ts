@@ -19,6 +19,7 @@ export interface Paste {
     id: string;
     title: string;
     createdAt: string;
+    editedAt?: string;
     expiresIn: ExpiresIn;
     deletesAt: string;
     pasties: Pasty[];
