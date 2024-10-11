@@ -8,10 +8,12 @@
     import { beforeNavigate } from "$app/navigation";
     import { creatingPasteStore } from "./stores";
     import type { Settings } from "./api/settings";
+    import type { Pasty } from "./api/paste";
 
     export let settings: Settings;
     export let tabs: TabData[] = new Array<TabData>();
     export let activeTab: TabData | undefined = undefined;
+    export let existingPasties: Pasty[] = [];
     $: activeTab = tabs.find((t) => t.id === activeTabId);
 
     // used for giving tabs their own unique ID
@@ -20,7 +22,7 @@
     let tabGroupElement: HTMLElement;
     let editorTarget: HTMLElement;
 
-    let activeTabId = 0;
+    let activeTabId = "0";
 
     let isDraggedOver = false;
 
@@ -55,10 +57,20 @@
             }
         });
 
-        await addTab();
+        if (existingPasties.length > 0) {
+            const langs = await getLangs(fetch);
+            for (const pasty of existingPasties) {
+                const lang = langs.find((lang) => lang.name === pasty.language);
+                await addTab(pasty.title, pasty.content, lang, pasty.id);
+            }
+
+            await setActiveTab(tabs[0].id);
+        } else {
+            await addTab();
+        }
     });
 
-    const onTabClose = async (id: number) => {
+    const onTabClose = async (id: string) => {
         // cant close last tab
         if (tabs.length === 1) return;
 
@@ -89,7 +101,7 @@
     };
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const onTabClick = async (id: number, event: CustomEvent<any>) => {
+    const onTabClick = async (id: string, event: CustomEvent<any>) => {
         let target = event.detail.event.target as HTMLElement;
 
         // ignore if close icon is pressed
@@ -101,34 +113,43 @@
         await setActiveTab(id);
     };
 
-    const onTabFinishRenaming = (id: number) => {
+    const onTabFinishRenaming = (id: string) => {
         const idx = tabs.findIndex((t) => t.id === id);
 
         tabs[idx].editor.focus();
     };
 
-    const addTab = async (title?: string, content?: string, language?: Language) => {
+    export const addTab = async (
+        title?: string,
+        content?: string,
+        language?: Language,
+        id?: string
+    ) => {
         const name = title || "untitled";
 
         let newtab: TabData = new TabData(
-            tabCounter,
+            id || String(tabCounter),
             name,
             new Editor({
                 target: editorTarget,
                 props: {
                     settings,
                     onMounted: () => {
-                        copyPreviousTabSettings(newtab.editor);
-
                         if (content && language) {
                             newtab.editor.setContent(content);
                             newtab.editor.setSelectedLang(language);
 
                             // if the first tab is empty, remove it
                             const firstTab = tabs[0];
-                            if (!firstTab.editor.getContent() || firstTab.title === "untitled") {
+                            if (
+                                tabs.length > 1 &&
+                                !firstTab.editor.getContent() &&
+                                firstTab.title === "untitled"
+                            ) {
                                 tabs = tabs.slice(1);
                             }
+                        } else {
+                            copyPreviousTabSettings(newtab.editor);
                         }
                     }
                 }
@@ -151,7 +172,7 @@
         }
     };
 
-    const setActiveTab = async (id: number) => {
+    const setActiveTab = async (id: string) => {
         activeTabId = id;
 
         updateTabEditorVisibility();
