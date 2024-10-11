@@ -174,7 +174,12 @@
             {#if data.paste.expiresIn != ExpiresIn.never}
                 <span class="separator">-</span>
                 <span use:tooltip aria-label={new Date(data.paste.deletesAt).toString()}>
-                    expires {data.relativesExpiresIn}
+                    expires {data.relativeExpiresIn}
+                </span>
+            {/if}
+            {#if data.relativeEditedAt && data.paste.editedAt}
+                <span use:tooltip aria-label={new Date(data.paste.editedAt).toString()}>
+                    <br />edited {data.relativeEditedAt}
                 </span>
             {/if}
         </span>
@@ -514,6 +519,7 @@
                 font-size: $fs-small;
                 color: var(--color-bg3);
                 margin-top: 0.25rem;
+                line-height: 1.5;
 
                 span:last-child {
                     white-space: pre;
