@@ -1195,4 +1195,51 @@ public class PasteTests : IClassFixture<DatabaseFixture>
 
         userContext.LogoutUser();
     }
+
+    [Fact]
+    public async Task TestEdit_ShouldUpdateTags()
+    {
+        var createInfo = new PasteCreateInfo
+        {
+            Pasties = new()
+            {
+                new()
+                {
+                    Content = "Hello, World!"
+                }
+            },
+        };
+
+        userContext.LoginUser(new User { Id = "1" });
+
+        var paste = await pasteService.CreateAsync(createInfo);
+
+        var editInfo = new PasteEditInfo
+        {
+            Pasties = new()
+            {
+                new()
+                {
+                    Id = paste.Pasties[0].Id,
+                    Content = "Hello, World!"
+                }
+            },
+            Tags = ["tag"]
+        };
+
+        await pasteService.EditAsync(paste.Id, editInfo);
+
+        var fetchedPaste = await pasteService.GetAsync(paste.Id);
+
+        Assert.Equal(paste.Title, fetchedPaste.Title);
+        Assert.Equal(paste.Pasties[0].Content, fetchedPaste.Pasties[0].Content);
+
+        Assert.Single(fetchedPaste.History);
+        Assert.Equal(paste.Title, fetchedPaste.History[0].Title);
+        Assert.Equal(paste.Pasties[0].Content, fetchedPaste.History[0].Pasties[0].Content);
+        Assert.Equal(fetchedPaste.Pasties[0].Id, fetchedPaste.History[0].Pasties[0].Id);
+        Assert.Equal(["tag"], fetchedPaste.Tags);
+
+        userContext.LogoutUser();
+    }
 }
