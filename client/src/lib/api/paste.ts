@@ -66,6 +66,19 @@ export interface PastyCreateInfo {
     language: string;
 }
 
+export interface PasteEditInfo {
+    title: string;
+    tags: string[];
+    pasties: PastyEditInfo[];
+}
+
+export interface PastyEditInfo {
+    id?: string;
+    title: string;
+    content: string;
+    language: string;
+}
+
 export interface PasteWithLangStats {
     paste: Paste;
     languageStats: LangStat[];
@@ -125,14 +138,29 @@ export const expiresInToLongString = (exp: ExpiresIn): string => {
     }
 };
 
-export const createPaste = async (skeleton: PasteCreateInfo): Promise<Paste | null> => {
+export const createPaste = async (createInfo: PasteCreateInfo): Promise<Paste | null> => {
     const res = await fetch(`${env.PUBLIC_API_BASE}/pastes/`, {
         method: "post",
         credentials: "include",
         headers: {
             "Content-Type": "application/json"
         },
-        body: JSON.stringify(skeleton)
+        body: JSON.stringify(createInfo)
+    });
+
+    if (res.ok) return await res.json();
+
+    return null;
+};
+
+export const editPaste = async (id: string, editInfo: PasteEditInfo): Promise<Paste | null> => {
+    const res = await fetch(`${env.PUBLIC_API_BASE}/pastes/${id}`, {
+        method: "patch",
+        credentials: "include",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify(editInfo)
     });
 
     if (res.ok) return await res.json();
