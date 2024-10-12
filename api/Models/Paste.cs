@@ -41,12 +41,3 @@ public class Paste
 
     [JsonIgnore] public List<PasteHistory> History { get; set; } = new();
 }
-
-public class PasteHistory
-{
-    public DateTime EditedAt { get; init; } = DateTime.UtcNow;
-
-    public string Title { get; set; }
-
-    public List<Pasty> Pasties { get; set; }
-}
