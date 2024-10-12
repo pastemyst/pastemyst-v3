@@ -34,6 +34,12 @@ public class PasteController(PasteService pasteService) : ControllerBase
         return await pasteService.GetLanguageStatsAsync(pasteId);
     }
 
+    [HttpGet("{pasteId}/history_compact")]
+    public async Task<List<PasteHistoryCompact>> GetPasteHistoryCompact(string pasteId)
+    {
+        return await pasteService.GetHistoryCompactAsync(pasteId);
+    }
+
     [HttpDelete("{pasteId}")]
     public async Task DeletePaste(string pasteId)
     {

@@ -372,6 +372,7 @@ public class PasteService(
 
         var pasteHistory = new PasteHistory
         {
+            Id = idProvider.GenerateId(id => paste.History.Any(h => h.Id == id)),
             EditedAt = DateTime.UtcNow,
             Title = paste.Title.Clone() as string,
             Pasties = new List<Pasty>(paste.Pasties)
@@ -408,5 +409,18 @@ public class PasteService(
         await mongo.Pastes.UpdateOneAsync(p => p.Id == paste.Id, update);
 
         return paste;
+    }
+
+    public async Task<List<PasteHistoryCompact>> GetHistoryCompactAsync(string id)
+    {
+        var paste = await GetAsync(id);
+
+        var history = paste.History
+            .Select(h => new PasteHistoryCompact() { Id = h.Id, EditedAt = h.EditedAt })
+            .ToList();
+
+        history.Sort((a, b) => b.EditedAt.CompareTo(a.EditedAt));
+
+        return history;
     }
 }
