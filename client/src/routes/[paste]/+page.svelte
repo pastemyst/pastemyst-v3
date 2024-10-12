@@ -177,12 +177,15 @@
                     expires {data.relativeExpiresIn}
                 </span>
             {/if}
-            {#if data.relativeEditedAt && data.paste.editedAt}
-                <span use:tooltip aria-label={new Date(data.paste.editedAt).toString()}>
-                    <br />edited {data.relativeEditedAt}
-                </span>
-            {/if}
         </span>
+        {#if data.relativeEditedAt && data.paste.editedAt}
+            <span class="edited-date">
+                <span use:tooltip aria-label={new Date(data.paste.editedAt).toString()}>
+                    edited {data.relativeEditedAt}
+                </span>
+                (<a href="/{data.paste.id}/history">view history</a>)
+            </span>
+        {/if}
     </div>
 
     <div class="options flex wrap row center gap-s">
@@ -505,6 +508,12 @@
                 span:last-child {
                     white-space: pre;
                 }
+            }
+
+            .edited-date {
+                font-size: $fs-small;
+                color: var(--color-bg3);
+                line-height: 1.5;
             }
         }
 
