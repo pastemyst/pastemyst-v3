@@ -40,6 +40,8 @@ public interface IPasteService
     public Task<Paste> EditAsync(string id, PasteEditInfo editInfo);
 
     public Task<List<PasteHistoryCompact>> GetHistoryCompactAsync(string id);
+
+    public Task<Paste> GetAtEdit(string id, string historyId);
 }
 
 public class PasteService(
@@ -456,5 +458,22 @@ public class PasteService(
         history.Sort((a, b) => b.EditedAt.CompareTo(a.EditedAt));
 
         return history;
+    }
+
+    public async Task<Paste> GetAtEdit(string id, string historyId)
+    {
+        var paste = await GetAsync(id);
+
+        var edit = paste.History.FirstOrDefault(h => h.Id == historyId);
+
+        if (edit is null)
+        {
+            throw new HttpException(HttpStatusCode.NotFound, "Edit not found.");
+        }
+
+        paste.Title = edit.Title;
+        paste.Pasties = edit.Pasties;
+
+        return paste;
     }
 }

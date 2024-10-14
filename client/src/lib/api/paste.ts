@@ -193,6 +193,17 @@ export const getPasteHistoryCompact = async (fetchFunc: FetchFunc, id: string): 
     return [];
 };
 
+export const getPasteAtEdit = async (fetchFunc: FetchFunc, id: string, historyId: string): Promise<Paste | null> => {
+    const res = await fetchFunc(`${env.PUBLIC_API_BASE}/pastes/${id}/history/${historyId}`, {
+        method: "get",
+        credentials: "include"
+    });
+
+    if (res.ok) return await res.json();
+
+    return null;
+};
+
 export const deletePaste = async (id: string): Promise<boolean> => {
     const res = await fetch(`${env.PUBLIC_API_BASE}/pastes/${id}`, {
         method: "delete",
