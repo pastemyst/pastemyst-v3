@@ -2,14 +2,18 @@
     import { formatDistanceToNow } from "date-fns";
     import type { PageData } from "./$types";
     import { tooltip } from "$lib/tooltips";
+    import PasteHeader from "$lib/PasteHeader.svelte";
+    import TagList from "$lib/TagList.svelte";
 
     export let data: PageData;
 </script>
 
-<section>
-    <h1>history of <a href="/{data.paste.id}">{data.paste.title}</a></h1>
+<PasteHeader paste={data.paste} owner={data.owner} pasteStats={data.pasteStats} langStats={data.langStats} isStarred={data.isStarred} />
 
-    <h3>list of all edits made to this paste</h3>
+<TagList tags={data.paste.tags} ownerUsername={data.owner.username} />
+
+<section>
+    <h3>list of all edits made to this paste, <a href="/{data.paste.id}">go back to the paste</a></h3>
 
     {#each data.history as history}
         <div class="edit flex row center space-between">
@@ -42,8 +46,8 @@
 </section>
 
 <style lang="scss">
-    h1 {
-        margin-top: 0;
+    section {
+        margin-top: 1rem;
     }
 
     h3 {
