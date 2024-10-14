@@ -423,4 +423,21 @@ public class PasteService(
 
         return history;
     }
+
+    public async Task<Paste> GetAtEdit(string id, string historyId)
+    {
+        var paste = await GetAsync(id);
+
+        var edit = paste.History.FirstOrDefault(h => h.Id == historyId);
+
+        if (edit is null)
+        {
+            throw new HttpException(HttpStatusCode.NotFound, "Edit not found.");
+        }
+
+        paste.Title = edit.Title;
+        paste.Pasties = edit.Pasties;
+
+        return paste;
+    }
 }

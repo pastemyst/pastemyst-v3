@@ -1242,4 +1242,70 @@ public class PasteTests : IClassFixture<DatabaseFixture>
 
         userContext.LogoutUser();
     }
+
+    [Fact]
+    public async Task TestGetAtEdit_ShouldReturnNotFound_WhenNoHistory()
+    {
+        var createInfo = new PasteCreateInfo
+        {
+            Pasties = new()
+            {
+                new()
+                {
+                    Content = "Hello, World!"
+                }
+            },
+        };
+
+        userContext.LoginUser(new User { Id = "1" });
+
+        var paste = await pasteService.CreateAsync(createInfo);
+
+        await Assert.ThrowsAsync<HttpException>(async () => await pasteService.GetAtEdit(paste.Id, "1"));
+
+        userContext.LogoutUser();
+    }
+
+    [Fact]
+    public async Task TestGetAtEdit_ShouldReturnPasteAtEdit()
+    {
+        var createInfo = new PasteCreateInfo
+        {
+            Pasties = new()
+            {
+                new()
+                {
+                    Content = "Hello, World!"
+                }
+            },
+        };
+
+        userContext.LoginUser(new User { Id = "1" });
+
+        var paste = await pasteService.CreateAsync(createInfo);
+
+        var editInfo = new PasteEditInfo
+        {
+            Title = "New Title",
+            Pasties = new()
+            {
+                new()
+                {
+                    Id = paste.Pasties[0].Id,
+                    Content = "New Content"
+                }
+            }
+        };
+
+        await pasteService.EditAsync(paste.Id, editInfo);
+
+        var history = await pasteService.GetHistoryCompactAsync(paste.Id);
+
+        var fetchedPaste = await pasteService.GetAtEdit(paste.Id, history[0].Id);
+
+        Assert.Equal(paste.Title, fetchedPaste.Title);
+        Assert.Equal(paste.Pasties[0].Content, fetchedPaste.Pasties[0].Content);
+
+        userContext.LogoutUser();
+    }
 }
