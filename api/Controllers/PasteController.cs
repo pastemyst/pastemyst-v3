@@ -40,6 +40,12 @@ public class PasteController(PasteService pasteService) : ControllerBase
         return await pasteService.GetHistoryCompactAsync(pasteId);
     }
 
+    [HttpGet("{pasteId}/history/{historyId}")]
+    public async Task<Paste> GetPasteAtEdit(string pasteId, string historyId)
+    {
+        return await pasteService.GetAtEdit(pasteId, historyId);
+    }
+
     [HttpDelete("{pasteId}")]
     public async Task DeletePaste(string pasteId)
     {
