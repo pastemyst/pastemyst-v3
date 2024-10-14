@@ -4,13 +4,16 @@
     import { tooltip } from "$lib/tooltips";
     import PasteHeader from "$lib/PasteHeader.svelte";
     import TagList from "$lib/TagList.svelte";
+    import { currentUserStore } from "$lib/stores";
 
     export let data: PageData;
 </script>
 
 <PasteHeader paste={data.paste} owner={data.owner} pasteStats={data.pasteStats} langStats={data.langStats} isStarred={data.isStarred} />
 
-<TagList tags={data.paste.tags} ownerUsername={data.owner.username} />
+{#if $currentUserStore?.id === data.paste.ownerId && data.paste.tags}
+    <TagList tags={data.paste.tags} ownerUsername={$currentUserStore.username} />
+{/if}
 
 <section>
     <h3>list of all edits made to this paste, <a href="/{data.paste.id}">go back to the paste</a></h3>
