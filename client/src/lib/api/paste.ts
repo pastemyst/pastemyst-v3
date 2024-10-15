@@ -68,7 +68,6 @@ export interface PastyCreateInfo {
 
 export interface PasteEditInfo {
     title: string;
-    tags: string[];
     pasties: PastyEditInfo[];
 }
 
@@ -146,6 +145,21 @@ export const createPaste = async (createInfo: PasteCreateInfo): Promise<Paste | 
             "Content-Type": "application/json"
         },
         body: JSON.stringify(createInfo)
+    });
+
+    if (res.ok) return await res.json();
+
+    return null;
+};
+
+export const editPasteTags = async (id: string, tags: string[]): Promise<Paste | null> => {
+    const res = await fetch(`${env.PUBLIC_API_BASE}/pastes/${id}/tags`, {
+        method: "patch",
+        credentials: "include",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify(tags)
     });
 
     if (res.ok) return await res.json();
