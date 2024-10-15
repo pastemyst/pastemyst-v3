@@ -1,7 +1,7 @@
 import { error } from "@sveltejs/kit";
 import { ExpiresIn, getPaste, getPasteLangs, getPasteStats, isPasteStarred } from "$lib/api/paste";
 import type { PageLoad } from "./$types";
-import { getUserById } from "$lib/api/user";
+import { getUserById, getUserTags } from "$lib/api/user";
 import { formatDistanceToNow } from "date-fns";
 
 export const load: PageLoad = async ({ params, fetch, parent }) => {
@@ -31,7 +31,7 @@ export const load: PageLoad = async ({ params, fetch, parent }) => {
         error(ownerStatus);
     }
 
-    const { settings } = await parent();
+    const { settings, self } = await parent();
 
     const highlightedCode: string[] = [];
 
@@ -55,6 +55,11 @@ export const load: PageLoad = async ({ params, fetch, parent }) => {
         highlightedCode.push(await res.text());
     }
 
+    let tags: string[] = [];
+    if (self) {
+        tags = await getUserTags(fetch, self.username);
+    }
+
     return {
         paste: paste,
         relativeCreatedAt: relativeCreatedAt,
@@ -64,6 +69,7 @@ export const load: PageLoad = async ({ params, fetch, parent }) => {
         pasteStats: pasteStats,
         owner: owner,
         highlightedCode: highlightedCode,
-        isStarred: isStarred
+        isStarred: isStarred,
+        userTags: tags
     };
 };
