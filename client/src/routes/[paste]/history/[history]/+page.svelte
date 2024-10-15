@@ -38,7 +38,7 @@
     </div>
 </section>
 
-<Pasties paste={data.paste} settings={data.settings} pasteStats={data.pasteStats} langStats={data.langStats} highlightedCode={data.highlightedCode} />
+<Pasties paste={data.paste} settings={data.settings} pasteStats={data.pasteStats} langStats={data.langStats} highlightedCode={data.highlightedCode} historyId={data.historyId} />
 
 <style lang="scss">
     section {
