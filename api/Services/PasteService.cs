@@ -351,6 +351,33 @@ public class PasteService(
         return (memoryStream.ToArray(), paste.Title);
     }
 
+    public async Task<Paste> EditTagsAsync(string id, List<string> tags)
+    {
+        if (!userContext.IsLoggedIn())
+        {
+            throw new HttpException(HttpStatusCode.Unauthorized, "You must be authorized to edit tags.");
+        }
+
+        var paste = await GetAsync(id);
+
+        if (paste.OwnerId is null)
+        {
+            throw new HttpException(HttpStatusCode.BadRequest, "Only owned pastes can have their tags edited.");
+        }
+
+        if (paste.OwnerId != userContext.Self.Id)
+        {
+            throw new HttpException(HttpStatusCode.Unauthorized, "You can only edit tags of your own pastes.");
+        }
+
+        paste.Tags = tags.Select(t => t.Trim()).Where(s => !string.IsNullOrEmpty(s)).ToList();
+
+        var update = Builders<Paste>.Update.Set(p => p.Tags, paste.Tags);
+        await mongo.Pastes.UpdateOneAsync(p => p.Id == paste.Id, update);
+
+        return paste;
+    }
+
     public async Task<Paste> EditAsync(string id, PasteEditInfo editInfo)
     {
         if (!userContext.IsLoggedIn())
@@ -404,8 +431,7 @@ public class PasteService(
         var update = Builders<Paste>.Update
             .Set(p => p.Title, paste.Title ?? "")
             .Set(p => p.Pasties, paste.Pasties)
-            .Set(p => p.History, paste.History)
-            .Set(p => p.Tags, editInfo.Tags.Select(t => t.Trim()).Where(s => !string.IsNullOrEmpty(s)).ToList());
+            .Set(p => p.History, paste.History);
         await mongo.Pastes.UpdateOneAsync(p => p.Id == paste.Id, update);
 
         return paste;

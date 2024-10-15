@@ -1197,7 +1197,7 @@ public class PasteTests : IClassFixture<DatabaseFixture>
     }
 
     [Fact]
-    public async Task TestEdit_ShouldUpdateTags()
+    public async Task TestEditTags_ShouldUpdateTags()
     {
         var createInfo = new PasteCreateInfo
         {
@@ -1208,37 +1208,18 @@ public class PasteTests : IClassFixture<DatabaseFixture>
                     Content = "Hello, World!"
                 }
             },
+            Tags = ["tag1"]
         };
 
         userContext.LoginUser(new User { Id = "1" });
 
         var paste = await pasteService.CreateAsync(createInfo);
 
-        var editInfo = new PasteEditInfo
-        {
-            Pasties = new()
-            {
-                new()
-                {
-                    Id = paste.Pasties[0].Id,
-                    Content = "Hello, World!"
-                }
-            },
-            Tags = ["tag"]
-        };
-
-        await pasteService.EditAsync(paste.Id, editInfo);
+        await pasteService.EditTagsAsync(paste.Id, ["tag2", "tag3"]);
 
         var fetchedPaste = await pasteService.GetAsync(paste.Id);
 
-        Assert.Equal(paste.Title, fetchedPaste.Title);
-        Assert.Equal(paste.Pasties[0].Content, fetchedPaste.Pasties[0].Content);
-
-        Assert.Single(fetchedPaste.History);
-        Assert.Equal(paste.Title, fetchedPaste.History[0].Title);
-        Assert.Equal(paste.Pasties[0].Content, fetchedPaste.History[0].Pasties[0].Content);
-        Assert.Equal(fetchedPaste.Pasties[0].Id, fetchedPaste.History[0].Pasties[0].Id);
-        Assert.Equal(["tag"], fetchedPaste.Tags);
+        Assert.Equal(["tag2", "tag3"], fetchedPaste.Tags);
 
         userContext.LogoutUser();
     }
