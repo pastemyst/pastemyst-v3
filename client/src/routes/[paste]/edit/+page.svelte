@@ -27,7 +27,6 @@
 
         const paste: PasteEditInfo = {
             title: data.paste.title,
-            tags: data.paste.tags,
             pasties
         };
 
@@ -58,7 +57,7 @@
     />
 </div>
 
-<TagInput bind:tags={data.paste.tags} existingTags={data.userTags} anonymousPaste={false} />
+<TagInput bind:tags={data.paste.tags} existingTags={data.userTags} anonymousPaste={false} readonly={true} />
 
 <TabbedEditor
     settings={data.settings}

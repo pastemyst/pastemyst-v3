@@ -3,8 +3,8 @@
     import type { PageData } from "./$types";
     import { tooltip } from "$lib/tooltips";
     import PasteHeader from "$lib/PasteHeader.svelte";
-    import TagList from "$lib/TagList.svelte";
     import { currentUserStore } from "$lib/stores";
+    import TagInput from "$lib/TagInput.svelte";
 
     export let data: PageData;
 </script>
@@ -12,7 +12,7 @@
 <PasteHeader paste={data.paste} owner={data.owner} pasteStats={data.pasteStats} langStats={data.langStats} isStarred={data.isStarred} />
 
 {#if $currentUserStore?.id === data.paste.ownerId && data.paste.tags}
-    <TagList tags={data.paste.tags} ownerUsername={$currentUserStore.username} />
+    <TagInput bind:tags={data.paste.tags} existingTags={[]} anonymousPaste={false} readonly={true} />
 {/if}
 
 <section>

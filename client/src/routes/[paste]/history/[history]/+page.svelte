@@ -2,7 +2,7 @@
     import PasteHeader from "$lib/PasteHeader.svelte";
     import Pasties from "$lib/Pasties.svelte";
     import { currentUserStore } from "$lib/stores";
-    import TagList from "$lib/TagList.svelte";
+    import TagInput from "$lib/TagInput.svelte";
     import { tooltip } from "$lib/tooltips";
     import type { PageData } from "./$types";
 
@@ -12,7 +12,7 @@
 <PasteHeader paste={data.paste} owner={data.owner} pasteStats={data.pasteStats} langStats={data.langStats} isStarred={data.isStarred} />
 
 {#if $currentUserStore?.id === data.paste.ownerId && data.paste.tags}
-    <TagList tags={data.paste.tags} ownerUsername={$currentUserStore.username} />
+    <TagInput bind:tags={data.paste.tags} existingTags={[]} readonly />
 {/if}
 
 <section class="flex row center space-between">
