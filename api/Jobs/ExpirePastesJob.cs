@@ -5,7 +5,7 @@ using Quartz;
 
 namespace pastemyst.Jobs;
 
-public class ExpirePastesJob(ILogger<ExpirePastesJob> logger, IActionLogger actionLogger, IMongoService mongo)
+public class ExpirePastesJob(ILogger<ExpirePastesJob> logger, ActionLogger actionLogger, MongoService mongo)
     : IJob
 {
     public async Task Execute(IJobExecutionContext context)

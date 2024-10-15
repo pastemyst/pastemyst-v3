@@ -7,18 +7,7 @@ using pastemyst.Serializers;
 
 namespace pastemyst.Services;
 
-public interface IMongoService
-{
-    public IMongoCollection<Paste> Pastes { get; }
-    public IMongoCollection<User> Users { get; }
-    public IMongoCollection<ActionLog> ActionLogs { get; }
-    public IMongoCollection<SessionSettings> SessionSettings { get; }
-    public GridFSBucket Images { get; }
-
-    public void DeleteTestDatabase();
-}
-
-public class MongoService : IMongoService
+public class MongoService
 {
     public IMongoCollection<Paste> Pastes { get; private set; }
 

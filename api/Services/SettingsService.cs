@@ -6,29 +6,13 @@ using pastemyst.Models;
 
 namespace pastemyst.Services;
 
-public interface ISettingsService
-{
-    public Task SetUsernameAsync(string username);
-
-    public Task SetAvatarAsync(byte[] bytes, string contentType);
-
-    public UserSettings GetUserSettings();
-
-    public Task UpdateUserSettingsAsync(UserSettings settings);
-
-    public Task<Settings> GetSettingsAsync(HttpContext httpContext);
-
-    public Task UpdateSettingsAsync(HttpContext httpContext, Settings settings);
-}
-
 public class SettingsService(
     IConfiguration configuration,
-    IUserProvider userProvider,
-    IImageService imageService,
-    IUserContext userContext,
-    IIdProvider idProvider,
-    IMongoService mongo)
-    : ISettingsService
+    UserProvider userProvider,
+    ImageService imageService,
+    UserContext userContext,
+    IdProvider idProvider,
+    MongoService mongo)
 {
     public async Task SetUsernameAsync(string username)
     {

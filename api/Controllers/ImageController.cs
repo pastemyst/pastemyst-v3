@@ -5,7 +5,7 @@ namespace pastemyst.Controllers;
 
 [ApiController]
 [Route("/api/v3/images")]
-public class ImageController(IImageService imageService) : ControllerBase
+public class ImageController(ImageService imageService) : ControllerBase
 {
     [HttpGet("{imageId}")]
     public async Task<IActionResult> GetImage(string imageId)

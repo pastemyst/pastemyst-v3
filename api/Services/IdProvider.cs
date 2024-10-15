@@ -1,29 +1,12 @@
 namespace pastemyst.Services;
 
-public interface IIdProvider
-{
-    /// <summary>
-    /// Generates a random base36 8 character ID.
-    /// </summary>
-    string GenerateId();
-
-    /// <summary>
-    /// Keeps generating random base36 8 character IDs while the provided predicate returns true.
-    /// Use case: generating IDs while the previous generate ID already exists in the DB.
-    /// </summary>
-    string GenerateId(Predicate<string> predicate);
-
-    /// <summary>
-    /// Keeps generating random base36 8 character IDs while the provided predicate returns true.
-    /// Use case: generating IDs while the previous generate ID already exists in the DB.
-    /// </summary>
-    Task<string> GenerateId(Func<string, Task<bool>> predicate);
-}
-
-public class IdProvider : IIdProvider
+public class IdProvider
 {
     private const string Base36Chars = "abcdefghijklmnopqrstuvwxyz0123456789";
 
+    /// <summary>
+    /// Generates a random base36 8 character ID.
+    /// </summary>
     public string GenerateId()
     {
         var random = new Random();
@@ -38,6 +21,10 @@ public class IdProvider : IIdProvider
         return id;
     }
 
+    /// <summary>
+    /// Keeps generating random base36 8 character IDs while the provided predicate returns true.
+    /// Use case: generating IDs while the previous generate ID already exists in the DB.
+    /// </summary>
     public string GenerateId(Predicate<string> predicate)
     {
         var id = GenerateId();
@@ -45,6 +32,10 @@ public class IdProvider : IIdProvider
         return id;
     }
 
+    /// <summary>
+    /// Keeps generating random base36 8 character IDs while the provided predicate returns true.
+    /// Use case: generating IDs while the previous generate ID already exists in the DB.
+    /// </summary>
     public async Task<string> GenerateId(Func<string, Task<bool>> predicate)
     {
         var id = GenerateId();

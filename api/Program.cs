@@ -29,33 +29,33 @@ builder.Services.AddSession(options =>
 
 builder.Services.AddHttpClient();
 
-builder.Services.AddSingleton<IMongoService, MongoService>();
+builder.Services.AddSingleton<MongoService>();
 
-builder.Services.TryAddSingleton<ILanguageProvider, LanguageProvider>();
+builder.Services.TryAddSingleton<LanguageProvider>();
 builder.Services.AddSingleton(s =>
-    (IHostedService)s.GetRequiredService<ILanguageProvider>()
+    (IHostedService)s.GetRequiredService<LanguageProvider>()
 );
 
-builder.Services.TryAddSingleton<IVersionProvider, VersionProvider>();
+builder.Services.TryAddSingleton<VersionProvider>();
 builder.Services.AddSingleton(s =>
-    (IHostedService)s.GetRequiredService<IVersionProvider>()
+    (IHostedService)s.GetRequiredService<VersionProvider>()
 );
 
-builder.Services.TryAddSingleton<IChangelogProvider, ChangelogProvider>();
+builder.Services.TryAddSingleton<ChangelogProvider>();
 builder.Services.AddSingleton(s =>
-    (IHostedService)s.GetRequiredService<IChangelogProvider>()
+    (IHostedService)s.GetRequiredService<ChangelogProvider>()
 );
 
-builder.Services.AddScoped<IIdProvider, IdProvider>();
-builder.Services.AddScoped<IImageService, ImageService>();
-builder.Services.AddScoped<IUserProvider, UserProvider>();
-builder.Services.AddScoped<IOAuthService, OAuthService>();
-builder.Services.AddScoped<IAuthService, AuthService>();
-builder.Services.AddScoped<IUserContext, UserContext>();
-builder.Services.AddScoped<ISettingsService, SettingsService>();
-builder.Services.AddScoped<IPasteService, PasteService>();
-builder.Services.AddScoped<IActionLogger, ActionLogger>();
-builder.Services.AddScoped<IStatsService, StatsService>();
+builder.Services.AddScoped<IdProvider>();
+builder.Services.AddScoped<ImageService>();
+builder.Services.AddScoped<UserProvider>();
+builder.Services.AddScoped<OAuthService>();
+builder.Services.AddScoped<AuthService>();
+builder.Services.AddScoped<UserContext>();
+builder.Services.AddScoped<SettingsService>();
+builder.Services.AddScoped<PasteService>();
+builder.Services.AddScoped<ActionLogger>();
+builder.Services.AddScoped<StatsService>();
 
 builder.Services.AddQuartz(q =>
 {

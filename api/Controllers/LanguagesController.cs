@@ -6,7 +6,7 @@ namespace pastemyst.Controllers;
 
 [ApiController]
 [Route("/api/v3/langs")]
-public class LanguagesController(ILanguageProvider languageProvider) : ControllerBase
+public class LanguagesController(LanguageProvider languageProvider) : ControllerBase
 {
     [HttpGet]
     public List<Language> All()

@@ -6,16 +6,7 @@ using pastemyst.Models.Auth;
 
 namespace pastemyst.Services;
 
-public interface IOAuthService
-{
-    public Dictionary<string, OAuthProviderConfig> OAuthProviders { get; }
-
-    public Task<OAuthProviderUser> GetProviderUserAsync(OAuthProviderConfig provider, string token);
-
-    public Task<string> ExchangeTokenAsync(OAuthProviderConfig provider, string code);
-}
-
-public class OAuthService : IOAuthService
+public class OAuthService
 {
     public Dictionary<string, OAuthProviderConfig> OAuthProviders { get; }
 

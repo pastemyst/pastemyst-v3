@@ -10,11 +10,11 @@ namespace pastemyst.Tests;
 public class PasteTests : IClassFixture<DatabaseFixture>
 {
     private DatabaseFixture databaseFixture;
-    private IIdProvider idProvider;
+    private IdProvider idProvider;
     private LanguageProvider languageProvider;
-    private IUserContext userContext;
-    private IActionLogger actionLogger;
-    private IPasteService pasteService;
+    private UserContext userContext;
+    private ActionLogger actionLogger;
+    private PasteService pasteService;
 
     public PasteTests(DatabaseFixture databaseFixture)
     {

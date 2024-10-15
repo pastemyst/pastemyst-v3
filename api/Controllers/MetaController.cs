@@ -7,10 +7,10 @@ namespace pastemyst.Controllers;
 [ApiController]
 [Route("/api/v3/meta")]
 public class MetaController(
-    IVersionProvider versionProvider,
-    IChangelogProvider changelogProvider,
-    IPasteService pasteService,
-    IStatsService statsService)
+    VersionProvider versionProvider,
+    ChangelogProvider changelogProvider,
+    PasteService pasteService,
+    StatsService statsService)
     : ControllerBase
 {
     [HttpGet("version")]

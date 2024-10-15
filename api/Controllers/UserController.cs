@@ -6,7 +6,7 @@ namespace pastemyst.Controllers;
 
 [ApiController]
 [Route("/api/v3/users")]
-public class UserController(IUserProvider userProvider) : ControllerBase
+public class UserController(UserProvider userProvider) : ControllerBase
 {
     [HttpGet]
     [Route("{username}")]

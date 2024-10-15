@@ -12,28 +12,14 @@ using pastemyst.Models;
 
 namespace pastemyst.Services;
 
-public interface IAuthService
-{
-    public Task<string> InitiateLoginFlowAsync(string provider, HttpContext httpContext);
-
-    public Task<string> HandleCallbackAsync(string provider, string state, string code, HttpContext httpContext);
-
-    public Task RegisterUserAsync(string username, HttpContext httpContext);
-
-    public Task<User> GetSelfAsync(HttpContext httpContext);
-
-    public string Logout(HttpContext httpContext);
-}
-
 public class AuthService(
-    IIdProvider idProvider,
-    IOAuthService oAuthService,
+    IdProvider idProvider,
+    OAuthService oAuthService,
     IConfiguration configuration,
     IHttpClientFactory httpClientFactory,
-    IImageService imageService,
-    IActionLogger actionLogger,
-    IMongoService mongo)
-    : IAuthService
+    ImageService imageService,
+    ActionLogger actionLogger,
+    MongoService mongo)
 {
     public async Task<string> InitiateLoginFlowAsync(string provider, HttpContext httpContext)
     {

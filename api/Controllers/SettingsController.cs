@@ -7,7 +7,7 @@ namespace pastemyst.Controllers;
 
 [ApiController]
 [Route("/api/v3/settings")]
-public class SettingsController(ISettingsService settingsService) : ControllerBase
+public class SettingsController(SettingsService settingsService) : ControllerBase
 {
     [HttpGet]
     public async Task<Settings> GetSettings()

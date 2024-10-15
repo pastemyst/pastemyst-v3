@@ -4,20 +4,7 @@ using MongoDB.Driver.GridFS;
 
 namespace pastemyst.Services;
 
-public interface IImageService
-{
-    Task<string> UploadImageAsync(byte[] bytes, string contentType);
-
-    Task<GridFSFileInfo<ObjectId>> FindByIdAsync(string id);
-
-    Task<byte[]> DownloadByIdAsync(string id);
-
-    Task DeleteAsync(string id);
-
-    Task<bool> ExistsByIdAsync(string id);
-}
-
-public class ImageService(IMongoService mongo) : IImageService
+public class ImageService(MongoService mongo)
 {
     public async Task<string> UploadImageAsync(byte[] bytes, string contentType)
     {

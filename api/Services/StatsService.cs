@@ -4,12 +4,7 @@ using pastemyst.Models;
 
 namespace pastemyst.Services;
 
-public interface IStatsService
-{
-    public Task<AppStats> GetAppStatsAsync();
-}
-
-public class StatsService(IMongoService mongo) : IStatsService
+public class StatsService(MongoService mongo)
 {
     public async Task<AppStats> GetAppStatsAsync()
     {
