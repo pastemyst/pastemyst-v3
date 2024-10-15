@@ -12,6 +12,7 @@
     export let pasteStats: PasteStats | null;
     export let langStats: LangStat[];
     export let highlightedCode: string[];
+    export let historyId: string | null = null;
 
     let activePastyId: string = paste.pasties[0].id;
     let activePasty: Pasty = paste.pasties[0];
@@ -43,6 +44,7 @@
                                     {paste}
                                     {pasty}
                                     {langStats}
+                                    {historyId}
                                     stats={pasteStats.pasties[pasty.id]}
                                     bind:previewMarkdown={previewMarkdownStacked[i]}
                                 />
@@ -83,6 +85,7 @@
                         {paste}
                         pasty={activePasty}
                         {langStats}
+                        {historyId}
                         stats={pasteStats.pasties[activePastyId]}
                         bind:previewMarkdown={previewMarkdownTabbed}
                     />

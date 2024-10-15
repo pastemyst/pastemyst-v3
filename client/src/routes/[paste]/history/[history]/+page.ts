@@ -56,6 +56,6 @@ export const load: PageLoad = async ({ params, fetch, parent }) => {
     const nextEdit: HistoryType | undefined = history[currentHistoryIndex - 1];
 
     return {
-	paste, owner, pasteStats, langStats, isStarred, highlightedCode, previousEdit, nextEdit
+	paste, owner, pasteStats, langStats, isStarred, highlightedCode, previousEdit, nextEdit, historyId: params.history
     };
 };
