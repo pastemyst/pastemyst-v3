@@ -10,6 +10,7 @@
     export let langStats: LangStat[];
     export let stats: Stats;
     export let previewMarkdown = true;
+    export let historyId: string | null = null;
 
     let copied = false;
 
@@ -94,7 +95,7 @@
         {#if !paste.private}
             <a
                 class="btn"
-                href="/raw/{paste.id}/{pasty.id}"
+                href="/raw/{paste.id}/{pasty.id}/{historyId || ''}"
                 aria-label="view raw content"
                 use:tooltip
             >
