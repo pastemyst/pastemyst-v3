@@ -4,7 +4,7 @@ namespace pastemyst.Tests;
 
 public class DatabaseFixture : IDisposable
 {
-    public IMongoService MongoService { get; }
+    public MongoService MongoService { get; }
 
     public DatabaseFixture()
     {

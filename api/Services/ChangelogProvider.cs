@@ -4,12 +4,7 @@ using Release = pastemyst.Models.Release;
 
 namespace pastemyst.Services;
 
-public interface IChangelogProvider
-{
-    public List<Release> Releases { get; }
-}
-
-public class ChangelogProvider : IChangelogProvider, IHostedService
+public class ChangelogProvider : IHostedService
 {
     public List<Release> Releases { get; } = new();
 

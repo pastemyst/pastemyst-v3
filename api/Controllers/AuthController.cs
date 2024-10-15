@@ -6,7 +6,7 @@ namespace pastemyst.Controllers;
 
 [ApiController]
 [Route("/api/v3")]
-public class AuthController(IAuthService authService) : ControllerBase
+public class AuthController(AuthService authService) : ControllerBase
 {
     [HttpGet("login/{provider}")]
     public async Task<IActionResult> Login(string provider)

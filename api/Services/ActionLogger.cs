@@ -2,12 +2,7 @@ using pastemyst.Models;
 
 namespace pastemyst.Services;
 
-public interface IActionLogger
-{
-    public Task LogActionAsync(ActionLogType type, string objectId);
-}
-
-public class ActionLogger(IMongoService mongo) : IActionLogger
+public class ActionLogger(MongoService mongo)
 {
     public async Task LogActionAsync(ActionLogType type, string objectId)
     {

@@ -9,42 +9,12 @@ using pastemyst.Utils;
 
 namespace pastemyst.Services;
 
-public interface IPasteService
-{
-    public Task<Paste> CreateAsync(PasteCreateInfo createInfo);
-
-    public Task<Paste> GetAsync(string id);
-
-    public Task<PasteStats> GetStatsAsync(string id);
-
-    public Task<List<LanguageStat>> GetLanguageStatsAsync(string id);
-
-    public List<LanguageStat> GetLanguageStats(Paste paste);
-
-    public Task<long> GetActiveCountAsync();
-
-    public Task DeleteAsync(string id);
-
-    public Task<bool> IsStarredAsync(string id);
-
-    public Task ToggleStarAsync(string id);
-
-    public Task TogglePinnedAsync(string id);
-
-    public Task TogglePrivateAsync(string id);
-
-    public Task<bool> ExistsByIdAsync(string id);
-
-    public Task<(byte[] zip, string title)> GetPasteAsZip(string id);
-}
-
 public class PasteService(
-    IIdProvider idProvider,
-    ILanguageProvider languageProvider,
-    IUserContext userContext,
-    IActionLogger actionLogger,
-    IMongoService mongo)
-    : IPasteService
+    IdProvider idProvider,
+    LanguageProvider languageProvider,
+    UserContext userContext,
+    ActionLogger actionLogger,
+    MongoService mongo)
 {
     public async Task<Paste> CreateAsync(PasteCreateInfo createInfo)
     {

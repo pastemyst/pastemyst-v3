@@ -3,12 +3,7 @@ using Semver;
 
 namespace pastemyst.Services;
 
-public interface IVersionProvider
-{
-    string Version { get; }
-}
-
-public class VersionProvider : IVersionProvider, IHostedService
+public class VersionProvider : IHostedService
 {
     public string Version { get; private set; } = null!;
 

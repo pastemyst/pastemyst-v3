@@ -7,7 +7,7 @@ namespace pastemyst.Jobs;
 
 public class ExpireSesssionSettingsJob(
     ILogger<ExpireSesssionSettingsJob> logger,
-    IMongoService mongo)
+    MongoService mongo)
     : IJob
 {
     public async Task Execute(IJobExecutionContext context)

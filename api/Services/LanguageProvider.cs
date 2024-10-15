@@ -7,21 +7,7 @@ using YamlDotNet.Serialization.NamingConventions;
 
 namespace pastemyst.Services;
 
-public interface ILanguageProvider
-{
-    public List<Language> Languages { get; }
-
-    public List<string> PopularLanguageNames { get; }
-
-    /// <summary>
-    /// Tries to find a language based on the name (it will search names, aliases and extensions).
-    /// </summary>
-    public Language FindByName(string name);
-
-    public Task<Language> AutodetectLanguageAsync(string content);
-}
-
-public class LanguageProvider : ILanguageProvider, IHostedService
+public class LanguageProvider : IHostedService
 {
     private const string LanguagesUri =
         "https://raw.githubusercontent.com/github-linguist/linguist/v7.29.0/lib/linguist/languages.yml";
@@ -35,6 +21,9 @@ public class LanguageProvider : ILanguageProvider, IHostedService
         "Python", "Ruby", "Rust", "Scala", "Shell", "Swift", "TypeScript", "Yaml"
     ];
 
+    /// <summary>
+    /// Tries to find a language based on the name (it will search names, aliases and extensions).
+    /// </summary>
     public Language FindByName(string name)
     {
         Language foundLang = null;

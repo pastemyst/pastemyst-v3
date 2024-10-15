@@ -2,17 +2,7 @@ using pastemyst.Models;
 
 namespace pastemyst.Services;
 
-public interface IUserContext
-{
-    public User Self { get; }
-
-    public bool IsLoggedIn();
-    public bool UserIsSelf(User user);
-    public void LoginUser(User user);
-    public void LogoutUser();
-}
-
-public class UserContext : IUserContext
+public class UserContext
 {
     public User Self { get; private set;  }
 

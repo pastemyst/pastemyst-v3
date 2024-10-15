@@ -6,7 +6,7 @@ namespace pastemyst.Controllers;
 
 [ApiController]
 [Route("/api/v3/pastes")]
-public class PasteController(IPasteService pasteService) : ControllerBase
+public class PasteController(PasteService pasteService) : ControllerBase
 {
     [HttpGet("{pasteId}.zip")]
     public async Task<FileContentResult> GetPasteAsZip(string pasteId)

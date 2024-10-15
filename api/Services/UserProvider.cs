@@ -5,22 +5,7 @@ using pastemyst.Models;
 
 namespace pastemyst.Services;
 
-public interface IUserProvider
-{
-    public Task<User> GetByUsernameOrIdAsync(string username, string id);
-
-    public Task<User> GetByUsernameAsync(string username);
-
-    public Task<bool> ExistsByUsernameAsync(string username);
-
-    public Task<Page<PasteWithLangStats>> GetOwnedPastesAsync(string username, string tag, bool pinnedOnly, PageRequest pageRequest);
-
-    public Task<List<string>> GetTagsAsync(string username);
-
-    public Task DeleteUserAsync(string username);
-}
-
-public class UserProvider(IUserContext userContext, IPasteService pasteService, IMongoService mongo, IActionLogger actionLogger, IImageService imageService) : IUserProvider
+public class UserProvider(UserContext userContext, PasteService pasteService, MongoService mongo, ActionLogger actionLogger, ImageService imageService)
 {
     public async Task<User> GetByUsernameOrIdAsync(string username, string id)
     {
