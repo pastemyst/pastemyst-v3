@@ -82,6 +82,12 @@ public class PasteController(PasteService pasteService) : ControllerBase
         return await pasteService.EditAsync(pasteId, editInfo);
     }
 
+    [HttpPatch("{pasteId}/tags")]
+    public async Task<Paste> EditPasteTags(string pasteId, [FromBody] List<string> tags)
+    {
+        return await pasteService.EditTagsAsync(pasteId, tags);
+    }
+
     [HttpPost]
     public async Task<IActionResult> CreatePaste([FromBody] PasteCreateInfo createInfo)
     {
