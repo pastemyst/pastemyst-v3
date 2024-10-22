@@ -209,7 +209,10 @@ export const getPaste = async (
     return [null, res.status];
 };
 
-export const getPasteHistoryCompact = async (fetchFunc: FetchFunc, id: string): Promise<{ id: string, editedAt: string }[]> => {
+export const getPasteHistoryCompact = async (
+    fetchFunc: FetchFunc,
+    id: string
+): Promise<{ id: string; editedAt: string }[]> => {
     const res = await fetchFunc(`${env.PUBLIC_API_BASE}/pastes/${id}/history_compact`, {
         method: "get",
         credentials: "include"
@@ -220,7 +223,11 @@ export const getPasteHistoryCompact = async (fetchFunc: FetchFunc, id: string): 
     return [];
 };
 
-export const getPasteAtEdit = async (fetchFunc: FetchFunc, id: string, historyId: string): Promise<Paste | null> => {
+export const getPasteAtEdit = async (
+    fetchFunc: FetchFunc,
+    id: string,
+    historyId: string
+): Promise<Paste | null> => {
     const res = await fetchFunc(`${env.PUBLIC_API_BASE}/pastes/${id}/history/${historyId}`, {
         method: "get",
         credentials: "include"
@@ -231,7 +238,11 @@ export const getPasteAtEdit = async (fetchFunc: FetchFunc, id: string, historyId
     return null;
 };
 
-export const getPasteDiff = async (fetchFunc: FetchFunc, id: string, historyId: string): Promise<PasteDiff | null> => {
+export const getPasteDiff = async (
+    fetchFunc: FetchFunc,
+    id: string,
+    historyId: string
+): Promise<PasteDiff | null> => {
     const res = await fetchFunc(`${env.PUBLIC_API_BASE}/pastes/${id}/history/${historyId}/diff`, {
         method: "get",
         credentials: "include"

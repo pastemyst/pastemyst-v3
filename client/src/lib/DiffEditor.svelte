@@ -1,7 +1,7 @@
 <script lang="ts">
     import { onMount } from "svelte";
     import type { Pasty } from "./api/paste";
-    import { MergeView } from "@codemirror/merge"
+    import { MergeView } from "@codemirror/merge";
     import { EditorView } from "codemirror";
     import { Compartment, EditorState, type Extension } from "@codemirror/state";
     import { themes } from "./themes";
@@ -37,7 +37,7 @@
             highlightSpecialChars(),
             drawSelection(),
             EditorView.editable.of(false),
-            EditorState.readOnly.of(true),
+            EditorState.readOnly.of(true)
         ];
 
         editor = new MergeView({
@@ -52,7 +52,9 @@
             parent: editorElement
         });
 
-        const oldPastyLanguageDescription = cmLangs.find(l => oldPasty?.language.toLowerCase() === l.name.toLowerCase());
+        const oldPastyLanguageDescription = cmLangs.find(
+            (l) => oldPasty?.language.toLowerCase() === l.name.toLowerCase()
+        );
 
         if (oldPastyLanguageDescription) {
             const languageSupport = await oldPastyLanguageDescription.load();
@@ -62,7 +64,9 @@
             });
         }
 
-        const newPastyLanguageDescription = cmLangs.find(l => newPasty?.language.toLowerCase() === l.name.toLowerCase());
+        const newPastyLanguageDescription = cmLangs.find(
+            (l) => newPasty?.language.toLowerCase() === l.name.toLowerCase()
+        );
 
         if (newPastyLanguageDescription) {
             const languageSupport = await newPastyLanguageDescription.load();
@@ -77,13 +81,17 @@
 <div class="title flex row space-between">
     <div class="old">
         {#if oldPasty}
-            <span class:deleted={!newPasty || oldPasty.title !== newPasty.title}>{oldPasty.title}</span>
+            <span class:deleted={!newPasty || oldPasty.title !== newPasty.title}
+                >{oldPasty.title}</span
+            >
         {/if}
     </div>
 
     <div class="new">
         {#if newPasty}
-            <span class:added={!oldPasty || newPasty.title !== oldPasty.title}>{newPasty.title}</span>
+            <span class:added={!oldPasty || newPasty.title !== oldPasty.title}
+                >{newPasty.title}</span
+            >
         {/if}
     </div>
 </div>

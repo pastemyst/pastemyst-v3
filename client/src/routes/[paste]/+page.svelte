@@ -1,9 +1,6 @@
 <script lang="ts">
     import type { PageData } from "./$types";
-    import {
-        copyLinkToClipboardStore,
-        currentUserStore,
-    } from "$lib/stores";
+    import { copyLinkToClipboardStore, currentUserStore } from "$lib/stores";
     import { onMount } from "svelte";
     import toast from "svelte-french-toast";
     import PasteHeader from "$lib/PasteHeader.svelte";
@@ -39,10 +36,22 @@
     <title>pastemyst | {data.paste.title || "untitled"}</title>
 </svelte:head>
 
-<PasteHeader paste={data.paste} owner={data.owner} pasteStats={data.pasteStats} langStats={data.langStats} isStarred={data.isStarred} />
+<PasteHeader
+    paste={data.paste}
+    owner={data.owner}
+    pasteStats={data.pasteStats}
+    langStats={data.langStats}
+    isStarred={data.isStarred}
+/>
 
 {#if $currentUserStore?.id === data.paste.ownerId && data.paste.tags}
     <TagInput bind:tags={data.paste.tags} existingTags={data.userTags} on:update={onUpdateTags} />
 {/if}
 
-<Pasties paste={data.paste} settings={data.settings} pasteStats={data.pasteStats} langStats={data.langStats} highlightedCode={data.highlightedCode} />
+<Pasties
+    paste={data.paste}
+    settings={data.settings}
+    pasteStats={data.pasteStats}
+    langStats={data.langStats}
+    highlightedCode={data.highlightedCode}
+/>

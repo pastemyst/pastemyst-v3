@@ -1,4 +1,10 @@
-import { getPasteAtEdit, getPasteHistoryCompact, getPasteLangs, getPasteStats, isPasteStarred } from "$lib/api/paste";
+import {
+    getPasteAtEdit,
+    getPasteHistoryCompact,
+    getPasteLangs,
+    getPasteStats,
+    isPasteStarred
+} from "$lib/api/paste";
 import { error } from "@sveltejs/kit";
 import type { PageLoad } from "./$types";
 import { getUserById } from "$lib/api/user";
@@ -48,14 +54,22 @@ export const load: PageLoad = async ({ params, fetch, parent }) => {
         highlightedCode.push(await res.text());
     }
 
-    const currentHistoryIndex = history.findIndex(h => h.id === params.history);
+    const currentHistoryIndex = history.findIndex((h) => h.id === params.history);
 
-    type HistoryType = typeof history[0];
+    type HistoryType = (typeof history)[0];
 
     const previousEdit: HistoryType | undefined = history[currentHistoryIndex + 1];
     const nextEdit: HistoryType | undefined = history[currentHistoryIndex - 1];
 
     return {
-        paste, owner, pasteStats, langStats, isStarred, highlightedCode, previousEdit, nextEdit, historyId: params.history
+        paste,
+        owner,
+        pasteStats,
+        langStats,
+        isStarred,
+        highlightedCode,
+        previousEdit,
+        nextEdit,
+        historyId: params.history
     };
 };

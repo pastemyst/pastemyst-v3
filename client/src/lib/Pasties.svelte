@@ -100,9 +100,7 @@
             </div>
         {:else}
             <!-- eslint-disable-next-line svelte/no-at-html-tags -->
-            {@html highlightedCode[
-                paste.pasties.findIndex((p) => p.id === activePastyId)
-            ]}
+            {@html highlightedCode[paste.pasties.findIndex((p) => p.id === activePastyId)]}
         {/if}
     {/if}
 </div>
