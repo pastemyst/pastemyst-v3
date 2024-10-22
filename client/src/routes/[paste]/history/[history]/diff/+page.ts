@@ -10,7 +10,7 @@ import { error } from "@sveltejs/kit";
 import type { PageLoad } from "./$types";
 import { getUserById } from "$lib/api/user";
 
-export const load: PageLoad = async ({ params, fetch, parent }) => {
+export const load: PageLoad = async ({ params, fetch }) => {
     const pasteDiff = await getPasteDiff(fetch, params.paste, params.history);
 
     if (!pasteDiff) {
