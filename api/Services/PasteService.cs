@@ -450,7 +450,7 @@ public class PasteService(
         return history;
     }
 
-    public async Task<Paste> GetAtEdit(string id, string historyId)
+    public async Task<Paste> GetAtEditAsync(string id, string historyId)
     {
         var paste = await GetAsync(id);
 
@@ -465,5 +465,38 @@ public class PasteService(
         paste.Pasties = edit.Pasties;
 
         return paste;
+    }
+
+    public async Task<PasteDiff> GetDiffAsync(string id, string historyId)
+    {
+        var paste = await GetAsync(id);
+
+        var editIndex = paste.History.FindIndex(h => h.Id == historyId);
+
+        if (editIndex == -1)
+        {
+            throw new HttpException(HttpStatusCode.NotFound, "Edit not found.");
+        }
+
+        PasteHistory newEdit = null;
+        if (editIndex != paste.History.Count - 1)
+        {
+            newEdit = paste.History[editIndex + 1];
+        }
+        else
+        {
+            newEdit = new PasteHistory
+            {
+                Title = paste.Title,
+                Pasties = paste.Pasties
+            };
+        }
+
+        return new PasteDiff
+        {
+            CurrentPaste = paste,
+            OldPaste = paste.History[editIndex],
+            NewPaste = newEdit
+        };
     }
 }

@@ -7,7 +7,7 @@ export const load: PageLoad = async ({ params, fetch, parent }) => {
     const paste = await getPasteAtEdit(fetch, params.paste, params.history);
 
     if (!paste) {
-	error(404);
+        error(404);
     }
 
     const history = await getPasteHistoryCompact(fetch, params.paste);
@@ -56,6 +56,6 @@ export const load: PageLoad = async ({ params, fetch, parent }) => {
     const nextEdit: HistoryType | undefined = history[currentHistoryIndex - 1];
 
     return {
-	paste, owner, pasteStats, langStats, isStarred, highlightedCode, previousEdit, nextEdit, historyId: params.history
+        paste, owner, pasteStats, langStats, isStarred, highlightedCode, previousEdit, nextEdit, historyId: params.history
     };
 };

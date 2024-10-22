@@ -43,7 +43,13 @@ public class PasteController(PasteService pasteService) : ControllerBase
     [HttpGet("{pasteId}/history/{historyId}")]
     public async Task<Paste> GetPasteAtEdit(string pasteId, string historyId)
     {
-        return await pasteService.GetAtEdit(pasteId, historyId);
+        return await pasteService.GetAtEditAsync(pasteId, historyId);
+    }
+
+    [HttpGet("{pasteId}/history/{historyId}/diff")]
+    public async Task<PasteDiff> GetPasteDiff(string pasteId, string historyId)
+    {
+        return await pasteService.GetDiffAsync(pasteId, historyId);
     }
 
     [HttpDelete("{pasteId}")]
