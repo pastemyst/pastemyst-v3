@@ -21,7 +21,7 @@ export interface AppStats {
 
 export const getVersion = async (fetchFunc: FetchFunc): Promise<string> => {
     const res = await fetchFunc(`${env.PUBLIC_API_BASE}/meta/version`, {
-        method: "get"
+        method: "GET"
     });
 
     if (res.ok) return (await res.json()).version;
@@ -31,7 +31,7 @@ export const getVersion = async (fetchFunc: FetchFunc): Promise<string> => {
 
 export const getReleases = async (fetchFunc: FetchFunc): Promise<Release[]> => {
     const res = await fetchFunc(`${env.PUBLIC_API_BASE}/meta/releases`, {
-        method: "get"
+        method: "GET"
     });
 
     if (res.ok) return await res.json();
@@ -41,7 +41,7 @@ export const getReleases = async (fetchFunc: FetchFunc): Promise<Release[]> => {
 
 export const getActivePastes = async (fetchFunc: FetchFunc): Promise<number> => {
     const res = await fetchFunc(`${env.PUBLIC_API_BASE}/meta/active_pastes`, {
-        method: "get"
+        method: "GET"
     });
 
     if (res.ok) return (await res.json()).count;
@@ -51,7 +51,7 @@ export const getActivePastes = async (fetchFunc: FetchFunc): Promise<number> => 
 
 export const getAppStats = async (fetchFunc: FetchFunc): Promise<[AppStats | null, number]> => {
     const res = await fetchFunc(`${env.PUBLIC_API_BASE}/meta/stats`, {
-        method: "get"
+        method: "GET"
     });
 
     if (res.ok) return [await res.json(), res.status];

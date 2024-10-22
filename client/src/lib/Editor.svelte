@@ -287,7 +287,7 @@
 
     const preview = async () => {
         const res = await fetch("/internal/highlight", {
-            method: "post",
+            method: "POST",
             body: JSON.stringify({
                 content: getContent(),
                 language: getSelectedLang().name,

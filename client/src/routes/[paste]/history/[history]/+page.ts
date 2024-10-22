@@ -36,7 +36,7 @@ export const load: PageLoad = async ({ params, fetch, parent }) => {
 
     for (const pasty of paste.pasties) {
         const res = await fetch("/internal/highlight", {
-            method: "post",
+            method: "POST",
             headers: {
                 "Content-Type": "application/json"
             },
