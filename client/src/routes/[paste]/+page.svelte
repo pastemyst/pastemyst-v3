@@ -571,7 +571,7 @@
             .lang {
                 border-radius: $border-radius;
                 padding: 0.25rem 0.5rem;
-                color: var(--color-bg2);
+                color: var(--color-bg);
 
                 &.dark {
                     color: var(--color-fg);
