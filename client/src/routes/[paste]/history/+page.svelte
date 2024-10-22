@@ -9,24 +9,44 @@
     export let data: PageData;
 </script>
 
-<PasteHeader paste={data.paste} owner={data.owner} pasteStats={data.pasteStats} langStats={data.langStats} isStarred={data.isStarred} />
+<PasteHeader
+    paste={data.paste}
+    owner={data.owner}
+    pasteStats={data.pasteStats}
+    langStats={data.langStats}
+    isStarred={data.isStarred}
+/>
 
 {#if $currentUserStore?.id === data.paste.ownerId && data.paste.tags}
-    <TagInput bind:tags={data.paste.tags} existingTags={[]} anonymousPaste={false} readonly={true} />
+    <TagInput
+        bind:tags={data.paste.tags}
+        existingTags={[]}
+        anonymousPaste={false}
+        readonly={true}
+    />
 {/if}
 
 <section>
-    <h3>list of all edits made to this paste, <a href="/{data.paste.id}">go back to the paste</a></h3>
+    <h3>
+        list of all edits made to this paste, <a href="/{data.paste.id}">go back to the paste</a>
+    </h3>
 
     {#each data.history as history}
         <div class="edit flex row center space-between">
             <div class="flex col">
-                <a href="/{data.paste.id}/history/{history.id}/diff">{formatDistanceToNow(new Date(history.editedAt), { addSuffix: true })}</a>
+                <a href="/{data.paste.id}/history/{history.id}/diff"
+                    >{formatDistanceToNow(new Date(history.editedAt), { addSuffix: true })}</a
+                >
                 <span>{new Date(history.editedAt)}</span>
             </div>
 
             <div class="flex row center gap-s">
-                <a href="/{data.paste.id}/history/{history.id}/diff" class="btn" aria-label="view diff" use:tooltip>
+                <a
+                    href="/{data.paste.id}/history/{history.id}/diff"
+                    class="btn"
+                    aria-label="view diff"
+                    use:tooltip
+                >
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" class="icon">
                         <path
                             fill="currentColor"
@@ -35,7 +55,12 @@
                     </svg>
                 </a>
 
-                <a href="/{data.paste.id}/history/{history.id}" class="btn" aria-label="view paste at this point" use:tooltip>
+                <a
+                    href="/{data.paste.id}/history/{history.id}"
+                    class="btn"
+                    aria-label="view paste at this point"
+                    use:tooltip
+                >
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" class="icon">
                         <path
                             fill="currentColor"

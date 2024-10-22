@@ -10,7 +10,7 @@ export const GET: RequestHandler = async ({ params }) => {
     if (params.history) {
         paste = await getPasteAtEdit(fetch, params.paste, params.history);
     } else {
-        [ paste ] = await getPaste(fetch, params.paste);
+        [paste] = await getPaste(fetch, params.paste);
     }
 
     if (!paste) {

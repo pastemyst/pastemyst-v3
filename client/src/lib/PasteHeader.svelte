@@ -1,6 +1,14 @@
 <script lang="ts">
     import { formatDistanceToNow } from "date-fns";
-    import { deletePaste, ExpiresIn, pinPaste, starPaste, togglePrivatePaste, type Paste, type PasteStats } from "./api/paste";
+    import {
+        deletePaste,
+        ExpiresIn,
+        pinPaste,
+        starPaste,
+        togglePrivatePaste,
+        type Paste,
+        type PasteStats
+    } from "./api/paste";
     import { tooltip } from "./tooltips";
     import type { User } from "./api/user";
     import { cmdPalOpen, cmdPalTitle, currentUserStore } from "./stores";
@@ -119,9 +127,7 @@
                 {formatDistanceToNow(new Date(paste.createdAt), { addSuffix: true })}
             </span>
             {#if owner}
-                <span class="owner"
-                    >by <a href="/~{owner.username}">{owner.username}</a></span
-                >
+                <span class="owner">by <a href="/~{owner.username}">{owner.username}</a></span>
             {/if}
             {#if paste.expiresIn != ExpiresIn.never}
                 <span class="separator">-</span>

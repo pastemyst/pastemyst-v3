@@ -57,7 +57,12 @@
     />
 </div>
 
-<TagInput bind:tags={data.paste.tags} existingTags={data.userTags} anonymousPaste={false} readonly={true} />
+<TagInput
+    bind:tags={data.paste.tags}
+    existingTags={data.userTags}
+    anonymousPaste={false}
+    readonly={true}
+/>
 
 <TabbedEditor
     settings={data.settings}

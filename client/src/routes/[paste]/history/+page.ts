@@ -1,4 +1,10 @@
-import { getPaste, getPasteHistoryCompact, getPasteLangs, getPasteStats, isPasteStarred } from "$lib/api/paste";
+import {
+    getPaste,
+    getPasteHistoryCompact,
+    getPasteLangs,
+    getPasteStats,
+    isPasteStarred
+} from "$lib/api/paste";
 import { error } from "@sveltejs/kit";
 import type { PageLoad } from "./$types";
 import { getUserById } from "$lib/api/user";
@@ -30,6 +36,11 @@ export const load: PageLoad = async ({ params, fetch }) => {
     }
 
     return {
-        history, paste, owner, pasteStats, langStats, isStarred
+        history,
+        paste,
+        owner,
+        pasteStats,
+        langStats,
+        isStarred
     };
 };
