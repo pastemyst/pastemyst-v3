@@ -11,18 +11,18 @@ export const load: PageLoad = async ({ params, url, fetch }) => {
     const tagQuery = tag == null ? "" : "&tag=" + tag;
 
     const userRes = await fetch(`${env.PUBLIC_API_BASE}/users/${params.user}`, {
-        method: "get"
+        method: "GET"
     });
 
     const meRes = await fetch(`${env.PUBLIC_API_BASE}/auth/self`, {
-        method: "get",
+        method: "GET",
         credentials: "include"
     });
 
     const userPastesRes = await fetch(
         `${env.PUBLIC_API_BASE}/users/${params.user}/pastes?pageSize=5${tagQuery}`,
         {
-            method: "get",
+            method: "GET",
             credentials: "include"
         }
     );
@@ -30,7 +30,7 @@ export const load: PageLoad = async ({ params, url, fetch }) => {
     const userPinnedPastesRes = await fetch(
         `${env.PUBLIC_API_BASE}/users/${params.user}/pastes/pinned?pageSize=5`,
         {
-            method: "get",
+            method: "GET",
             credentials: "include"
         }
     );

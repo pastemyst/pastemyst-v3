@@ -8,7 +8,7 @@ export const createAccount = async (username: string): Promise<string | null> =>
     };
 
     const res = await fetch(`${env.PUBLIC_API_BASE}/auth/register`, {
-        method: "post",
+        method: "POST",
         credentials: "include",
         headers: {
             "Content-Type": "application/json"
@@ -23,7 +23,7 @@ export const createAccount = async (username: string): Promise<string | null> =>
 
 export const getSelf = async (fetchFunc: FetchFunc): Promise<User | null> => {
     const res = await fetchFunc(`${env.PUBLIC_API_BASE}/auth/self`, {
-        method: "get",
+        method: "GET",
         credentials: "include"
     });
 
