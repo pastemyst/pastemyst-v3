@@ -71,6 +71,19 @@ export interface PasteEditInfo {
     pasties: PastyEditInfo[];
 }
 
+export interface PasteHistory {
+    id: string;
+    editedAt: string;
+    title: string;
+    pasties: Pasty[];
+}
+
+export interface PasteDiff {
+    currentPaste: Paste;
+    oldPaste: PasteHistory;
+    newPaste: PasteHistory;
+}
+
 export interface PastyEditInfo {
     id?: string;
     title: string;
@@ -209,6 +222,17 @@ export const getPasteHistoryCompact = async (fetchFunc: FetchFunc, id: string): 
 
 export const getPasteAtEdit = async (fetchFunc: FetchFunc, id: string, historyId: string): Promise<Paste | null> => {
     const res = await fetchFunc(`${env.PUBLIC_API_BASE}/pastes/${id}/history/${historyId}`, {
+        method: "get",
+        credentials: "include"
+    });
+
+    if (res.ok) return await res.json();
+
+    return null;
+};
+
+export const getPasteDiff = async (fetchFunc: FetchFunc, id: string, historyId: string): Promise<PasteDiff | null> => {
+    const res = await fetchFunc(`${env.PUBLIC_API_BASE}/pastes/${id}/history/${historyId}/diff`, {
         method: "get",
         credentials: "include"
     });
