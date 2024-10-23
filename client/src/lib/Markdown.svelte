@@ -1,10 +1,10 @@
 <script lang="ts">
     import { marked } from "marked";
-    import { gfmHeadingId } from "marked-gfm-heading-id";
+    import { markedHeadingAnchorExtension } from "./marked-heading-anchor";
 
     export let content: string;
 
-    marked.use(gfmHeadingId());
+    marked.use(markedHeadingAnchorExtension());
 
     let markdownHtml = marked.parse(content, { gfm: true }) as string;
 </script>

@@ -158,7 +158,7 @@
         }
 
         .markdown {
-            padding: 0rem 1rem;
+            padding: 0rem 2rem;
         }
 
         :global(.shiki),

@@ -367,6 +367,10 @@ section {
         margin-top: 2rem;
     }
 
+    h1, h2, h3, h4, h5, h6 {
+        scroll-margin-top: 5.5rem;
+    }
+
     blockquote {
         border-left: 4px solid var(--color-secondary);
         padding-left: 1rem;
@@ -388,5 +392,29 @@ section {
 
     img {
         max-width: 100%;
+    }
+
+    .markdown-heading {
+        position: relative;
+
+        &:hover {
+            .markdown-heading-anchor {
+                opacity: 1;
+            }
+        }
+
+        .markdown-heading-anchor {
+            position: absolute;
+            top: 50%;
+            left: -28px;
+            display: flex;
+            margin: auto;
+            width: 25px;
+            height: 25px;
+            opacity: 0;
+            justify-content: center;
+            align-items: center;
+            transform: translateY(calc(-50% - 0.3rem));
+        }
     }
 }
