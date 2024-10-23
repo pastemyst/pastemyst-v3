@@ -12,6 +12,13 @@ public class Paste
 
     public DateTime CreatedAt { get; init; } = DateTime.UtcNow;
 
+    public DateTime? EditedAt {
+        get {
+            if (History.Count == 0) return null;
+            return History[^1].EditedAt;
+        }
+    }
+
     public ExpiresIn ExpiresIn { get; init; } = ExpiresIn.Never;
 
     public DateTime? DeletesAt { get; init; }
@@ -31,4 +38,6 @@ public class Paste
     [JsonIgnore] public List<string> Stars { get; set; } = new();
 
     [JsonPropertyName("stars")] public int StarsCount => Stars.Count;
+
+    [JsonIgnore] public List<PasteHistory> History { get; set; } = new();
 }

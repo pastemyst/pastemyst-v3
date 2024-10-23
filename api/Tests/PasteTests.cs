@@ -1043,4 +1043,361 @@ public class PasteTests : IClassFixture<DatabaseFixture>
 
         userContext.LogoutUser();
     }
+
+    [Fact]
+    public async Task TestEdit_ShouldThrow_WhenLoggedOut()
+    {
+        var createInfo = new PasteCreateInfo
+        {
+            Pasties = new()
+            {
+                new()
+                {
+                    Content = "Hello, World!"
+                }
+            },
+        };
+
+        var paste = await pasteService.CreateAsync(createInfo);
+
+        var editInfo = new PasteEditInfo
+        {
+            Title = "New Title",
+            Pasties = new()
+            {
+                new()
+                {
+                    Id = paste.Pasties[0].Id,
+                    Content = "New Content"
+                }
+            }
+        };
+
+        await Assert.ThrowsAsync<HttpException>(async () => await pasteService.EditAsync(paste.Id, editInfo));
+    }
+
+    [Fact]
+    public async Task TestEdit_ShouldThrow_WhenNotOwnedPaste()
+    {
+        var createInfo = new PasteCreateInfo
+        {
+            Pasties = new()
+            {
+                new()
+                {
+                    Content = "Hello, World!"
+                }
+            },
+        };
+
+        var paste = await pasteService.CreateAsync(createInfo);
+
+        var editInfo = new PasteEditInfo
+        {
+            Title = "New Title",
+            Pasties = new()
+            {
+                new()
+                {
+                    Id = paste.Pasties[0].Id,
+                    Content = "New Content"
+                }
+            }
+        };
+
+        userContext.LoginUser(new User { Id = "1" });
+
+        await Assert.ThrowsAsync<HttpException>(async () => await pasteService.EditAsync(paste.Id, editInfo));
+
+        userContext.LogoutUser();
+    }
+
+    [Fact]
+    public async Task TestEdit_ShouldThrow_WhenNotOwner()
+    {
+        var createInfo = new PasteCreateInfo
+        {
+            Pasties = new()
+            {
+                new()
+                {
+                    Content = "Hello, World!"
+                }
+            },
+        };
+
+        userContext.LoginUser(new User { Id = "1" });
+
+        var paste = await pasteService.CreateAsync(createInfo);
+
+        var editInfo = new PasteEditInfo
+        {
+            Title = "New Title",
+            Pasties = new()
+            {
+                new()
+                {
+                    Id = paste.Pasties[0].Id,
+                    Content = "New Content"
+                }
+            }
+        };
+
+        userContext.LoginUser(new User { Id = "2" });
+
+        await Assert.ThrowsAsync<HttpException>(async () => await pasteService.EditAsync(paste.Id, editInfo));
+
+        userContext.LogoutUser();
+    }
+
+    [Fact]
+    public async Task TestEdit_ShouldUpdateTitleAndContent()
+    {
+        var createInfo = new PasteCreateInfo
+        {
+            Pasties = new()
+            {
+                new()
+                {
+                    Content = "Hello, World!"
+                }
+            },
+        };
+
+        userContext.LoginUser(new User { Id = "1" });
+
+        var paste = await pasteService.CreateAsync(createInfo);
+
+        var editInfo = new PasteEditInfo
+        {
+            Title = "New Title",
+            Pasties = new()
+            {
+                new()
+                {
+                    Id = paste.Pasties[0].Id,
+                    Content = "New Content"
+                }
+            }
+        };
+
+        await pasteService.EditAsync(paste.Id, editInfo);
+
+        var fetchedPaste = await pasteService.GetAsync(paste.Id);
+
+        Assert.Equal("New Title", fetchedPaste.Title);
+        Assert.Equal("New Content", fetchedPaste.Pasties[0].Content);
+
+        Assert.Single(fetchedPaste.History);
+        Assert.Equal(paste.Title, fetchedPaste.History[0].Title);
+        Assert.Equal(paste.Pasties[0].Content, fetchedPaste.History[0].Pasties[0].Content);
+        Assert.Equal(fetchedPaste.Pasties[0].Id, fetchedPaste.History[0].Pasties[0].Id);
+
+        userContext.LogoutUser();
+    }
+
+    [Fact]
+    public async Task TestEditTags_ShouldUpdateTags()
+    {
+        var createInfo = new PasteCreateInfo
+        {
+            Pasties = new()
+            {
+                new()
+                {
+                    Content = "Hello, World!"
+                }
+            },
+            Tags = ["tag1"]
+        };
+
+        userContext.LoginUser(new User { Id = "1" });
+
+        var paste = await pasteService.CreateAsync(createInfo);
+
+        await pasteService.EditTagsAsync(paste.Id, ["tag2", "tag3"]);
+
+        var fetchedPaste = await pasteService.GetAsync(paste.Id);
+
+        Assert.Equal(["tag2", "tag3"], fetchedPaste.Tags);
+
+        userContext.LogoutUser();
+    }
+
+    [Fact]
+    public async Task TestGetAtEdit_ShouldReturnNotFound_WhenNoHistory()
+    {
+        var createInfo = new PasteCreateInfo
+        {
+            Pasties = new()
+            {
+                new()
+                {
+                    Content = "Hello, World!"
+                }
+            },
+        };
+
+        userContext.LoginUser(new User { Id = "1" });
+
+        var paste = await pasteService.CreateAsync(createInfo);
+
+        await Assert.ThrowsAsync<HttpException>(async () => await pasteService.GetAtEditAsync(paste.Id, "1"));
+
+        userContext.LogoutUser();
+    }
+
+    [Fact]
+    public async Task TestGetAtEdit_ShouldReturnPasteAtEdit()
+    {
+        var createInfo = new PasteCreateInfo
+        {
+            Pasties = new()
+            {
+                new()
+                {
+                    Content = "Hello, World!"
+                }
+            },
+        };
+
+        userContext.LoginUser(new User { Id = "1" });
+
+        var paste = await pasteService.CreateAsync(createInfo);
+
+        var editInfo = new PasteEditInfo
+        {
+            Title = "New Title",
+            Pasties = new()
+            {
+                new()
+                {
+                    Id = paste.Pasties[0].Id,
+                    Content = "New Content"
+                }
+            }
+        };
+
+        await pasteService.EditAsync(paste.Id, editInfo);
+
+        var history = await pasteService.GetHistoryCompactAsync(paste.Id);
+
+        var fetchedPaste = await pasteService.GetAtEditAsync(paste.Id, history[0].Id);
+
+        Assert.Equal(paste.Title, fetchedPaste.Title);
+        Assert.Equal(paste.Pasties[0].Content, fetchedPaste.Pasties[0].Content);
+
+        userContext.LogoutUser();
+    }
+
+    [Fact]
+    public async Task GetDiff_ShouldReturnProperDiff_WhenOnlyOneEdit()
+    {
+        var createInfo = new PasteCreateInfo
+        {
+            Pasties = new()
+            {
+                new()
+                {
+                    Content = "Hello, World!"
+                }
+            },
+        };
+
+        userContext.LoginUser(new User { Id = "1" });
+
+        var paste = await pasteService.CreateAsync(createInfo);
+
+        var editInfo = new PasteEditInfo
+        {
+            Title = "New Title",
+            Pasties = new()
+            {
+                new()
+                {
+                    Id = paste.Pasties[0].Id,
+                    Content = "New Content"
+                }
+            }
+        };
+
+        await pasteService.EditAsync(paste.Id, editInfo);
+
+        var history = await pasteService.GetHistoryCompactAsync(paste.Id);
+
+        var diff = await pasteService.GetDiffAsync(paste.Id, history[0].Id);
+
+        Assert.Equal("New Title", diff.CurrentPaste.Title);
+        Assert.Equal("New Title", diff.NewPaste.Title);
+        Assert.Equal("New Content", diff.CurrentPaste.Pasties[0].Content);
+        Assert.Equal("New Content", diff.NewPaste.Pasties[0].Content);
+        Assert.Equal("Hello, World!", diff.OldPaste.Pasties[0].Content);
+        Assert.Empty(diff.OldPaste.Title);
+
+        userContext.LogoutUser();
+    }
+
+    [Fact]
+    public async Task GetDiff_ShouldReturnProperDiff_WhenMultipleEdits()
+    {
+        var createInfo = new PasteCreateInfo
+        {
+            Pasties = new()
+            {
+                new()
+                {
+                    Content = "Hello, World!"
+                }
+            },
+        };
+
+        userContext.LoginUser(new User { Id = "1" });
+
+        var paste = await pasteService.CreateAsync(createInfo);
+
+        var editInfo = new PasteEditInfo
+        {
+            Title = "New Title",
+            Pasties = new()
+            {
+                new()
+                {
+                    Id = paste.Pasties[0].Id,
+                    Content = "New Content"
+                }
+            }
+        };
+
+        await pasteService.EditAsync(paste.Id, editInfo);
+
+        editInfo = new PasteEditInfo
+        {
+            Title = "New Title 2",
+            Pasties = new()
+            {
+                new()
+                {
+                    Id = paste.Pasties[0].Id,
+                    Content = "New Content 2"
+                }
+            }
+        };
+
+        await pasteService.EditAsync(paste.Id, editInfo);
+
+        var history = await pasteService.GetHistoryCompactAsync(paste.Id);
+
+        var diff = await pasteService.GetDiffAsync(paste.Id, history[0].Id);
+
+        Assert.Equal("New Title 2", diff.CurrentPaste.Title);
+        Assert.Equal("New Content 2", diff.CurrentPaste.Pasties[0].Content);
+
+        Assert.Equal("New Title 2", diff.NewPaste.Title);
+        Assert.Equal("New Content 2", diff.NewPaste.Pasties[0].Content);
+
+        Assert.Equal("New Title", diff.OldPaste.Title);
+        Assert.Equal("New Content", diff.OldPaste.Pasties[0].Content);
+
+        userContext.LogoutUser();
+    }
 }

@@ -19,6 +19,7 @@ export interface Paste {
     id: string;
     title: string;
     createdAt: string;
+    editedAt?: string;
     expiresIn: ExpiresIn;
     deletesAt: string;
     pasties: Pasty[];
@@ -60,6 +61,31 @@ export interface PasteCreateInfo {
 }
 
 export interface PastyCreateInfo {
+    title: string;
+    content: string;
+    language: string;
+}
+
+export interface PasteEditInfo {
+    title: string;
+    pasties: PastyEditInfo[];
+}
+
+export interface PasteHistory {
+    id: string;
+    editedAt: string;
+    title: string;
+    pasties: Pasty[];
+}
+
+export interface PasteDiff {
+    currentPaste: Paste;
+    oldPaste: PasteHistory;
+    newPaste: PasteHistory;
+}
+
+export interface PastyEditInfo {
+    id?: string;
     title: string;
     content: string;
     language: string;
@@ -124,14 +150,44 @@ export const expiresInToLongString = (exp: ExpiresIn): string => {
     }
 };
 
-export const createPaste = async (skeleton: PasteCreateInfo): Promise<Paste | null> => {
+export const createPaste = async (createInfo: PasteCreateInfo): Promise<Paste | null> => {
     const res = await fetch(`${env.PUBLIC_API_BASE}/pastes/`, {
-        method: "post",
+        method: "POST",
         credentials: "include",
         headers: {
             "Content-Type": "application/json"
         },
-        body: JSON.stringify(skeleton)
+        body: JSON.stringify(createInfo)
+    });
+
+    if (res.ok) return await res.json();
+
+    return null;
+};
+
+export const editPasteTags = async (id: string, tags: string[]): Promise<Paste | null> => {
+    const res = await fetch(`${env.PUBLIC_API_BASE}/pastes/${id}/tags`, {
+        method: "PATCH",
+        credentials: "include",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify(tags)
+    });
+
+    if (res.ok) return await res.json();
+
+    return null;
+};
+
+export const editPaste = async (id: string, editInfo: PasteEditInfo): Promise<Paste | null> => {
+    const res = await fetch(`${env.PUBLIC_API_BASE}/pastes/${id}`, {
+        method: "PATCH",
+        credentials: "include",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify(editInfo)
     });
 
     if (res.ok) return await res.json();
@@ -144,7 +200,7 @@ export const getPaste = async (
     id: string
 ): Promise<[Paste | null, number]> => {
     const res = await fetchFunc(`${env.PUBLIC_API_BASE}/pastes/${id}`, {
-        method: "get",
+        method: "GET",
         credentials: "include"
     });
 
@@ -153,9 +209,53 @@ export const getPaste = async (
     return [null, res.status];
 };
 
+export const getPasteHistoryCompact = async (
+    fetchFunc: FetchFunc,
+    id: string
+): Promise<{ id: string; editedAt: string }[]> => {
+    const res = await fetchFunc(`${env.PUBLIC_API_BASE}/pastes/${id}/history_compact`, {
+        method: "GET",
+        credentials: "include"
+    });
+
+    if (res.ok) return await res.json();
+
+    return [];
+};
+
+export const getPasteAtEdit = async (
+    fetchFunc: FetchFunc,
+    id: string,
+    historyId: string
+): Promise<Paste | null> => {
+    const res = await fetchFunc(`${env.PUBLIC_API_BASE}/pastes/${id}/history/${historyId}`, {
+        method: "GET",
+        credentials: "include"
+    });
+
+    if (res.ok) return await res.json();
+
+    return null;
+};
+
+export const getPasteDiff = async (
+    fetchFunc: FetchFunc,
+    id: string,
+    historyId: string
+): Promise<PasteDiff | null> => {
+    const res = await fetchFunc(`${env.PUBLIC_API_BASE}/pastes/${id}/history/${historyId}/diff`, {
+        method: "GET",
+        credentials: "include"
+    });
+
+    if (res.ok) return await res.json();
+
+    return null;
+};
+
 export const deletePaste = async (id: string): Promise<boolean> => {
     const res = await fetch(`${env.PUBLIC_API_BASE}/pastes/${id}`, {
-        method: "delete",
+        method: "DELETE",
         credentials: "include"
     });
 
@@ -164,7 +264,7 @@ export const deletePaste = async (id: string): Promise<boolean> => {
 
 export const starPaste = async (id: string): Promise<boolean> => {
     const res = await fetch(`${env.PUBLIC_API_BASE}/pastes/${id}/star`, {
-        method: "post",
+        method: "POST",
         credentials: "include"
     });
 
@@ -173,7 +273,7 @@ export const starPaste = async (id: string): Promise<boolean> => {
 
 export const pinPaste = async (id: string): Promise<boolean> => {
     const res = await fetch(`${env.PUBLIC_API_BASE}/pastes/${id}/pin`, {
-        method: "post",
+        method: "POST",
         credentials: "include"
     });
 
@@ -182,7 +282,7 @@ export const pinPaste = async (id: string): Promise<boolean> => {
 
 export const isPasteStarred = async (fetchFunc: FetchFunc, id: string): Promise<boolean> => {
     const res = await fetchFunc(`${env.PUBLIC_API_BASE}/pastes/${id}/star`, {
-        method: "get",
+        method: "GET",
         credentials: "include"
     });
 
@@ -193,7 +293,7 @@ export const isPasteStarred = async (fetchFunc: FetchFunc, id: string): Promise<
 
 export const togglePrivatePaste = async (id: string): Promise<boolean> => {
     const res = await fetch(`${env.PUBLIC_API_BASE}/pastes/${id}/private`, {
-        method: "post",
+        method: "POST",
         credentials: "include"
     });
 
@@ -205,7 +305,7 @@ export const getPasteStats = async (
     id: string
 ): Promise<PasteStats | null> => {
     const res = await fetchFunc(`${env.PUBLIC_API_BASE}/pastes/${id}/stats`, {
-        method: "get",
+        method: "GET",
         credentials: "include"
     });
 
@@ -216,7 +316,7 @@ export const getPasteStats = async (
 
 export const getPasteLangs = async (fetchFunc: FetchFunc, id: string): Promise<LangStat[]> => {
     const res = await fetchFunc(`${env.PUBLIC_API_BASE}/pastes/${id}/langs`, {
-        method: "get",
+        method: "GET",
         credentials: "include"
     });
 
@@ -237,7 +337,7 @@ export const getUserPastes = async (
             `?page=${page}` +
             `&pageSize=${pageSize}`,
         {
-            method: "get",
+            method: "GET",
             credentials: "include"
         }
     );

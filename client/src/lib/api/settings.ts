@@ -20,7 +20,7 @@ export const getSettings = async (
     fetchFunc: FetchFunc
 ): Promise<[settings: Settings, cookie?: string]> => {
     const res = await fetchFunc(`${env.PUBLIC_API_BASE}/settings`, {
-        method: "get",
+        method: "GET",
         credentials: "include"
     });
 
@@ -32,7 +32,7 @@ export const getSettings = async (
 
 export const updateSettings = async (fetchFunc: FetchFunc, settings: Settings) => {
     await fetchFunc(`${env.PUBLIC_API_BASE}/settings`, {
-        method: "patch",
+        method: "PATCH",
         credentials: "include",
         headers: {
             "Content-Type": "application/json"
@@ -43,7 +43,7 @@ export const updateSettings = async (fetchFunc: FetchFunc, settings: Settings) =
 
 export const getUserSettings = async (fetchFunc: FetchFunc): Promise<UserSettings> => {
     const res = await fetchFunc(`${env.PUBLIC_API_BASE}/settings/user`, {
-        method: "get",
+        method: "GET",
         credentials: "include"
     });
 
@@ -52,7 +52,7 @@ export const getUserSettings = async (fetchFunc: FetchFunc): Promise<UserSetting
 
 export const updateUserSettings = async (fetchFunc: FetchFunc, userSettings: UserSettings) => {
     await fetchFunc(`${env.PUBLIC_API_BASE}/settings/user`, {
-        method: "patch",
+        method: "PATCH",
         credentials: "include",
         headers: {
             "Content-Type": "application/json"

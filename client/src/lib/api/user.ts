@@ -13,7 +13,7 @@ export interface User {
 
 export const getUserByUsername = async (username: string): Promise<User | null> => {
     const res = await fetch(`${env.PUBLIC_API_BASE}/users/${username}`, {
-        method: "get"
+        method: "GET"
     });
 
     if (res.ok) return await res.json();
@@ -26,7 +26,7 @@ export const getUserById = async (
     id: string
 ): Promise<[User | null, number]> => {
     const res = await fetchFunc(`${env.PUBLIC_API_BASE}/users?id=${id}`, {
-        method: "get"
+        method: "GET"
     });
 
     if (res.ok) return [await res.json(), res.status];
@@ -36,7 +36,7 @@ export const getUserById = async (
 
 export const getUserTags = async (fetchFunc: FetchFunc, username: string): Promise<string[]> => {
     const res = await fetchFunc(`${env.PUBLIC_API_BASE}/users/${username}/tags`, {
-        method: "get",
+        method: "GET",
         credentials: "include"
     });
 
@@ -47,7 +47,7 @@ export const getUserTags = async (fetchFunc: FetchFunc, username: string): Promi
 
 export const deleteUser = async (username: string): Promise<boolean> => {
     const res = await fetch(`${env.PUBLIC_API_BASE}/users/${username}`, {
-        method: "delete",
+        method: "DELETE",
         credentials: "include"
     });
 

@@ -1,7 +1,7 @@
 import { error } from "@sveltejs/kit";
 import { ExpiresIn, getPaste, getPasteLangs, getPasteStats, isPasteStarred } from "$lib/api/paste";
 import type { PageLoad } from "./$types";
-import { getUserById } from "$lib/api/user";
+import { getUserById, getUserTags } from "$lib/api/user";
 import { formatDistanceToNow } from "date-fns";
 
 export const load: PageLoad = async ({ params, fetch, parent }) => {
@@ -13,10 +13,13 @@ export const load: PageLoad = async ({ params, fetch, parent }) => {
     }
 
     const relativeCreatedAt = formatDistanceToNow(new Date(paste.createdAt), { addSuffix: true });
-    const relativesExpiresIn =
+    const relativeExpiresIn =
         paste.expiresIn !== ExpiresIn.never
             ? formatDistanceToNow(new Date(paste.deletesAt), { addSuffix: true })
             : "";
+    const relativeEditedAt = paste.editedAt
+        ? formatDistanceToNow(new Date(paste.editedAt), { addSuffix: true })
+        : undefined;
     const pasteStats = await getPasteStats(fetch, paste.id);
     const langStats = await getPasteLangs(fetch, paste.id);
     const [owner, ownerStatus] =
@@ -28,13 +31,13 @@ export const load: PageLoad = async ({ params, fetch, parent }) => {
         error(ownerStatus);
     }
 
-    const { settings } = await parent();
+    const { settings, self } = await parent();
 
     const highlightedCode: string[] = [];
 
     for (const pasty of paste.pasties) {
         const res = await fetch("/internal/highlight", {
-            method: "post",
+            method: "POST",
             headers: {
                 "Content-Type": "application/json"
             },
@@ -52,14 +55,21 @@ export const load: PageLoad = async ({ params, fetch, parent }) => {
         highlightedCode.push(await res.text());
     }
 
+    let tags: string[] = [];
+    if (self) {
+        tags = await getUserTags(fetch, self.username);
+    }
+
     return {
         paste: paste,
         relativeCreatedAt: relativeCreatedAt,
-        relativesExpiresIn: relativesExpiresIn,
+        relativeEditedAt: relativeEditedAt,
+        relativeExpiresIn: relativeExpiresIn,
         langStats: langStats,
         pasteStats: pasteStats,
         owner: owner,
         highlightedCode: highlightedCode,
-        isStarred: isStarred
+        isStarred: isStarred,
+        userTags: tags
     };
 };

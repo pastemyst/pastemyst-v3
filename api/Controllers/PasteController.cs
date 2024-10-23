@@ -34,6 +34,24 @@ public class PasteController(PasteService pasteService) : ControllerBase
         return await pasteService.GetLanguageStatsAsync(pasteId);
     }
 
+    [HttpGet("{pasteId}/history_compact")]
+    public async Task<List<PasteHistoryCompact>> GetPasteHistoryCompact(string pasteId)
+    {
+        return await pasteService.GetHistoryCompactAsync(pasteId);
+    }
+
+    [HttpGet("{pasteId}/history/{historyId}")]
+    public async Task<Paste> GetPasteAtEdit(string pasteId, string historyId)
+    {
+        return await pasteService.GetAtEditAsync(pasteId, historyId);
+    }
+
+    [HttpGet("{pasteId}/history/{historyId}/diff")]
+    public async Task<PasteDiff> GetPasteDiff(string pasteId, string historyId)
+    {
+        return await pasteService.GetDiffAsync(pasteId, historyId);
+    }
+
     [HttpDelete("{pasteId}")]
     public async Task DeletePaste(string pasteId)
     {
@@ -62,6 +80,18 @@ public class PasteController(PasteService pasteService) : ControllerBase
     public async Task TogglePrivatePaste(string pasteId)
     {
         await pasteService.TogglePrivateAsync(pasteId);
+    }
+
+    [HttpPatch("{pasteId}")]
+    public async Task<Paste> EditPaste(string pasteId, [FromBody] PasteEditInfo editInfo)
+    {
+        return await pasteService.EditAsync(pasteId, editInfo);
+    }
+
+    [HttpPatch("{pasteId}/tags")]
+    public async Task<Paste> EditPasteTags(string pasteId, [FromBody] List<string> tags)
+    {
+        return await pasteService.EditTagsAsync(pasteId, tags);
     }
 
     [HttpPost]
