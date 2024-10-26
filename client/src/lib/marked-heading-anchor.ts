@@ -16,8 +16,9 @@ export const markedHeadingAnchorExtension = (): MarkedExtension => {
             heading({ tokens, depth }) {
                 const text = this.parser.parseInline(tokens);
 
-                const raw = sanitizeHtml(this.parser.parseInline(tokens, this.parser.textRenderer))
-                    .trim();
+                const raw = sanitizeHtml(
+                    this.parser.parseInline(tokens, this.parser.textRenderer)
+                ).trim();
 
                 const id = slugger.slug(raw.toLowerCase());
 
