@@ -1,22 +1,6 @@
 import type { MarkedExtension } from 'marked';
 import GithubSlugger from 'github-slugger';
-
-// unescape from marked helpers
-const unescapeTest = /&(#(?:\d+)|(?:#x[0-9A-Fa-f]+)|(?:\w+));?/ig;
-
-export const unescape = (html: string) => {
-    // explicitly match decimal, hex, and named HTML entities
-    return html.replace(unescapeTest, (_, n) => {
-        n = n.toLowerCase();
-        if (n === 'colon') return ':';
-        if (n.charAt(0) === '#') {
-            return n.charAt(1) === 'x'
-                ? String.fromCharCode(parseInt(n.substring(2), 16))
-                : String.fromCharCode(+n.substring(1));
-        }
-        return '';
-    });
-};
+import { sanitize } from '@jill64/universal-sanitizer';
 
 const slugger = new GithubSlugger();
 
@@ -31,9 +15,11 @@ export const markedHeadingAnchorExtension = (): MarkedExtension => {
         renderer: {
             heading({ tokens, depth }) {
                 const text = this.parser.parseInline(tokens);
-                const raw = unescape(this.parser.parseInline(tokens, this.parser.textRenderer))
+
+                const raw = sanitize(this.parser.parseInline(tokens, this.parser.textRenderer))
                     .trim()
                     .replace(/<[!/a-z].*?>/gi, '');
+
                 const id = slugger.slug(raw.toLowerCase());
 
                 return `
