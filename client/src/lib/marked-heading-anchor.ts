@@ -1,6 +1,6 @@
-import type { MarkedExtension } from 'marked';
-import GithubSlugger from 'github-slugger';
-import { sanitize } from '@jill64/universal-sanitizer';
+import type { MarkedExtension } from "marked";
+import GithubSlugger from "github-slugger";
+import { sanitize } from "@jill64/universal-sanitizer";
 
 const slugger = new GithubSlugger();
 
@@ -10,7 +10,7 @@ export const markedHeadingAnchorExtension = (): MarkedExtension => {
             preprocess(src) {
                 slugger.reset();
                 return src;
-            },
+            }
         },
         renderer: {
             heading({ tokens, depth }) {
@@ -18,7 +18,7 @@ export const markedHeadingAnchorExtension = (): MarkedExtension => {
 
                 const raw = sanitize(this.parser.parseInline(tokens, this.parser.textRenderer))
                     .trim()
-                    .replace(/<[!/a-z].*?>/gi, '');
+                    .replace(/<[!/a-z].*?>/gi, "");
 
                 const id = slugger.slug(raw.toLowerCase());
 
@@ -35,7 +35,7 @@ export const markedHeadingAnchorExtension = (): MarkedExtension => {
                         </a>
                     </div>\n
                 `;
-            },
-        },
+            }
+        }
     };
 };
