@@ -17,6 +17,7 @@
         "@sveltejs/vite-plugin-svelte": "^3.0.0",
         "@types/eslint": "^9.6.1",
         "@types/node": "^22.7.4",
+        "@types/sanitize-html": "^2.13.0",
         "@types/sortablejs": "^1.15.1",
         "eslint": "^9.11.1",
         "eslint-config-prettier": "^9.1.0",
@@ -51,10 +52,10 @@
         "github-slugger": "^2.0.0",
         "highlight-words": "^1.2.2",
         "marked": "^14.1.0",
+        "sanitize-html": "^2.13.1",
         "shiki": "^1.14.1",
         "sortablejs": "^1.15.0",
         "svelte-french-toast": "^1.2.0",
-        "tippy.js": "^6.3.7",
-        "sanitize-html": "^2.13.1"
+        "tippy.js": "^6.3.7"
     }
 }
