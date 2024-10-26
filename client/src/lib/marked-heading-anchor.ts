@@ -1,6 +1,6 @@
 import type { MarkedExtension } from "marked";
 import GithubSlugger from "github-slugger";
-import { sanitize } from "@jill64/universal-sanitizer";
+import sanitizeHtml from "sanitize-html";
 
 const slugger = new GithubSlugger();
 
@@ -16,9 +16,8 @@ export const markedHeadingAnchorExtension = (): MarkedExtension => {
             heading({ tokens, depth }) {
                 const text = this.parser.parseInline(tokens);
 
-                const raw = sanitize(this.parser.parseInline(tokens, this.parser.textRenderer))
-                    .trim()
-                    .replace(/<[!/a-z].*?>/gi, "");
+                const raw = sanitizeHtml(this.parser.parseInline(tokens, this.parser.textRenderer))
+                    .trim();
 
                 const id = slugger.slug(raw.toLowerCase());
 
