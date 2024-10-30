@@ -383,9 +383,9 @@ section {
     }
 
     pre {
-        background-color: var(--color-bg1);
+        background-color: var(--color-bg1) !important;
         border-radius: $border-radius;
-        border: 1px solid var(--color-bg2);
+        border: 1px solid var(--color-bg2) !important;
         line-height: initial;
         padding: 1rem;
 

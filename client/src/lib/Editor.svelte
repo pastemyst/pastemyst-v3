@@ -10,11 +10,11 @@
     import { Close, setTempCommands, type Command } from "./command";
     import { cmdPalOpen, cmdPalTitle } from "./stores";
     import { languages as cmLangs } from "@codemirror/language-data";
-    import Markdown from "./Markdown.svelte";
     import { isLanguageMarkdown } from "./utils/markdown";
     import type { IndentUnit } from "./indentation";
     import type { Settings } from "./api/settings";
     import { themes } from "./themes";
+    import { marked } from "marked";
 
     export let hidden = false;
     export let settings: Settings;
@@ -286,16 +286,21 @@
     };
 
     const preview = async () => {
-        const res = await fetch("/internal/highlight", {
-            method: "POST",
-            body: JSON.stringify({
-                content: getContent(),
-                language: getSelectedLang().name,
-                wrap: settings.textWrap
-            })
-        });
+        if (isLanguageMarkdown(selectedLanguage.name)) {
+            currentPreviewContent = marked.parse(getContent(), { gfm: true }) as string;
+        } else {
+            const res = await fetch("/internal/highlight", {
+                method: "POST",
+                body: JSON.stringify({
+                    content: getContent(),
+                    language: getSelectedLang().name,
+                    wrap: settings.textWrap,
+                    theme: settings.theme
+                })
+            });
 
-        currentPreviewContent = await res.text();
+            currentPreviewContent = await res.text();
+        }
     };
 
     const onPreviewClick = async () => {
@@ -356,15 +361,9 @@
 
 <div class:hidden>
     {#if previewEnabled}
-        <div class="preview">
-            {#if isLanguageMarkdown(selectedLanguage.name)}
-                <div class="markdown">
-                    <Markdown content={getContent()} />
-                </div>
-            {:else}
-                <!-- eslint-disable-next-line svelte/no-at-html-tags -->
-                {@html currentPreviewContent}
-            {/if}
+        <div class="preview" class:markdown={isLanguageMarkdown(selectedLanguage.name)}>
+            <!-- eslint-disable-next-line svelte/no-at-html-tags -->
+            {@html currentPreviewContent}
         </div>
     {/if}
 
@@ -525,7 +524,7 @@
             background-color: transparent;
         }
 
-        .markdown {
+        &.markdown {
             padding: 0 1rem;
         }
     }

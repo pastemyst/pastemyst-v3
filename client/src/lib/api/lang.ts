@@ -49,3 +49,14 @@ export const autodetectLanguage = async (content: string): Promise<Language> => 
 
     return (await getLangs(fetch)).find((lang) => lang.name === "Text")!;
 };
+
+export const findLangByName = async (
+    fetchFunc: FetchFunc,
+    lang: string
+): Promise<Language | undefined> => {
+    const res = await fetchFunc(`${env.PUBLIC_API_BASE}/langs/${lang}`);
+
+    if (res.ok) return await res.json();
+
+    return undefined;
+};

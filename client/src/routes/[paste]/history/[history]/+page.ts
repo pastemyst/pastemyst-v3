@@ -8,6 +8,10 @@ import {
 import { error } from "@sveltejs/kit";
 import type { PageLoad } from "./$types";
 import { getUserById } from "$lib/api/user";
+import { marked } from "marked";
+import { markedHeadingAnchorExtension } from "$lib/marked-heading-anchor";
+import { markedShikiExtension } from "$lib/marked-shiki-extension";
+import { isLanguageMarkdown } from "$lib/utils/markdown";
 
 export const load: PageLoad = async ({ params, fetch, parent }) => {
     const paste = await getPasteAtEdit(fetch, params.paste, params.history);
@@ -54,6 +58,21 @@ export const load: PageLoad = async ({ params, fetch, parent }) => {
         highlightedCode.push(await res.text());
     }
 
+    marked.use(markedHeadingAnchorExtension());
+    marked.use(markedShikiExtension(fetch, settings.textWrap, settings.theme));
+
+    const renderedMarkdown: { id: string; renderedMarkdown: string }[] = [];
+    for (const pasty of paste.pasties) {
+        if (!isLanguageMarkdown(pasty.language)) continue;
+
+        const rendered = await marked.parse(pasty.content, { gfm: true });
+
+        renderedMarkdown.push({
+            id: pasty.id,
+            renderedMarkdown: rendered
+        });
+    }
+
     const currentHistoryIndex = history.findIndex((h) => h.id === params.history);
 
     type HistoryType = (typeof history)[0];
@@ -70,6 +89,7 @@ export const load: PageLoad = async ({ params, fetch, parent }) => {
         highlightedCode,
         previousEdit,
         nextEdit,
+        renderedMarkdown,
         historyId: params.history
     };
 };

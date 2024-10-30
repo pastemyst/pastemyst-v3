@@ -54,4 +54,5 @@
     pasteStats={data.pasteStats}
     langStats={data.langStats}
     highlightedCode={data.highlightedCode}
+    renderedMarkdown={data.renderedMarkdown}
 />

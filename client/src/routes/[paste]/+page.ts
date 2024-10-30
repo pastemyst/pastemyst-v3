@@ -3,6 +3,10 @@ import { ExpiresIn, getPaste, getPasteLangs, getPasteStats, isPasteStarred } fro
 import type { PageLoad } from "./$types";
 import { getUserById, getUserTags } from "$lib/api/user";
 import { formatDistanceToNow } from "date-fns";
+import { isLanguageMarkdown } from "$lib/utils/markdown";
+import { marked } from "marked";
+import { markedHeadingAnchorExtension } from "$lib/marked-heading-anchor";
+import { markedShikiExtension } from "$lib/marked-shiki-extension";
 
 export const load: PageLoad = async ({ params, fetch, parent }) => {
     const [paste, pasteStatus] = await getPaste(fetch, params.paste);
@@ -55,6 +59,21 @@ export const load: PageLoad = async ({ params, fetch, parent }) => {
         highlightedCode.push(await res.text());
     }
 
+    marked.use(markedHeadingAnchorExtension());
+    marked.use(markedShikiExtension(fetch, settings.textWrap, settings.theme));
+
+    const renderedMarkdown: { id: string; renderedMarkdown: string }[] = [];
+    for (const pasty of paste.pasties) {
+        if (!isLanguageMarkdown(pasty.language)) continue;
+
+        const rendered = await marked.parse(pasty.content, { gfm: true });
+
+        renderedMarkdown.push({
+            id: pasty.id,
+            renderedMarkdown: rendered
+        });
+    }
+
     let tags: string[] = [];
     if (self) {
         tags = await getUserTags(fetch, self.username);
@@ -70,6 +89,7 @@ export const load: PageLoad = async ({ params, fetch, parent }) => {
         owner: owner,
         highlightedCode: highlightedCode,
         isStarred: isStarred,
-        userTags: tags
+        userTags: tags,
+        renderedMarkdown: renderedMarkdown
     };
 };

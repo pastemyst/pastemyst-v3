@@ -1,5 +1,4 @@
 <script lang="ts">
-    import Markdown from "$lib/Markdown.svelte";
     import type { PageData } from "./$types";
 
     export let data: PageData;
@@ -22,7 +21,7 @@
             <a href="https://github.com/pastemyst/pastemyst-v3" rel="external">on github</a>.
         </p>
     {:else}
-        {#each data.releases as release}
+        {#each data.releases as release, i}
             <div class="release">
                 <div class="flex row center space-between">
                     <h4><a href={release.url} rel="external">{release.title}</a></h4>
@@ -36,8 +35,9 @@
                     Published on: {new Date(release.releasedAt).toDateString()}
                 </p>
 
-                <p class="content">
-                    <Markdown content={release.content} />
+                <p class="content markdown">
+                    <!-- eslint-disable-next-line svelte/no-at-html-tags -->
+                    {@html data.renderedMarkdown[i]}
                 </p>
             </div>
         {/each}
