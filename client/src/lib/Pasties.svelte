@@ -2,16 +2,18 @@
     import type { LangStat } from "./api/lang";
     import type { Paste, PasteStats, Pasty } from "./api/paste";
     import type { Settings } from "./api/settings";
-    import Markdown from "./Markdown.svelte";
     import PastyMeta from "./PastyMeta.svelte";
     import Tab from "./Tab.svelte";
     import { isLanguageMarkdown } from "./utils/markdown";
+    import { browser } from "$app/environment";
+    import type { Action } from "svelte/action";
 
     export let paste: Paste;
     export let settings: Settings;
     export let pasteStats: PasteStats | null;
     export let langStats: LangStat[];
     export let highlightedCode: string[];
+    export let renderedMarkdown: { id: string; renderedMarkdown: string }[];
     export let historyId: string | null = null;
 
     let activePastyId: string = paste.pasties[0].id;
@@ -27,6 +29,19 @@
 
     const setActiveTab = (id: string) => {
         activePastyId = id;
+    };
+
+    const focusMarkdownHeading: Action = () => {
+        if (browser && window.location.hash) {
+            const id = window.location.hash.slice(1);
+            const element = document.getElementById(id);
+            if (element) {
+                const yOffset = -90;
+                const y = element.getBoundingClientRect().top + window.scrollY + yOffset;
+
+                window.scrollTo({ top: y, behavior: "instant" });
+            }
+        }
     };
 </script>
 
@@ -54,8 +69,9 @@
                 </div>
 
                 {#if isLanguageMarkdown(pasty.language) && previewMarkdownStacked[i]}
-                    <div class="markdown">
-                        <Markdown content={pasty.content} />
+                    <div class="markdown" use:focusMarkdownHeading>
+                        <!-- eslint-disable-next-line svelte/no-at-html-tags -->
+                        {@html renderedMarkdown.find((p) => p.id === pasty.id)?.renderedMarkdown}
                     </div>
                 {:else}
                     <!-- eslint-disable-next-line svelte/no-at-html-tags -->
@@ -95,8 +111,9 @@
 
         <!-- eslint-disable-next-line svelte/no-at-html-tags -->
         {#if isLanguageMarkdown(activePasty.language) && previewMarkdownTabbed}
-            <div class="markdown">
-                <Markdown content={activePasty.content} />
+            <div class="markdown" use:focusMarkdownHeading>
+                <!-- eslint-disable-next-line svelte/no-at-html-tags -->
+                {@html renderedMarkdown.find((p) => p.id === activePasty.id)?.renderedMarkdown}
             </div>
         {:else}
             <!-- eslint-disable-next-line svelte/no-at-html-tags -->
@@ -168,6 +185,7 @@
             border: 1px solid var(--color-bg2);
             border-top: none;
             margin: 0;
+            margin-bottom: 1rem;
             overflow-x: auto;
         }
 
