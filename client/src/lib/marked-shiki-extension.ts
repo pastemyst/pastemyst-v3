@@ -1,7 +1,11 @@
 import type { MarkedExtension } from "marked";
 import type { FetchFunc } from "./api/fetch";
 
-export const markedShikiExtension = (fetch: FetchFunc, wrap: boolean, theme: string): MarkedExtension => {
+export const markedShikiExtension = (
+    fetch: FetchFunc,
+    wrap: boolean,
+    theme: string
+): MarkedExtension => {
     return {
         async: true,
         async walkTokens(token) {
