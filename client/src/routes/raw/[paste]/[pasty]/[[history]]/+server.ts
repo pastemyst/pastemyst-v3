@@ -1,7 +1,7 @@
 import { getPaste, getPasteAtEdit, type Paste } from "$lib/api/paste";
 import { error, type RequestHandler } from "@sveltejs/kit";
 
-export const GET: RequestHandler = async ({ params }) => {
+export const GET: RequestHandler = async ({ params, fetch }) => {
     if (!params.paste) {
         error(404);
     }
