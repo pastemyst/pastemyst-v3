@@ -19,7 +19,7 @@
         "@types/node": "^22.7.4",
         "@types/sanitize-html": "^2.13.0",
         "@types/sortablejs": "^1.15.1",
-        "eslint": "^9.11.1",
+        "eslint": "^9.13.0",
         "eslint-config-prettier": "^9.1.0",
         "eslint-plugin-svelte": "^2.36.0",
         "globals": "^15.9.0",
