@@ -8,15 +8,17 @@ export const load: LayoutServerLoad = async ({ fetch, cookies }) => {
     if (settingsCookie) {
         const parsedSettingsCookie = cookie.parse(settingsCookie);
 
-        cookies.set(
-            "pastemyst_session_settings",
-            parsedSettingsCookie["pastemyst_session_settings"],
-            {
-                path: parsedSettingsCookie.path,
-                expires: new Date(parsedSettingsCookie.expires),
-                sameSite: "strict"
-            }
-        );
+        if (parsedSettingsCookie["pastemyst_session_settings"]) {
+            cookies.set(
+                "pastemyst_session_settings",
+                parsedSettingsCookie["pastemyst_session_settings"],
+                {
+                    path: parsedSettingsCookie.path!,
+                    expires: new Date(parsedSettingsCookie.expires!),
+                    sameSite: "strict"
+                }
+            );
+        }
     }
 
     return {
