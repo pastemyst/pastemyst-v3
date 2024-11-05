@@ -50,7 +50,7 @@
         "date-fns": "^4.1.0",
         "frappe-charts": "^1.6.2",
         "github-slugger": "^2.0.0",
-        "highlight-words": "^1.2.2",
+        "highlight-words": "^2.0.0",
         "marked": "^14.1.0",
         "sanitize-html": "^2.13.1",
         "shiki": "^1.14.1",
