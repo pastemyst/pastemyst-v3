@@ -222,6 +222,13 @@
         {/if}
     </div>
 
+    {#if pasteWithLangStats.paste.editedAt}
+        <div>
+            <!-- prettier-ignore -->
+            <span use:tooltip aria-label={new Date(pasteWithLangStats.paste.editedAt).toString()}>edited {formatDistanceToNow(new Date(pasteWithLangStats.paste.editedAt), { addSuffix: true })}</span>
+        </div>
+    {/if}
+
     <div>
         <span>{getPasteLangs(pasteWithLangStats.languageStats)}</span>
     </div>
