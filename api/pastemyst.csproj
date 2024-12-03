@@ -21,7 +21,7 @@
         <PackageReference Include="MongoDB.Driver" Version="2.30.0" />
         <PackageReference Include="MongoDB.Driver.GridFS" Version="2.30.0" />
         <PackageReference Include="Octokit" Version="11.0.1" />
-        <PackageReference Include="Quartz" Version="3.7.0" />
+        <PackageReference Include="Quartz" Version="3.13.1" />
         <PackageReference Include="Quartz.AspNetCore" Version="3.6.2" />
         <PackageReference Include="Semver" Version="2.3.0" />
         <PackageReference Include="Swashbuckle.AspNetCore" Version="6.5.0" />
