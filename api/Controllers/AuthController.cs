@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Http.Extensions;
 using Microsoft.AspNetCore.Mvc;
 using MongoDB.Driver;
 using OpenIddict.Abstractions;
+using OpenIddict.Client.WebIntegration;
 using pastemyst.Exceptions;
 using pastemyst.Models;
 using pastemyst.Services;
@@ -83,8 +84,8 @@ public class AuthController(
 
             var avatarClaim = provider switch
             {
-                "github" => "avatar_url",
-                "gitlab" => "avatar_url",
+                OpenIddictClientWebIntegrationConstants.Providers.GitHub => "avatar_url",
+                OpenIddictClientWebIntegrationConstants.Providers.GitLab => "avatar_url",
                 _ => null
             };
             
@@ -100,8 +101,8 @@ public class AuthController(
             
             var usernameClaim = provider switch
             {
-                "github" => "login",
-                "gitlab" => "username",
+                OpenIddictClientWebIntegrationConstants.Providers.GitHub => "login",
+                OpenIddictClientWebIntegrationConstants.Providers.GitLab => "username",
                 _ => null
             };
             
