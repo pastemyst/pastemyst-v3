@@ -1,9 +1,12 @@
+using Microsoft.Extensions.Options;
 using MongoDB.Bson.Serialization;
 using MongoDB.Bson.Serialization.Conventions;
 using MongoDB.Driver;
 using MongoDB.Driver.GridFS;
+using OpenIddict.MongoDb;
 using pastemyst.Models;
 using pastemyst.Serializers;
+using pastemyst.Utils;
 
 namespace pastemyst.Services;
 
@@ -21,7 +24,7 @@ public class MongoService
 
     private MongoClient mongoClient;
 
-    public MongoService(IConfiguration configuration)
+    public MongoService(IConfiguration configuration, IOptionsMonitor<OpenIddictMongoDbOptions> openIddictOptions)
     {
         BsonClassMap.RegisterClassMap<Paste>(map =>
         {
@@ -58,6 +61,8 @@ public class MongoService
         {
             Unique = true
         }));
+
+        if (openIddictOptions is not null) OpenIddictIndexer.IndexOpenIddictDb(mongoClient, openIddictOptions);
     }
 
     public void DeleteTestDatabase()

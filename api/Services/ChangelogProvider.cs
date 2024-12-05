@@ -4,7 +4,7 @@ using Release = pastemyst.Models.Release;
 
 namespace pastemyst.Services;
 
-public class ChangelogProvider : IHostedService
+public partial class ChangelogProvider : IHostedService
 {
     public List<Release> Releases { get; } = new();
 
@@ -24,7 +24,7 @@ public class ChangelogProvider : IHostedService
         return Task.CompletedTask;
     }
 
-    private IEnumerable<Release> GenerateChangelog(IEnumerable<Octokit.Release> releases)
+    private static IEnumerable<Release> GenerateChangelog(IEnumerable<Octokit.Release> releases)
     {
         var res = new List<Release>();
 
@@ -47,7 +47,7 @@ public class ChangelogProvider : IHostedService
             }
 
             // Remove ## changelog from older releases.
-            var content = Regex.Replace(release.Body, "(?i)## changelog:?\r\n\r\n", "");
+            var content = ChangelogContentRegex().Replace(release.Body, "");
 
             res.Add(new Release
             {
@@ -61,4 +61,7 @@ public class ChangelogProvider : IHostedService
 
         return res;
     }
+
+    [GeneratedRegex("(?i)## changelog:?\r\n\r\n", RegexOptions.None, "en-US")]
+    private static partial Regex ChangelogContentRegex();
 }

@@ -1,6 +1,6 @@
 <script lang="ts">
     import { page } from "$app/stores";
-    import { createAccount } from "$lib/api/auth";
+    import { env } from "$env/dynamic/public";
     import { getUserByUsername } from "$lib/api/user";
     import { usernameRegex } from "$lib/patterns";
 
@@ -9,8 +9,6 @@
 
     let usernameValid = true;
     let usernameErrorMsg: string;
-
-    let createAccountErrorMsg: string | null = null;
 
     const onUsernameInput = async () => {
         await validateUsername();
@@ -24,13 +22,7 @@
             return;
         }
 
-        createAccountErrorMsg = await createAccount(username);
-
-        if (createAccountErrorMsg) return;
-
-        // not using goto("/") becase the page needs to get refreshed
-        // so the current account gets updated
-        window.location.href = "/";
+        window.location.href = `${env.PUBLIC_API_BASE}/auth/register?username=${username}`;
     };
 
     const validateUsername = async () => {
@@ -65,13 +57,6 @@
     </p>
 
     <form class="flex col" on:submit|preventDefault={onFormSubmit}>
-        {#if createAccountErrorMsg}
-            <p class="error-message">
-                There was an issue creating the account. Please try again. If the issue persists
-                please <a href="/contact">contact us</a>. Message: {createAccountErrorMsg}
-            </p>
-        {/if}
-
         <label for="username">
             username:<span class="required">*</span>
 

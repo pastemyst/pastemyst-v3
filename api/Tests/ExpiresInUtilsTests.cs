@@ -10,7 +10,7 @@ public class ExpiresInUtilsTests
     public void TestToDeletesAt()
     {
         var start = DateTime.Now;
-        var expiresIn = ExpiresIn.OneHour;
+        const ExpiresIn expiresIn = ExpiresIn.OneHour;
 
         var result = ExpiresInUtils.ToDeletesAt(start, expiresIn);
 

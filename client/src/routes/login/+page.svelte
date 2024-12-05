@@ -17,7 +17,7 @@
 
     <ul>
         <li>
-            <a href="{env.PUBLIC_API_BASE}/login/github" rel="external" class="btn">
+            <a href="{env.PUBLIC_API_BASE}/login/GitHub" rel="external" class="btn">
                 <svg
                     xmlns="http://www.w3.org/2000/svg"
                     width="64"
@@ -40,7 +40,7 @@
         </li>
 
         <li>
-            <a href="{env.PUBLIC_API_BASE}/login/gitlab" rel="external" class="btn">
+            <a href="{env.PUBLIC_API_BASE}/login/GitLab" rel="external" class="btn">
                 <svg
                     width="32px"
                     height="32px"

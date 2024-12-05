@@ -16,7 +16,7 @@ public class DatabaseFixture : IDisposable
                 })
             .Build();
 
-        MongoService = new MongoService(configuration);
+        MongoService = new MongoService(configuration, null);
     }
 
     public void Dispose()

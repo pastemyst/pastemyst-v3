@@ -1,4 +1,7 @@
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.Extensions.DependencyInjection.Extensions;
+using MongoDB.Driver;
+using OpenIddict.Client.WebIntegration;
 using pastemyst.Jobs;
 using pastemyst.Middleware;
 using pastemyst.Services;
@@ -15,7 +18,7 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddHttpContextAccessor();
 
-builder.Services.AddHttpLogging(o => {});
+builder.Services.AddHttpLogging(_ => {});
 
 builder.Services.AddDistributedMemoryCache();
 
@@ -49,8 +52,6 @@ builder.Services.AddSingleton(s =>
 builder.Services.AddScoped<IdProvider>();
 builder.Services.AddScoped<ImageService>();
 builder.Services.AddScoped<UserProvider>();
-builder.Services.AddScoped<OAuthService>();
-builder.Services.AddScoped<AuthService>();
 builder.Services.AddScoped<UserContext>();
 builder.Services.AddScoped<SettingsService>();
 builder.Services.AddScoped<PasteService>();
@@ -91,10 +92,105 @@ builder.Services.AddCors(options =>
 
     options.AddPolicy("client", policy =>
         policy.WithOrigins(builder.Configuration["ClientUrl"] ?? throw new InvalidOperationException("Missing ClientUrl configuration"))
-        .AllowAnyHeader()
-        .AllowAnyMethod()
-        .AllowCredentials()
+              .AllowAnyHeader()
+              .AllowAnyMethod()
+              .AllowCredentials()
     );
+});
+
+builder.Services.AddOpenIddict()
+    .AddCore(options =>
+    {
+        options.UseMongoDb()
+               .UseDatabase(new MongoClient(builder.Configuration.GetConnectionString("DefaultDb")).GetDatabase("openiddict"));
+    })
+    .AddClient(options =>
+    {
+        options.AllowAuthorizationCodeFlow();
+        
+        // TODO: prod certificates
+        options.AddDevelopmentEncryptionCertificate()
+               .AddDevelopmentSigningCertificate();
+
+        options.UseAspNetCore()
+               .EnableRedirectionEndpointPassthrough()
+               .DisableTransportSecurityRequirement(); // TODO: disable https only on dev
+
+        options.UseSystemNetHttp();
+        
+        var githubClientId = builder.Configuration["GitHub:ClientId"];
+        var githubClientSecret = builder.Configuration["GitHub:ClientSecret"];
+        
+        var gitlabClientId = builder.Configuration["GitLab:ClientId"];
+        var gitlabClientSecret = builder.Configuration["GitLab:ClientSecret"];
+
+        var webProviders = options.UseWebProviders();
+
+        if (githubClientId is not null && githubClientSecret is not null)
+        {
+            webProviders.AddGitHub(providerOptions =>
+            {
+                providerOptions.SetClientId(githubClientId)
+                               .SetClientSecret(githubClientSecret)
+                               .SetRedirectUri($"api/v3/login/{OpenIddictClientWebIntegrationConstants.Providers.GitHub}/callback")
+                               .AddScopes("read:user");
+            });
+        }
+        
+        if (gitlabClientId is not null && gitlabClientSecret is not null)
+        {
+            webProviders.AddGitLab(providerOptions =>
+            {
+                providerOptions.SetClientId(gitlabClientId)
+                               .SetClientSecret(gitlabClientSecret)
+                               .SetRedirectUri($"api/v3/login/{OpenIddictClientWebIntegrationConstants.Providers.GitLab}/callback")
+                               .AddScopes("read_user");
+            });
+        }
+    })
+    .AddServer(options =>
+    {
+        options.SetTokenEndpointUris("/api/v3/auth/connect/token");
+
+        options.AllowClientCredentialsFlow();
+
+        // TODO: prod certificates
+        options.AddDevelopmentEncryptionCertificate()
+               .AddDevelopmentSigningCertificate();
+
+        // TODO: check this out :)
+        options.DisableAccessTokenEncryption();
+
+        options.UseAspNetCore()
+               .EnableTokenEndpointPassthrough()
+               .DisableTransportSecurityRequirement() // TODO: enable https in prod
+               .EnableAuthorizationEndpointPassthrough();
+    })
+    .AddValidation(options =>
+    {
+        options.UseLocalServer();
+        options.UseAspNetCore();
+    });
+
+builder.Services.AddAuthorization().AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme).AddCookie(options =>
+{
+    options.Cookie.Name = "pastemyst_auth";
+    options.ExpireTimeSpan = TimeSpan.FromDays(30);
+    options.Cookie.SameSite = SameSiteMode.Strict;
+    options.Cookie.MaxAge = options.ExpireTimeSpan;
+    
+    // on failed auth, don't redirect to login, just return 401
+    options.Events.OnRedirectToLogin = context =>
+    {
+        context.Response.StatusCode = StatusCodes.Status401Unauthorized;
+        return Task.CompletedTask;
+    };
+    
+    options.Events.OnRedirectToAccessDenied = context =>
+    {
+        context.Response.StatusCode = StatusCodes.Status401Unauthorized;
+        return Task.CompletedTask;
+    };
 });
 
 var app = builder.Build();
@@ -102,7 +198,6 @@ var app = builder.Build();
 app.UseHttpLogging();
 
 app.UseMiddleware<ExceptionMiddleware>();
-app.UseMiddleware<UserContextMiddleware>();
 
 if (app.Environment.IsDevelopment())
 {
@@ -110,12 +205,13 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
+app.UseCors("client");
+app.UseCors();
+
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.UseSession();
-
-app.UseCors("client");
-app.UseCors();
 
 app.MapControllers();
 
