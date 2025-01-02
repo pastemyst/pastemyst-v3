@@ -52,7 +52,6 @@ builder.Services.AddSingleton(s =>
 builder.Services.AddScoped<IdProvider>();
 builder.Services.AddScoped<ImageService>();
 builder.Services.AddScoped<UserProvider>();
-builder.Services.AddScoped<UserContext>();
 builder.Services.AddScoped<SettingsService>();
 builder.Services.AddScoped<PasteService>();
 builder.Services.AddScoped<ActionLogger>();

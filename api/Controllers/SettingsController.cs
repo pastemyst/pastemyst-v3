@@ -12,31 +12,31 @@ public class SettingsController(SettingsService settingsService) : ControllerBas
     [HttpGet]
     public async Task<Settings> GetSettings()
     {
-        return await settingsService.GetSettingsAsync(HttpContext);
+        return await settingsService.GetSettingsAsync(HttpContext, HttpContext.User);
     }
 
     [HttpPatch]
     public async Task UpdateSettings([FromBody] Settings settings)
     {
-        await settingsService.UpdateSettingsAsync(HttpContext, settings);
+        await settingsService.UpdateSettingsAsync(HttpContext, HttpContext.User, settings);
     }
 
     [HttpGet("user")]
-    public UserSettings GetUserSettings()
+    public async Task<UserSettings> GetUserSettings()
     {
-        return settingsService.GetUserSettings();
+        return await settingsService.GetUserSettingsAsync(HttpContext.User);
     }
 
     [HttpPatch("user")]
     public async Task UpdateUserSettings([FromBody] UserSettings userSettings)
     {
-        await settingsService.UpdateUserSettingsAsync(userSettings);
+        await settingsService.UpdateUserSettingsAsync(HttpContext.User, userSettings);
     }
 
     [HttpPatch("username")]
     public async Task SetUsername([FromBody] SetUsernameRequest setUsernameRequest)
     {
-        await settingsService.SetUsernameAsync(setUsernameRequest.Username);
+        await settingsService.SetUsernameAsync(HttpContext.User, setUsernameRequest.Username);
     }
 
     [HttpPatch("avatar")]
@@ -44,7 +44,7 @@ public class SettingsController(SettingsService settingsService) : ControllerBas
     {
         await using var stream = file.OpenReadStream();
         var bytes = new byte[file.Length];
-        _ = await stream.ReadAsync(bytes, 0, (int)file.Length);
-        await settingsService.SetAvatarAsync(bytes, file.ContentType);
+        _ = await stream.ReadAsync(bytes.AsMemory(0, (int)file.Length));
+        await settingsService.SetAvatarAsync(HttpContext.User, bytes, file.ContentType);
     }
 }

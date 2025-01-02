@@ -1,12 +1,23 @@
 using System.Net;
+using System.Security.Claims;
 using MongoDB.Driver;
+using OpenIddict.Abstractions;
 using pastemyst.Exceptions;
+using pastemyst.Extensions;
 using pastemyst.Models;
 
 namespace pastemyst.Services;
 
-public class UserProvider(UserContext userContext, PasteService pasteService, MongoService mongo, ActionLogger actionLogger, ImageService imageService)
+public class UserProvider(PasteService pasteService, MongoService mongo, ActionLogger actionLogger, ImageService imageService)
 {
+    public async Task<User> GetSelfAsync(ClaimsPrincipal self)
+    {
+        var id = self.GetClaim(ClaimTypes.NameIdentifier);
+        var selfUser = await mongo.Users.Find(u => u.Id == id).FirstAsync();
+
+        return selfUser;
+    }
+    
     public async Task<User> GetByUsernameOrIdAsync(string username, string id)
     {
         if (username is not null)
@@ -33,19 +44,19 @@ public class UserProvider(UserContext userContext, PasteService pasteService, Mo
         return await GetByUsernameAsync(username) is not null;
     }
 
-    public async Task<Page<PasteWithLangStats>> GetOwnedPastesAsync(string username, string tag, bool pinnedOnly, PageRequest pageRequest)
+    public async Task<Page<PasteWithLangStats>> GetOwnedPastesAsync(ClaimsPrincipal self, string username, string tag, bool pinnedOnly, PageRequest pageRequest)
     {
         var user = await GetByUsernameAsync(username) ?? throw new HttpException(HttpStatusCode.NotFound, "User not found.");
 
         // If not showing only pinned pastes, and show all pastes is disabled, return an empty list.
-        if (!pinnedOnly && !userContext.UserIsSelf(user) && !user.UserSettings.ShowAllPastesOnProfile)
+        if (!pinnedOnly && self.Id() != user.Id && !user.UserSettings.ShowAllPastesOnProfile)
         {
             return new Page<PasteWithLangStats>();
         }
 
         var filter = Builders<Paste>.Filter.Eq(p => p.OwnerId, user.Id);
 
-        if (!userContext.UserIsSelf(user))
+        if (self.Id() != user.Id)
         {
             filter &= Builders<Paste>.Filter.Eq(p => p.Private, false);
         }
@@ -54,7 +65,7 @@ public class UserProvider(UserContext userContext, PasteService pasteService, Mo
 
         if (tag is not null)
         {
-            if (!userContext.UserIsSelf(user))
+            if (self.Id() != user.Id)
             {
                 throw new HttpException(HttpStatusCode.Unauthorized, "You must be authorized to view paste tags.");
             }
@@ -72,7 +83,7 @@ public class UserProvider(UserContext userContext, PasteService pasteService, Mo
         var totalPages = (int)Math.Ceiling((float)totalItems / pageRequest.PageSize);
 
         // hide all tags for everyone except the owner
-        if (!userContext.UserIsSelf(user))
+        if (self.Id() != user.Id)
         {
             pastes.ForEach(p => p.Tags = []);
         }
@@ -82,7 +93,7 @@ public class UserProvider(UserContext userContext, PasteService pasteService, Mo
         {
             var stats = pasteService.GetLanguageStats(paste);
 
-            pastesWithLangStags.Add(new() { Paste = paste, LanguageStats = stats });
+            pastesWithLangStags.Add(new PasteWithLangStats { Paste = paste, LanguageStats = stats });
         }
 
         return new Page<PasteWithLangStats>
@@ -95,14 +106,14 @@ public class UserProvider(UserContext userContext, PasteService pasteService, Mo
         };
     }
 
-    public async Task<List<string>> GetTagsAsync(string username)
+    public async Task<List<string>> GetTagsAsync(ClaimsPrincipal self, string username)
     {
-        if (!userContext.IsLoggedIn())
+        if (!self.IsLoggedIn())
             throw new HttpException(HttpStatusCode.Unauthorized, "You must be authorized to get your own tags.");
 
         var user = await GetByUsernameAsync(username);
 
-        if (!userContext.UserIsSelf(user))
+        if (self.Id() != user.Id)
             throw new HttpException(HttpStatusCode.Unauthorized, "You can only fetch your own tags.");
 
         var filter = Builders<Paste>.Filter.Eq(p => p.OwnerId, user.Id);
@@ -113,14 +124,14 @@ public class UserProvider(UserContext userContext, PasteService pasteService, Mo
             .ToList();
     }
 
-    public async Task DeleteUserAsync(string username)
+    public async Task DeleteUserAsync(ClaimsPrincipal self, string username)
     {
-        if (!userContext.IsLoggedIn())
+        if (self.IsLoggedIn())
             throw new HttpException(HttpStatusCode.Unauthorized, "You must be authorized to delete your account.");
 
         var user = await GetByUsernameAsync(username);
 
-        if (userContext.UserIsSelf(user))
+        if (self.Id() != user.Id)
             throw new HttpException(HttpStatusCode.Unauthorized, "You can delete only your account.");
 
         await imageService.DeleteAsync(user.AvatarId);

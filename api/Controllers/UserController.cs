@@ -21,24 +21,24 @@ public class UserController(UserProvider userProvider) : ControllerBase
     [HttpDelete("{username}")]
     public async Task DeleteUser(string username)
     {
-        await userProvider.DeleteUserAsync(username);
+        await userProvider.DeleteUserAsync(HttpContext.User, username);
     }
 
     [HttpGet("{username}/pastes")]
     public async Task<Page<PasteWithLangStats>> GetUserOwnedPastes(string username, [FromQuery] PageRequest pageRequest, [FromQuery] string tag)
     {
-        return await userProvider.GetOwnedPastesAsync(username, tag, false, pageRequest);
+        return await userProvider.GetOwnedPastesAsync(HttpContext.User, username, tag, false, pageRequest);
     }
 
     [HttpGet("{username}/pastes/pinned")]
     public async Task<Page<PasteWithLangStats>> GetUserOwnedPinnedPastes(string username, [FromQuery] PageRequest pageRequest)
     {
-        return await userProvider.GetOwnedPastesAsync(username, null, true, pageRequest);
+        return await userProvider.GetOwnedPastesAsync(HttpContext.User, username, null, true, pageRequest);
     }
 
     [HttpGet("{username}/tags")]
     public async Task<List<string>> GetUserTags(string username)
     {
-        return await userProvider.GetTagsAsync(username);
+        return await userProvider.GetTagsAsync(HttpContext.User, username);
     }
 }

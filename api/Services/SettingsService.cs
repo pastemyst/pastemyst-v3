@@ -1,7 +1,9 @@
 using System.Net;
+using System.Security.Claims;
 using MongoDB.Driver;
 using MongoDB.Bson;
 using pastemyst.Exceptions;
+using pastemyst.Extensions;
 using pastemyst.Models;
 
 namespace pastemyst.Services;
@@ -10,18 +12,19 @@ public class SettingsService(
     IConfiguration configuration,
     UserProvider userProvider,
     ImageService imageService,
-    UserContext userContext,
     IdProvider idProvider,
     MongoService mongo)
 {
-    public async Task SetUsernameAsync(string username)
+    public async Task SetUsernameAsync(ClaimsPrincipal self, string username)
     {
-        if (!userContext.IsLoggedIn())
+        if (!self.IsLoggedIn())
         {
             throw new HttpException(HttpStatusCode.Unauthorized, "You need to be authorized to change settings.");
         }
+        
+        var selfUser = await userProvider.GetSelfAsync(self);
 
-        if (string.Equals(userContext.Self.Username, username, StringComparison.CurrentCultureIgnoreCase))
+        if (string.Equals(selfUser.Username, username, StringComparison.CurrentCultureIgnoreCase))
         {
             throw new HttpException(HttpStatusCode.BadRequest, "Same username.");
         }
@@ -32,47 +35,54 @@ public class SettingsService(
         }
 
         var update = Builders<User>.Update.Set(u => u.Username, username);
-        await mongo.Users.UpdateOneAsync(u => u.Id == userContext.Self.Id, update);
+        await mongo.Users.UpdateOneAsync(u => u.Id == selfUser.Id, update);
     }
 
-    public async Task SetAvatarAsync(byte[] bytes, string contentType)
+    public async Task SetAvatarAsync(ClaimsPrincipal self, byte[] bytes, string contentType)
     {
-        if (!userContext.IsLoggedIn())
+        if (!self.IsLoggedIn())
         {
             throw new HttpException(HttpStatusCode.Unauthorized, "You need to be authorized to change settings.");
         }
+        
+        var selfUser = await userProvider.GetSelfAsync(self);
 
-        await mongo.Images.DeleteAsync(ObjectId.Parse(userContext.Self.AvatarId));
+        await mongo.Images.DeleteAsync(ObjectId.Parse(selfUser.AvatarId));
 
         var newAvatar = await imageService.UploadImageAsync(bytes, contentType);
 
         var update = Builders<User>.Update.Set(u => u.AvatarId, newAvatar);
-        await mongo.Users.UpdateOneAsync(u => u.Id == userContext.Self.Id, update);
+        await mongo.Users.UpdateOneAsync(u => u.Id == selfUser.Id, update);
     }
 
-    public UserSettings GetUserSettings()
+    public async Task<UserSettings> GetUserSettingsAsync(ClaimsPrincipal self)
     {
-        if (!userContext.IsLoggedIn())
+        if (!self.IsLoggedIn())
             throw new HttpException(HttpStatusCode.Unauthorized, "You must be authorized to fetch user settings.");
+        
+        var selfUser = await userProvider.GetSelfAsync(self);
 
-        return userContext.Self.UserSettings;
+        return selfUser.UserSettings;
     }
 
-    public async Task UpdateUserSettingsAsync(UserSettings settings)
+    public async Task UpdateUserSettingsAsync(ClaimsPrincipal self, UserSettings settings)
     {
-        if (!userContext.IsLoggedIn())
+        if (!self.IsLoggedIn())
             throw new HttpException(HttpStatusCode.Unauthorized, "You must be authorized to update user settings.");
+        
+        var selfUser = await userProvider.GetSelfAsync(self);
 
         var update = Builders<User>.Update.Set(u => u.UserSettings, settings);
-        await mongo.Users.UpdateOneAsync(u => u.Id == userContext.Self.Id, update);
+        await mongo.Users.UpdateOneAsync(u => u.Id == selfUser.Id, update);
     }
 
-    public async Task<Settings> GetSettingsAsync(HttpContext httpContext)
+    public async Task<Settings> GetSettingsAsync(HttpContext httpContext, ClaimsPrincipal self)
     {
         // If a logged in user is requesting the settings, send the user's settings
-        if (userContext.IsLoggedIn())
+        if (self.IsLoggedIn())
         {
-            return userContext.Self.Settings;
+            var selfUser = await userProvider.GetSelfAsync(self);
+            return selfUser.Settings;
         }
 
         var sessionSettingsCookie = httpContext.Request.Cookies["pastemyst_session_settings"];
@@ -114,12 +124,13 @@ public class SettingsService(
         return newSessionSettings.Settings;
     }
 
-    public async Task UpdateSettingsAsync(HttpContext httpContext, Settings settings)
+    public async Task UpdateSettingsAsync(HttpContext httpContext, ClaimsPrincipal self, Settings settings)
     {
-        if (userContext.IsLoggedIn())
+        if (self.IsLoggedIn())
         {
+            var selfUser = await userProvider.GetSelfAsync(self);
             var update = Builders<User>.Update.Set(u => u.Settings, settings);
-            await mongo.Users.UpdateOneAsync(u => u.Id == userContext.Self.Id, update);
+            await mongo.Users.UpdateOneAsync(u => u.Id == selfUser.Id, update);
         }
         else
         {
