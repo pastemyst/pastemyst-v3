@@ -78,10 +78,6 @@ to enable language autodetection, you need to install the [guesslang-bun](https:
 
 the client is written with sveltekit, so install node and npm (or yarn).
 
-here is the list of packages you need to install on ubuntu to generate the grammar files for all the languages: `ruby`, `ruby-dev`, `ruby-bundler`, `docker`, `libssl-dev`, `build-essentials`, `cmake`, `libzip-dev`, `libicu-dev`, `pkg-config`.
-
-then to generate the grammar files, run the `generate-grammars.sh` script.
-
 install all dependencies:
 
 ```
@@ -99,8 +95,6 @@ npm run dev
 ## docker
 
 you can also run the entire project (db, api and client) using docker.
-
-make sure to first generate the grammar files before running the containers so that syntex highlighting works.
 
 copy the `.env.example` file to `.env` and change the variables.
 

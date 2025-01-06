@@ -3,6 +3,7 @@ import { themes } from "$lib/themes";
 import type { RequestEvent, RequestHandler } from "@sveltejs/kit";
 import { readFileSync } from "fs";
 import { getSingletonHighlighter, type LanguageRegistration } from "shiki";
+import { grammars } from "tm-grammars";
 
 export const POST: RequestHandler = async ({ request }: RequestEvent) => {
     const json = await request.json();
@@ -30,9 +31,8 @@ const highlight = async (
         const lang = await findLangByName(fetch, language);
 
         if (lang && lang?.tmScope !== "none") {
-            const langJson: LanguageRegistration = JSON.parse(
-                readFileSync(`static/grammars/${lang?.tmScope}.json`, "utf8")
-            );
+            const name = grammars.find(g => g.scopeName === lang.tmScope)!.name;
+            const langJson: LanguageRegistration = await import(`../../../../node_modules/tm-grammars/grammars/${name}.json`, { with: { type: "json" } });
             await highlighter.loadLanguage(langJson);
 
             actualLanguage = langJson.name;
