@@ -31,8 +31,11 @@ const highlight = async (
         const lang = await findLangByName(fetch, language);
 
         if (lang && lang?.tmScope !== "none") {
-            const name = grammars.find(g => g.scopeName === lang.tmScope)!.name;
-            const langJson: LanguageRegistration = await import(`../../../../node_modules/tm-grammars/grammars/${name}.json`, { with: { type: "json" } });
+            const name = grammars.find((g) => g.scopeName === lang.tmScope)!.name;
+            const langJson: LanguageRegistration = await import(
+                `../../../../node_modules/tm-grammars/grammars/${name}.json`,
+                { with: { type: "json" } }
+            );
             await highlighter.loadLanguage(langJson);
 
             actualLanguage = langJson.name;
