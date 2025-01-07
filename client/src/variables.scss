@@ -1,3 +1,5 @@
+@use 'sass:list';
+
 $fs-small: 0.9rem;
 $fs-normal: 1rem;
 $fs-medium: 1.2rem;
@@ -12,10 +14,10 @@ $break-med: 620px;
 @mixin transition($properties...) {
     $transition: ();
     @each $property in $properties {
-        $transition: append($transition, ($property 0.1s ease-in-out), $separator: comma);
+        $transition: list.append($transition, ($property 0.1s ease-in-out), $separator: comma);
     }
 
-    @if length($properties) == 0 {
+    @if list.length($properties) == 0 {
         $transition: all 0.1s ease-in-out;
     }
 
