@@ -159,11 +159,7 @@
 <span class="hint">set the default indentation unit and width for the text editor</span>
 
 <div class="flex row center gap-s">
-    <Checkbox
-        label="text wrap"
-        bind:checked={settings.textWrap}
-        onchange={onTextWrapClicked}
-    />
+    <Checkbox label="text wrap" bind:checked={settings.textWrap} onchange={onTextWrapClicked} />
 </div>
 
 <span class="hint">text wrapping in the editor</span>
