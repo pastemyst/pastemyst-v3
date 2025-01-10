@@ -9,15 +9,20 @@
     import { cmdPalOpen, cmdPalTitle, currentUserStore } from "$lib/stores";
     import type { PageData } from "./$types";
 
-    export let data: PageData;
+    interface Props {
+        data: PageData;
+    }
+
+    let { data = $bindable() }: Props = $props();
 
     let avatarInput: HTMLInputElement;
     let avatarForm: HTMLFormElement;
 
-    let usernameInputValue = data.self.username;
-    let usernameAvailable = true;
-    let usernameValid = true;
-    let waitingForUsernameCheck = false;
+    let usernameInputValue = $state(data.self.username);
+    let usernameAvailable = $state(true);
+    let usernameValid = $state(true);
+    let waitingForUsernameCheck = $state(false);
+    let userSettings = $state(data.userSettings);
 
     const onAvatarEditClick = () => {
         avatarInput.click();
@@ -94,7 +99,7 @@
     };
 
     const saveSettings = async () => {
-        await updateUserSettings(fetch, data.userSettings);
+        await updateUserSettings(fetch, userSettings);
     };
 
     const onAccountDelete = async () => {
@@ -138,7 +143,7 @@
         alt="{data.self.username}'s avatar"
     />
 
-    <button on:click={onAvatarEditClick}>
+    <button onclick={onAvatarEditClick}>
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" class="icon">
             <path
                 fill="currentColor"
@@ -157,7 +162,7 @@
             id="avatar"
             accept="image/*"
             bind:this={avatarInput}
-            on:change={onAvatarChange}
+            onchange={onAvatarChange}
         />
     </form>
 </div>
@@ -168,7 +173,7 @@
     <input
         type="text"
         bind:value={usernameInputValue}
-        on:keyup={onUsernameInputKeyup}
+        onkeyup={onUsernameInputKeyup}
         required
         name="username"
         id="username"
@@ -181,7 +186,7 @@
         disabled={waitingForUsernameCheck ||
             !usernameAvailable ||
             data.self.username === usernameInputValue}
-        on:click={onUsernameSave}
+        onclick={onUsernameSave}
     >
         {#if waitingForUsernameCheck}
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" class="icon loader">
@@ -222,14 +227,14 @@
 <div class="privacy">
     <Checkbox
         label="show all pastes on your profile"
-        bind:checked={data.userSettings.showAllPastesOnProfile}
-        on:change={saveSettings}
+        bind:checked={userSettings.showAllPastesOnProfile}
+        onchange={saveSettings}
     />
     <span class="hint">
         toggle whether to show only your pinned pastes or all your public pastes on your profile
     </span>
 
-    <button class="delete-account btn btn-danger" on:click={onAccountDelete}>delete account</button>
+    <button class="delete-account btn btn-danger" onclick={onAccountDelete}>delete account</button>
     <span class="hint">
         this will delete your account and all the associated data, including the pastes
     </span>

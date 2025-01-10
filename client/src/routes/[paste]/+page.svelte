@@ -2,13 +2,20 @@
     import type { PageData } from "./$types";
     import { copyLinkToClipboardStore, currentUserStore } from "$lib/stores";
     import { onMount } from "svelte";
-    import toast from "svelte-french-toast";
+    import toast from "svelte-5-french-toast";
     import PasteHeader from "$lib/PasteHeader.svelte";
     import Pasties from "$lib/Pasties.svelte";
     import TagInput from "$lib/TagInput.svelte";
     import { editPasteTags } from "$lib/api/paste";
 
-    export let data: PageData;
+    interface Props {
+        data: PageData;
+    }
+
+    let { data = $bindable() }: Props = $props();
+
+    let tags = $state(data.paste.tags);
+    let paste = $state(data.paste);
 
     onMount(() => {
         if ($copyLinkToClipboardStore) {
@@ -28,7 +35,7 @@
     });
 
     const onUpdateTags = async () => {
-        await editPasteTags(data.paste.id, data.paste.tags);
+        await editPasteTags(data.paste.id, tags);
     };
 </script>
 
@@ -37,21 +44,27 @@
 </svelte:head>
 
 <PasteHeader
-    paste={data.paste}
-    owner={data.owner}
-    pasteStats={data.pasteStats}
+    bind:paste
+    owner={data.owner || undefined}
+    pasteStats={data.pasteStats || undefined}
     langStats={data.langStats}
     isStarred={data.isStarred}
 />
 
 {#if $currentUserStore?.id === data.paste.ownerId && data.paste.tags}
-    <TagInput bind:tags={data.paste.tags} existingTags={data.userTags} on:update={onUpdateTags} />
+    <TagInput
+        bind:tags
+        existingTags={data.userTags}
+        onupdate={onUpdateTags}
+        anonymousPaste={false}
+        readonly={false}
+    />
 {/if}
 
 <Pasties
     paste={data.paste}
     settings={data.settings}
-    pasteStats={data.pasteStats}
+    pasteStats={data.pasteStats || undefined}
     langStats={data.langStats}
     highlightedCode={data.highlightedCode}
     renderedMarkdown={data.renderedMarkdown}

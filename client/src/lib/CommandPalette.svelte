@@ -12,20 +12,20 @@
     import { cmdPalOpen, cmdPalTitle } from "./stores";
     import { isMacOs } from "./utils/userAgent";
 
-    let isOpen = false;
-    let title: string | null = null;
+    let isOpen = $state(false);
+    let title: string | null = $state(null);
 
-    let commands: Command[] = [];
-    let filteredCommands: Command[] = [];
+    let commands: Command[] = $state([]);
+    let filteredCommands: Command[] = $state([]);
 
-    let searchElement: HTMLInputElement | undefined;
-    let search = "";
+    let searchElement: HTMLInputElement | undefined = $state();
+    let search = $state("");
 
-    let highlightedChunks: HighlightWords.Chunk[][][];
+    let highlightedChunks: HighlightWords.Chunk[][][] = $state([]);
 
     let isCommandSelected = false;
-    let selectedCommand: Command | undefined;
-    let commandElements: HTMLElement[] = [];
+    let selectedCommand: Command | undefined = $state();
+    let commandElements: HTMLElement[] = $state([]);
 
     let showingTempCommands = false;
 
@@ -259,7 +259,7 @@
     };
 </script>
 
-<svelte:window on:keydown={handleKeys} />
+<svelte:window onkeydown={handleKeys} />
 
 <div role="dialog" aria-modal="true" class="palette-bg" class:open={isOpen}>
     <div class="palette">
@@ -276,9 +276,9 @@
                 autocomplete="off"
                 bind:this={searchElement}
                 bind:value={search}
-                on:blur={onSearchBlur}
-                on:keydown={onSearchKeyDown}
-                on:input={filter}
+                onblur={onSearchBlur}
+                onkeydown={onSearchKeyDown}
+                oninput={filter}
             />
         </div>
 
@@ -294,9 +294,9 @@
             {#each filteredCommands as cmd, i}
                 <button
                     class="command flex col"
-                    on:click={() => onCmd(cmd)}
-                    on:mousedown={() => onCmdMouseDown(cmd)}
-                    on:mouseup={onCmdMouseUp}
+                    onclick={() => onCmd(cmd)}
+                    onmousedown={() => onCmdMouseDown(cmd)}
+                    onmouseup={onCmdMouseUp}
                     bind:this={commandElements[i]}
                     class:selected={selectedCommand === cmd}
                 >

@@ -1,18 +1,22 @@
 <script lang="ts">
     import { tooltip } from "$lib/tooltips";
-    import { createEventDispatcher } from "svelte";
     import { currentUserStore } from "./stores";
 
-    export let encrypt = false;
-    export let isPrivate = false;
-    export let pinned = false;
-    export let anonymous = false;
+    interface Props {
+        encrypt: boolean;
+        isPrivate: boolean;
+        pinned: boolean;
+        anonymous: boolean;
+        oncreatePaste: () => void;
+    }
 
-    let dispatcher = createEventDispatcher();
-
-    const onCreatePaste = () => {
-        dispatcher("create");
-    };
+    let {
+        encrypt = $bindable(false),
+        isPrivate = $bindable(false),
+        pinned = $bindable(false),
+        anonymous = $bindable(false),
+        oncreatePaste
+    }: Props = $props();
 
     const onEncryptClick = () => {
         encrypt = !encrypt;
@@ -59,7 +63,7 @@
                 type="checkbox"
                 name="encrypt"
                 id="encrypt"
-                on:change={onEncryptClick}
+                onchange={onEncryptClick}
                 bind:checked={encrypt}
             />
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" class="icon">
@@ -84,7 +88,7 @@
                     type="checkbox"
                     name="anonymous"
                     id="anonymous"
-                    on:change={onAnonymousClick}
+                    onchange={onAnonymousClick}
                     bind:checked={anonymous}
                 />
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" class="icon">
@@ -107,7 +111,7 @@
                     type="checkbox"
                     name="private"
                     id="private"
-                    on:change={onPrivateClick}
+                    onchange={onPrivateClick}
                     bind:checked={isPrivate}
                 />
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" class="icon">
@@ -131,7 +135,7 @@
                     type="checkbox"
                     name="pin"
                     id="pin"
-                    on:change={onPinClick}
+                    onchange={onPinClick}
                     bind:checked={pinned}
                 />
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" class="icon">
@@ -146,7 +150,7 @@
         {/if}
     </div>
 
-    <button class="btn-main" on:click={onCreatePaste}>create paste</button>
+    <button class="btn-main" onclick={oncreatePaste}>create paste</button>
 </div>
 
 <style lang="scss">

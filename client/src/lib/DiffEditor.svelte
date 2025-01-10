@@ -9,9 +9,13 @@
     import type { Settings } from "./api/settings";
     import { drawSelection, highlightSpecialChars, lineNumbers } from "@codemirror/view";
 
-    export let settings: Settings;
-    export let oldPasty: Pasty | undefined = undefined;
-    export let newPasty: Pasty | undefined = undefined;
+    interface Props {
+        settings: Settings;
+        oldPasty?: Pasty | undefined;
+        newPasty?: Pasty | undefined;
+    }
+
+    let { settings, oldPasty = undefined, newPasty = undefined }: Props = $props();
 
     let editor: MergeView;
 

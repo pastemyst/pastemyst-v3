@@ -1,20 +1,29 @@
 <script lang="ts">
-    import { createEventDispatcher, tick } from "svelte";
+    import { tick } from "svelte";
     import { tooltip } from "./tooltips";
     import { currentUserStore } from "./stores";
 
-    export let readonly = false;
-    export let anonymousPaste = false;
-    export let tags: string[] = [];
-    export let existingTags: string[];
+    interface Props {
+        readonly: boolean;
+        anonymousPaste: boolean;
+        tags?: string[];
+        existingTags?: string[];
+        onupdate?: (tags: string[]) => void;
+    }
 
-    const dispatch = createEventDispatcher();
+    let {
+        readonly = false,
+        anonymousPaste = false,
+        tags = $bindable([]),
+        existingTags = [],
+        onupdate = undefined
+    }: Props = $props();
 
-    let addingTag = false;
+    let addingTag = $state(false);
 
-    let addTagElement: HTMLButtonElement;
-    let newTag: string;
-    let tagInputElement: HTMLInputElement;
+    let addTagElement: HTMLButtonElement | undefined = $state();
+    let newTag: string = $state("");
+    let tagInputElement: HTMLInputElement | undefined = $state();
 
     const removeTag = (tag: string) => {
         const tagIndex = tags.findIndex((t) => t === tag);
@@ -22,7 +31,7 @@
         tags.splice(tagIndex, 1);
         tags = tags;
 
-        dispatch("update", tags);
+        onupdate?.(tags);
     };
 
     const onAddTag = async () => {
@@ -30,7 +39,7 @@
 
         addingTag = true;
         await tick();
-        tagInputElement.focus();
+        tagInputElement?.focus();
     };
 
     const onTagInputBlur = () => {
@@ -42,17 +51,17 @@
         newTag = "";
         addingTag = false;
 
-        dispatch("update", tags);
+        onupdate?.(tags);
     };
 
     const onTagInputKeyPress = (event: KeyboardEvent) => {
         if (event.key === "Enter") {
             onTagInputBlur();
-            addTagElement.focus();
+            addTagElement?.focus();
         } else if (event.key == "Escape") {
             newTag = "";
             onTagInputBlur();
-            addTagElement.focus();
+            addTagElement?.focus();
         }
     };
 </script>
@@ -64,7 +73,7 @@
         <div class="tag flex row center">
             <span><a href="/~{$currentUserStore?.username}?tag={tag}">{tag}</a></span>
             {#if !readonly}
-                <button on:click={() => removeTag(tag)}>
+                <button onclick={() => removeTag(tag)} aria-label="remove tag">
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" class="icon">
                         <path
                             fill="currentColor"
@@ -82,8 +91,8 @@
             placeholder="tag name..."
             bind:this={tagInputElement}
             bind:value={newTag}
-            on:blur={onTagInputBlur}
-            on:keydown={onTagInputKeyPress}
+            onblur={onTagInputBlur}
+            onkeydown={onTagInputKeyPress}
             list="taglist"
         />
         <datalist id="taglist">
@@ -98,7 +107,7 @@
             class="add-tag flex row"
             aria-label={anonymousPaste ? "can't tag anonymous pastes" : "add tag"}
             use:tooltip
-            on:click={onAddTag}
+            onclick={onAddTag}
             bind:this={addTagElement}
             class:disabled={anonymousPaste}
         >

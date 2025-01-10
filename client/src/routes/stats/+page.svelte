@@ -3,7 +3,11 @@
     import type { PageData } from "./$types";
     import * as frappe from "frappe-charts";
 
-    export let data: PageData;
+    interface Props {
+        data: PageData;
+    }
+
+    let { data }: Props = $props();
 
     onMount(() => {
         const labels = Object.keys(data.activePastesOverTime).map((d) =>
@@ -57,7 +61,7 @@
         </ul>
     </div>
 
-    <div id="chart" />
+    <div id="chart"></div>
 </section>
 
 <style lang="scss">

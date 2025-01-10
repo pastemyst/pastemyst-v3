@@ -6,19 +6,23 @@
     import { tooltip } from "$lib/tooltips";
     import type { PageData } from "./$types";
 
-    export let data: PageData;
+    interface Props {
+        data: PageData;
+    }
+
+    let { data = $bindable() }: Props = $props();
 </script>
 
 <PasteHeader
     paste={data.paste}
-    owner={data.owner}
-    pasteStats={data.pasteStats}
+    owner={data.owner || undefined}
+    pasteStats={data.pasteStats || undefined}
     langStats={data.langStats}
     isStarred={data.isStarred}
 />
 
 {#if $currentUserStore?.id === data.paste.ownerId && data.paste.tags}
-    <TagInput bind:tags={data.paste.tags} existingTags={[]} readonly />
+    <TagInput bind:tags={data.paste.tags} existingTags={[]} readonly anonymousPaste={false} />
 {/if}
 
 <section class="flex row center space-between">
@@ -63,7 +67,7 @@
 <Pasties
     paste={data.paste}
     settings={data.settings}
-    pasteStats={data.pasteStats}
+    pasteStats={data.pasteStats || undefined}
     langStats={data.langStats}
     highlightedCode={data.highlightedCode}
     renderedMarkdown={data.renderedMarkdown}

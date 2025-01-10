@@ -6,13 +6,17 @@
     import { currentUserStore } from "$lib/stores";
     import TagInput from "$lib/TagInput.svelte";
 
-    export let data: PageData;
+    interface Props {
+        data: PageData;
+    }
+
+    let { data = $bindable() }: Props = $props();
 </script>
 
 <PasteHeader
     paste={data.paste}
-    owner={data.owner}
-    pasteStats={data.pasteStats}
+    owner={data.owner || undefined}
+    pasteStats={data.pasteStats || undefined}
     langStats={data.langStats}
     isStarred={data.isStarred}
 />

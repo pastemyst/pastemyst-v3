@@ -1,10 +1,10 @@
 import type Editor from "$lib/Editor.svelte";
 
 export default class TabData {
-    id: string;
-    title: string;
-    isInRenamingState = false;
-    editor: Editor;
+    id: string = $state("");
+    title: string = $state("untitled");
+    isInRenamingState = $state(false);
+    editor?: ReturnType<typeof Editor> = $state();
 
     constructor(id: string, title: string, editor: Editor) {
         this.id = id;

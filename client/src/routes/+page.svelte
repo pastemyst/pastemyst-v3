@@ -17,27 +17,33 @@
         currentUserStore
     } from "$lib/stores";
     import TabbedEditor from "$lib/TabbedEditor.svelte";
-    import type TabData from "$lib/TabData";
+    import type TabData from "$lib/TabData.svelte";
     import TagInput from "$lib/TagInput.svelte";
     import { onMount } from "svelte";
     import type { PageData } from "./$types";
 
-    export let data: PageData;
+    interface Props {
+        data: PageData;
+        selectedExpiresIn?: ExpiresIn;
+    }
 
-    export let selectedExpiresIn = ExpiresIn.never;
+    let { data, selectedExpiresIn = $bindable(ExpiresIn.never) }: Props = $props();
 
-    let title: string;
+    let title: string = $state("");
 
-    let tags: string[];
+    let tags: string[] = $state([]);
 
-    let tabs: TabData[];
-    let activeTab: TabData | undefined;
+    let tabs: TabData[] = $state([]);
+    let activeTab: TabData | undefined = $state();
 
-    let anonymous: boolean;
-    let isPrivate: boolean;
-    let pinned: boolean;
+    let anonymous: boolean = $state(false);
+    let isPrivate: boolean = $state(false);
+    let pinned: boolean = $state(false);
+    let encrypt: boolean = $state(false);
 
-    $: if (anonymous) tags = [];
+    $effect(() => {
+        if (anonymous) tags = [];
+    });
 
     onMount(() => {
         const commands: Command[] = [
@@ -51,7 +57,7 @@
             {
                 name: "set editor language",
                 action: () => {
-                    const cmds = activeTab?.editor.getLanguageCommands();
+                    const cmds = activeTab?.editor?.getLanguageCommands();
                     (async () => {
                         if (cmds) setTempCommands(await cmds);
                     })();
@@ -61,7 +67,7 @@
             {
                 name: "set editor indentation",
                 action: () => {
-                    const cmds = activeTab?.editor.getIndentUnitCommands();
+                    const cmds = activeTab?.editor?.getIndentUnitCommands();
                     if (cmds) setTempCommands(cmds);
                     return Close.no;
                 }
@@ -69,7 +75,7 @@
             {
                 name: "convert indentation",
                 action: () => {
-                    const cmds = activeTab?.editor.getIndentUnitCommands(true);
+                    const cmds = activeTab?.editor?.getIndentUnitCommands(true);
                     if (cmds) setTempCommands(cmds);
                     return Close.no;
                 }
@@ -84,9 +90,9 @@
 
         for (const tab of tabs) {
             pasties.push({
-                title: tab.title,
-                content: tab.editor.getContent(),
-                language: tab.editor.getSelectedLang().name
+                title: tab.title!,
+                content: tab.editor!.getContent(),
+                language: tab.editor!.getSelectedLang()!.name
             });
         }
 
@@ -156,19 +162,25 @@
         bind:value={title}
     />
 
-    <button on:click={openExpiresSelect}>
+    <button onclick={openExpiresSelect}>
         expires in: {expiresInToLongString(selectedExpiresIn)}
     </button>
 </div>
 
 {#if $currentUserStore}
-    <TagInput bind:tags existingTags={data.userTags} anonymousPaste={anonymous} />
+    <TagInput bind:tags existingTags={data.userTags} anonymousPaste={anonymous} readonly={false} />
 {/if}
 
 <TabbedEditor bind:tabs bind:activeTab settings={data.settings} />
 
 <div class="paste-options">
-    <PasteOptions on:create={onCreatePaste} bind:anonymous bind:isPrivate bind:pinned />
+    <PasteOptions
+        oncreatePaste={onCreatePaste}
+        bind:anonymous
+        bind:isPrivate
+        bind:pinned
+        bind:encrypt
+    />
 </div>
 
 <style lang="scss">

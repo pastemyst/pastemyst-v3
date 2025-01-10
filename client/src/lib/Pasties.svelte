@@ -8,24 +8,36 @@
     import { browser } from "$app/environment";
     import type { Action } from "svelte/action";
 
-    export let paste: Paste;
-    export let settings: Settings;
-    export let pasteStats: PasteStats | null;
-    export let langStats: LangStat[];
-    export let highlightedCode: string[];
-    export let renderedMarkdown: { id: string; renderedMarkdown: string }[];
-    export let historyId: string | null = null;
-
-    let activePastyId: string = paste.pasties[0].id;
-    let activePasty: Pasty = paste.pasties[0];
-
-    $: {
-        const p = paste.pasties.find((p) => p.id === activePastyId);
-        if (p) activePasty = p;
+    interface Props {
+        paste: Paste;
+        settings: Settings;
+        pasteStats?: PasteStats;
+        langStats: LangStat[];
+        highlightedCode: string[];
+        renderedMarkdown: { id: string; renderedMarkdown: string }[];
+        historyId?: string;
     }
 
-    let previewMarkdownStacked: boolean[] = [];
-    let previewMarkdownTabbed: boolean;
+    let {
+        paste,
+        settings,
+        pasteStats,
+        langStats,
+        highlightedCode,
+        renderedMarkdown,
+        historyId = undefined
+    }: Props = $props();
+
+    let activePastyId: string = $state(paste.pasties[0].id);
+    let activePasty: Pasty = $state(paste.pasties[0]);
+
+    $effect(() => {
+        const p = paste.pasties.find((p) => p.id === activePastyId);
+        if (p) activePasty = p;
+    });
+
+    let previewMarkdownStacked: boolean[] = $state([]);
+    let previewMarkdownTabbed: boolean = $state(false);
 
     const setActiveTab = (id: string) => {
         activePastyId = id;
@@ -89,7 +101,7 @@
                             isReadonly
                             title={pasty.title}
                             isActive={pasty.id === activePastyId}
-                            on:click={() => setActiveTab(pasty.id)}
+                            onclick={() => setActiveTab(pasty.id)}
                         />
                     {/each}
                 </div>
