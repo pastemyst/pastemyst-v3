@@ -2,22 +2,31 @@
     import Header from "$lib/Header.svelte";
     import Footer from "$lib/Footer.svelte";
     import type { LayoutData } from "./$types";
-    import { activePastesStores, currentUserStore, versionStore } from "$lib/stores";
     import CommandPalette from "$lib/CommandPalette.svelte";
     import { Close, setBaseCommands, type Command } from "$lib/command";
     import { beforeNavigate, goto } from "$app/navigation";
     import ThemeContext from "$lib/ThemeContext.svelte";
     import { env } from "$env/dynamic/public";
-    import { Toaster } from "svelte-french-toast";
+    import { Toaster } from "svelte-5-french-toast";
+    import type { Snippet } from "svelte";
+    import { activePastesStores, currentUserStore, versionStore } from "$lib/stores";
 
     import "tippy.js/dist/tippy.css";
     import "tippy.js/dist/svg-arrow.css";
     import "../app.scss";
 
-    export let data: LayoutData;
-    $: currentUserStore.set(data.self);
-    $: versionStore.set(data.version);
-    $: activePastesStores.set(data.activePastes);
+    interface Props {
+        data: LayoutData;
+        children: Snippet;
+    }
+
+    let { data, children }: Props = $props();
+
+    $effect(() => {
+        currentUserStore.set(data.self);
+        versionStore.set(data.version);
+        activePastesStores.set(data.activePastes);
+    });
 
     const getCommands = (): Command[] => {
         const commands: Command[] = [
@@ -90,7 +99,7 @@
         <Header />
 
         <main>
-            <slot />
+            {@render children()}
         </main>
 
         <Footer />

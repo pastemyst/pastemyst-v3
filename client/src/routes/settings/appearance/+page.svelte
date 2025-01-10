@@ -5,7 +5,11 @@
     import { Close, setTempCommands, type Command } from "$lib/command";
     import { themes } from "$lib/themes";
 
-    export let data: PageData;
+    interface Props {
+        data: PageData;
+    }
+
+    let { data = $bindable() }: Props = $props();
 
     const getPasteViewCommands = (): Command[] => {
         return [
@@ -74,7 +78,7 @@
 
 <div class="flex row center gap-s">
     <p>theme:</p>
-    <button on:click={onThemeClicked}>{data.settings.theme}</button>
+    <button onclick={onThemeClicked}>{data.settings.theme}</button>
 </div>
 
 <span class="hint">change the theme of pastemyst</span>
@@ -83,7 +87,7 @@
 
 <div class="flex row center gap-s">
     <p>paste view:</p>
-    <button on:click={onPasteViewClicked}>{data.settings.pasteView}</button>
+    <button onclick={onPasteViewClicked}>{data.settings.pasteView}</button>
 </div>
 
 <span class="hint">change how the files look when viewing a paste: tabbed or stacked</span>

@@ -1,10 +1,17 @@
 <script lang="ts">
-    import { onDestroy, onMount } from "svelte";
-    import tippy, { type Instance, type Props } from "tippy.js";
+    import { onDestroy, onMount, type Snippet } from "svelte";
+    import tippy, { type Instance, type Props as TippyProps } from "tippy.js";
+
+    interface Props {
+        buttonSlot: Snippet;
+        dropdownSlot: Snippet;
+    }
+
+    let { buttonSlot, dropdownSlot }: Props = $props();
 
     let buttonNode: HTMLElement;
     let dropdownNode: HTMLElement;
-    let tip: Instance<Props>;
+    let tip: Instance<TippyProps>;
 
     onMount(() => {
         tip = tippy(buttonNode, {
@@ -28,9 +35,9 @@
 </script>
 
 <button bind:this={buttonNode}>
-    <slot name="button" />
+    {@render buttonSlot()}
 
     <div bind:this={dropdownNode}>
-        <slot name="dropdown" />
+        {@render dropdownSlot()}
     </div>
 </button>

@@ -16,28 +16,32 @@
     import { themes } from "./themes";
     import { marked } from "marked";
 
-    export let hidden = false;
-    export let settings: Settings;
-    export let onMounted: (() => void) | undefined = undefined;
+    interface Props {
+        hidden?: boolean;
+        settings: Settings;
+        onMounted?: () => void;
+    }
+
+    let { hidden = false, settings, onMounted = undefined }: Props = $props();
 
     let editorElement: HTMLElement;
 
     let editorView: EditorView;
 
-    let cursorLine = 0;
-    let cursorCol = 0;
+    let cursorLine = $state(0);
+    let cursorCol = $state(0);
 
     let langCompartment = new Compartment();
-    let selectedLanguage: Language;
+    let selectedLanguage: Language | undefined = $state();
 
     let indentUnitCompartment = new Compartment();
     let indentWidthCompartment = new Compartment();
-    let selectedIndentUnit: IndentUnit = "spaces";
-    let selectedIndentWidth = 4;
+    let selectedIndentUnit: IndentUnit = $state("spaces");
+    let selectedIndentWidth = $state(4);
 
-    let previewEnabled = false;
-    let currentPreviewContent: string;
-    let langSupported = true;
+    let previewEnabled = $state(false);
+    let currentPreviewContent: string = $state("");
+    let langSupported = $state(true);
 
     let langs: Language[];
 
@@ -85,7 +89,7 @@
 
         const autodetectLanguageOnPasteExtension = EditorView.domEventHandlers({
             paste(event) {
-                if (selectedLanguage.name !== "Autodetect") return;
+                if (selectedLanguage?.name !== "Autodetect") return;
 
                 const content = event.clipboardData?.getData("text/plain");
 
@@ -153,6 +157,10 @@
                 ]
             });
         }
+    };
+
+    export const setHidden = (h: boolean) => {
+        hidden = h;
     };
 
     export const setIndentaion = (unit: IndentUnit, width: number) => {
@@ -286,6 +294,8 @@
     };
 
     const preview = async () => {
+        if (!selectedLanguage) return;
+
         if (isLanguageMarkdown(selectedLanguage.name)) {
             currentPreviewContent = marked.parse(getContent(), { gfm: true }) as string;
         } else {
@@ -293,7 +303,7 @@
                 method: "POST",
                 body: JSON.stringify({
                     content: getContent(),
-                    language: getSelectedLang().name,
+                    language: selectedLanguage.name,
                     wrap: settings.textWrap,
                     theme: settings.theme
                 })
@@ -325,7 +335,7 @@
         editorView.update([transaction]);
     };
 
-    export const getSelectedLang = (): Language => {
+    export const getSelectedLang = (): Language | undefined => {
         return selectedLanguage;
     };
 
@@ -333,7 +343,7 @@
         selectedLanguage = lang;
 
         const langDescription = cmLangs.find(
-            (l) => selectedLanguage.name.toLowerCase() === l.name.toLowerCase()
+            (l) => selectedLanguage!.name.toLowerCase() === l.name.toLowerCase()
         );
 
         if (langDescription) {
@@ -361,7 +371,7 @@
 
 <div class:hidden>
     {#if previewEnabled}
-        <div class="preview" class:markdown={isLanguageMarkdown(selectedLanguage.name)}>
+        <div class="preview" class:markdown={isLanguageMarkdown(selectedLanguage!.name)}>
             <!-- eslint-disable-next-line svelte/no-at-html-tags -->
             {@html currentPreviewContent}
         </div>
@@ -391,11 +401,11 @@
 
     <div class="toolbar flex sm-row center space-between">
         <div class="flex sm-row center">
-            <button on:click={onLanguageClick}>language: {selectedLanguage?.name}</button>
+            <button onclick={onLanguageClick}>language: {selectedLanguage?.name}</button>
 
-            <button on:click={onIndentClick}>{selectedIndentUnit}: {selectedIndentWidth}</button>
+            <button onclick={onIndentClick}>{selectedIndentUnit}: {selectedIndentWidth}</button>
 
-            <button on:click={onPreviewClick} class:enabled={previewEnabled}>preview</button>
+            <button onclick={onPreviewClick} class:enabled={previewEnabled}>preview</button>
         </div>
 
         <div class="flex row center">

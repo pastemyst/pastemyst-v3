@@ -1,7 +1,13 @@
 <script lang="ts">
+    import { type Snippet } from "svelte";
     import type { LayoutData } from "./$types";
 
-    export let data: LayoutData;
+    interface Props {
+        data: LayoutData;
+        children: Snippet;
+    }
+
+    let { data, children }: Props = $props();
 </script>
 
 <section class="settings-header flex sm-row space-between center">
@@ -76,7 +82,7 @@
     </section>
 
     <section class="settings">
-        <slot />
+        {@render children()}
     </section>
 </div>
 

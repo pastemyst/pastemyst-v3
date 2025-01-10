@@ -6,19 +6,25 @@
     import { cmdPalOpen, cmdPalTitle } from "$lib/stores";
     import type { PageData } from "./$types";
 
-    export let data: PageData;
+    interface Props {
+        data: PageData;
+    }
+
+    let { data = $bindable() }: Props = $props();
+
+    let settings = $state(data.settings);
 
     const getIndentUnitCommands = (): Command[] => {
         return [
             {
                 name: "spaces",
                 action: () => {
-                    data.settings.defaultIndentationUnit = "spaces";
+                    settings.defaultIndentationUnit = "spaces";
                     cmdPalTitle.set("select indentation width (spaces)");
 
                     setTempCommands(getIndentWidthCommands());
 
-                    updateSettings(fetch, data.settings);
+                    updateSettings(fetch, settings);
 
                     return Close.no;
                 }
@@ -26,11 +32,11 @@
             {
                 name: "tabs",
                 action: () => {
-                    data.settings.defaultIndentationUnit = "tabs";
+                    settings.defaultIndentationUnit = "tabs";
                     cmdPalTitle.set("select indentation width (tabs)");
                     setTempCommands(getIndentWidthCommands());
 
-                    updateSettings(fetch, data.settings);
+                    updateSettings(fetch, settings);
 
                     return Close.no;
                 }
@@ -45,9 +51,9 @@
             commands.push({
                 name: i.toString(),
                 action: () => {
-                    data.settings.defaultIndentationWidth = i;
+                    settings.defaultIndentationWidth = i;
 
-                    updateSettings(fetch, data.settings);
+                    updateSettings(fetch, settings);
 
                     return Close.yes;
                 }
@@ -91,9 +97,9 @@
                 name: lang.name,
                 description: lang.aliases?.join(", "),
                 action: () => {
-                    data.settings.defaultLanguage = lang.name;
+                    settings.defaultLanguage = lang.name;
 
-                    updateSettings(fetch, data.settings);
+                    updateSettings(fetch, settings);
 
                     return Close.yes;
                 }
@@ -118,11 +124,11 @@
     };
 
     const onTextWrapClicked = async () => {
-        await updateSettings(fetch, data.settings);
+        await updateSettings(fetch, settings);
     };
 
     const onCopyLinkOnCreateClicked = async () => {
-        await updateSettings(fetch, data.settings);
+        await updateSettings(fetch, settings);
     };
 </script>
 
@@ -138,15 +144,15 @@
 
 <div class="flex row center gap-s">
     <p>default language:</p>
-    <button on:click={onDefaultLanguageClicked}>{data.settings.defaultLanguage}</button>
+    <button onclick={onDefaultLanguageClicked}>{settings.defaultLanguage}</button>
 </div>
 
 <span class="hint">set the default language for the text editor</span>
 
 <div class="flex row center gap-s">
     <p>default indentation:</p>
-    <button on:click={onDefaultIndentationClicked}
-        >{data.settings.defaultIndentationUnit}: {data.settings.defaultIndentationWidth}</button
+    <button onclick={onDefaultIndentationClicked}
+        >{settings.defaultIndentationUnit}: {settings.defaultIndentationWidth}</button
     >
 </div>
 
@@ -155,8 +161,8 @@
 <div class="flex row center gap-s">
     <Checkbox
         label="text wrap"
-        bind:checked={data.settings.textWrap}
-        on:change={onTextWrapClicked}
+        bind:checked={settings.textWrap}
+        onchange={onTextWrapClicked}
     />
 </div>
 
@@ -165,8 +171,8 @@
 <div class="flex row center gap-s">
     <Checkbox
         label="copy link on create"
-        bind:checked={data.settings.copyLinkOnCreate}
-        on:change={onCopyLinkOnCreateClicked}
+        bind:checked={settings.copyLinkOnCreate}
+        onchange={onCopyLinkOnCreateClicked}
     />
 </div>
 

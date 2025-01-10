@@ -18,13 +18,23 @@
     import { Close, getConfirmActionCommands, setTempCommands } from "./command";
     import { goto } from "$app/navigation";
 
-    export let paste: Paste;
-    export let owner: User | null;
-    export let pasteStats: PasteStats | null;
-    export let langStats: LangStat[];
-    export let isStarred: boolean;
+    interface Props {
+        paste: Paste;
+        owner?: User;
+        pasteStats?: PasteStats;
+        langStats: LangStat[];
+        isStarred: boolean;
+    }
 
-    let linkCopied = false;
+    let {
+        paste = $bindable(),
+        owner = undefined,
+        pasteStats = undefined,
+        langStats,
+        isStarred = $bindable()
+    }: Props = $props();
+
+    let linkCopied = $state(false);
 
     const onPinClick = async () => {
         const ok = await pinPaste(paste.id);
@@ -162,7 +172,7 @@
                           : "pin",
                     hideOnClick: false
                 }}
-                on:click={onPinClick}
+                onclick={onPinClick}
                 class:pinned={paste.pinned}
                 class:disabled={paste.private}
             >
@@ -196,7 +206,7 @@
             aria-label="stars"
             use:tooltip
             disabled={$currentUserStore == null}
-            on:click={onStarClick}
+            onclick={onStarClick}
             class:starred={isStarred}
         >
             {#if isStarred}
@@ -222,7 +232,7 @@
         </button>
 
         {#if paste.private && $currentUserStore?.id === paste.ownerId}
-            <button aria-label="set to public" use:tooltip on:click={onPrivateClick}>
+            <button aria-label="set to public" use:tooltip onclick={onPrivateClick}>
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" class="icon">
                     <title>Unlock Icon</title>
                     <path
@@ -238,7 +248,7 @@
                     content: paste.pinned ? "can't private a pinned paste" : "set to private",
                     hideOnClick: false
                 }}
-                on:click={onPrivateClick}
+                onclick={onPrivateClick}
                 class:disabled={paste.pinned}
             >
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" class="icon">
@@ -268,7 +278,7 @@
                 content: linkCopied ? "copied" : "copy link",
                 hideOnClick: false
             }}
-            on:click={onCopyLink}
+            onclick={onCopyLink}
         >
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" class="icon">
                 <title>Link Icon</title>
@@ -303,7 +313,7 @@
             <button
                 use:tooltip
                 aria-label="delete paste"
-                on:click={onDeleteClick}
+                onclick={onDeleteClick}
                 class="btn-danger"
             >
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" class="icon">
@@ -399,11 +409,11 @@
                     max-width: 20px;
                     max-height: 20px;
                 }
+            }
 
-                &.starred svg,
-                &.pinned svg {
-                    color: var(--color-primary);
-                }
+            button.starred svg,
+            button.pinned svg {
+                color: var(--color-primary);
             }
 
             .stars {

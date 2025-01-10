@@ -5,14 +5,25 @@
     import { tooltip } from "$lib/tooltips";
     import { isLanguageMarkdown } from "./utils/markdown";
 
-    export let paste: Paste;
-    export let pasty: Pasty;
-    export let langStats: LangStat[];
-    export let stats: Stats;
-    export let previewMarkdown = true;
-    export let historyId: string | null = null;
+    interface Props {
+        paste: Paste;
+        pasty: Pasty;
+        langStats: LangStat[];
+        stats: Stats;
+        previewMarkdown: boolean;
+        historyId?: string;
+    }
 
-    let copied = false;
+    let {
+        paste,
+        pasty,
+        langStats,
+        stats,
+        previewMarkdown = $bindable(true),
+        historyId = undefined
+    }: Props = $props();
+
+    let copied = $state(false);
 
     // returns the full lang from the name
     // uses the already fetched langStats which already hold the full lang
@@ -60,7 +71,7 @@
                 aria-label="view markdown code"
                 use:tooltip
                 class:enabled={previewMarkdown}
-                on:click={onMarkdownPreviewClick}
+                onclick={onMarkdownPreviewClick}
             >
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" class="icon">
                     <title>Markdown Icon</title>
@@ -74,7 +85,7 @@
 
         <button
             aria-label="copy content"
-            on:click={onCopyClick}
+            onclick={onCopyClick}
             use:tooltip={{ content: copied ? "copied" : "copy content", hideOnClick: false }}
         >
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" class="icon">

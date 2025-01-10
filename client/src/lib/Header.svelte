@@ -77,7 +77,7 @@
 
         <button
             class="nav-item btn-icon"
-            on:click={onMenuClick}
+            onclick={onMenuClick}
             aria-label={`menu (${isMacOs() ? "cmd" : "ctrl"}+k)`}
             role="menu"
             use:tooltip

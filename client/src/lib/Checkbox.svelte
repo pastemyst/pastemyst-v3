@@ -1,15 +1,18 @@
 <script lang="ts">
-    import { createEventDispatcher } from "svelte";
+    import type { ChangeEventHandler } from "svelte/elements";
 
-    export let label: string;
-    export let checked: boolean;
+    interface Props {
+        label: string;
+        checked: boolean;
+        onchange?: ChangeEventHandler<HTMLInputElement>;
+    }
 
-    const dispatch = createEventDispatcher();
+    let { label, checked = $bindable(), onchange }: Props = $props();
 </script>
 
 <!-- TODO: id, for, keyboard control -->
 <label>
-    <input type="checkbox" bind:checked on:change={() => dispatch("change")} />
+    <input type="checkbox" bind:checked {onchange} />
     <span>{label}</span>
 </label>
 

@@ -4,9 +4,13 @@
     import type { User } from "./api/user";
     import PasteListItem from "./PasteListItem.svelte";
 
-    export let pastes: Page<PasteWithLangStats>;
-    export let user: User;
-    export let pinned = false;
+    interface Props {
+        pastes: Page<PasteWithLangStats>;
+        user: User;
+        pinned?: boolean;
+    }
+
+    let { pastes = $bindable(), user, pinned = false }: Props = $props();
 
     const onPrevPage = async () => {
         if (pastes.currentPage === 0) return;
@@ -48,7 +52,7 @@
 
     {#if pastes.totalPages > 1}
         <div class="pager flex row center">
-            <button class="btn" disabled={pastes.currentPage === 0} on:click={onPrevPage}>
+            <button class="btn" disabled={pastes.currentPage === 0} onclick={onPrevPage}>
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" class="icon">
                     <title>Chevron Left</title>
                     <path
@@ -59,7 +63,7 @@
                 </svg>
             </button>
             <span>{pastes.currentPage + 1}/{pastes.totalPages}</span>
-            <button class="btn" disabled={!pastes.hasNextPage} on:click={onNextPage}>
+            <button class="btn" disabled={!pastes.hasNextPage} onclick={onNextPage}>
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" class="icon">
                     <title>Chevron Right</title>
                     <path

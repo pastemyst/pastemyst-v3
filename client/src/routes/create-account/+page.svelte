@@ -1,22 +1,24 @@
 <script lang="ts">
-    import { page } from "$app/stores";
     import { createAccount } from "$lib/api/auth";
     import { getUserByUsername } from "$lib/api/user";
     import { usernameRegex } from "$lib/patterns";
+    import { page } from "$app/state";
 
-    let username = $page.url.searchParams.get("username");
+    let username = $state(page.url.searchParams.get("username"));
     let usernameInput: HTMLInputElement;
 
-    let usernameValid = true;
-    let usernameErrorMsg: string;
+    let usernameValid = $state(true);
+    let usernameErrorMsg: string = $state("");
 
-    let createAccountErrorMsg: string | null = null;
+    let createAccountErrorMsg: string | null = $state(null);
 
     const onUsernameInput = async () => {
         await validateUsername();
     };
 
-    const onFormSubmit = async () => {
+    const onFormSubmit = async (event: SubmitEvent) => {
+        event.preventDefault();
+
         await validateUsername();
 
         if (!username || !usernameValid) {
@@ -64,7 +66,7 @@
         <code>.</code>, <code>-</code>, <code>_</code>
     </p>
 
-    <form class="flex col" on:submit|preventDefault={onFormSubmit}>
+    <form class="flex col" onsubmit={onFormSubmit}>
         {#if createAccountErrorMsg}
             <p class="error-message">
                 There was an issue creating the account. Please try again. If the issue persists
@@ -87,7 +89,7 @@
             placeholder="username..."
             bind:value={username}
             bind:this={usernameInput}
-            on:input={onUsernameInput}
+            oninput={onUsernameInput}
             maxlength="20"
             minlength="1"
         />

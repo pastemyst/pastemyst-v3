@@ -1,20 +1,32 @@
 <script lang="ts">
-    import { createEventDispatcher, tick } from "svelte";
+    import { tick } from "svelte";
+    import type { EventHandler } from "svelte/elements";
 
-    export let id: string;
-    export let isActive = false;
-    export let title = "untitled";
-    export let isInRenamingState = false;
-    export let isReadonly = false;
-    export let closeable = true;
+    interface Props {
+        id: string;
+        isActive?: boolean;
+        title?: string;
+        isReadonly?: boolean;
+        closeable?: boolean;
+        isInRenamingState?: boolean;
+        onclick?: EventHandler;
+        onclose?: () => void;
+        onfinishedRenaming?: () => void;
+    }
 
-    let dispatch = createEventDispatcher();
+    let {
+        id,
+        isActive = false,
+        title = $bindable("untitled"),
+        isInRenamingState = $bindable(false),
+        isReadonly = false,
+        closeable = true,
+        onclick = undefined,
+        onclose = undefined,
+        onfinishedRenaming = undefined
+    }: Props = $props();
 
-    let inputElement: HTMLInputElement;
-
-    const onClick = (event: MouseEvent) => {
-        dispatch("click", { event: event });
-    };
+    let inputElement: HTMLInputElement | undefined = $state();
 
     const onDblClick = async () => {
         if (isReadonly) return;
@@ -23,8 +35,8 @@
 
         await tick();
 
-        inputElement.focus();
-        inputElement.select();
+        inputElement?.focus();
+        inputElement?.select();
         onInput();
     };
 
@@ -34,41 +46,42 @@
         // don't allow empty pasty titles
         if (title.length === 0) title = "untitled";
 
-        dispatch("finishedRenaming");
+        onfinishedRenaming?.();
     };
 
     const onInput = () => {
-        inputElement.style.width = inputElement.value.length + "ch";
+        if (inputElement) {
+            inputElement.style.width = inputElement.value.length + "ch";
 
-        if (title.length === 0) {
-            inputElement.style.width = inputElement.placeholder.length + "ch";
+            if (title.length === 0) {
+                inputElement.style.width = inputElement.placeholder.length + "ch";
+            }
         }
     };
 
     const onInputKeyup = (event: KeyboardEvent) => {
         if (event.key === "Enter" || event.key === "Escape") onInputBlur();
     };
-
-    const onClose = () => {
-        dispatch("close");
-    };
 </script>
 
-<button
+<div
+    role="button"
+    tabindex="0"
     class="tab flex row center space-between"
     class:active={isActive}
     class:rename-state={isInRenamingState}
     data-id={id}
-    on:click={onClick}
-    on:dblclick={onDblClick}
+    {onclick}
+    onkeydown={onclick}
+    ondblclick={onDblClick}
 >
     {#if isInRenamingState}
         <input
             type="text"
             bind:value={title}
-            on:blur={onInputBlur}
-            on:input={onInput}
-            on:keyup={onInputKeyup}
+            onblur={onInputBlur}
+            oninput={onInput}
+            onkeyup={onInputKeyup}
             bind:this={inputElement}
             placeholder="untitled"
             maxlength="50"
@@ -78,7 +91,7 @@
     {/if}
 
     {#if !isReadonly && closeable}
-        <button class="close-icon flex center" on:click={onClose}>
+        <button class="close-icon flex center" onclick={onclose}>
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" class="icon">
                 <title>Close Icon</title>
                 <path
@@ -89,7 +102,7 @@
             </svg>
         </button>
     {/if}
-</button>
+</div>
 
 <style lang="scss">
     .tab {

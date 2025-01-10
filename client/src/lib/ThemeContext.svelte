@@ -1,9 +1,14 @@
 <script lang="ts">
-    import { onMount } from "svelte";
+    import { onMount, type Snippet } from "svelte";
     import { themeStore } from "./stores";
     import { themes, type Theme } from "./themes";
 
-    export let currentTheme: string;
+    interface Props {
+        currentTheme: string;
+        children: Snippet;
+    }
+
+    let { currentTheme = $bindable(), children }: Props = $props();
 
     let mounted = false;
 
@@ -30,5 +35,5 @@
 </script>
 
 <div id="theme-context" data-theme={currentTheme}>
-    <slot />
+    {@render children()}
 </div>

@@ -3,25 +3,28 @@
     import { editPaste, type PasteEditInfo, type PastyEditInfo } from "$lib/api/paste";
     import { creatingPasteStore } from "$lib/stores";
     import TabbedEditor from "$lib/TabbedEditor.svelte";
-    import type TabData from "$lib/TabData";
+    import type TabData from "$lib/TabData.svelte";
     import TagInput from "$lib/TagInput.svelte";
     import type { PageData } from "./$types";
 
-    export let data: PageData;
+    interface Props {
+        data: PageData;
+    }
 
-    let tabs: TabData[] = [];
-    let activeTab: TabData | undefined;
-    let editor: TabbedEditor;
+    let { data = $bindable() }: Props = $props();
+
+    let tabs: TabData[] = $state([]);
+    let activeTab: TabData | undefined = $state();
 
     const onEditPaste = async () => {
         let pasties: PastyEditInfo[] = [];
 
         for (const tab of tabs) {
             pasties.push({
-                id: tab.id.length === 8 ? tab.id : undefined, // TODO: maybe a better way to check if it's a new pasty
-                title: tab.title,
-                content: tab.editor.getContent(),
-                language: tab.editor.getSelectedLang().name
+                id: tab.id?.length === 8 ? tab.id : undefined, // TODO: maybe a better way to check if it's a new pasty
+                title: tab.title!,
+                content: tab.editor!.getContent(),
+                language: tab.editor!.getSelectedLang()!.name
             });
         }
 
@@ -68,12 +71,11 @@
     settings={data.settings}
     bind:tabs
     bind:activeTab
-    bind:this={editor}
     existingPasties={data.paste.pasties}
 />
 
 <div class="paste-options block flex row">
-    <button class="btn-main" on:click={onEditPaste}>edit paste</button>
+    <button class="btn-main" onclick={onEditPaste}>edit paste</button>
 </div>
 
 <style lang="scss">
