@@ -198,13 +198,6 @@ public class AuthService(
         return (await mongo.Users.Find(u => u.Id == userId).FirstOrDefaultAsync(), scopes);
     }
 
-    public async Task<User> GetSelfAsync(HttpContext httpContext)
-    {
-        var (self, _) = await GetSelfWithScopesAsync(httpContext);
-
-        return self;
-    }
-
     public string Logout(HttpContext httpContext)
     {
         httpContext.Response.Cookies.Delete("pastemyst");
