@@ -11,7 +11,7 @@ public class AccessToken
 
     public DateTime CreatedAt { get; init; } = DateTime.UtcNow;
 
-    public DateTime ExpiresAt { get; init; } = DateTime.UtcNow.AddDays(30);
+    public DateTime? ExpiresAt { get; init; } = DateTime.UtcNow.AddDays(30);
 
     public string Token { get; init; }
 
