@@ -1,4 +1,8 @@
+using System.Net;
 using Microsoft.AspNetCore.Mvc;
+using pastemyst.Exceptions;
+using pastemyst.Extensions;
+using pastemyst.Models;
 using pastemyst.Models.Auth;
 using pastemyst.Services;
 
@@ -6,7 +10,7 @@ namespace pastemyst.Controllers;
 
 [ApiController]
 [Route("/api/v3")]
-public class AuthController(AuthService authService) : ControllerBase
+public class AuthController(AuthService authService, UserContext userContext) : ControllerBase
 {
     [HttpGet("login/{provider}")]
     public async Task<IActionResult> Login(string provider)
@@ -28,12 +32,19 @@ public class AuthController(AuthService authService) : ControllerBase
     }
 
     [HttpGet("auth/self")]
-    public async Task<IActionResult> GetSelf()
+    public User GetSelf()
     {
-        var self = await authService.GetSelfAsync(HttpContext);
+        if (!userContext.IsLoggedIn())
+        {
+            throw new HttpException(HttpStatusCode.Unauthorized, "You must be authorized to get self.");
+        }
 
-        if (self is null) return Unauthorized();
-        return Ok(self);
+        if (!userContext.HasScope(Scope.User, Scope.UserRead))
+        {
+            throw new HttpException(HttpStatusCode.Forbidden, $"Missing required scope {Scope.UserRead.ToEnumString()}.");
+        }
+
+        return userContext.Self;
     }
 
     [HttpGet("auth/logout")]

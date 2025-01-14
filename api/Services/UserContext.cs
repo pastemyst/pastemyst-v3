@@ -20,4 +20,9 @@ public class UserContext
     }
 
     public void LogoutUser() => Self = null;
+
+    public bool HasScope(params Scope[] scopes)
+    {
+        return scopes.Any(s => Scopes.Contains(s));
+    }
 }
