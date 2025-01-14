@@ -3,6 +3,8 @@ using MongoDB.Driver;
 using MongoDB.Bson;
 using pastemyst.Exceptions;
 using pastemyst.Models;
+using pastemyst.Models.Auth;
+using pastemyst.Extensions;
 
 namespace pastemyst.Services;
 
@@ -19,6 +21,11 @@ public class SettingsService(
         if (!userContext.IsLoggedIn())
         {
             throw new HttpException(HttpStatusCode.Unauthorized, "You need to be authorized to change settings.");
+        }
+
+        if (!userContext.HasScope(Scope.User))
+        {
+            throw new HttpException(HttpStatusCode.Forbidden, $"Missing required scope: {Scope.User.ToEnumString()}.");
         }
 
         if (string.Equals(userContext.Self.Username, username, StringComparison.CurrentCultureIgnoreCase))
@@ -42,6 +49,11 @@ public class SettingsService(
             throw new HttpException(HttpStatusCode.Unauthorized, "You need to be authorized to change settings.");
         }
 
+        if (!userContext.HasScope(Scope.User))
+        {
+            throw new HttpException(HttpStatusCode.Forbidden, $"Missing required scope: {Scope.User.ToEnumString()}.");
+        }
+
         await mongo.Images.DeleteAsync(ObjectId.Parse(userContext.Self.AvatarId));
 
         var newAvatar = await imageService.UploadImageAsync(bytes, contentType);
@@ -55,6 +67,9 @@ public class SettingsService(
         if (!userContext.IsLoggedIn())
             throw new HttpException(HttpStatusCode.Unauthorized, "You must be authorized to fetch user settings.");
 
+        if (!userContext.HasScope(Scope.User, Scope.UserRead))
+            throw new HttpException(HttpStatusCode.Forbidden, $"Missing required scope: {Scope.UserRead.ToEnumString()}.");
+
         return userContext.Self.UserSettings;
     }
 
@@ -62,6 +77,9 @@ public class SettingsService(
     {
         if (!userContext.IsLoggedIn())
             throw new HttpException(HttpStatusCode.Unauthorized, "You must be authorized to update user settings.");
+
+        if (!userContext.HasScope(Scope.User))
+            throw new HttpException(HttpStatusCode.Forbidden, $"Missing required scope: {Scope.User.ToEnumString()}.");
 
         var update = Builders<User>.Update.Set(u => u.UserSettings, settings);
         await mongo.Users.UpdateOneAsync(u => u.Id == userContext.Self.Id, update);
@@ -72,6 +90,11 @@ public class SettingsService(
         // If a logged in user is requesting the settings, send the user's settings
         if (userContext.IsLoggedIn())
         {
+            if (!userContext.HasScope(Scope.User, Scope.UserRead))
+            {
+                throw new HttpException(HttpStatusCode.Forbidden, $"Missing required scope: {Scope.UserRead.ToEnumString()}.");
+            }
+
             return userContext.Self.Settings;
         }
 
@@ -118,6 +141,11 @@ public class SettingsService(
     {
         if (userContext.IsLoggedIn())
         {
+            if (!userContext.HasScope(Scope.User))
+            {
+                throw new HttpException(HttpStatusCode.Forbidden, $"Missing required scope: {Scope.User.ToEnumString()}.")
+            }
+
             var update = Builders<User>.Update.Set(u => u.Settings, settings);
             await mongo.Users.UpdateOneAsync(u => u.Id == userContext.Self.Id, update);
         }
