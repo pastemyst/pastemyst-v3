@@ -6,5 +6,8 @@ public enum ActionLogType
     PasteDeleted,
     PasteExpired,
     UserCreated,
-    UserDeleted
+    UserDeleted,
+    AccessTokenCreated,
+    AccessTokenDeleted,
+    AccessTokenExpired
 }

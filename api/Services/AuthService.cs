@@ -214,6 +214,8 @@ public class AuthService(
         var filter = Builders<AccessToken>.Filter.Eq(a => a.Id, accessTokenId);
         await mongo.AccessTokens.DeleteOneAsync(filter);
 
+        await actionLogger.LogActionAsync(ActionLogType.AccessTokenDeleted, userId);
+
         return configuration["ClientUrl"];
     }
 
@@ -239,6 +241,8 @@ public class AuthService(
         };
 
         await mongo.AccessTokens.InsertOneAsync(accessToken);
+
+        await actionLogger.LogActionAsync(ActionLogType.AccessTokenCreated, owner.Id);
 
         return $"{accessToken.Id}-{secureString}";
     }
