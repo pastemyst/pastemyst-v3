@@ -1,11 +1,13 @@
 using System.Net;
+using System.Security.Cryptography;
+using System.Text;
 using System.Web;
 using JWT.Algorithms;
 using JWT.Builder;
-using JWT.Exceptions;
 using MongoDB.Driver;
 using pastemyst.Exceptions;
 using pastemyst.Models;
+using pastemyst.Models.Auth;
 
 // disable warning for using HMACSHA512Algorithm
 #pragma warning disable CS0618
@@ -78,17 +80,11 @@ public class AuthService(
         {
             var cookieExpirationTime = DateTimeOffset.Now.AddDays(30);
 
-            var jwtToken = JwtBuilder.Create()
-                .WithAlgorithm(new HMACSHA512Algorithm())
-                .AddClaim("exp", cookieExpirationTime.ToUnixTimeSeconds())
-                .AddClaim("id", existingUser.Id)
-                .AddClaim("username", existingUser.Username)
-                .WithSecret(configuration["JwtSecret"])
-                .Encode();
+            var newAccessToken = await GenerateAccessToken(existingUser, [Scope.CreatePaste]);
 
             cookie.Expires = cookieExpirationTime;
 
-            httpContext.Response.Cookies.Append("pastemyst", jwtToken, cookie);
+            httpContext.Response.Cookies.Append("pastemyst", newAccessToken, cookie);
 
             return configuration["ClientUrl"]!;
         }
@@ -163,13 +159,7 @@ public class AuthService(
 
         httpContext.Response.Cookies.Delete("pastemyst-registration");
 
-        var jwtToken = JwtBuilder.Create()
-            .WithAlgorithm(new HMACSHA512Algorithm())
-            .AddClaim("exp", DateTimeOffset.Now.AddDays(30).ToUnixTimeSeconds())
-            .AddClaim("id", user.Id)
-            .AddClaim("username", user.Username)
-            .WithSecret(configuration["JwtSecret"])
-            .Encode();
+        var accessToken = await GenerateAccessToken(user, [Scope.CreatePaste]);
 
         var newCookie = new CookieOptions
         {
@@ -180,39 +170,30 @@ public class AuthService(
             Secure = configuration.GetValue<bool>("Https")
         };
 
-        httpContext.Response.Cookies.Append("pastemyst", jwtToken, newCookie);
+        httpContext.Response.Cookies.Append("pastemyst", accessToken, newCookie);
 
         await actionLogger.LogActionAsync(ActionLogType.UserCreated, user.Id);
     }
 
     public async Task<User> GetSelfAsync(HttpContext httpContext)
     {
-        var jwtToken = httpContext.Request.Cookies["pastemyst"];
+        var accessToken = httpContext.Request.Cookies["pastemyst"];
 
-        if (jwtToken is null)
+        if (accessToken is null)
         {
             string authHeader = httpContext.Request.Headers["Authorization"];
 
             if (authHeader is null || authHeader.Length <= "Bearer ".Length) return null;
 
-            jwtToken = authHeader["Bearer ".Length..];
+            accessToken = authHeader["Bearer ".Length..];
         }
 
-        Dictionary<string, object> claims;
-        try
-        {
-            claims = JwtBuilder.Create()
-                .WithAlgorithm(new HMACSHA512Algorithm())
-                .WithSecret(configuration["JwtSecret"])
-                .MustVerifySignature()
-                .Decode<Dictionary<string, object>>(jwtToken);
-        }
-        catch (TokenExpiredException)
-        {
-            throw new HttpException(HttpStatusCode.Unauthorized, "JWT token has expired.");
-        }
+        var (valid, userId) = await AccessTokenValid(accessToken);
 
-        var userId = (string)claims["id"];
+        if (!valid)
+        {
+            throw new HttpException(HttpStatusCode.Unauthorized, "Access token is not valid.");
+        }
 
         return await mongo.Users.Find(u => u.Id == userId).FirstOrDefaultAsync();
     }
@@ -222,5 +203,60 @@ public class AuthService(
         httpContext.Response.Cookies.Delete("pastemyst");
 
         return configuration["ClientUrl"];
+    }
+
+    private async Task<string> GenerateAccessToken(User owner, Scope[] scopes)
+    {
+        using var sha = SHA512.Create();
+
+        var secureString = RandomNumberGenerator.GetHexString(64, true);
+        var hashedToken = sha.ComputeHash(Encoding.UTF8.GetBytes(secureString));
+
+        var hashStringBuilder = new StringBuilder();
+        foreach (byte b in hashedToken)
+        {
+            hashStringBuilder.Append(b.ToString("x2"));
+        }
+
+        var accessToken = new AccessToken
+        {
+            Id = await idProvider.GenerateId(async (id) => await AccessTokenExistsById(id)),
+            Token = hashStringBuilder.ToString(),
+            Scopes = scopes,
+            OwnerId = owner.Id
+        };
+
+        await mongo.AccessTokens.InsertOneAsync(accessToken);
+
+        return $"{accessToken.Id}-{secureString}";
+    }
+
+    private async Task<(bool, string)> AccessTokenValid(String accessToken)
+    {
+        var splitted = accessToken.Split("-");
+        var accessTokenId = splitted[0];
+        var accessTokenRaw = splitted[1];
+
+        var accessTokenDb = await mongo.AccessTokens.Find(a => a.Id == accessTokenId).FirstOrDefaultAsync();
+
+        if (accessTokenDb is null) return (false, null);
+
+        using var sha = SHA512.Create();
+        var hashedToken = sha.ComputeHash(Encoding.UTF8.GetBytes(accessTokenRaw));
+
+        var hashStringBuilder = new StringBuilder();
+        foreach (byte b in hashedToken)
+        {
+            hashStringBuilder.Append(b.ToString("x2"));
+        }
+
+        if (!accessTokenDb.Token.Equals(hashStringBuilder.ToString())) return (false, null);
+
+        return (true, accessTokenDb.OwnerId);
+    }
+
+    private async Task<bool> AccessTokenExistsById(string id)
+    {
+        return await mongo.AccessTokens.Find(a => a.Id == id).FirstOrDefaultAsync() is not null;
     }
 }

@@ -59,8 +59,6 @@ builder.Services.AddScoped<StatsService>();
 
 builder.Services.AddQuartz(q =>
 {
-    q.UseMicrosoftDependencyInjectionJobFactory();
-
     q.AddJob<ExpirePastesJob>(opts => opts.WithIdentity(nameof(ExpirePastesJob)));
     q.AddTrigger(opts => opts
         .ForJob(nameof(ExpirePastesJob))

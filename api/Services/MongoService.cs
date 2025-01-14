@@ -3,6 +3,7 @@ using MongoDB.Bson.Serialization.Conventions;
 using MongoDB.Driver;
 using MongoDB.Driver.GridFS;
 using pastemyst.Models;
+using pastemyst.Models.Auth;
 using pastemyst.Serializers;
 
 namespace pastemyst.Services;
@@ -17,18 +18,16 @@ public class MongoService
 
     public IMongoCollection<SessionSettings> SessionSettings { get; private set; }
 
+    public IMongoCollection<AccessToken> AccessTokens { get; private set; }
+
     public GridFSBucket Images { get; private set; }
 
     private MongoClient mongoClient;
 
     public MongoService(IConfiguration configuration)
     {
-        BsonClassMap.RegisterClassMap<Paste>(map =>
-        {
-            map.AutoMap();
-            map.GetMemberMap(p => p.ExpiresIn)
-                .SetSerializer(new CustomEnumStringSerializer<ExpiresIn>());
-        });
+        BsonSerializer.RegisterSerializer(new CustomEnumStringSerializer<ExpiresIn>());
+        BsonSerializer.RegisterSerializer(new CustomEnumStringSerializer<Scope>());
 
         var camelCaseConvention = new ConventionPack { new CamelCaseElementNameConvention() };
         ConventionRegistry.Register("CamelCase", camelCaseConvention, type => true);
@@ -45,6 +44,7 @@ public class MongoService
         Users = mongoDb.GetCollection<User>("users");
         ActionLogs = mongoDb.GetCollection<ActionLog>("actionLogs");
         SessionSettings = mongoDb.GetCollection<SessionSettings>("sessionSettings");
+        AccessTokens = mongoDb.GetCollection<AccessToken>("accessTokens");
 
         Images = new GridFSBucket(mongoDb, new()
         {
