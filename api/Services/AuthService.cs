@@ -188,7 +188,7 @@ public class AuthService(
             accessToken = authHeader["Bearer ".Length..];
         }
 
-        var (valid, userId, scopes) = await AccessTokenValid(accessToken);
+        var (valid, _, userId, scopes) = await AccessTokenValid(accessToken);
 
         if (!valid)
         {
@@ -198,9 +198,21 @@ public class AuthService(
         return (await mongo.Users.Find(u => u.Id == userId).FirstOrDefaultAsync(), scopes);
     }
 
-    public string Logout(HttpContext httpContext)
+    public async Task<string> Logout(HttpContext httpContext)
     {
+        var accessToken = httpContext.Request.Cookies["pastemyst"];
+
+        var (valid, accessTokenId, userId, scopes) = await AccessTokenValid(accessToken);
+
+        if (!valid)
+        {
+            throw new HttpException(HttpStatusCode.Unauthorized, "Access token is not valid.");
+        }
+
         httpContext.Response.Cookies.Delete("pastemyst");
+
+        var filter = Builders<AccessToken>.Filter.Eq(a => a.Id, accessTokenId);
+        await mongo.AccessTokens.DeleteOneAsync(filter);
 
         return configuration["ClientUrl"];
     }
@@ -231,7 +243,7 @@ public class AuthService(
         return $"{accessToken.Id}-{secureString}";
     }
 
-    private async Task<(bool, string, Scope[])> AccessTokenValid(String accessToken)
+    private async Task<(bool, string, string, Scope[])> AccessTokenValid(String accessToken)
     {
         var splitted = accessToken.Split("-");
         var accessTokenId = splitted[0];
@@ -239,7 +251,7 @@ public class AuthService(
 
         var accessTokenDb = await mongo.AccessTokens.Find(a => a.Id == accessTokenId).FirstOrDefaultAsync();
 
-        if (accessTokenDb is null) return (false, null, []);
+        if (accessTokenDb is null) return (false, null, null, []);
 
         using var sha = SHA512.Create();
         var hashedToken = sha.ComputeHash(Encoding.UTF8.GetBytes(accessTokenRaw));
@@ -250,9 +262,9 @@ public class AuthService(
             hashStringBuilder.Append(b.ToString("x2"));
         }
 
-        if (!accessTokenDb.Token.Equals(hashStringBuilder.ToString())) return (false, null, []);
+        if (!accessTokenDb.Token.Equals(hashStringBuilder.ToString())) return (false, null, null, []);
 
-        return (true, accessTokenDb.OwnerId, accessTokenDb.Scopes);
+        return (true, accessTokenDb.Id, accessTokenDb.OwnerId, accessTokenDb.Scopes);
     }
 
     private async Task<bool> AccessTokenExistsById(string id)

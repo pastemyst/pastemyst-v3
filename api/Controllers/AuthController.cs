@@ -48,8 +48,8 @@ public class AuthController(AuthService authService, UserContext userContext) : 
     }
 
     [HttpGet("auth/logout")]
-    public IActionResult Logout()
+    public async Task<IActionResult> Logout()
     {
-        return Redirect(authService.Logout(HttpContext));
+        return Redirect(await authService.Logout(HttpContext));
     }
 }
