@@ -257,6 +257,12 @@ public class AuthService(
 
         if (accessTokenDb is null) return (false, null, null, []);
 
+        if (accessTokenDb.ExpiresAt <= DateTime.UtcNow)
+        {
+            await mongo.AccessTokens.DeleteOneAsync(a => a.Id == accessTokenId);
+            return (false, null, null, []);
+        }
+
         using var sha = SHA512.Create();
         var hashedToken = sha.ComputeHash(Encoding.UTF8.GetBytes(accessTokenRaw));
 
