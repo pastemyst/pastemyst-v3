@@ -81,7 +81,7 @@ public class PasteTests : IClassFixture<DatabaseFixture>
             },
         };
 
-        userContext.LoginUser(new User { Id = "1" });
+        userContext.LoginUser(new User { Id = "1" }, []);
 
         var paste = await pasteService.CreateAsync(createInfo);
 
@@ -106,7 +106,7 @@ public class PasteTests : IClassFixture<DatabaseFixture>
             },
         };
 
-        userContext.LoginUser(new User { Id = "1" });
+        userContext.LoginUser(new User { Id = "1" }, []);
 
         await Assert.ThrowsAsync<HttpException>(async () => await pasteService.CreateAsync(createInfo));
 
@@ -129,7 +129,7 @@ public class PasteTests : IClassFixture<DatabaseFixture>
             },
         };
 
-        userContext.LoginUser(new User { Id = "1" });
+        userContext.LoginUser(new User { Id = "1" }, []);
 
         await Assert.ThrowsAsync<HttpException>(async () => await pasteService.CreateAsync(createInfo));
 
@@ -170,7 +170,7 @@ public class PasteTests : IClassFixture<DatabaseFixture>
             },
         };
 
-        userContext.LoginUser(new User { Id = "1" });
+        userContext.LoginUser(new User { Id = "1" }, []);
 
         await Assert.ThrowsAsync<HttpException>(async () => await pasteService.CreateAsync(createInfo));
 
@@ -211,7 +211,7 @@ public class PasteTests : IClassFixture<DatabaseFixture>
             },
         };
 
-        userContext.LoginUser(new User { Id = "1" });
+        userContext.LoginUser(new User { Id = "1" }, []);
 
         await Assert.ThrowsAsync<HttpException>(async () => await pasteService.CreateAsync(createInfo));
 
@@ -233,7 +233,7 @@ public class PasteTests : IClassFixture<DatabaseFixture>
             },
         };
 
-        userContext.LoginUser(new User { Id = "1" });
+        userContext.LoginUser(new User { Id = "1" }, []);
 
         var paste = await pasteService.CreateAsync(createInfo);
 
@@ -257,7 +257,7 @@ public class PasteTests : IClassFixture<DatabaseFixture>
             },
         };
 
-        userContext.LoginUser(new User { Id = "1" });
+        userContext.LoginUser(new User { Id = "1" }, []);
 
         var paste = await pasteService.CreateAsync(createInfo);
 
@@ -373,7 +373,7 @@ public class PasteTests : IClassFixture<DatabaseFixture>
             },
         };
 
-        userContext.LoginUser(new User { Id = "1" });
+        userContext.LoginUser(new User { Id = "1" }, []);
 
         var paste = await pasteService.CreateAsync(createInfo);
 
@@ -397,11 +397,11 @@ public class PasteTests : IClassFixture<DatabaseFixture>
             },
         };
 
-        userContext.LoginUser(new User { Id = "1" });
+        userContext.LoginUser(new User { Id = "1" }, []);
 
         var paste = await pasteService.CreateAsync(createInfo);
 
-        userContext.LoginUser(new User { Id = "2" });
+        userContext.LoginUser(new User { Id = "2" }, []);
 
         await Assert.ThrowsAsync<HttpException>(async () => await pasteService.GetAsync(paste.Id));
 
@@ -423,7 +423,7 @@ public class PasteTests : IClassFixture<DatabaseFixture>
             },
         };
 
-        userContext.LoginUser(new User { Id = "1" });
+        userContext.LoginUser(new User { Id = "1" }, []);
 
         var paste = await pasteService.CreateAsync(createInfo);
 
@@ -473,7 +473,7 @@ public class PasteTests : IClassFixture<DatabaseFixture>
 
         var paste = await pasteService.CreateAsync(createInfo);
 
-        userContext.LoginUser(new User { Id = "1" });
+        userContext.LoginUser(new User { Id = "1" }, []);
 
         await Assert.ThrowsAsync<HttpException>(async () => await pasteService.DeleteAsync(paste.Id));
 
@@ -494,11 +494,11 @@ public class PasteTests : IClassFixture<DatabaseFixture>
             },
         };
 
-        userContext.LoginUser(new User { Id = "1" });
+        userContext.LoginUser(new User { Id = "1" }, []);
 
         var paste = await pasteService.CreateAsync(createInfo);
 
-        userContext.LoginUser(new User { Id = "2" });
+        userContext.LoginUser(new User { Id = "2" }, []);
 
         await Assert.ThrowsAsync<HttpException>(async () => await pasteService.DeleteAsync(paste.Id));
 
@@ -520,11 +520,11 @@ public class PasteTests : IClassFixture<DatabaseFixture>
             },
         };
 
-        userContext.LoginUser(new User { Id = "1" });
+        userContext.LoginUser(new User { Id = "1" }, []);
 
         var paste = await pasteService.CreateAsync(createInfo);
 
-        userContext.LoginUser(new User { Id = "2" });
+        userContext.LoginUser(new User { Id = "2" }, []);
 
         var exception = await Assert.ThrowsAsync<HttpException>(async () => await pasteService.DeleteAsync(paste.Id));
 
@@ -547,7 +547,7 @@ public class PasteTests : IClassFixture<DatabaseFixture>
             },
         };
 
-        userContext.LoginUser(new User { Id = "1" });
+        userContext.LoginUser(new User { Id = "1" }, []);
 
         var paste = await pasteService.CreateAsync(createInfo);
 
@@ -592,11 +592,11 @@ public class PasteTests : IClassFixture<DatabaseFixture>
             },
         };
 
-        userContext.LoginUser(new User { Id = "1" });
+        userContext.LoginUser(new User { Id = "1" }, []);
 
         var paste = await pasteService.CreateAsync(createInfo);
 
-        userContext.LoginUser(new User { Id = "2" });
+        userContext.LoginUser(new User { Id = "2" }, []);
 
         await Assert.ThrowsAsync<HttpException>(async () => await pasteService.ToggleStarAsync(paste.Id));
 
@@ -619,7 +619,7 @@ public class PasteTests : IClassFixture<DatabaseFixture>
 
         var paste = await pasteService.CreateAsync(createInfo);
 
-        userContext.LoginUser(new User { Id = "1" });
+        userContext.LoginUser(new User { Id = "1" }, []);
         await pasteService.ToggleStarAsync(paste.Id);
 
         var fetchedPaste = await pasteService.GetAsync(paste.Id);
@@ -645,7 +645,7 @@ public class PasteTests : IClassFixture<DatabaseFixture>
 
         var paste = await pasteService.CreateAsync(createInfo);
 
-        userContext.LoginUser(new User { Id = "1" });
+        userContext.LoginUser(new User { Id = "1" }, []);
         await pasteService.ToggleStarAsync(paste.Id);
         await pasteService.ToggleStarAsync(paste.Id);
 
@@ -690,11 +690,11 @@ public class PasteTests : IClassFixture<DatabaseFixture>
             },
         };
 
-        userContext.LoginUser(new User { Id = "1" });
+        userContext.LoginUser(new User { Id = "1" }, []);
 
         var paste = await pasteService.CreateAsync(createInfo);
 
-        userContext.LoginUser(new User { Id = "2" });
+        userContext.LoginUser(new User { Id = "2" }, []);
 
         await Assert.ThrowsAsync<HttpException>(async () => await pasteService.IsStarredAsync(paste.Id));
 
@@ -717,7 +717,7 @@ public class PasteTests : IClassFixture<DatabaseFixture>
 
         var paste = await pasteService.CreateAsync(createInfo);
 
-        userContext.LoginUser(new User { Id = "1" });
+        userContext.LoginUser(new User { Id = "1" }, []);
 
         var isStarred = await pasteService.IsStarredAsync(paste.Id);
 
@@ -742,7 +742,7 @@ public class PasteTests : IClassFixture<DatabaseFixture>
 
         var paste = await pasteService.CreateAsync(createInfo);
 
-        userContext.LoginUser(new User { Id = "1" });
+        userContext.LoginUser(new User { Id = "1" }, []);
         await pasteService.ToggleStarAsync(paste.Id);
 
         var isStarred = await pasteService.IsStarredAsync(paste.Id);
@@ -787,7 +787,7 @@ public class PasteTests : IClassFixture<DatabaseFixture>
 
         var paste = await pasteService.CreateAsync(createInfo);
 
-        userContext.LoginUser(new User { Id = "1" });
+        userContext.LoginUser(new User { Id = "1" }, []);
 
         await Assert.ThrowsAsync<HttpException>(async () => await pasteService.TogglePinnedAsync(paste.Id));
 
@@ -808,11 +808,11 @@ public class PasteTests : IClassFixture<DatabaseFixture>
             },
         };
 
-        userContext.LoginUser(new User { Id = "1" });
+        userContext.LoginUser(new User { Id = "1" }, []);
 
         var paste = await pasteService.CreateAsync(createInfo);
 
-        userContext.LoginUser(new User { Id = "2" });
+        userContext.LoginUser(new User { Id = "2" }, []);
 
         await Assert.ThrowsAsync<HttpException>(async () => await pasteService.TogglePinnedAsync(paste.Id));
 
@@ -834,7 +834,7 @@ public class PasteTests : IClassFixture<DatabaseFixture>
             },
         };
 
-        userContext.LoginUser(new User { Id = "1" });
+        userContext.LoginUser(new User { Id = "1" }, []);
 
         var paste = await pasteService.CreateAsync(createInfo);
 
@@ -857,7 +857,7 @@ public class PasteTests : IClassFixture<DatabaseFixture>
             },
         };
 
-        userContext.LoginUser(new User { Id = "1" });
+        userContext.LoginUser(new User { Id = "1" }, []);
 
         var paste = await pasteService.CreateAsync(createInfo);
 
@@ -885,7 +885,7 @@ public class PasteTests : IClassFixture<DatabaseFixture>
             },
         };
 
-        userContext.LoginUser(new User { Id = "1" });
+        userContext.LoginUser(new User { Id = "1" }, []);
 
         var paste = await pasteService.CreateAsync(createInfo);
 
@@ -933,7 +933,7 @@ public class PasteTests : IClassFixture<DatabaseFixture>
 
         var paste = await pasteService.CreateAsync(createInfo);
 
-        userContext.LoginUser(new User { Id = "1" });
+        userContext.LoginUser(new User { Id = "1" }, []);
 
         await Assert.ThrowsAsync<HttpException>(async () => await pasteService.TogglePrivateAsync(paste.Id));
 
@@ -954,11 +954,11 @@ public class PasteTests : IClassFixture<DatabaseFixture>
             },
         };
 
-        userContext.LoginUser(new User { Id = "1" });
+        userContext.LoginUser(new User { Id = "1" }, []);
 
         var paste = await pasteService.CreateAsync(createInfo);
 
-        userContext.LoginUser(new User { Id = "2" });
+        userContext.LoginUser(new User { Id = "2" }, []);
 
         await Assert.ThrowsAsync<HttpException>(async () => await pasteService.TogglePrivateAsync(paste.Id));
 
@@ -980,7 +980,7 @@ public class PasteTests : IClassFixture<DatabaseFixture>
             },
         };
 
-        userContext.LoginUser(new User { Id = "1" });
+        userContext.LoginUser(new User { Id = "1" }, []);
 
         var paste = await pasteService.CreateAsync(createInfo);
 
@@ -1003,7 +1003,7 @@ public class PasteTests : IClassFixture<DatabaseFixture>
             },
         };
 
-        userContext.LoginUser(new User { Id = "1" });
+        userContext.LoginUser(new User { Id = "1" }, []);
 
         var paste = await pasteService.CreateAsync(createInfo);
 
@@ -1031,7 +1031,7 @@ public class PasteTests : IClassFixture<DatabaseFixture>
             },
         };
 
-        userContext.LoginUser(new User { Id = "1" });
+        userContext.LoginUser(new User { Id = "1" }, []);
 
         var paste = await pasteService.CreateAsync(createInfo);
 
@@ -1105,7 +1105,7 @@ public class PasteTests : IClassFixture<DatabaseFixture>
             }
         };
 
-        userContext.LoginUser(new User { Id = "1" });
+        userContext.LoginUser(new User { Id = "1" }, []);
 
         await Assert.ThrowsAsync<HttpException>(async () => await pasteService.EditAsync(paste.Id, editInfo));
 
@@ -1126,7 +1126,7 @@ public class PasteTests : IClassFixture<DatabaseFixture>
             },
         };
 
-        userContext.LoginUser(new User { Id = "1" });
+        userContext.LoginUser(new User { Id = "1" }, []);
 
         var paste = await pasteService.CreateAsync(createInfo);
 
@@ -1143,7 +1143,7 @@ public class PasteTests : IClassFixture<DatabaseFixture>
             }
         };
 
-        userContext.LoginUser(new User { Id = "2" });
+        userContext.LoginUser(new User { Id = "2" }, []);
 
         await Assert.ThrowsAsync<HttpException>(async () => await pasteService.EditAsync(paste.Id, editInfo));
 
@@ -1164,7 +1164,7 @@ public class PasteTests : IClassFixture<DatabaseFixture>
             },
         };
 
-        userContext.LoginUser(new User { Id = "1" });
+        userContext.LoginUser(new User { Id = "1" }, []);
 
         var paste = await pasteService.CreateAsync(createInfo);
 
@@ -1211,7 +1211,7 @@ public class PasteTests : IClassFixture<DatabaseFixture>
             Tags = ["tag1"]
         };
 
-        userContext.LoginUser(new User { Id = "1" });
+        userContext.LoginUser(new User { Id = "1" }, []);
 
         var paste = await pasteService.CreateAsync(createInfo);
 
@@ -1238,7 +1238,7 @@ public class PasteTests : IClassFixture<DatabaseFixture>
             },
         };
 
-        userContext.LoginUser(new User { Id = "1" });
+        userContext.LoginUser(new User { Id = "1" }, []);
 
         var paste = await pasteService.CreateAsync(createInfo);
 
@@ -1261,7 +1261,7 @@ public class PasteTests : IClassFixture<DatabaseFixture>
             },
         };
 
-        userContext.LoginUser(new User { Id = "1" });
+        userContext.LoginUser(new User { Id = "1" }, []);
 
         var paste = await pasteService.CreateAsync(createInfo);
 
@@ -1304,7 +1304,7 @@ public class PasteTests : IClassFixture<DatabaseFixture>
             },
         };
 
-        userContext.LoginUser(new User { Id = "1" });
+        userContext.LoginUser(new User { Id = "1" }, []);
 
         var paste = await pasteService.CreateAsync(createInfo);
 
@@ -1351,7 +1351,7 @@ public class PasteTests : IClassFixture<DatabaseFixture>
             },
         };
 
-        userContext.LoginUser(new User { Id = "1" });
+        userContext.LoginUser(new User { Id = "1" }, []);
 
         var paste = await pasteService.CreateAsync(createInfo);
 

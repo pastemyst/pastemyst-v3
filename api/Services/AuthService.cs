@@ -80,7 +80,7 @@ public class AuthService(
         {
             var cookieExpirationTime = DateTimeOffset.Now.AddDays(30);
 
-            var newAccessToken = await GenerateAccessToken(existingUser, [Scope.CreatePaste]);
+            var newAccessToken = await GenerateAccessToken(existingUser, [Scope.Paste, Scope.User]);
 
             cookie.Expires = cookieExpirationTime;
 
@@ -159,7 +159,7 @@ public class AuthService(
 
         httpContext.Response.Cookies.Delete("pastemyst-registration");
 
-        var accessToken = await GenerateAccessToken(user, [Scope.CreatePaste]);
+        var accessToken = await GenerateAccessToken(user, [Scope.Paste, Scope.User]);
 
         var newCookie = new CookieOptions
         {
@@ -175,7 +175,7 @@ public class AuthService(
         await actionLogger.LogActionAsync(ActionLogType.UserCreated, user.Id);
     }
 
-    public async Task<User> GetSelfAsync(HttpContext httpContext)
+    public async Task<(User, Scope[])> GetSelfWithScopesAsync(HttpContext httpContext)
     {
         var accessToken = httpContext.Request.Cookies["pastemyst"];
 
@@ -183,19 +183,26 @@ public class AuthService(
         {
             string authHeader = httpContext.Request.Headers["Authorization"];
 
-            if (authHeader is null || authHeader.Length <= "Bearer ".Length) return null;
+            if (authHeader is null || authHeader.Length <= "Bearer ".Length) return (null, []);
 
             accessToken = authHeader["Bearer ".Length..];
         }
 
-        var (valid, userId) = await AccessTokenValid(accessToken);
+        var (valid, userId, scopes) = await AccessTokenValid(accessToken);
 
         if (!valid)
         {
             throw new HttpException(HttpStatusCode.Unauthorized, "Access token is not valid.");
         }
 
-        return await mongo.Users.Find(u => u.Id == userId).FirstOrDefaultAsync();
+        return (await mongo.Users.Find(u => u.Id == userId).FirstOrDefaultAsync(), scopes);
+    }
+
+    public async Task<User> GetSelfAsync(HttpContext httpContext)
+    {
+        var (self, _) = await GetSelfWithScopesAsync(httpContext);
+
+        return self;
     }
 
     public string Logout(HttpContext httpContext)
@@ -231,7 +238,7 @@ public class AuthService(
         return $"{accessToken.Id}-{secureString}";
     }
 
-    private async Task<(bool, string)> AccessTokenValid(String accessToken)
+    private async Task<(bool, string, Scope[])> AccessTokenValid(String accessToken)
     {
         var splitted = accessToken.Split("-");
         var accessTokenId = splitted[0];
@@ -239,7 +246,7 @@ public class AuthService(
 
         var accessTokenDb = await mongo.AccessTokens.Find(a => a.Id == accessTokenId).FirstOrDefaultAsync();
 
-        if (accessTokenDb is null) return (false, null);
+        if (accessTokenDb is null) return (false, null, []);
 
         using var sha = SHA512.Create();
         var hashedToken = sha.ComputeHash(Encoding.UTF8.GetBytes(accessTokenRaw));
@@ -250,9 +257,9 @@ public class AuthService(
             hashStringBuilder.Append(b.ToString("x2"));
         }
 
-        if (!accessTokenDb.Token.Equals(hashStringBuilder.ToString())) return (false, null);
+        if (!accessTokenDb.Token.Equals(hashStringBuilder.ToString())) return (false, null, []);
 
-        return (true, accessTokenDb.OwnerId);
+        return (true, accessTokenDb.OwnerId, accessTokenDb.Scopes);
     }
 
     private async Task<bool> AccessTokenExistsById(string id)
