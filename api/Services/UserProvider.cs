@@ -1,7 +1,9 @@
 using System.Net;
 using MongoDB.Driver;
 using pastemyst.Exceptions;
+using pastemyst.Extensions;
 using pastemyst.Models;
+using pastemyst.Models.Auth;
 
 namespace pastemyst.Services;
 
@@ -43,9 +45,14 @@ public class UserProvider(UserContext userContext, PasteService pasteService, Mo
             return new Page<PasteWithLangStats>();
         }
 
+        if (!userContext.HasScope(Scope.Paste, Scope.PasteRead, Scope.PublicPaste, Scope.PublicPasteRead))
+        {
+            throw new HttpException(HttpStatusCode.Forbidden, $"Missing required scope {Scope.PasteRead.ToEnumString()} or {Scope.PublicPasteRead.ToEnumString()}.");
+        }
+
         var filter = Builders<Paste>.Filter.Eq(p => p.OwnerId, user.Id);
 
-        if (!userContext.UserIsSelf(user))
+        if (!userContext.UserIsSelf(user) || !userContext.HasScope(Scope.Paste, Scope.PasteRead))
         {
             filter &= Builders<Paste>.Filter.Eq(p => p.Private, false);
         }
@@ -57,6 +64,11 @@ public class UserProvider(UserContext userContext, PasteService pasteService, Mo
             if (!userContext.UserIsSelf(user))
             {
                 throw new HttpException(HttpStatusCode.Unauthorized, "You must be authorized to view paste tags.");
+            }
+
+            if (!userContext.HasScope(Scope.User, Scope.UserRead))
+            {
+                throw new HttpException(HttpStatusCode.Forbidden, $"Missing required scope {Scope.UserRead.ToEnumString()} to view user tags.");
             }
 
             filter &= Builders<Paste>.Filter.AnyStringIn(p => p.Tags, tag);
@@ -105,6 +117,9 @@ public class UserProvider(UserContext userContext, PasteService pasteService, Mo
         if (!userContext.UserIsSelf(user))
             throw new HttpException(HttpStatusCode.Unauthorized, "You can only fetch your own tags.");
 
+        if (!userContext.HasScope(Scope.User, Scope.UserRead))
+            throw new HttpException(HttpStatusCode.Forbidden, $"Missing required scope {Scope.UserRead.ToEnumString()}.");
+
         var filter = Builders<Paste>.Filter.Eq(p => p.OwnerId, user.Id);
 
         return (await mongo.Pastes.Find(filter).Project(p => p.Tags).ToListAsync())
@@ -117,6 +132,9 @@ public class UserProvider(UserContext userContext, PasteService pasteService, Mo
     {
         if (!userContext.IsLoggedIn())
             throw new HttpException(HttpStatusCode.Unauthorized, "You must be authorized to delete your account.");
+
+        if (!userContext.HasScope(Scope.User))
+            throw new HttpException(HttpStatusCode.Forbidden, $"Missing required scope {Scope.User.ToEnumString()}.");
 
         var user = await GetByUsernameAsync(username);
 
