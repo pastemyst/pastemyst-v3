@@ -192,7 +192,7 @@ public class AuthService(
 
         if (!valid)
         {
-            throw new HttpException(HttpStatusCode.Unauthorized, "Access token is not valid.");
+            return (null, []);
         }
 
         return (await mongo.Users.Find(u => u.Id == userId).FirstOrDefaultAsync(), scopes);
