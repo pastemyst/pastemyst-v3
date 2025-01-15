@@ -143,7 +143,7 @@ public class SettingsService(
         {
             if (!userContext.HasScope(Scope.User))
             {
-                throw new HttpException(HttpStatusCode.Forbidden, $"Missing required scope: {Scope.User.ToEnumString()}.")
+                throw new HttpException(HttpStatusCode.Forbidden, $"Missing required scope: {Scope.User.ToEnumString()}.");
             }
 
             var update = Builders<User>.Update.Set(u => u.Settings, settings);
