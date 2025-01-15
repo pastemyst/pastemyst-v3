@@ -8,6 +8,7 @@ using MongoDB.Driver;
 using pastemyst.Exceptions;
 using pastemyst.Models;
 using pastemyst.Models.Auth;
+using pastemyst.Utils;
 
 // disable warning for using HMACSHA512Algorithm
 #pragma warning disable CS0618
@@ -80,7 +81,7 @@ public class AuthService(
         {
             var cookieExpirationTime = DateTimeOffset.Now.AddDays(30);
 
-            var newAccessToken = await GenerateAccessToken(existingUser, [Scope.Paste, Scope.User]);
+            var (newAccessToken, _) = await GenerateAccessToken(existingUser, [Scope.Paste, Scope.User, Scope.UserAccessTokens], ExpiresIn.OneMonth);
 
             cookie.Expires = cookieExpirationTime;
 
@@ -159,7 +160,7 @@ public class AuthService(
 
         httpContext.Response.Cookies.Delete("pastemyst-registration");
 
-        var accessToken = await GenerateAccessToken(user, [Scope.Paste, Scope.User]);
+        var (accessToken, _) = await GenerateAccessToken(user, [Scope.Paste, Scope.User, Scope.UserAccessTokens], ExpiresIn.OneMonth);
 
         var newCookie = new CookieOptions
         {
@@ -219,7 +220,7 @@ public class AuthService(
         return configuration["ClientUrl"];
     }
 
-    private async Task<string> GenerateAccessToken(User owner, Scope[] scopes)
+    public async Task<(string, DateTime?)> GenerateAccessToken(User owner, Scope[] scopes, ExpiresIn expiresIn)
     {
         using var sha = SHA512.Create();
 
@@ -237,14 +238,15 @@ public class AuthService(
             Id = await idProvider.GenerateId(async (id) => await AccessTokenExistsById(id)),
             Token = hashStringBuilder.ToString(),
             Scopes = scopes,
-            OwnerId = owner.Id
+            OwnerId = owner.Id,
+            ExpiresAt = ExpiresInUtils.ToDeletesAt(DateTime.UtcNow, expiresIn)
         };
 
         await mongo.AccessTokens.InsertOneAsync(accessToken);
 
         await actionLogger.LogActionAsync(ActionLogType.AccessTokenCreated, owner.Id);
 
-        return $"{accessToken.Id}-{secureString}";
+        return ($"{accessToken.Id}-{secureString}", accessToken.ExpiresAt);
     }
 
     private async Task<(bool, string, string, Scope[])> AccessTokenValid(String accessToken)

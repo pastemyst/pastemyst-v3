@@ -26,4 +26,9 @@ public enum Scope
     /// </summary>
     [EnumMember(Value="user:read")]
     UserRead,
+    /// <summary>
+    /// Grants read and write access to user's access tokens.
+    /// </summary>
+    [EnumMember(Value="user:access_tokens")]
+    UserAccessTokens
 }
