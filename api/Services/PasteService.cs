@@ -4,7 +4,9 @@ using System.Text;
 using MongoDB.Bson;
 using MongoDB.Driver;
 using pastemyst.Exceptions;
+using pastemyst.Extensions;
 using pastemyst.Models;
+using pastemyst.Models.Auth;
 using pastemyst.Utils;
 
 namespace pastemyst.Services;
@@ -46,6 +48,11 @@ public class PasteService(
             case true when createInfo.Anonymous:
                 throw new HttpException(HttpStatusCode.BadRequest,
                     "Can't create a tagged anonymous paste.");
+        }
+
+        if (userContext.IsLoggedIn() && !createInfo.Anonymous && !userContext.HasScope(Scope.Paste))
+        {
+            throw new HttpException(HttpStatusCode.Forbidden, $"Missing required scope {Scope.Paste.ToEnumString()}.");
         }
 
         var createdAt = DateTime.UtcNow;
@@ -102,7 +109,7 @@ public class PasteService(
             throw new HttpException(HttpStatusCode.NotFound, "Paste not found");
         }
 
-        if (paste.Private && (!userContext.IsLoggedIn() || userContext.Self.Id != paste.OwnerId))
+        if (paste.Private && (!userContext.IsLoggedIn() || userContext.Self.Id != paste.OwnerId || !userContext.HasScope(Scope.Paste, Scope.PasteRead)))
             throw new HttpException(HttpStatusCode.NotFound, "Paste not found");
 
         // only the paste owner can see the tags
@@ -201,6 +208,9 @@ public class PasteService(
         if (!userContext.IsLoggedIn())
             throw new HttpException(HttpStatusCode.Unauthorized, "You must be authorized to delete pastes.");
 
+        if (!userContext.HasScope(Scope.Paste))
+            throw new HttpException(HttpStatusCode.Forbidden, $"Missing required scope {Scope.Paste.ToEnumString()}.");
+
         var paste = await GetAsync(id);
 
         if (paste.OwnerId is null || paste.OwnerId != userContext.Self.Id)
@@ -272,6 +282,11 @@ public class PasteService(
             throw new HttpException(HttpStatusCode.Unauthorized, "You must be authorized to pin/unpin pastes.");
         }
 
+        if (!userContext.HasScope(Scope.User))
+        {
+            throw new HttpException(HttpStatusCode.Forbidden, $"Missing required scope {Scope.User.ToEnumString()}.");
+        }
+
         var paste = await GetAsync(id);
 
         if (paste.OwnerId is null)
@@ -298,6 +313,11 @@ public class PasteService(
         if (!userContext.IsLoggedIn())
         {
             throw new HttpException(HttpStatusCode.Unauthorized, "You must be authorized to change the private status of pastes.");
+        }
+
+        if (!userContext.HasScope(Scope.Paste))
+        {
+            throw new HttpException(HttpStatusCode.Forbidden, $"Missing required scope {Scope.Paste.ToEnumString()}.");
         }
 
         var paste = await GetAsync(id);
@@ -358,6 +378,11 @@ public class PasteService(
             throw new HttpException(HttpStatusCode.Unauthorized, "You must be authorized to edit tags.");
         }
 
+        if (!userContext.HasScope(Scope.Paste))
+        {
+            throw new HttpException(HttpStatusCode.Forbidden, $"Missing required scope {Scope.Paste.ToEnumString()}.");
+        }
+
         var paste = await GetAsync(id);
 
         if (paste.OwnerId is null)
@@ -383,6 +408,11 @@ public class PasteService(
         if (!userContext.IsLoggedIn())
         {
             throw new HttpException(HttpStatusCode.Unauthorized, "You must be authorized to edit pastes.");
+        }
+
+        if (!userContext.HasScope(Scope.Paste))
+        {
+            throw new HttpException(HttpStatusCode.Forbidden, $"Missing required scope {Scope.Paste.ToEnumString()}.");
         }
 
         var paste = await GetAsync(id);

@@ -45,11 +45,6 @@ public class UserProvider(UserContext userContext, PasteService pasteService, Mo
             return new Page<PasteWithLangStats>();
         }
 
-        if (!userContext.HasScope(Scope.Paste, Scope.PasteRead, Scope.PublicPaste, Scope.PublicPasteRead))
-        {
-            throw new HttpException(HttpStatusCode.Forbidden, $"Missing required scope {Scope.PasteRead.ToEnumString()} or {Scope.PublicPasteRead.ToEnumString()}.");
-        }
-
         var filter = Builders<Paste>.Filter.Eq(p => p.OwnerId, user.Id);
 
         if (!userContext.UserIsSelf(user) || !userContext.HasScope(Scope.Paste, Scope.PasteRead))
