@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using pastemyst.Models;
+using pastemyst.Models.Auth;
 using pastemyst.Services;
 
 namespace pastemyst.Controllers;
@@ -40,5 +41,11 @@ public class UserController(UserProvider userProvider) : ControllerBase
     public async Task<List<string>> GetUserTags(string username)
     {
         return await userProvider.GetTagsAsync(username);
+    }
+
+    [HttpPost("{username}/access_tokens")]
+    public async Task<AccessTokenResponse> CreateAccessToken([FromBody] GenerateAccessTokenRequest accessTokenRequest)
+    {
+        return await userProvider.GenerateAccessTokenForSelf(accessTokenRequest.Scopes, accessTokenRequest.ExpiresIn);
     }
 }
