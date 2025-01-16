@@ -81,7 +81,7 @@ public class AuthService(
         {
             var cookieExpirationTime = DateTimeOffset.Now.AddDays(30);
 
-            var (newAccessToken, _) = await GenerateAccessToken(existingUser, [Scope.Paste, Scope.User, Scope.UserAccessTokens], ExpiresIn.OneMonth);
+            var (newAccessToken, _) = await GenerateAccessToken(existingUser, [Scope.Paste, Scope.User, Scope.UserAccessTokens], ExpiresIn.OneMonth, hidden: true);
 
             cookie.Expires = cookieExpirationTime;
 
@@ -160,7 +160,7 @@ public class AuthService(
 
         httpContext.Response.Cookies.Delete("pastemyst-registration");
 
-        var (accessToken, _) = await GenerateAccessToken(user, [Scope.Paste, Scope.User, Scope.UserAccessTokens], ExpiresIn.OneMonth);
+        var (accessToken, _) = await GenerateAccessToken(user, [Scope.Paste, Scope.User, Scope.UserAccessTokens], ExpiresIn.OneMonth, hidden: true);
 
         var newCookie = new CookieOptions
         {
@@ -220,7 +220,7 @@ public class AuthService(
         return configuration["ClientUrl"];
     }
 
-    public async Task<(string, DateTime?)> GenerateAccessToken(User owner, Scope[] scopes, ExpiresIn expiresIn)
+    public async Task<(string, DateTime?)> GenerateAccessToken(User owner, Scope[] scopes, ExpiresIn expiresIn, bool hidden = false, string description = "")
     {
         using var sha = SHA512.Create();
 
@@ -239,7 +239,9 @@ public class AuthService(
             Token = hashStringBuilder.ToString(),
             Scopes = scopes,
             OwnerId = owner.Id,
-            ExpiresAt = ExpiresInUtils.ToDeletesAt(DateTime.UtcNow, expiresIn)
+            ExpiresAt = ExpiresInUtils.ToDeletesAt(DateTime.UtcNow, expiresIn),
+            Hidden = hidden,
+            Description = description
         };
 
         await mongo.AccessTokens.InsertOneAsync(accessToken);

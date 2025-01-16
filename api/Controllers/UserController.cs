@@ -44,8 +44,14 @@ public class UserController(UserProvider userProvider) : ControllerBase
     }
 
     [HttpPost("{username}/access_tokens")]
-    public async Task<AccessTokenResponse> CreateAccessToken([FromBody] GenerateAccessTokenRequest accessTokenRequest)
+    public async Task<GenerateAccessTokenResponse> GenerateAccessToken([FromBody] GenerateAccessTokenRequest accessTokenRequest)
     {
-        return await userProvider.GenerateAccessTokenForSelf(accessTokenRequest.Scopes, accessTokenRequest.ExpiresIn);
+        return await userProvider.GenerateAccessTokenForSelf(accessTokenRequest.Scopes, accessTokenRequest.ExpiresIn, accessTokenRequest.Description);
+    }
+
+    [HttpGet("{username}/access_tokens")]
+    public async Task<List<AccessTokenResponse>> GetAccessTokens()
+    {
+        return await userProvider.GetAccessTokensForSelf();
     }
 }
