@@ -9,6 +9,10 @@ public class AccessToken
     [BsonRepresentation(BsonType.String)]
     public string Id { get; init; }
 
+    public string Description { get; init; } = "";
+
+    public bool Hidden { get; init; } = false;
+
     public DateTime CreatedAt { get; init; } = DateTime.UtcNow;
 
     public DateTime? ExpiresAt { get; init; } = DateTime.UtcNow.AddDays(30);

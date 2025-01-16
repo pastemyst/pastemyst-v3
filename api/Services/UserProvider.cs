@@ -149,7 +149,7 @@ public class UserProvider(UserContext userContext, PasteService pasteService, Mo
         await actionLogger.LogActionAsync(ActionLogType.UserDeleted, user.Id);
     }
 
-    public async Task<AccessTokenResponse> GenerateAccessTokenForSelf(Scope[] scopes, ExpiresIn expiresIn)
+    public async Task<GenerateAccessTokenResponse> GenerateAccessTokenForSelf(Scope[] scopes, ExpiresIn expiresIn, string description)
     {
         if (!userContext.IsLoggedIn())
         {
@@ -161,8 +161,32 @@ public class UserProvider(UserContext userContext, PasteService pasteService, Mo
             throw new HttpException(HttpStatusCode.Forbidden, $"Missing required scope {Scope.UserAccessTokens.ToEnumString()}.");
         }
 
-        var (accessToken, expiresAt) = await authService.GenerateAccessToken(userContext.Self, scopes, expiresIn);
+        var (accessToken, expiresAt) = await authService.GenerateAccessToken(userContext.Self, scopes, expiresIn, hidden: false, description);
 
         return new() { AccessToken = accessToken, ExpiresAt = expiresAt };
+    }
+
+    public async Task<List<AccessTokenResponse>> GetAccessTokensForSelf()
+    {
+        if (!userContext.IsLoggedIn())
+        {
+            throw new HttpException(HttpStatusCode.Forbidden, "You must be authorized to generate new access tokens.");
+        }
+
+        if (!userContext.HasScope(Scope.UserAccessTokens))
+        {
+            throw new HttpException(HttpStatusCode.Forbidden, $"Missing required scope {Scope.UserAccessTokens.ToEnumString()}.");
+        }
+
+        var filter = Builders<AccessToken>.Filter.Eq(a => a.Hidden, false) & Builders<AccessToken>.Filter.Eq(a => a.OwnerId, userContext.Self.Id);
+        var accessTokens = (await mongo.AccessTokens.FindAsync(filter)).ToList().Select(a => new AccessTokenResponse
+                {
+                    Description = a.Description,
+                    CreatedAt = a.CreatedAt,
+                    ExpiresAt = a.ExpiresAt,
+                    Scopes = a.Scopes
+                });
+
+        return accessTokens.ToList();
     }
 }
