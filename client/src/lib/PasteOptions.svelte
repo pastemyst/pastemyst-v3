@@ -18,13 +18,7 @@
         oncreatePaste
     }: Props = $props();
 
-    const onEncryptClick = () => {
-        encrypt = !encrypt;
-    };
-
     const onPrivateClick = () => {
-        isPrivate = !isPrivate;
-
         if (isPrivate) {
             pinned = false;
             anonymous = false;
@@ -32,8 +26,6 @@
     };
 
     const onPinClick = () => {
-        pinned = !pinned;
-
         if (pinned) {
             isPrivate = false;
             anonymous = false;
@@ -41,8 +33,6 @@
     };
 
     const onAnonymousClick = () => {
-        anonymous = !anonymous;
-
         if (anonymous) {
             isPrivate = false;
             pinned = false;
@@ -59,13 +49,7 @@
             class:checked={encrypt}
             use:tooltip
         >
-            <input
-                type="checkbox"
-                name="encrypt"
-                id="encrypt"
-                onchange={onEncryptClick}
-                bind:checked={encrypt}
-            />
+            <input type="checkbox" name="encrypt" id="encrypt" bind:checked={encrypt} />
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" class="icon">
                 <title>Key Icon</title>
                 <path
