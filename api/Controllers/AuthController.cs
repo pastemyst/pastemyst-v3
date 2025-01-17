@@ -47,6 +47,24 @@ public class AuthController(AuthService authService, UserContext userContext) : 
         return userContext.Self;
     }
 
+    [HttpPost("auth/self/access_tokens")]
+    public async Task<GenerateAccessTokenResponse> GenerateAccessToken([FromBody] GenerateAccessTokenRequest accessTokenRequest)
+    {
+        return await authService.GenerateAccessTokenForSelf(accessTokenRequest.Scopes, accessTokenRequest.ExpiresIn, accessTokenRequest.Description);
+    }
+
+    [HttpGet("auth/self/access_tokens")]
+    public async Task<List<AccessTokenResponse>> GetAccessTokens()
+    {
+        return await authService.GetAccessTokensForSelf();
+    }
+
+    [HttpDelete("auth/self/access_tokens/{id}")]
+    public async Task DeleteAccessToken(string id)
+    {
+        await authService.DeleteAccessTokenForSelf(id);
+    }
+
     [HttpGet("auth/logout")]
     public async Task<IActionResult> Logout()
     {

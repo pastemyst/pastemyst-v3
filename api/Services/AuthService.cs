@@ -6,6 +6,7 @@ using JWT.Algorithms;
 using JWT.Builder;
 using MongoDB.Driver;
 using pastemyst.Exceptions;
+using pastemyst.Extensions;
 using pastemyst.Models;
 using pastemyst.Models.Auth;
 using pastemyst.Utils;
@@ -22,6 +23,7 @@ public class AuthService(
     IHttpClientFactory httpClientFactory,
     ImageService imageService,
     ActionLogger actionLogger,
+    UserContext userContext,
     MongoService mongo)
 {
     public async Task<string> InitiateLoginFlowAsync(string provider, HttpContext httpContext)
@@ -249,6 +251,70 @@ public class AuthService(
         await actionLogger.LogActionAsync(ActionLogType.AccessTokenCreated, owner.Id);
 
         return ($"{accessToken.Id}-{secureString}", accessToken.ExpiresAt);
+    }
+
+    public async Task<GenerateAccessTokenResponse> GenerateAccessTokenForSelf(Scope[] scopes, ExpiresIn expiresIn, string description)
+    {
+        if (!userContext.IsLoggedIn())
+        {
+            throw new HttpException(HttpStatusCode.Forbidden, "You must be authorized to generate new access tokens.");
+        }
+
+        if (!userContext.HasScope(Scope.UserAccessTokens))
+        {
+            throw new HttpException(HttpStatusCode.Forbidden, $"Missing required scope {Scope.UserAccessTokens.ToEnumString()}.");
+        }
+
+        var (accessToken, expiresAt) = await GenerateAccessToken(userContext.Self, scopes, expiresIn, hidden: false, description);
+
+        return new() { AccessToken = accessToken, ExpiresAt = expiresAt };
+    }
+
+    public async Task<List<AccessTokenResponse>> GetAccessTokensForSelf()
+    {
+        if (!userContext.IsLoggedIn())
+        {
+            throw new HttpException(HttpStatusCode.Forbidden, "You must be authorized to generate new access tokens.");
+        }
+
+        if (!userContext.HasScope(Scope.UserAccessTokens))
+        {
+            throw new HttpException(HttpStatusCode.Forbidden, $"Missing required scope {Scope.UserAccessTokens.ToEnumString()}.");
+        }
+
+        var filter = Builders<AccessToken>.Filter.Eq(a => a.Hidden, false) & Builders<AccessToken>.Filter.Eq(a => a.OwnerId, userContext.Self.Id);
+        var accessTokens = (await mongo.AccessTokens.FindAsync(filter)).ToList().Select(a => new AccessTokenResponse
+                {
+                    Id = a.Id,
+                    Description = a.Description,
+                    CreatedAt = a.CreatedAt,
+                    ExpiresAt = a.ExpiresAt,
+                    Scopes = a.Scopes
+                });
+
+        return accessTokens.ToList();
+    }
+
+    public async Task DeleteAccessTokenForSelf(string accessTokenId)
+    {
+        if (!userContext.IsLoggedIn())
+        {
+            throw new HttpException(HttpStatusCode.Forbidden, "You must be authorized to generate new access tokens.");
+        }
+
+        if (!userContext.HasScope(Scope.UserAccessTokens))
+        {
+            throw new HttpException(HttpStatusCode.Forbidden, $"Missing required scope {Scope.UserAccessTokens.ToEnumString()}.");
+        }
+
+        var accessToken = await mongo.AccessTokens.Find(a => a.Id == accessTokenId).FirstOrDefaultAsync();
+
+        if (accessToken is null)
+        {
+            throw new HttpException(HttpStatusCode.NotFound, "Access token not found.");
+        }
+
+        await mongo.AccessTokens.DeleteOneAsync(a => a.Id == accessTokenId);
     }
 
     private async Task<(bool, string, string, Scope[])> AccessTokenValid(String accessToken)
