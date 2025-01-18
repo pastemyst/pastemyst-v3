@@ -236,7 +236,9 @@
     {/if}
 
     <div>
-        <span>{getPasteLangs(pasteWithLangStats.languageStats)}</span>
+        {#if pasteWithLangStats.languageStats}
+            <span>{getPasteLangs(pasteWithLangStats.languageStats)}</span>
+        {/if}
     </div>
 </div>
 

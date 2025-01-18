@@ -100,4 +100,10 @@ public class PasteController(PasteService pasteService) : ControllerBase
         var paste = await pasteService.CreateAsync(createInfo);
         return Created("/api/v3/pastes/" + paste.Id, paste);
     }
+
+    [HttpGet("{pasteId}/encrypted")]
+    public async Task<IActionResult> IsPasteEncrypted(string pasteId)
+    {
+        return Ok(await pasteService.IsEncryptedAsync(pasteId));
+    }
 }

@@ -40,6 +40,7 @@
     let isPrivate: boolean = $state(false);
     let pinned: boolean = $state(false);
     let encrypt: boolean = $state(false);
+    let encryptionKey: string = $state("");
 
     $effect(() => {
         if (anonymous) tags = [];
@@ -103,21 +104,24 @@
             anonymous: anonymous,
             private: isPrivate,
             pinned: pinned,
+            encrypted: encrypt,
             tags: tags
         };
 
-        const paste = await createPaste(pasteSkeleton);
+        console.log(encryptionKey);
+
+        const paste = await createPaste(pasteSkeleton, encryptionKey);
 
         // TODO: handle if creating paste failed.
 
         $creatingPasteStore = true;
 
         if (data.settings.copyLinkOnCreate) {
-            navigator.clipboard.writeText(`${window.location}${paste?.id}`);
+            await navigator.clipboard.writeText(`${window.location}${paste?.id}`);
             copyLinkToClipboardStore.set(true);
         }
 
-        goto(`/${paste?.id}`);
+        await goto(`/${paste?.id}`);
     };
 
     const getExpiresInCommands = (): Command[] => {
@@ -180,6 +184,7 @@
         bind:isPrivate
         bind:pinned
         bind:encrypt
+        bind:encryptionKey
     />
 </div>
 

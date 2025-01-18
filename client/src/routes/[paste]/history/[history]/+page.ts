@@ -3,9 +3,10 @@ import {
     getPasteHistoryCompact,
     getPasteLangs,
     getPasteStats,
+    isPasteEncrypted,
     isPasteStarred
 } from "$lib/api/paste";
-import { error } from "@sveltejs/kit";
+import { error, redirect } from "@sveltejs/kit";
 import type { PageLoad } from "./$types";
 import { getUserById } from "$lib/api/user";
 import { marked } from "marked";
@@ -17,7 +18,14 @@ export const load: PageLoad = async ({ params, fetch, parent }) => {
     const paste = await getPasteAtEdit(fetch, params.paste, params.history);
 
     if (!paste) {
-        error(404);
+        const isEncrypted = await isPasteEncrypted(fetch, params.paste);
+
+        if (isEncrypted) {
+            redirect(302, `/${params.paste}/decrypt`);
+        } else {
+            // TODO: error handling
+            error(404);
+        }
     }
 
     const history = await getPasteHistoryCompact(fetch, params.paste);

@@ -45,14 +45,14 @@ public class UserProvider(UserContext userContext, PasteService pasteService, Mo
             return new Page<PasteWithLangStats>();
         }
 
-        var filter = Builders<Paste>.Filter.Eq(p => p.OwnerId, user.Id);
+        var filter = Builders<BasePaste>.Filter.Eq(p => p.OwnerId, user.Id);
 
         if (!userContext.UserIsSelf(user) || !userContext.HasScope(Scope.Paste, Scope.PasteRead))
         {
-            filter &= Builders<Paste>.Filter.Eq(p => p.Private, false);
+            filter &= Builders<BasePaste>.Filter.Eq(p => p.Private, false);
         }
 
-        if (pinnedOnly) filter &= Builders<Paste>.Filter.Eq(p => p.Pinned, true);
+        if (pinnedOnly) filter &= Builders<BasePaste>.Filter.Eq(p => p.Pinned, true);
 
         if (tag is not null)
         {
@@ -66,16 +66,16 @@ public class UserProvider(UserContext userContext, PasteService pasteService, Mo
                 throw new HttpException(HttpStatusCode.Forbidden, $"Missing required scope {Scope.UserRead.ToEnumString()} to view user tags.");
             }
 
-            filter &= Builders<Paste>.Filter.AnyStringIn(p => p.Tags, tag);
+            filter &= Builders<BasePaste>.Filter.AnyStringIn(p => p.Tags, tag);
         }
 
-        var pastes = await mongo.Pastes.Find(filter)
+        var pastes = await mongo.BasePastes.Find(filter)
             .SortByDescending(p => p.CreatedAt)
             .Skip(pageRequest.Page * pageRequest.PageSize)
             .Limit(pageRequest.PageSize)
             .ToListAsync();
 
-        var totalItems = await mongo.Pastes.CountDocumentsAsync(filter);
+        var totalItems = await mongo.BasePastes.CountDocumentsAsync(filter);
         var totalPages = (int)Math.Ceiling((float)totalItems / pageRequest.PageSize);
 
         // hide all tags for everyone except the owner
@@ -87,9 +87,15 @@ public class UserProvider(UserContext userContext, PasteService pasteService, Mo
         var pastesWithLangStags = new List<PasteWithLangStats>();
         foreach (var paste in pastes)
         {
-            var stats = pasteService.GetLanguageStats(paste);
-
-            pastesWithLangStags.Add(new() { Paste = paste, LanguageStats = stats });
+            if (paste is Paste regularPaste)
+            {
+                var stats = pasteService.GetLanguageStats(regularPaste);
+                pastesWithLangStags.Add(new PasteWithLangStats { Paste = paste, LanguageStats = stats });
+            }
+            else
+            {
+                pastesWithLangStags.Add(new PasteWithLangStats { Paste = paste, LanguageStats = null });
+            }
         }
 
         return new Page<PasteWithLangStats>

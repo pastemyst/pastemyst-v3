@@ -1,0 +1,37 @@
+import { error, json, type RequestEvent, type RequestHandler } from "@sveltejs/kit";
+import { env } from "$env/dynamic/public";
+import { type Paste, type PasteCreateInfo } from "$lib/api/paste";
+
+type CreateInfoWithEncryptionKey = PasteCreateInfo & { encryptionKey: string };
+
+export const POST: RequestHandler = async ({ request, fetch, cookies }: RequestEvent) => {
+    const createInfo: CreateInfoWithEncryptionKey = await request.json();
+
+    const res = await fetch(`${env.PUBLIC_API_BASE}/pastes/`, {
+        method: "POST",
+        credentials: "include",
+        headers: {
+            "Content-Type": "application/json",
+            "Encryption-Key": createInfo.encryptionKey
+        },
+        body: JSON.stringify(createInfo)
+    });
+
+    if (res.ok) {
+        const paste: Paste = await res.json();
+        const date = new Date();
+        date.setTime(date.getTime() + 60 * 60 * 1000);
+
+        cookies.set(`pastemyst-encryption-key-${paste.id}`, createInfo.encryptionKey, {
+            path: "/",
+            httpOnly: true,
+            sameSite: "strict",
+            secure: false, // TODO: check if using https or not!
+            expires: date
+        });
+
+        return json(paste);
+    }
+
+    return error(res.status);
+};

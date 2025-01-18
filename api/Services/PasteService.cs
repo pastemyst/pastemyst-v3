@@ -81,7 +81,7 @@ public class PasteService(
         {
             if (encryptionContext.EncryptionKey is null)
             {
-                throw new HttpException(HttpStatusCode.BadRequest, "Missing decryption key");
+                throw new HttpException(HttpStatusCode.BadRequest, "Missing encryption key");
             }
 
             var decryptedPasteData = new DecryptedPasteData
@@ -168,15 +168,23 @@ public class PasteService(
                 return regularPaste;
             case EncryptedPaste encryptedPaste:
             {
-                if (encryptionContext.EncryptionKey is null)
+                var encryptionKey = encryptionContext.EncryptionKey;
+                if (encryptionKey is null)
                 {
-                    throw new HttpException(HttpStatusCode.BadRequest, "Missing encryption key");
+                    if (encryptionContext.EncryptionKeys.TryGetValue(paste.Id, out var value))
+                    {
+                        encryptionKey = value;
+                    }
+                    else
+                    {
+                        throw new HttpException(HttpStatusCode.BadRequest, "Missing encryption key");
+                    }
                 }
 
                 try
                 {
                     var salt = Convert.FromBase64String(encryptedPaste.Salt);
-                    using var deriveBytes = new Rfc2898DeriveBytes(encryptionContext.EncryptionKey, salt, 100_000, HashAlgorithmName.SHA512);
+                    using var deriveBytes = new Rfc2898DeriveBytes(encryptionKey, salt, 100_000, HashAlgorithmName.SHA512);
                     var key = deriveBytes.GetBytes(32);
 
                     using var aes = Aes.Create();
@@ -309,7 +317,19 @@ public class PasteService(
         if (!userContext.HasScope(Scope.Paste))
             throw new HttpException(HttpStatusCode.Forbidden, $"Missing required scope {Scope.Paste.ToEnumString()}.");
 
-        var paste = await GetAsync(id);
+        var paste = await mongo.BasePastes.Find(p => p.Id == id).FirstOrDefaultAsync();
+
+        if (paste is null) throw new HttpException(HttpStatusCode.NotFound, "Paste not found");
+
+        if (paste.DeletesAt <= DateTime.UtcNow)
+        {
+            await mongo.Pastes.DeleteOneAsync(p => p.Id == paste.Id);
+
+            throw new HttpException(HttpStatusCode.NotFound, "Paste not found");
+        }
+
+        if (paste.Private && (!userContext.IsLoggedIn() || userContext.Self.Id != paste.OwnerId || !userContext.HasScope(Scope.Paste)))
+            throw new HttpException(HttpStatusCode.NotFound, "Paste not found");
 
         if (paste.OwnerId is null || paste.OwnerId != userContext.Self.Id)
         {
@@ -320,7 +340,7 @@ public class PasteService(
             throw new HttpException(HttpStatusCode.Unauthorized, "You can only delete your own pastes.");
         }
 
-        await mongo.Pastes.DeleteOneAsync(p => p.Id == paste.Id);
+        await mongo.BasePastes.DeleteOneAsync(p => p.Id == paste.Id);
 
         await actionLogger.LogActionAsync(ActionLogType.PasteDeleted, paste.Id);
     }
@@ -369,8 +389,8 @@ public class PasteService(
             paste.Stars.Add(userContext.Self.Id);
         }
 
-        var update = Builders<Paste>.Update.Set(p => p.Stars, paste.Stars);
-        await mongo.Pastes.UpdateOneAsync(p => p.Id == paste.Id, update);
+        var update = Builders<BasePaste>.Update.Set(p => p.Stars, paste.Stars);
+        await mongo.BasePastes.UpdateOneAsync(p => p.Id == paste.Id, update);
     }
 
     public async Task TogglePinnedAsync(string id)
@@ -402,8 +422,8 @@ public class PasteService(
             throw new HttpException(HttpStatusCode.BadRequest, "You can't pin private pastes.");
         }
 
-        var update = Builders<Paste>.Update.Set(p => p.Pinned, !paste.Pinned);
-        await mongo.Pastes.UpdateOneAsync(p => p.Id == paste.Id, update);
+        var update = Builders<BasePaste>.Update.Set(p => p.Pinned, !paste.Pinned);
+        await mongo.BasePastes.UpdateOneAsync(p => p.Id == paste.Id, update);
     }
 
     public async Task TogglePrivateAsync(string id)
@@ -435,8 +455,8 @@ public class PasteService(
             throw new HttpException(HttpStatusCode.BadRequest, "You can't private pinned pastes.");
         }
 
-        var update = Builders<Paste>.Update.Set(p => p.Private, !paste.Private);
-        await mongo.Pastes.UpdateOneAsync(p => p.Id == paste.Id, update);
+        var update = Builders<BasePaste>.Update.Set(p => p.Private, !paste.Private);
+        await mongo.BasePastes.UpdateOneAsync(p => p.Id == paste.Id, update);
     }
 
     public async Task<bool> ExistsByIdAsync(string id)
@@ -495,8 +515,8 @@ public class PasteService(
 
         paste.Tags = tags.Select(t => t.Trim()).Where(s => !string.IsNullOrEmpty(s)).ToList();
 
-        var update = Builders<Paste>.Update.Set(p => p.Tags, paste.Tags);
-        await mongo.Pastes.UpdateOneAsync(p => p.Id == paste.Id, update);
+        var update = Builders<BasePaste>.Update.Set(p => p.Tags, paste.Tags);
+        await mongo.BasePastes.UpdateOneAsync(p => p.Id == paste.Id, update);
 
         return paste;
     }
@@ -559,9 +579,17 @@ public class PasteService(
 
         if (isEncrypted)
         {
-            if (encryptionContext.EncryptionKey is null)
+            var encryptionKey = encryptionContext.EncryptionKey;
+            if (encryptionKey is null)
             {
-                throw new HttpException(HttpStatusCode.BadRequest, "Missing encryption key");
+                if (encryptionContext.EncryptionKeys.TryGetValue(paste.Id, out var value))
+                {
+                    encryptionKey = value;
+                }
+                else
+                {
+                    throw new HttpException(HttpStatusCode.BadRequest, "Missing encryption key");
+                }
             }
 
             var decryptedPasteData = new DecryptedPasteData
@@ -575,7 +603,7 @@ public class PasteService(
             try
             {
                 var salt = RandomNumberGenerator.GetBytes(32);
-                using var deriveBytes = new Rfc2898DeriveBytes(encryptionContext.EncryptionKey, salt, 100_000, HashAlgorithmName.SHA512);
+                using var deriveBytes = new Rfc2898DeriveBytes(encryptionKey, salt, 100_000, HashAlgorithmName.SHA512);
                 var key = deriveBytes.GetBytes(32);
 
                 using var aes = Aes.Create();
@@ -674,6 +702,28 @@ public class PasteService(
             OldPaste = paste.History[editIndex],
             NewPaste = newEdit
         };
+    }
+
+    public async Task<bool> IsEncryptedAsync(string id)
+    {
+        var paste = await mongo.BasePastes.Find(p => p.Id == id).FirstOrDefaultAsync();
+
+        if (paste is null) throw new HttpException(HttpStatusCode.NotFound, "Paste not found");
+
+        if (paste.DeletesAt <= DateTime.UtcNow)
+        {
+            await mongo.BasePastes.DeleteOneAsync(p => p.Id == paste.Id);
+
+            throw new HttpException(HttpStatusCode.NotFound, "Paste not found");
+        }
+
+        if (paste.Private && (!userContext.IsLoggedIn() || userContext.Self.Id != paste.OwnerId ||
+                              !userContext.HasScope(Scope.Paste, Scope.PasteRead)))
+        {
+            throw new HttpException(HttpStatusCode.NotFound, "Paste not found");
+        }
+
+        return paste is EncryptedPaste;
     }
 
     private async Task<T> CreateBasePaste<T>(PasteCreateInfo createInfo) where T : BasePaste, new()
