@@ -30,7 +30,7 @@ export const actions = {
             path: "/",
             httpOnly: true,
             sameSite: "strict",
-            secure: false, // TODO: check if using https or not!
+            secure: env.PUBLIC_USE_HTTPS === "true",
             expires: date
         });
 

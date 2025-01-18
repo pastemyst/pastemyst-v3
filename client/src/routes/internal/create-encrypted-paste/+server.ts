@@ -26,7 +26,7 @@ export const POST: RequestHandler = async ({ request, fetch, cookies }: RequestE
             path: "/",
             httpOnly: true,
             sameSite: "strict",
-            secure: false, // TODO: check if using https or not!
+            secure: env.PUBLIC_USE_HTTPS === "true",
             expires: date
         });
 
