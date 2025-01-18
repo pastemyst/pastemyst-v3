@@ -328,6 +328,50 @@ public class PasteTests : IClassFixture<DatabaseFixture>
     }
 
     [Fact]
+    public async Task TestCreate_ShouldThrow_WhenEncryptedPaste_WhenMissingEncryptionKey()
+    {
+        var createInfo = new PasteCreateInfo
+        {
+            Pasties =
+            [
+                new PastyCreateInfo
+                {
+                    Content = "Hello, World!",
+                    Language = "cs"
+                }
+            ],
+            Encrypted = true
+        };
+
+        await Assert.ThrowsAsync<HttpException>(async () => await pasteService.CreateAsync(createInfo));
+    }
+
+    [Fact]
+    public async Task TestCreate_ShouldCreate_WhenEncryptedPaste()
+    {
+        var createInfo = new PasteCreateInfo
+        {
+            Pasties =
+            [
+                new PastyCreateInfo
+                {
+                    Content = "Hello, World!",
+                    Language = "cs"
+                }
+            ],
+            Encrypted = true
+        };
+
+        encryptionContext.EncryptionKey = "epikepik";
+
+        var paste = await pasteService.CreateAsync(createInfo);
+
+        Assert.Equal("Hello, World!", paste.Pasties[0].Content);
+
+        encryptionContext.EncryptionKey = null;
+    }
+
+    [Fact]
     public async Task TestGet_ShouldThrow_WhenPasteDoesntExist()
     {
         await Assert.ThrowsAsync<HttpException>(async () => await pasteService.GetAsync("1"));
@@ -438,6 +482,84 @@ public class PasteTests : IClassFixture<DatabaseFixture>
         fetchedPaste = await pasteService.GetAsync(paste.Id);
 
         Assert.Empty(fetchedPaste.Tags);
+    }
+
+    [Fact]
+    public async Task TestGet_ShouldThrow_WhenPasteIsEncrypted_WhenEncryptionKeyMissing()
+    {
+        var createInfo = new PasteCreateInfo
+        {
+            Pasties =
+            [
+                new PastyCreateInfo
+                {
+                    Content = "Hello, World!"
+                }
+            ],
+            Encrypted = true
+        };
+
+        encryptionContext.EncryptionKey = "epikepik";
+
+        var paste = await pasteService.CreateAsync(createInfo);
+
+        encryptionContext.EncryptionKey = null;
+
+        await Assert.ThrowsAsync<HttpException>(async () => await pasteService.GetAsync(paste.Id));
+    }
+
+    [Fact]
+    public async Task TestGet_ShouldThrow_WhenPasteIsEncrypted_WhenEncryptionKeyWrong()
+    {
+        var createInfo = new PasteCreateInfo
+        {
+            Pasties =
+            [
+                new PastyCreateInfo
+                {
+                    Content = "Hello, World!"
+                }
+            ],
+            Encrypted = true
+        };
+
+        encryptionContext.EncryptionKey = "epikepik";
+
+        var paste = await pasteService.CreateAsync(createInfo);
+
+        encryptionContext.EncryptionKey = "epik";
+
+        await Assert.ThrowsAsync<HttpException>(async () => await pasteService.GetAsync(paste.Id));
+
+        encryptionContext.EncryptionKey = null;
+    }
+
+    [Fact]
+    public async Task TestGet_ShouldReturn_WhenPasteIsEncrypted()
+    {
+        var createInfo = new PasteCreateInfo
+        {
+            Pasties =
+            [
+                new PastyCreateInfo
+                {
+                    Content = "Hello, World!"
+                }
+            ],
+            Encrypted = true
+        };
+
+        encryptionContext.EncryptionKey = "epikepik";
+
+        var paste = await pasteService.CreateAsync(createInfo);
+
+        encryptionContext.EncryptionKey = "epikepik";
+
+        var fetchedPaste = await pasteService.GetAsync(paste.Id);
+
+        Assert.Equal("Hello, World!", fetchedPaste.Pasties[0].Content);
+
+        encryptionContext.EncryptionKey = null;
     }
 
     [Fact]
@@ -1199,6 +1321,55 @@ public class PasteTests : IClassFixture<DatabaseFixture>
     }
 
     [Fact]
+    public async Task TestEdit_ShouldUpdateContent_WhenEncrypted()
+    {
+        var createInfo = new PasteCreateInfo
+        {
+            Pasties =
+            [
+                new PastyCreateInfo
+                {
+                    Content = "Hello, World!"
+                }
+            ],
+            Encrypted = true
+        };
+
+        userContext.LoginUser(new User { Id = "1" }, defaultScopes);
+        encryptionContext.EncryptionKey = "epikepik";
+
+        var paste = await pasteService.CreateAsync(createInfo);
+
+        var editInfo = new PasteEditInfo
+        {
+            Title = "New Title",
+            Pasties =
+            [
+                new PastyEditInfo
+                {
+                    Id = paste!.Pasties[0].Id,
+                    Content = "New Content"
+                }
+            ]
+        };
+
+        await pasteService.EditAsync(paste.Id, editInfo);
+
+        var fetchedPaste = await pasteService.GetAsync(paste.Id);
+
+        Assert.Equal("New Title", fetchedPaste.Title);
+        Assert.Equal("New Content", fetchedPaste.Pasties[0].Content);
+
+        Assert.Single(fetchedPaste.History);
+        Assert.Equal(paste.Title, fetchedPaste.History[0].Title);
+        Assert.Equal(paste.Pasties[0].Content, fetchedPaste.History[0].Pasties[0].Content);
+        Assert.Equal(fetchedPaste.Pasties[0].Id, fetchedPaste.History[0].Pasties[0].Id);
+
+        userContext.LogoutUser();
+        encryptionContext.EncryptionKey = null;
+    }
+
+    [Fact]
     public async Task TestEditTags_ShouldUpdateTags()
     {
         var createInfo = new PasteCreateInfo
@@ -1290,6 +1461,52 @@ public class PasteTests : IClassFixture<DatabaseFixture>
         Assert.Equal(paste.Pasties[0].Content, fetchedPaste.Pasties[0].Content);
 
         userContext.LogoutUser();
+    }
+
+    [Fact]
+    public async Task TestGetAtEdit_ShouldReturnPasteAtEdit_WhenEncrypted()
+    {
+        var createInfo = new PasteCreateInfo
+        {
+            Pasties =
+            [
+                new PastyCreateInfo
+                {
+                    Content = "Hello, World!"
+                }
+            ],
+            Encrypted = true
+        };
+
+        userContext.LoginUser(new User { Id = "1" }, defaultScopes);
+        encryptionContext.EncryptionKey = "epikepik";
+
+        var paste = await pasteService.CreateAsync(createInfo);
+
+        var editInfo = new PasteEditInfo
+        {
+            Title = "New Title",
+            Pasties =
+            [
+                new PastyEditInfo
+                {
+                    Id = paste!.Pasties[0].Id,
+                    Content = "New Content"
+                }
+            ]
+        };
+
+        await pasteService.EditAsync(paste.Id, editInfo);
+
+        var history = await pasteService.GetHistoryCompactAsync(paste.Id);
+
+        var fetchedPaste = await pasteService.GetAtEditAsync(paste.Id, history[0].Id);
+
+        Assert.Equal(paste.Title, fetchedPaste.Title);
+        Assert.Equal(paste.Pasties[0].Content, fetchedPaste.Pasties[0].Content);
+
+        userContext.LogoutUser();
+        encryptionContext.EncryptionKey = null;
     }
 
     [Fact]

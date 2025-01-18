@@ -514,7 +514,7 @@ public class PasteService(
         }
 
         var paste = await GetAsync(id);
-        var isEncrypted = await mongo.EncryptedPastes.FindAsync(p => p.Id == paste.Id) !is null;
+        var isEncrypted = (await mongo.BasePastes.FindAsync(p => p.Id == paste.Id)).FirstOrDefault() is EncryptedPaste;
 
         if (paste.OwnerId is null)
         {
