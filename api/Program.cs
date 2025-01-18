@@ -52,6 +52,7 @@ builder.Services.AddScoped<UserProvider>();
 builder.Services.AddScoped<OAuthService>();
 builder.Services.AddScoped<AuthService>();
 builder.Services.AddScoped<UserContext>();
+builder.Services.AddScoped<EncryptionContext>();
 builder.Services.AddScoped<SettingsService>();
 builder.Services.AddScoped<PasteService>();
 builder.Services.AddScoped<ActionLogger>();
@@ -108,6 +109,7 @@ app.UseHttpLogging();
 
 app.UseMiddleware<ExceptionMiddleware>();
 app.UseMiddleware<UserContextMiddleware>();
+app.UseMiddleware<EncryptionMiddleware>();
 
 if (app.Environment.IsDevelopment())
 {

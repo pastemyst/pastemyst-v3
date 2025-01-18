@@ -184,7 +184,7 @@ public class AuthService(
 
         if (accessToken is null)
         {
-            string authHeader = httpContext.Request.Headers["Authorization"];
+            string authHeader = httpContext.Request.Headers.Authorization;
 
             if (authHeader is null || authHeader.Length <= "Bearer ".Length) return (null, []);
 
@@ -193,19 +193,14 @@ public class AuthService(
 
         var (valid, _, userId, scopes) = await AccessTokenValid(accessToken);
 
-        if (!valid)
-        {
-            return (null, []);
-        }
-
-        return (await mongo.Users.Find(u => u.Id == userId).FirstOrDefaultAsync(), scopes);
+        return valid ? (await mongo.Users.Find(u => u.Id == userId).FirstOrDefaultAsync(), scopes) : (null, []);
     }
 
     public async Task<string> Logout(HttpContext httpContext)
     {
         var accessToken = httpContext.Request.Cookies["pastemyst"];
 
-        var (valid, accessTokenId, userId, scopes) = await AccessTokenValid(accessToken);
+        var (valid, accessTokenId, userId, _) = await AccessTokenValid(accessToken);
 
         if (!valid)
         {
@@ -222,15 +217,14 @@ public class AuthService(
         return configuration["ClientUrl"];
     }
 
-    public async Task<(string, DateTime?)> GenerateAccessToken(User owner, Scope[] scopes, ExpiresIn expiresIn, bool hidden = false, string description = "")
+    private async Task<(string, DateTime?)> GenerateAccessToken(User owner, Scope[] scopes, ExpiresIn expiresIn, bool hidden = false, string description = "")
     {
-        using var sha = SHA512.Create();
 
         var secureString = RandomNumberGenerator.GetHexString(64, true);
-        var hashedToken = sha.ComputeHash(Encoding.UTF8.GetBytes(secureString));
+        var hashedToken = SHA512.HashData(Encoding.UTF8.GetBytes(secureString));
 
         var hashStringBuilder = new StringBuilder();
-        foreach (byte b in hashedToken)
+        foreach (var b in hashedToken)
         {
             hashStringBuilder.Append(b.ToString("x2"));
         }
