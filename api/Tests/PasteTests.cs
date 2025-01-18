@@ -10,24 +10,23 @@ namespace pastemyst.Tests;
 
 public class PasteTests : IClassFixture<DatabaseFixture>
 {
-    private DatabaseFixture databaseFixture;
-    private IdProvider idProvider;
-    private LanguageProvider languageProvider;
-    private UserContext userContext;
-    private ActionLogger actionLogger;
-    private PasteService pasteService;
+    private readonly DatabaseFixture databaseFixture;
+    private readonly UserContext userContext;
+    private readonly PasteService pasteService;
+    private readonly EncryptionContext encryptionContext = new();
 
-    private Scope[] defaultScopes = [Scope.Paste, Scope.User];
+    private readonly Scope[] defaultScopes = [Scope.Paste, Scope.User];
 
     public PasteTests(DatabaseFixture databaseFixture)
     {
         this.databaseFixture = databaseFixture;
 
-        idProvider = new IdProvider();
-        languageProvider = new LanguageProvider();
+        var idProvider = new IdProvider();
+        var languageProvider = new LanguageProvider();
+        var actionLogger = new ActionLogger(databaseFixture.MongoService);
+
         userContext = new UserContext();
-        actionLogger = new ActionLogger(databaseFixture.MongoService);
-        pasteService = new PasteService(idProvider, languageProvider, userContext, actionLogger, databaseFixture.MongoService);
+        pasteService = new PasteService(idProvider, languageProvider, userContext, encryptionContext, actionLogger, databaseFixture.MongoService);
 
         Task.Run(() => languageProvider.StartAsync(CancellationToken.None)).Wait();
     }
@@ -37,18 +36,18 @@ public class PasteTests : IClassFixture<DatabaseFixture>
     {
         var createInfo = new PasteCreateInfo
         {
-            Pasties = new()
-            {
-                new()
+            Pasties =
+            [
+                new PastyCreateInfo
                 {
                     Content = "Hello, World!"
                 }
-            },
+            ],
         };
 
         var paste = await pasteService.CreateAsync(createInfo);
 
-        Assert.Equal("Hello, World!", paste.Pasties[0].Content);
+        Assert.Equal("Hello, World!", paste!.Pasties[0].Content);
     }
 
     [Fact]
@@ -57,13 +56,13 @@ public class PasteTests : IClassFixture<DatabaseFixture>
         var createInfo = new PasteCreateInfo
         {
             Pinned = true,
-            Pasties = new()
-            {
-                new()
+            Pasties =
+            [
+                new PastyCreateInfo
                 {
                     Content = "Hello, World!"
                 }
-            },
+            ],
         };
 
         await Assert.ThrowsAsync<HttpException>(async () => await pasteService.CreateAsync(createInfo));
@@ -75,13 +74,13 @@ public class PasteTests : IClassFixture<DatabaseFixture>
         var createInfo = new PasteCreateInfo
         {
             Pinned = true,
-            Pasties = new()
-            {
-                new()
+            Pasties =
+            [
+                new PastyCreateInfo
                 {
                     Content = "Hello, World!"
                 }
-            },
+            ],
         };
 
         userContext.LoginUser(new User { Id = "1" }, defaultScopes);
@@ -100,13 +99,13 @@ public class PasteTests : IClassFixture<DatabaseFixture>
         {
             Pinned = true,
             Private = true,
-            Pasties = new()
-            {
-                new()
+            Pasties =
+            [
+                new PastyCreateInfo
                 {
                     Content = "Hello, World!"
                 }
-            },
+            ],
         };
 
         userContext.LoginUser(new User { Id = "1" }, defaultScopes);
@@ -123,13 +122,13 @@ public class PasteTests : IClassFixture<DatabaseFixture>
         {
             Pinned = true,
             Anonymous = true,
-            Pasties = new()
-            {
-                new()
+            Pasties =
+            [
+                new PastyCreateInfo
                 {
                     Content = "Hello, World!"
                 }
-            },
+            ],
         };
 
         userContext.LoginUser(new User { Id = "1" }, defaultScopes);
@@ -145,13 +144,13 @@ public class PasteTests : IClassFixture<DatabaseFixture>
         var createInfo = new PasteCreateInfo
         {
             Private = true,
-            Pasties = new()
-            {
-                new()
+            Pasties =
+            [
+                new PastyCreateInfo
                 {
                     Content = "Hello, World!"
                 }
-            },
+            ],
         };
 
         await Assert.ThrowsAsync<HttpException>(async () => await pasteService.CreateAsync(createInfo));
@@ -164,13 +163,13 @@ public class PasteTests : IClassFixture<DatabaseFixture>
         {
             Private = true,
             Anonymous = true,
-            Pasties = new()
-            {
-                new()
+            Pasties =
+            [
+                new PastyCreateInfo
                 {
                     Content = "Hello, World!"
                 }
-            },
+            ],
         };
 
         userContext.LoginUser(new User { Id = "1" }, defaultScopes);
@@ -186,13 +185,13 @@ public class PasteTests : IClassFixture<DatabaseFixture>
         var createInfo = new PasteCreateInfo
         {
             Tags = ["tag"],
-            Pasties = new()
-            {
-                new()
+            Pasties =
+            [
+                new PastyCreateInfo
                 {
                     Content = "Hello, World!"
                 }
-            },
+            ],
         };
 
         await Assert.ThrowsAsync<HttpException>(async () => await pasteService.CreateAsync(createInfo));
@@ -205,13 +204,13 @@ public class PasteTests : IClassFixture<DatabaseFixture>
         {
             Tags = ["epik"],
             Anonymous = true,
-            Pasties = new()
-            {
-                new()
+            Pasties =
+            [
+                new PastyCreateInfo
                 {
                     Content = "Hello, World!"
                 }
-            },
+            ],
         };
 
         userContext.LoginUser(new User { Id = "1" }, defaultScopes);
@@ -227,13 +226,13 @@ public class PasteTests : IClassFixture<DatabaseFixture>
         var createInfo = new PasteCreateInfo
         {
             Anonymous = true,
-            Pasties = new()
-            {
-                new()
+            Pasties =
+            [
+                new PastyCreateInfo
                 {
                     Content = "Hello, World!"
                 }
-            },
+            ],
         };
 
         userContext.LoginUser(new User { Id = "1" }, defaultScopes);
@@ -251,13 +250,13 @@ public class PasteTests : IClassFixture<DatabaseFixture>
         var createInfo = new PasteCreateInfo
         {
             Private = true,
-            Pasties = new()
-            {
-                new()
+            Pasties =
+            [
+                new PastyCreateInfo
                 {
                     Content = "Hello, World!"
                 }
-            },
+            ],
         };
 
         userContext.LoginUser(new User { Id = "1" }, defaultScopes);
@@ -275,18 +274,18 @@ public class PasteTests : IClassFixture<DatabaseFixture>
         var createInfo = new PasteCreateInfo
         {
             ExpiresIn = ExpiresIn.OneHour,
-            Pasties = new()
-            {
-                new()
+            Pasties =
+            [
+                new PastyCreateInfo
                 {
                     Content = "Hello, World!"
                 }
-            },
+            ],
         };
 
         var paste = await pasteService.CreateAsync(createInfo);
 
-        Assert.Equal(paste.CreatedAt.AddHours(1).Ticks, paste.DeletesAt.Value.Ticks);
+        Assert.Equal(paste.CreatedAt.AddHours(1).Ticks, paste.DeletesAt!.Value.Ticks);
     }
 
     [Fact]
@@ -294,18 +293,18 @@ public class PasteTests : IClassFixture<DatabaseFixture>
     {
         var createInfo = new PasteCreateInfo
         {
-            Pasties = new()
-            {
-                new()
+            Pasties =
+            [
+                new PastyCreateInfo
                 {
                     Content = "Hello, World!"
                 }
-            },
+            ],
         };
 
         var paste = await pasteService.CreateAsync(createInfo);
 
-        Assert.Equal("Text", paste.Pasties[0].Language);
+        Assert.Equal("Text", paste!.Pasties[0].Language);
     }
 
     [Fact]
@@ -313,19 +312,19 @@ public class PasteTests : IClassFixture<DatabaseFixture>
     {
         var createInfo = new PasteCreateInfo
         {
-            Pasties = new()
-            {
-                new()
+            Pasties =
+            [
+                new PastyCreateInfo
                 {
                     Content = "Hello, World!",
                     Language = "cs"
                 }
-            },
+            ],
         };
 
         var paste = await pasteService.CreateAsync(createInfo);
 
-        Assert.Equal("C#", paste.Pasties[0].Language);
+        Assert.Equal("C#", paste!.Pasties[0].Language);
     }
 
     [Fact]
@@ -340,13 +339,13 @@ public class PasteTests : IClassFixture<DatabaseFixture>
         var createInfo = new PasteCreateInfo
         {
             ExpiresIn = ExpiresIn.OneHour,
-            Pasties = new()
-            {
-                new()
+            Pasties =
+            [
+                new PastyCreateInfo
                 {
                     Content = "Hello, World!"
                 }
-            },
+            ],
         };
 
         var paste = await pasteService.CreateAsync(createInfo);
@@ -367,13 +366,13 @@ public class PasteTests : IClassFixture<DatabaseFixture>
         var createInfo = new PasteCreateInfo
         {
             Private = true,
-            Pasties = new()
-            {
-                new()
+            Pasties =
+            [
+                new PastyCreateInfo
                 {
                     Content = "Hello, World!"
                 }
-            },
+            ],
         };
 
         userContext.LoginUser(new User { Id = "1" }, defaultScopes);
@@ -391,13 +390,13 @@ public class PasteTests : IClassFixture<DatabaseFixture>
         var createInfo = new PasteCreateInfo
         {
             Private = true,
-            Pasties = new()
-            {
-                new()
+            Pasties =
+            [
+                new PastyCreateInfo
                 {
                     Content = "Hello, World!"
                 }
-            },
+            ],
         };
 
         userContext.LoginUser(new User { Id = "1" }, defaultScopes);
@@ -417,13 +416,13 @@ public class PasteTests : IClassFixture<DatabaseFixture>
         var createInfo = new PasteCreateInfo
         {
             Tags = ["tag"],
-            Pasties = new()
-            {
-                new()
+            Pasties =
+            [
+                new PastyCreateInfo
                 {
                     Content = "Hello, World!"
                 }
-            },
+            ],
         };
 
         userContext.LoginUser(new User { Id = "1" }, defaultScopes);
@@ -446,13 +445,13 @@ public class PasteTests : IClassFixture<DatabaseFixture>
     {
         var createInfo = new PasteCreateInfo
         {
-            Pasties = new()
-            {
-                new()
+            Pasties =
+            [
+                new PastyCreateInfo
                 {
                     Content = "Hello, World!"
                 }
-            },
+            ],
         };
 
         var paste = await pasteService.CreateAsync(createInfo);
@@ -465,13 +464,13 @@ public class PasteTests : IClassFixture<DatabaseFixture>
     {
         var createInfo = new PasteCreateInfo
         {
-            Pasties = new()
-            {
-                new()
+            Pasties =
+            [
+                new PastyCreateInfo
                 {
                     Content = "Hello, World!"
                 }
-            },
+            ],
         };
 
         var paste = await pasteService.CreateAsync(createInfo);
@@ -488,13 +487,13 @@ public class PasteTests : IClassFixture<DatabaseFixture>
     {
         var createInfo = new PasteCreateInfo
         {
-            Pasties = new()
-            {
-                new()
+            Pasties =
+            [
+                new PastyCreateInfo
                 {
                     Content = "Hello, World!"
                 }
-            },
+            ],
         };
 
         userContext.LoginUser(new User { Id = "1" }, defaultScopes);
@@ -514,13 +513,13 @@ public class PasteTests : IClassFixture<DatabaseFixture>
         var createInfo = new PasteCreateInfo
         {
             Private = true,
-            Pasties = new()
-            {
-                new()
+            Pasties =
+            [
+                new PastyCreateInfo
                 {
                     Content = "Hello, World!"
                 }
-            },
+            ],
         };
 
         userContext.LoginUser(new User { Id = "1" }, defaultScopes);
@@ -541,13 +540,13 @@ public class PasteTests : IClassFixture<DatabaseFixture>
     {
         var createInfo = new PasteCreateInfo
         {
-            Pasties = new()
-            {
-                new()
+            Pasties =
+            [
+                new PastyCreateInfo
                 {
                     Content = "Hello, World!"
                 }
-            },
+            ],
         };
 
         userContext.LoginUser(new User { Id = "1" }, defaultScopes);
@@ -566,13 +565,13 @@ public class PasteTests : IClassFixture<DatabaseFixture>
     {
         var createInfo = new PasteCreateInfo
         {
-            Pasties = new()
-            {
-                new()
+            Pasties =
+            [
+                new PastyCreateInfo
                 {
                     Content = "Hello, World!"
                 }
-            },
+            ],
         };
 
         var paste = await pasteService.CreateAsync(createInfo);
@@ -586,13 +585,13 @@ public class PasteTests : IClassFixture<DatabaseFixture>
         var createInfo = new PasteCreateInfo
         {
             Private = true,
-            Pasties = new()
-            {
-                new()
+            Pasties =
+            [
+                new PastyCreateInfo
                 {
                     Content = "Hello, World!"
                 }
-            },
+            ],
         };
 
         userContext.LoginUser(new User { Id = "1" }, defaultScopes);
@@ -611,13 +610,13 @@ public class PasteTests : IClassFixture<DatabaseFixture>
     {
         var createInfo = new PasteCreateInfo
         {
-            Pasties = new()
-            {
-                new()
+            Pasties =
+            [
+                new PastyCreateInfo
                 {
                     Content = "Hello, World!"
                 }
-            },
+            ],
         };
 
         var paste = await pasteService.CreateAsync(createInfo);
@@ -637,13 +636,13 @@ public class PasteTests : IClassFixture<DatabaseFixture>
     {
         var createInfo = new PasteCreateInfo
         {
-            Pasties = new()
-            {
-                new()
+            Pasties =
+            [
+                new PastyCreateInfo
                 {
                     Content = "Hello, World!"
                 }
-            },
+            ],
         };
 
         var paste = await pasteService.CreateAsync(createInfo);
@@ -664,13 +663,13 @@ public class PasteTests : IClassFixture<DatabaseFixture>
     {
         var createInfo = new PasteCreateInfo
         {
-            Pasties = new()
-            {
-                new()
+            Pasties =
+            [
+                new PastyCreateInfo
                 {
                     Content = "Hello, World!"
                 }
-            },
+            ],
         };
 
         var paste = await pasteService.CreateAsync(createInfo);
@@ -684,13 +683,13 @@ public class PasteTests : IClassFixture<DatabaseFixture>
         var createInfo = new PasteCreateInfo
         {
             Private = true,
-            Pasties = new()
-            {
-                new()
+            Pasties =
+            [
+                new PastyCreateInfo
                 {
                     Content = "Hello, World!"
                 }
-            },
+            ],
         };
 
         userContext.LoginUser(new User { Id = "1" }, defaultScopes);
@@ -709,13 +708,13 @@ public class PasteTests : IClassFixture<DatabaseFixture>
     {
         var createInfo = new PasteCreateInfo
         {
-            Pasties = new()
-            {
-                new()
+            Pasties =
+            [
+                new PastyCreateInfo
                 {
                     Content = "Hello, World!"
                 }
-            },
+            ],
         };
 
         var paste = await pasteService.CreateAsync(createInfo);
@@ -734,13 +733,13 @@ public class PasteTests : IClassFixture<DatabaseFixture>
     {
         var createInfo = new PasteCreateInfo
         {
-            Pasties = new()
-            {
-                new()
+            Pasties =
+            [
+                new PastyCreateInfo
                 {
                     Content = "Hello, World!"
                 }
-            },
+            ],
         };
 
         var paste = await pasteService.CreateAsync(createInfo);
@@ -760,13 +759,13 @@ public class PasteTests : IClassFixture<DatabaseFixture>
     {
         var createInfo = new PasteCreateInfo
         {
-            Pasties = new()
-            {
-                new()
+            Pasties =
+            [
+                new PastyCreateInfo
                 {
                     Content = "Hello, World!"
                 }
-            },
+            ],
         };
 
         var paste = await pasteService.CreateAsync(createInfo);
@@ -779,13 +778,13 @@ public class PasteTests : IClassFixture<DatabaseFixture>
     {
         var createInfo = new PasteCreateInfo
         {
-            Pasties = new()
-            {
-                new()
+            Pasties =
+            [
+                new PastyCreateInfo
                 {
                     Content = "Hello, World!"
                 }
-            },
+            ],
         };
 
         var paste = await pasteService.CreateAsync(createInfo);
@@ -802,13 +801,13 @@ public class PasteTests : IClassFixture<DatabaseFixture>
     {
         var createInfo = new PasteCreateInfo
         {
-            Pasties = new()
-            {
-                new()
+            Pasties =
+            [
+                new PastyCreateInfo
                 {
                     Content = "Hello, World!"
                 }
-            },
+            ],
         };
 
         userContext.LoginUser(new User { Id = "1" }, defaultScopes);
@@ -828,13 +827,13 @@ public class PasteTests : IClassFixture<DatabaseFixture>
         var createInfo = new PasteCreateInfo
         {
             Private = true,
-            Pasties = new()
-            {
-                new()
+            Pasties =
+            [
+                new PastyCreateInfo
                 {
                     Content = "Hello, World!"
                 }
-            },
+            ],
         };
 
         userContext.LoginUser(new User { Id = "1" }, defaultScopes);
@@ -851,13 +850,13 @@ public class PasteTests : IClassFixture<DatabaseFixture>
     {
         var createInfo = new PasteCreateInfo
         {
-            Pasties = new()
-            {
-                new()
+            Pasties =
+            [
+                new PastyCreateInfo
                 {
                     Content = "Hello, World!"
                 }
-            },
+            ],
         };
 
         userContext.LoginUser(new User { Id = "1" }, defaultScopes);
@@ -879,13 +878,13 @@ public class PasteTests : IClassFixture<DatabaseFixture>
         var createInfo = new PasteCreateInfo
         {
             Pinned = true,
-            Pasties = new()
-            {
-                new()
+            Pasties =
+            [
+                new PastyCreateInfo
                 {
                     Content = "Hello, World!"
                 }
-            },
+            ],
         };
 
         userContext.LoginUser(new User { Id = "1" }, defaultScopes);
@@ -906,13 +905,13 @@ public class PasteTests : IClassFixture<DatabaseFixture>
     {
         var createInfo = new PasteCreateInfo
         {
-            Pasties = new()
-            {
-                new()
+            Pasties =
+            [
+                new PastyCreateInfo
                 {
                     Content = "Hello, World!"
                 }
-            },
+            ],
         };
 
         var paste = await pasteService.CreateAsync(createInfo);
@@ -925,13 +924,13 @@ public class PasteTests : IClassFixture<DatabaseFixture>
     {
         var createInfo = new PasteCreateInfo
         {
-            Pasties = new()
-            {
-                new()
+            Pasties =
+            [
+                new PastyCreateInfo
                 {
                     Content = "Hello, World!"
                 }
-            },
+            ],
         };
 
         var paste = await pasteService.CreateAsync(createInfo);
@@ -948,13 +947,13 @@ public class PasteTests : IClassFixture<DatabaseFixture>
     {
         var createInfo = new PasteCreateInfo
         {
-            Pasties = new()
-            {
-                new()
+            Pasties =
+            [
+                new PastyCreateInfo
                 {
                     Content = "Hello, World!"
                 }
-            },
+            ],
         };
 
         userContext.LoginUser(new User { Id = "1" }, defaultScopes);
@@ -974,13 +973,13 @@ public class PasteTests : IClassFixture<DatabaseFixture>
         var createInfo = new PasteCreateInfo
         {
             Pinned = true,
-            Pasties = new()
-            {
-                new()
+            Pasties =
+            [
+                new PastyCreateInfo
                 {
                     Content = "Hello, World!"
                 }
-            },
+            ],
         };
 
         userContext.LoginUser(new User { Id = "1" }, defaultScopes);
@@ -997,13 +996,13 @@ public class PasteTests : IClassFixture<DatabaseFixture>
     {
         var createInfo = new PasteCreateInfo
         {
-            Pasties = new()
-            {
-                new()
+            Pasties =
+            [
+                new PastyCreateInfo
                 {
                     Content = "Hello, World!"
                 }
-            },
+            ],
         };
 
         userContext.LoginUser(new User { Id = "1" }, defaultScopes);
@@ -1025,13 +1024,13 @@ public class PasteTests : IClassFixture<DatabaseFixture>
         var createInfo = new PasteCreateInfo
         {
             Private = true,
-            Pasties = new()
-            {
-                new()
+            Pasties =
+            [
+                new PastyCreateInfo
                 {
                     Content = "Hello, World!"
                 }
-            },
+            ],
         };
 
         userContext.LoginUser(new User { Id = "1" }, defaultScopes);
@@ -1052,13 +1051,13 @@ public class PasteTests : IClassFixture<DatabaseFixture>
     {
         var createInfo = new PasteCreateInfo
         {
-            Pasties = new()
-            {
-                new()
+            Pasties =
+            [
+                new PastyCreateInfo
                 {
                     Content = "Hello, World!"
                 }
-            },
+            ],
         };
 
         var paste = await pasteService.CreateAsync(createInfo);
@@ -1066,14 +1065,14 @@ public class PasteTests : IClassFixture<DatabaseFixture>
         var editInfo = new PasteEditInfo
         {
             Title = "New Title",
-            Pasties = new()
-            {
-                new()
+            Pasties =
+            [
+                new PastyEditInfo
                 {
-                    Id = paste.Pasties[0].Id,
+                    Id = paste!.Pasties[0].Id,
                     Content = "New Content"
                 }
-            }
+            ]
         };
 
         await Assert.ThrowsAsync<HttpException>(async () => await pasteService.EditAsync(paste.Id, editInfo));
@@ -1084,13 +1083,13 @@ public class PasteTests : IClassFixture<DatabaseFixture>
     {
         var createInfo = new PasteCreateInfo
         {
-            Pasties = new()
-            {
-                new()
+            Pasties =
+            [
+                new PastyCreateInfo
                 {
                     Content = "Hello, World!"
                 }
-            },
+            ],
         };
 
         var paste = await pasteService.CreateAsync(createInfo);
@@ -1098,14 +1097,14 @@ public class PasteTests : IClassFixture<DatabaseFixture>
         var editInfo = new PasteEditInfo
         {
             Title = "New Title",
-            Pasties = new()
-            {
-                new()
+            Pasties =
+            [
+                new PastyEditInfo
                 {
-                    Id = paste.Pasties[0].Id,
+                    Id = paste!.Pasties[0].Id,
                     Content = "New Content"
                 }
-            }
+            ]
         };
 
         userContext.LoginUser(new User { Id = "1" }, defaultScopes);
@@ -1120,13 +1119,13 @@ public class PasteTests : IClassFixture<DatabaseFixture>
     {
         var createInfo = new PasteCreateInfo
         {
-            Pasties = new()
-            {
-                new()
+            Pasties =
+            [
+                new PastyCreateInfo
                 {
                     Content = "Hello, World!"
                 }
-            },
+            ],
         };
 
         userContext.LoginUser(new User { Id = "1" }, defaultScopes);
@@ -1136,14 +1135,14 @@ public class PasteTests : IClassFixture<DatabaseFixture>
         var editInfo = new PasteEditInfo
         {
             Title = "New Title",
-            Pasties = new()
-            {
-                new()
+            Pasties =
+            [
+                new PastyEditInfo
                 {
-                    Id = paste.Pasties[0].Id,
+                    Id = paste!.Pasties[0].Id,
                     Content = "New Content"
                 }
-            }
+            ]
         };
 
         userContext.LoginUser(new User { Id = "2" }, defaultScopes);
@@ -1158,13 +1157,13 @@ public class PasteTests : IClassFixture<DatabaseFixture>
     {
         var createInfo = new PasteCreateInfo
         {
-            Pasties = new()
-            {
-                new()
+            Pasties =
+            [
+                new PastyCreateInfo
                 {
                     Content = "Hello, World!"
                 }
-            },
+            ],
         };
 
         userContext.LoginUser(new User { Id = "1" }, defaultScopes);
@@ -1174,14 +1173,14 @@ public class PasteTests : IClassFixture<DatabaseFixture>
         var editInfo = new PasteEditInfo
         {
             Title = "New Title",
-            Pasties = new()
-            {
-                new()
+            Pasties =
+            [
+                new PastyEditInfo
                 {
-                    Id = paste.Pasties[0].Id,
+                    Id = paste!.Pasties[0].Id,
                     Content = "New Content"
                 }
-            }
+            ]
         };
 
         await pasteService.EditAsync(paste.Id, editInfo);
@@ -1204,13 +1203,13 @@ public class PasteTests : IClassFixture<DatabaseFixture>
     {
         var createInfo = new PasteCreateInfo
         {
-            Pasties = new()
-            {
-                new()
+            Pasties =
+            [
+                new PastyCreateInfo
                 {
                     Content = "Hello, World!"
                 }
-            },
+            ],
             Tags = ["tag1"]
         };
 
@@ -1232,13 +1231,13 @@ public class PasteTests : IClassFixture<DatabaseFixture>
     {
         var createInfo = new PasteCreateInfo
         {
-            Pasties = new()
-            {
-                new()
+            Pasties =
+            [
+                new PastyCreateInfo
                 {
                     Content = "Hello, World!"
                 }
-            },
+            ],
         };
 
         userContext.LoginUser(new User { Id = "1" }, defaultScopes);
@@ -1255,13 +1254,13 @@ public class PasteTests : IClassFixture<DatabaseFixture>
     {
         var createInfo = new PasteCreateInfo
         {
-            Pasties = new()
-            {
-                new()
+            Pasties =
+            [
+                new PastyCreateInfo
                 {
                     Content = "Hello, World!"
                 }
-            },
+            ],
         };
 
         userContext.LoginUser(new User { Id = "1" }, defaultScopes);
@@ -1271,14 +1270,14 @@ public class PasteTests : IClassFixture<DatabaseFixture>
         var editInfo = new PasteEditInfo
         {
             Title = "New Title",
-            Pasties = new()
-            {
-                new()
+            Pasties =
+            [
+                new PastyEditInfo
                 {
-                    Id = paste.Pasties[0].Id,
+                    Id = paste!.Pasties[0].Id,
                     Content = "New Content"
                 }
-            }
+            ]
         };
 
         await pasteService.EditAsync(paste.Id, editInfo);
@@ -1298,13 +1297,13 @@ public class PasteTests : IClassFixture<DatabaseFixture>
     {
         var createInfo = new PasteCreateInfo
         {
-            Pasties = new()
-            {
-                new()
+            Pasties =
+            [
+                new PastyCreateInfo
                 {
                     Content = "Hello, World!"
                 }
-            },
+            ],
         };
 
         userContext.LoginUser(new User { Id = "1" }, defaultScopes);
@@ -1314,14 +1313,14 @@ public class PasteTests : IClassFixture<DatabaseFixture>
         var editInfo = new PasteEditInfo
         {
             Title = "New Title",
-            Pasties = new()
-            {
-                new()
+            Pasties =
+            [
+                new PastyEditInfo
                 {
-                    Id = paste.Pasties[0].Id,
+                    Id = paste!.Pasties[0].Id,
                     Content = "New Content"
                 }
-            }
+            ]
         };
 
         await pasteService.EditAsync(paste.Id, editInfo);
@@ -1345,13 +1344,13 @@ public class PasteTests : IClassFixture<DatabaseFixture>
     {
         var createInfo = new PasteCreateInfo
         {
-            Pasties = new()
-            {
-                new()
+            Pasties =
+            [
+                new PastyCreateInfo
                 {
                     Content = "Hello, World!"
                 }
-            },
+            ],
         };
 
         userContext.LoginUser(new User { Id = "1" }, defaultScopes);
@@ -1361,14 +1360,14 @@ public class PasteTests : IClassFixture<DatabaseFixture>
         var editInfo = new PasteEditInfo
         {
             Title = "New Title",
-            Pasties = new()
-            {
-                new()
+            Pasties =
+            [
+                new PastyEditInfo
                 {
-                    Id = paste.Pasties[0].Id,
+                    Id = paste!.Pasties[0].Id,
                     Content = "New Content"
                 }
-            }
+            ]
         };
 
         await pasteService.EditAsync(paste.Id, editInfo);
@@ -1376,14 +1375,14 @@ public class PasteTests : IClassFixture<DatabaseFixture>
         editInfo = new PasteEditInfo
         {
             Title = "New Title 2",
-            Pasties = new()
-            {
-                new()
+            Pasties =
+            [
+                new PastyEditInfo
                 {
                     Id = paste.Pasties[0].Id,
                     Content = "New Content 2"
                 }
-            }
+            ]
         };
 
         await pasteService.EditAsync(paste.Id, editInfo);

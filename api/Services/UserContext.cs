@@ -7,7 +7,7 @@ public class UserContext
 {
     public User Self { get; private set; }
 
-    public Scope[] Scopes { get; private set; }
+    private Scope[] Scopes { get; set; }
 
     public bool IsLoggedIn() => Self is not null;
 

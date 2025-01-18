@@ -10,7 +10,9 @@ namespace pastemyst.Services;
 
 public class MongoService
 {
+    public IMongoCollection<BasePaste> BasePastes { get; private set; }
     public IMongoCollection<Paste> Pastes { get; private set; }
+    public IMongoCollection<EncryptedPaste> EncryptedPastes { get; private set; }
 
     public IMongoCollection<User> Users { get; private set; }
 
@@ -40,7 +42,9 @@ public class MongoService
 
         var mongoDb = mongoClient.GetDatabase(databaseName);
 
-        Pastes = mongoDb.GetCollection<Paste>("pastes");
+        BasePastes = mongoDb.GetCollection<BasePaste>("pastes");
+        Pastes = BasePastes.OfType<Paste>();
+        EncryptedPastes = BasePastes.OfType<EncryptedPaste>();
         Users = mongoDb.GetCollection<User>("users");
         ActionLogs = mongoDb.GetCollection<ActionLog>("actionLogs");
         SessionSettings = mongoDb.GetCollection<SessionSettings>("sessionSettings");

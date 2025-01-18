@@ -9,15 +9,17 @@ public class PasteCreateInfo
 
     [MinLength(1)]
     [Required]
-    public List<PastyCreateInfo> Pasties { get; set; }
+    public List<PastyCreateInfo> Pasties { get; init; }
 
-    public ExpiresIn ExpiresIn { get; set; } = ExpiresIn.Never;
+    public ExpiresIn ExpiresIn { get; init; } = ExpiresIn.Never;
 
-    public bool Anonymous { get; set; } = false;
+    public bool Anonymous { get; init; } = false;
 
-    public bool Private { get; set; } = false;
+    public bool Private { get; init; } = false;
 
-    public bool Pinned { get; set; } = false;
+    public bool Pinned { get; init; } = false;
 
-    public List<string> Tags { get; set; } = new();
+    public bool Encrypted { get; init; } = false;
+
+    public List<string> Tags { get; init; } = [];
 }
