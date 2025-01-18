@@ -10,6 +10,14 @@ public class EncryptionMiddleware(RequestDelegate next)
 
         encryptionContext.EncryptionKey = httpContext.Request.Headers["Encryption-Key"];
 
+        foreach (var cookie in httpContext.Request.Cookies)
+        {
+            if (!cookie.Key.StartsWith("pastemyst-encryption-key-")) continue;
+
+            var paste = cookie.Key["pastemyst-encryption-key-".Length..];
+            encryptionContext.EncryptionKeys[paste] = cookie.Value;
+        }
+
         httpContext.Features.Set(encryptionContext);
 
         await next(httpContext);

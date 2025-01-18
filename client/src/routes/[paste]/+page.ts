@@ -1,5 +1,12 @@
-import { error } from "@sveltejs/kit";
-import { ExpiresIn, getPaste, getPasteLangs, getPasteStats, isPasteStarred } from "$lib/api/paste";
+import { error, redirect } from "@sveltejs/kit";
+import {
+    ExpiresIn,
+    getPaste,
+    getPasteLangs,
+    getPasteStats,
+    isPasteEncrypted,
+    isPasteStarred
+} from "$lib/api/paste";
 import type { PageLoad } from "./$types";
 import { getUserById, getUserTags } from "$lib/api/user";
 import { formatDistanceToNow } from "date-fns";
@@ -12,8 +19,14 @@ export const load: PageLoad = async ({ params, fetch, parent }) => {
     const [paste, pasteStatus] = await getPaste(fetch, params.paste);
 
     if (!paste) {
-        // TODO: error handling
-        error(pasteStatus);
+        const isEncrypted = await isPasteEncrypted(fetch, params.paste);
+
+        if (isEncrypted) {
+            redirect(302, `/${params.paste}/decrypt`);
+        } else {
+            // TODO: error handling
+            error(pasteStatus);
+        }
     }
 
     const relativeCreatedAt = formatDistanceToNow(new Date(paste.createdAt), { addSuffix: true });

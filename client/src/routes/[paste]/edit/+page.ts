@@ -1,5 +1,5 @@
-import { getPaste } from "$lib/api/paste";
-import { error } from "@sveltejs/kit";
+import { getPaste, isPasteEncrypted } from "$lib/api/paste";
+import { error, redirect } from "@sveltejs/kit";
 import type { PageLoad } from "./$types";
 import { getUserTags } from "$lib/api/user";
 
@@ -13,8 +13,14 @@ export const load: PageLoad = async ({ params, fetch, parent }) => {
     const [paste, pasteStatus] = await getPaste(fetch, params.paste);
 
     if (!paste) {
-        // TODO: error handling
-        error(pasteStatus);
+        const isEncrypted = await isPasteEncrypted(fetch, params.paste);
+
+        if (isEncrypted) {
+            redirect(302, `/${params.paste}/decrypt`);
+        } else {
+            // TODO: error handling
+            error(pasteStatus);
+        }
     }
 
     if (paste.ownerId !== self.id) {

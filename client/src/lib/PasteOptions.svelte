@@ -4,6 +4,7 @@
 
     interface Props {
         encrypt: boolean;
+        encryptionKey: string;
         isPrivate: boolean;
         pinned: boolean;
         anonymous: boolean;
@@ -12,6 +13,7 @@
 
     let {
         encrypt = $bindable(false),
+        encryptionKey = $bindable(""),
         isPrivate = $bindable(false),
         pinned = $bindable(false),
         anonymous = $bindable(false),
@@ -41,7 +43,7 @@
 </script>
 
 <div class="paste-options block flex sm-row center space-between">
-    <div class="options flex row center">
+    <div class="options flex wrap gap-m row center">
         <label
             for="encrypt"
             aria-label="encrypt the paste with a password"
@@ -132,6 +134,16 @@
                 </svg>
             </label>
         {/if}
+
+        {#if encrypt}
+            <input
+                class="encryption-input"
+                type="password"
+                placeholder="encryption password"
+                required
+                bind:value={encryptionKey}
+            />
+        {/if}
     </div>
 
     <button class="btn-main" onclick={oncreatePaste}>create paste</button>
@@ -152,7 +164,6 @@
         cursor: pointer;
         background-color: var(--color-bg);
         padding: 0.5rem;
-        margin-right: 1rem;
 
         &:focus-within {
             border-color: var(--color-primary) !important;
@@ -180,6 +191,12 @@
         svg {
             @include transition(color);
         }
+    }
+
+    .encryption-input {
+        background-color: var(--color-bg);
+        font-size: $fs-normal;
+        max-width: 15rem;
     }
 
     button {

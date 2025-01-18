@@ -58,6 +58,7 @@ export interface PasteCreateInfo {
     private: boolean;
     pinned: boolean;
     tags: string[];
+    encrypted: boolean;
 }
 
 export interface PastyCreateInfo {
@@ -150,17 +151,33 @@ export const expiresInToLongString = (exp: ExpiresIn): string => {
     }
 };
 
-export const createPaste = async (createInfo: PasteCreateInfo): Promise<Paste | null> => {
-    const res = await fetch(`${env.PUBLIC_API_BASE}/pastes/`, {
-        method: "POST",
-        credentials: "include",
-        headers: {
-            "Content-Type": "application/json"
-        },
-        body: JSON.stringify(createInfo)
-    });
+export const createPaste = async (
+    createInfo: PasteCreateInfo,
+    encryptionKey: string
+): Promise<Paste | null> => {
+    if (createInfo.encrypted) {
+        const res = await fetch(`/internal/create-encrypted-paste`, {
+            method: "POST",
+            credentials: "include",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({ ...createInfo, encryptionKey })
+        });
 
-    if (res.ok) return await res.json();
+        if (res.ok) return await res.json();
+    } else {
+        const res = await fetch(`${env.PUBLIC_API_BASE}/pastes/`, {
+            method: "POST",
+            credentials: "include",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(createInfo)
+        });
+
+        if (res.ok) return await res.json();
+    }
 
     return null;
 };
@@ -345,4 +362,15 @@ export const getUserPastes = async (
     if (res.ok) return await res.json();
 
     return null;
+};
+
+export const isPasteEncrypted = async (fetchFunc: FetchFunc, id: string): Promise<boolean> => {
+    const res = await fetchFunc(`${env.PUBLIC_API_BASE}/pastes/${id}/encrypted`, {
+        method: "GET",
+        credentials: "include"
+    });
+
+    if (res.ok) return await res.json();
+
+    return false;
 };
