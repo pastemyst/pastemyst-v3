@@ -3,12 +3,17 @@ using Semver;
 
 namespace pastemyst.Services;
 
-public class VersionProvider : IHostedService
+public sealed class VersionProvider
 {
-    public string Version { get; private set; } = null!;
+    private string _version = null!;
 
-    public Task StartAsync(CancellationToken cancellationToken)
+    public string GetVersion()
     {
+        // If we've already calculated the version, return it
+        if (_version is not null)
+            return _version;
+        
+        // Otherwise, get the version information from the .git folder in the repository
         var repoPath = "../";
         if (!Repository.IsValid("../"))
         {
@@ -17,17 +22,12 @@ public class VersionProvider : IHostedService
 
         using var repo = new Repository(repoPath);
 
-        Version = repo.Tags
+        _version = repo.Tags
             .Select(t => SemVersion.Parse(t.FriendlyName, SemVersionStyles.Strict))
             .OrderDescending()
             .First()
             .ToString();
 
-        return Task.CompletedTask;
-    }
-
-    public Task StopAsync(CancellationToken cancellationToken)
-    {
-        return Task.CompletedTask;
+        return _version;
     }
 }
