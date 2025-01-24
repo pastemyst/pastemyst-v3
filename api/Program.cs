@@ -18,7 +18,6 @@ builder.Services.AddHttpContextAccessor();
 builder.Services.AddHttpLogging(o => {});
 
 builder.Services.AddDistributedMemoryCache();
-builder.Services.AddMemoryCache();
 
 builder.Services.AddSession(options =>
 {
