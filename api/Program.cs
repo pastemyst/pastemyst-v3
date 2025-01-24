@@ -18,6 +18,7 @@ builder.Services.AddHttpContextAccessor();
 builder.Services.AddHttpLogging(o => {});
 
 builder.Services.AddDistributedMemoryCache();
+builder.Services.AddMemoryCache();
 
 builder.Services.AddSession(options =>
 {
@@ -36,15 +37,8 @@ builder.Services.AddSingleton(s =>
     (IHostedService)s.GetRequiredService<LanguageProvider>()
 );
 
-builder.Services.TryAddSingleton<VersionProvider>();
-builder.Services.AddSingleton(s =>
-    (IHostedService)s.GetRequiredService<VersionProvider>()
-);
-
-builder.Services.TryAddSingleton<ChangelogProvider>();
-builder.Services.AddSingleton(s =>
-    s.GetRequiredService<ChangelogProvider>()
-);
+builder.Services.AddSingleton<VersionProvider>();
+builder.Services.AddSingleton<ChangelogProvider>();
 
 builder.Services.AddScoped<IdProvider>();
 builder.Services.AddScoped<ImageService>();
@@ -107,9 +101,9 @@ var app = builder.Build();
 
 app.UseHttpLogging();
 
-app.UseMiddleware<ExceptionMiddleware>();
-app.UseMiddleware<UserContextMiddleware>();
-app.UseMiddleware<EncryptionMiddleware>();
+// app.UseMiddleware<ExceptionMiddleware>();
+// app.UseMiddleware<UserContextMiddleware>();
+// app.UseMiddleware<EncryptionMiddleware>();
 
 if (app.Environment.IsDevelopment())
 {
