@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Caching.Memory;
 using pastemyst.Models;
 using pastemyst.Services;
 
@@ -10,7 +11,8 @@ public class MetaController(
     VersionProvider versionProvider,
     ChangelogProvider changelogProvider,
     PasteService pasteService,
-    StatsService statsService)
+    StatsService statsService,
+    IMemoryCache memoryCache)
     : ControllerBase
 {
     [HttpGet("version")]
@@ -20,9 +22,16 @@ public class MetaController(
     }
 
     [HttpGet("releases")]
-    public List<Release> GetReleases()
+    public async Task<List<Release>> GetReleases()
     {
-        return changelogProvider.Releases;
+        if (memoryCache.TryGetValue("releases", out List<Release> releases))
+            return releases;
+
+        var updatedReleases = (await changelogProvider.GenerateChangelogAsync()).ToList();
+
+        memoryCache.Set("releases", updatedReleases, DateTimeOffset.Now.AddHours(1));
+
+        return updatedReleases;
     }
 
     [HttpGet("active_pastes")]
