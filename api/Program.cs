@@ -101,9 +101,9 @@ var app = builder.Build();
 
 app.UseHttpLogging();
 
-// app.UseMiddleware<ExceptionMiddleware>();
-// app.UseMiddleware<UserContextMiddleware>();
-// app.UseMiddleware<EncryptionMiddleware>();
+app.UseMiddleware<ExceptionMiddleware>();
+app.UseMiddleware<UserContextMiddleware>();
+app.UseMiddleware<EncryptionMiddleware>();
 
 if (app.Environment.IsDevelopment())
 {
