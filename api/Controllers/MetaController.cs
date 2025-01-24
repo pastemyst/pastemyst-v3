@@ -17,7 +17,7 @@ public sealed class MetaController(
     [HttpGet("version")]
     public VersionResponse GetVersion()
     {
-        return new VersionResponse { Version = versionProvider.Version };
+        return new VersionResponse { Version = versionProvider.GetVersion() };
     }
 
     [HttpGet("releases")]
