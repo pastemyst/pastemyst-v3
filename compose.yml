@@ -4,8 +4,6 @@ services:
     container_name: pastemyst-mongodb
     volumes:
       - mongodb_data:/data/db
-    ports:
-      - 27017:27017
 
   api:
     container_name: pastemyst-api
