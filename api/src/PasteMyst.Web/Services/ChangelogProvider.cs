@@ -1,28 +1,36 @@
 using System.Text.RegularExpressions;
 using Octokit;
-using Models_Release = PasteMyst.Web.Models.Release;
 using Release = PasteMyst.Web.Models.Release;
 
 namespace PasteMyst.Web.Services;
 
 public sealed class ChangelogProvider
 {
-    public async Task<IEnumerable<Models_Release>> GenerateChangelogAsync()
+    private List<Release> _releases;
+
+    public async Task<IEnumerable<Release>> GenerateChangelogAsync()
     {
+        // If we've cached the releases before, then just return it
+        if (_releases != null)
+            return _releases;
+
+        // Otherwise, fetch it and cache it for subsequent requests
         var github = new GitHubClient(new ProductHeaderValue("pastemyst"));
 
         var v2Releases = await github.Repository.Release.GetAll("codemyst", "pastemyst");
         var v3Releases = await github.Repository.Release.GetAll("pastemyst", "pastemyst-v3");
 
         // Ignore drafts.
-        return
+        _releases =
         [
             ..v3Releases.Where(x => !x.Draft).Select(ToRelease),
             ..v2Releases.Where(x => !x.Draft).Select(ToRelease)
         ];
+
+        return _releases;
     }
 
-    private static Models_Release ToRelease(Octokit.Release release)
+    private static Release ToRelease(Octokit.Release release)
     {
         // If it doesn't have a title use the tag as the title.
         var title = release.Name;
@@ -40,7 +48,7 @@ public sealed class ChangelogProvider
         // Remove ## changelog from older releases.
         var content = Regex.Replace(release.Body, "(?i)## changelog:?\r\n\r\n", "");
 
-        return new Models_Release
+        return new Release
         {
             Url = release.HtmlUrl,
             Title = title,

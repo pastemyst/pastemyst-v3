@@ -11,27 +11,19 @@ public sealed class MetaController(
     VersionProvider versionProvider,
     ChangelogProvider changelogProvider,
     PasteService pasteService,
-    StatsService statsService,
-    IMemoryCache memoryCache)
+    StatsService statsService)
     : ControllerBase
 {
     [HttpGet("version")]
     public VersionResponse GetVersion()
     {
-        return new VersionResponse { Version = versionProvider.Version };
+        return new VersionResponse { Version = versionProvider.GetVersion() };
     }
 
     [HttpGet("releases")]
     public async Task<List<Release>> GetReleasesAsync()
     {
-        if (memoryCache.TryGetValue("releases", out List<Release> releases))
-            return releases;
-
-        var updatedReleases = (await changelogProvider.GenerateChangelogAsync()).ToList();
-
-        memoryCache.Set("releases", updatedReleases, DateTimeOffset.Now.AddHours(1));
-
-        return updatedReleases;
+        return (await changelogProvider.GenerateChangelogAsync()).ToList();
     }
 
     [HttpGet("active_pastes")]
