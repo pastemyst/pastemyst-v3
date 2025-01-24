@@ -6,8 +6,8 @@ using pastemyst.Services;
 namespace pastemyst.Controllers;
 
 [ApiController]
-[Route("/api/v3/meta")]
-public class MetaController(
+[Route("api/v3/meta")]
+public sealed class MetaController(
     VersionProvider versionProvider,
     ChangelogProvider changelogProvider,
     PasteService pasteService,
