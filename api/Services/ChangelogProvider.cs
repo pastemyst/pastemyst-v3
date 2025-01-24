@@ -6,19 +6,28 @@ namespace pastemyst.Services;
 
 public sealed class ChangelogProvider
 {
+    private List<Release> _releases;
+
     public async Task<IEnumerable<Release>> GenerateChangelogAsync()
     {
+        // If we've cached the releases before, then just return it
+        if (_releases != null)
+            return _releases;
+
+        // Otherwise, fetch it and cache it for subsequent requests
         var github = new GitHubClient(new ProductHeaderValue("pastemyst"));
 
         var v2Releases = await github.Repository.Release.GetAll("codemyst", "pastemyst");
         var v3Releases = await github.Repository.Release.GetAll("pastemyst", "pastemyst-v3");
 
         // Ignore drafts.
-        return
+        _releases =
         [
             ..v3Releases.Where(x => !x.Draft).Select(ToRelease),
             ..v2Releases.Where(x => !x.Draft).Select(ToRelease)
         ];
+
+        return _releases;
     }
 
     private static Release ToRelease(Octokit.Release release)
