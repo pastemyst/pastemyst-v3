@@ -1,0 +1,43 @@
+services:
+  mongodb:
+    image: mongo:latest
+    container_name: pastemyst-mongodb
+    volumes:
+      - mongodb_data:/data/db
+
+  api:
+    container_name: pastemyst-api
+    pull_policy: build
+    build:
+      context: .
+      dockerfile: api/src/PasteMyst.Web/Dockerfile
+    ports:
+      - ${API_PORT}:8080
+    environment:
+      - ConnectionStrings:DefaultDb=mongodb://mongodb:27017
+      - JwtSecret=${JWT_SECRET}
+      - GitHub:ClientId=${GITHUB_CLIENT_ID}
+      - GitHub:ClientSecret=${GITHUB_CLIENT_SECRET}
+      - GitLab:ClientId=${GITLAB_CLIENT_ID}
+      - GitLab:ClientSecret=${GITLAB_CLIENT_SECRET}
+      - Host=${API_URL}
+      - ClientUrl=${CLIENT_URL}
+    depends_on:
+      - mongodb
+
+  client:
+    container_name: pastemyst-client
+    pull_policy: build
+    build:
+      context: ./client
+    ports:
+      - ${CLIENT_PORT}:3000
+    environment:
+      - PUBLIC_API_BASE=${API_URL}/api/v3
+      - PUBLIC_ALPHA_RELEASE=${ALPHA_RELEASE}
+    depends_on:
+      - api
+
+volumes:
+  mongodb_data:
+    driver: local
