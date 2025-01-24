@@ -43,7 +43,7 @@ builder.Services.AddSingleton(s =>
 
 builder.Services.TryAddSingleton<ChangelogProvider>();
 builder.Services.AddSingleton(s =>
-    (IHostedService)s.GetRequiredService<ChangelogProvider>()
+    s.GetRequiredService<ChangelogProvider>()
 );
 
 builder.Services.AddScoped<IdProvider>();
