@@ -4,6 +4,7 @@ using System.Text;
 using System.Web;
 using JWT.Algorithms;
 using JWT.Builder;
+using MongoDB.Bson;
 using MongoDB.Driver;
 using pastemyst.Exceptions;
 using pastemyst.Extensions;
@@ -66,7 +67,7 @@ public class AuthService(
         var accessToken = await oAuthService.ExchangeTokenAsync(oAuthProvider, code);
         var providerUser = await oAuthService.GetProviderUserAsync(oAuthProvider, accessToken);
 
-        var userFilter = Builders<User>.Filter.Eq(u => u.ProviderName, oAuthProvider.Name) &
+        var userFilter = Builders<User>.Filter.Regex(u => u.ProviderName, new BsonRegularExpression(oAuthProvider.Name, "i")) &
                          Builders<User>.Filter.Eq(u => u.ProviderId, providerUser.Id);
 
         var existingUser = await mongo.Users.Find(userFilter).FirstOrDefaultAsync();
@@ -219,7 +220,6 @@ public class AuthService(
 
     private async Task<(string, DateTime?)> GenerateAccessToken(User owner, Scope[] scopes, ExpiresIn expiresIn, bool hidden = false, string description = "")
     {
-
         var secureString = RandomNumberGenerator.GetHexString(64, true);
         var hashedToken = SHA512.HashData(Encoding.UTF8.GetBytes(secureString));
 
