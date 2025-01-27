@@ -28,8 +28,8 @@ public class MongoService
 
     public MongoService(IConfiguration configuration)
     {
-        BsonSerializer.RegisterSerializer(new CustomEnumStringSerializer<ExpiresIn>());
-        BsonSerializer.RegisterSerializer(new CustomEnumStringSerializer<Scope>());
+        BsonSerializer.TryRegisterSerializer(new CustomEnumStringSerializer<ExpiresIn>());
+        BsonSerializer.TryRegisterSerializer(new CustomEnumStringSerializer<Scope>());
 
         var camelCaseConvention = new ConventionPack { new CamelCaseElementNameConvention() };
         ConventionRegistry.Register("CamelCase", camelCaseConvention, type => true);
@@ -56,7 +56,7 @@ public class MongoService
             ChunkSizeBytes = 1_000_000
         });
 
-        var usernameIndex = Builders<User>.IndexKeys.Text(u => u.Username);
+        var usernameIndex = Builders<User>.IndexKeys.Ascending(u => u.Username);
 
         Users.Indexes.CreateOne(new CreateIndexModel<User>(usernameIndex, new()
         {
