@@ -8,7 +8,7 @@ public sealed class ChangelogProvider
 {
     private List<Release> _releases;
 
-    public async Task<IEnumerable<Release>> GenerateChangelogAsync()
+    public async Task<IEnumerable<Release>> GenerateChangelogAsync(CancellationToken token)
     {
         // If we've cached the releases before, then just return it
         if (_releases != null)

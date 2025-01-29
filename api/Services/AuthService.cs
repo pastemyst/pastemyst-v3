@@ -26,13 +26,13 @@ public class AuthService(
     UserContext userContext,
     MongoService mongo)
 {
-    public async Task<string> InitiateLoginFlowAsync(string provider, HttpContext httpContext)
+    public async Task<string> InitiateLoginFlowAsync(string provider, HttpContext httpContext, CancellationToken token)
     {
         // Random state string used to validate that the acquired token was requested from here.
         var state = idProvider.GenerateId();
 
         httpContext.Session.SetString("state", state);
-        await httpContext.Session.CommitAsync();
+        await httpContext.Session.CommitAsync(token);
 
         var oauthProvider = oAuthService.OAuthProviders[provider];
 
@@ -44,7 +44,7 @@ public class AuthService(
                "&state=" + state;
     }
 
-    public async Task<string> HandleCallbackAsync(string provider, string state, string code, HttpContext httpContext)
+    public async Task<string> HandleCallbackAsync(string provider, string state, string code, HttpContext httpContext, CancellationToken token)
     {
         // Get the state string to validate the request
         var sessionState = httpContext.Session.GetString("state");
@@ -55,7 +55,7 @@ public class AuthService(
         }
 
         httpContext.Session.Clear();
-        await httpContext.Session.CommitAsync();
+        await httpContext.Session.CommitAsync(token);
 
         if (state != sessionState)
         {
@@ -63,13 +63,13 @@ public class AuthService(
         }
 
         var oAuthProvider = oAuthService.OAuthProviders[provider];
-        var accessToken = await oAuthService.ExchangeTokenAsync(oAuthProvider, code);
-        var providerUser = await oAuthService.GetProviderUserAsync(oAuthProvider, accessToken);
+        var accessToken = await oAuthService.ExchangeTokenAsync(oAuthProvider, code, token);
+        var providerUser = await oAuthService.GetProviderUserAsync(oAuthProvider, accessToken, token);
 
         var userFilter = Builders<User>.Filter.Eq(u => u.ProviderName, oAuthProvider.Name) &
                          Builders<User>.Filter.Eq(u => u.ProviderId, providerUser.Id);
 
-        var existingUser = await mongo.Users.Find(userFilter).FirstOrDefaultAsync();
+        var existingUser = await mongo.Users.Find(userFilter).FirstOrDefaultAsync(token);
 
         var cookie = new CookieOptions
         {
@@ -83,7 +83,7 @@ public class AuthService(
         {
             var cookieExpirationTime = DateTimeOffset.Now.AddDays(30);
 
-            var (newAccessToken, _) = await GenerateAccessToken(existingUser, [Scope.Paste, Scope.User, Scope.UserAccessTokens], ExpiresIn.OneMonth, hidden: true);
+            var (newAccessToken, _) = await GenerateAccessToken(existingUser, [Scope.Paste, Scope.User, Scope.UserAccessTokens], ExpiresIn.OneMonth, token, hidden: true);
 
             cookie.Expires = cookieExpirationTime;
 
@@ -112,7 +112,7 @@ public class AuthService(
         }
     }
 
-    public async Task RegisterUserAsync(string username, HttpContext httpContext)
+    public async Task RegisterUserAsync(string username, HttpContext httpContext, CancellationToken token)
     {
         var cookie = httpContext.Request.Cookies["pastemyst-registration"];
 
@@ -122,7 +122,7 @@ public class AuthService(
         }
 
         var usernameFilter = Builders<User>.Filter.Eq(u => u.Username, username);
-        var existingUser = await mongo.Users.Find(usernameFilter).FirstOrDefaultAsync();
+        var existingUser = await mongo.Users.Find(usernameFilter).FirstOrDefaultAsync(cancellationToken: token);
 
         if (existingUser is not null)
         {
@@ -135,11 +135,11 @@ public class AuthService(
             .MustVerifySignature()
             .Decode<Dictionary<string, object>>(cookie);
 
-        var id = await idProvider.GenerateId(async id => await mongo.Users.Find(u => u.Id == id).FirstOrDefaultAsync() is not null);
+        var id = await idProvider.GenerateId(async id => await mongo.Users.Find(u => u.Id == id).FirstOrDefaultAsync(cancellationToken: token) is not null);
 
         var client = httpClientFactory.CreateClient();
-        var response = await client.GetAsync((string)claims["avatarUrl"]);
-        var imageBytes = await response.Content.ReadAsByteArrayAsync();
+        var response = await client.GetAsync((string)claims["avatarUrl"], token);
+        var imageBytes = await response.Content.ReadAsByteArrayAsync(token);
 
         var avatarId = await imageService.UploadImageAsync(
             imageBytes,
@@ -158,11 +158,11 @@ public class AuthService(
             Settings = new Settings()
         };
 
-        await mongo.Users.InsertOneAsync(user);
+        await mongo.Users.InsertOneAsync(user, cancellationToken: token);
 
         httpContext.Response.Cookies.Delete("pastemyst-registration");
 
-        var (accessToken, _) = await GenerateAccessToken(user, [Scope.Paste, Scope.User, Scope.UserAccessTokens], ExpiresIn.OneMonth, hidden: true);
+        var (accessToken, _) = await GenerateAccessToken(user, [Scope.Paste, Scope.User, Scope.UserAccessTokens], ExpiresIn.OneMonth, token, hidden: true);
 
         var newCookie = new CookieOptions
         {
@@ -178,7 +178,7 @@ public class AuthService(
         await actionLogger.LogActionAsync(ActionLogType.UserCreated, user.Id);
     }
 
-    public async Task<(User, Scope[])> GetSelfWithScopesAsync(HttpContext httpContext)
+    public async Task<(User, Scope[])> GetSelfWithScopesAsync(HttpContext httpContext, CancellationToken token)
     {
         var accessToken = httpContext.Request.Cookies["pastemyst"];
 
@@ -193,10 +193,10 @@ public class AuthService(
 
         var (valid, _, userId, scopes) = await AccessTokenValid(accessToken);
 
-        return valid ? (await mongo.Users.Find(u => u.Id == userId).FirstOrDefaultAsync(), scopes) : (null, []);
+        return valid ? (await mongo.Users.Find(u => u.Id == userId).FirstOrDefaultAsync(cancellationToken: token), scopes) : (null, []);
     }
 
-    public async Task<string> Logout(HttpContext httpContext)
+    public async Task<string> Logout(HttpContext httpContext, CancellationToken token)
     {
         var accessToken = httpContext.Request.Cookies["pastemyst"];
 
@@ -210,14 +210,14 @@ public class AuthService(
         httpContext.Response.Cookies.Delete("pastemyst");
 
         var filter = Builders<AccessToken>.Filter.Eq(a => a.Id, accessTokenId);
-        await mongo.AccessTokens.DeleteOneAsync(filter);
+        await mongo.AccessTokens.DeleteOneAsync(filter, token);
 
         await actionLogger.LogActionAsync(ActionLogType.AccessTokenDeleted, userId);
 
         return configuration["ClientUrl"];
     }
 
-    private async Task<(string, DateTime?)> GenerateAccessToken(User owner, Scope[] scopes, ExpiresIn expiresIn, bool hidden = false, string description = "")
+    private async Task<(string, DateTime?)> GenerateAccessToken(User owner, Scope[] scopes, ExpiresIn expiresIn, CancellationToken token, bool hidden = false, string description = "")
     {
 
         var secureString = RandomNumberGenerator.GetHexString(64, true);
@@ -240,14 +240,15 @@ public class AuthService(
             Description = description
         };
 
-        await mongo.AccessTokens.InsertOneAsync(accessToken);
+        await mongo.AccessTokens.InsertOneAsync(accessToken, cancellationToken: token);
 
         await actionLogger.LogActionAsync(ActionLogType.AccessTokenCreated, owner.Id);
 
         return ($"{accessToken.Id}-{secureString}", accessToken.ExpiresAt);
     }
 
-    public async Task<GenerateAccessTokenResponse> GenerateAccessTokenForSelf(Scope[] scopes, ExpiresIn expiresIn, string description)
+    public async Task<GenerateAccessTokenResponse> GenerateAccessTokenForSelf(Scope[] scopes, ExpiresIn expiresIn,
+        string description, CancellationToken token)
     {
         if (!userContext.IsLoggedIn())
         {
@@ -259,12 +260,12 @@ public class AuthService(
             throw new HttpException(HttpStatusCode.Forbidden, $"Missing required scope {Scope.UserAccessTokens.ToEnumString()}.");
         }
 
-        var (accessToken, expiresAt) = await GenerateAccessToken(userContext.Self, scopes, expiresIn, hidden: false, description);
+        var (accessToken, expiresAt) = await GenerateAccessToken(userContext.Self, scopes, expiresIn, token, hidden: false, description);
 
-        return new() { AccessToken = accessToken, ExpiresAt = expiresAt };
+        return new GenerateAccessTokenResponse { AccessToken = accessToken, ExpiresAt = expiresAt };
     }
 
-    public async Task<List<AccessTokenResponse>> GetAccessTokensForSelf()
+    public async Task<List<AccessTokenResponse>> GetAccessTokensForSelf(CancellationToken token)
     {
         if (!userContext.IsLoggedIn())
         {
@@ -277,7 +278,7 @@ public class AuthService(
         }
 
         var filter = Builders<AccessToken>.Filter.Eq(a => a.Hidden, false) & Builders<AccessToken>.Filter.Eq(a => a.OwnerId, userContext.Self.Id);
-        var accessTokens = (await mongo.AccessTokens.FindAsync(filter)).ToList().Select(a => new AccessTokenResponse
+        var accessTokens = (await mongo.AccessTokens.FindAsync(filter, cancellationToken: token)).ToList(cancellationToken: token).Select(a => new AccessTokenResponse
                 {
                     Id = a.Id,
                     Description = a.Description,
@@ -289,7 +290,7 @@ public class AuthService(
         return accessTokens.ToList();
     }
 
-    public async Task DeleteAccessTokenForSelf(string accessTokenId)
+    public async Task DeleteAccessTokenForSelf(string accessTokenId, CancellationToken token)
     {
         if (!userContext.IsLoggedIn())
         {
@@ -301,14 +302,14 @@ public class AuthService(
             throw new HttpException(HttpStatusCode.Forbidden, $"Missing required scope {Scope.UserAccessTokens.ToEnumString()}.");
         }
 
-        var accessToken = await mongo.AccessTokens.Find(a => a.Id == accessTokenId).FirstOrDefaultAsync();
+        var accessToken = await mongo.AccessTokens.Find(a => a.Id == accessTokenId).FirstOrDefaultAsync(cancellationToken: token);
 
         if (accessToken is null)
         {
             throw new HttpException(HttpStatusCode.NotFound, "Access token not found.");
         }
 
-        await mongo.AccessTokens.DeleteOneAsync(a => a.Id == accessTokenId);
+        await mongo.AccessTokens.DeleteOneAsync(a => a.Id == accessTokenId, cancellationToken: token);
     }
 
     private async Task<(bool, string, string, Scope[])> AccessTokenValid(String accessToken)

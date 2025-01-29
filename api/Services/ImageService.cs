@@ -19,15 +19,15 @@ public class ImageService(MongoService mongo)
         return image.ToString();
     }
 
-    public async Task<GridFSFileInfo<ObjectId>> FindByIdAsync(string id)
+    public async Task<GridFSFileInfo<ObjectId>> FindByIdAsync(string id, CancellationToken token)
     {
         var filter = Builders<GridFSFileInfo<ObjectId>>.Filter.Eq(fs => fs.Id, ObjectId.Parse(id));
-        return await (await mongo.Images.FindAsync(filter)).FirstOrDefaultAsync();
+        return await (await mongo.Images.FindAsync(filter, cancellationToken: token)).FirstOrDefaultAsync(cancellationToken: token);
     }
 
-    public async Task<byte[]> DownloadByIdAsync(string id)
+    public async Task<byte[]> DownloadByIdAsync(string id, CancellationToken token)
     {
-        return await mongo.Images.DownloadAsBytesAsync(new ObjectId(id));
+        return await mongo.Images.DownloadAsBytesAsync(new ObjectId(id), cancellationToken: token);
     }
 
     public async Task DeleteAsync(string id)
@@ -35,5 +35,5 @@ public class ImageService(MongoService mongo)
         await mongo.Images.DeleteAsync(new ObjectId(id));
     }
 
-    public async Task<bool> ExistsByIdAsync(string id) => await FindByIdAsync(id) is not null;
+    public async Task<bool> ExistsByIdAsync(string id, CancellationToken token) => await FindByIdAsync(id, token) is not null;
 }

@@ -9,9 +9,9 @@ namespace pastemyst.Controllers;
 public class PasteController(PasteService pasteService) : ControllerBase
 {
     [HttpGet("{pasteId}.zip")]
-    public async Task<FileContentResult> GetPasteAsZip(string pasteId)
+    public async Task<FileContentResult> GetPasteAsZip(string pasteId, CancellationToken token)
     {
-        var (zip, title) = await pasteService.GetPasteAsZip(pasteId);
+        var (zip, title) = await pasteService.GetPasteAsZip(pasteId, token);
 
         return File(zip, "application/zip", title + ".zip");
     }
@@ -83,9 +83,9 @@ public class PasteController(PasteService pasteService) : ControllerBase
     }
 
     [HttpPatch("{pasteId}")]
-    public async Task<Paste> EditPaste(string pasteId, [FromBody] PasteEditInfo editInfo)
+    public async Task<Paste> EditPaste(string pasteId, [FromBody] PasteEditInfo editInfo, CancellationToken token)
     {
-        return await pasteService.EditAsync(pasteId, editInfo);
+        return await pasteService.EditAsync(pasteId, editInfo, token);
     }
 
     [HttpPatch("{pasteId}/tags")]
@@ -95,9 +95,9 @@ public class PasteController(PasteService pasteService) : ControllerBase
     }
 
     [HttpPost]
-    public async Task<IActionResult> CreatePaste([FromBody] PasteCreateInfo createInfo)
+    public async Task<IActionResult> CreatePaste([FromBody] PasteCreateInfo createInfo, CancellationToken token)
     {
-        var paste = await pasteService.CreateAsync(createInfo);
+        var paste = await pasteService.CreateAsync(createInfo, token);
         return Created("/api/v3/pastes/" + paste.Id, paste);
     }
 
