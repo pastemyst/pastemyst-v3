@@ -6,17 +6,17 @@ namespace PasteMyst.Web.Services;
 
 public class StatsService(MongoService mongo)
 {
-    public async Task<AppStats> GetAppStatsAsync()
+    public async Task<AppStats> GetAppStatsAsync(CancellationToken cancellationToken)
     {
         var totalPastesFilter = Builders<ActionLog>.Filter.Eq(a => a.Type, ActionLogType.PasteCreated);
         var totalUsersFilter = Builders<ActionLog>.Filter.Eq(a => a.Type, ActionLogType.UserCreated);
 
         return new()
         {
-            ActivePastes = await mongo.Pastes.CountDocumentsAsync(new BsonDocument()),
-            ActiveUsers = await mongo.Users.CountDocumentsAsync(new BsonDocument()),
-            TotalPastes = await mongo.ActionLogs.CountDocumentsAsync(totalPastesFilter),
-            TotalUsers = await mongo.ActionLogs.CountDocumentsAsync(totalUsersFilter),
+            ActivePastes = await mongo.Pastes.CountDocumentsAsync(new BsonDocument(), cancellationToken: cancellationToken),
+            ActiveUsers = await mongo.Users.CountDocumentsAsync(new BsonDocument(), cancellationToken: cancellationToken),
+            TotalPastes = await mongo.ActionLogs.CountDocumentsAsync(totalPastesFilter, cancellationToken: cancellationToken),
+            TotalUsers = await mongo.ActionLogs.CountDocumentsAsync(totalUsersFilter, cancellationToken: cancellationToken),
             ActivePastesOverTime = await GetActivePasteStatsOverTime(),
             TotalPastesOverTime = await GetActionLogStatsOverTime(ActionLogType.PasteCreated),
         };

@@ -2,11 +2,12 @@ using PasteMyst.Web.Services;
 
 namespace PasteMyst.Web.Middleware;
 
-public class UserContextMiddleware(RequestDelegate next)
+public sealed class UserContextMiddleware(RequestDelegate next)
 {
     public async Task InvokeAsync(HttpContext context, AuthService authService)
     {
-        var (self, scopes) = await authService.GetSelfWithScopesAsync(context);
+        var cancellationToken = context?.RequestAborted ?? CancellationToken.None;
+        var (self, scopes) = await authService.GetSelfWithScopesAsync(context, cancellationToken);
 
         var userContext = context.RequestServices.GetRequiredService<UserContext>();
         userContext.LoginUser(self, scopes);

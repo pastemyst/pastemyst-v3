@@ -48,7 +48,7 @@ public sealed class PasteTests
             ],
         };
 
-        var paste = await _pasteService.CreateAsync(createInfo);
+        var paste = await _pasteService.CreateAsync(createInfo, CancellationToken.None);
 
         Assert.That(paste, Is.Not.Null);
         Assert.That(paste.Pasties[0].Content, Is.EqualTo("Hello, World!"));
@@ -69,7 +69,7 @@ public sealed class PasteTests
             ],
         };
 
-        Assert.ThrowsAsync<HttpException>(async () => await _pasteService.CreateAsync(createInfo));
+        Assert.ThrowsAsync<HttpException>(async () => await _pasteService.CreateAsync(createInfo, CancellationToken.None));
     }
 
     [Test]
@@ -89,7 +89,7 @@ public sealed class PasteTests
 
         _userContext.LoginUser(new User { Id = "1" }, _defaultScopes);
 
-        var paste = await _pasteService.CreateAsync(createInfo);
+        var paste = await _pasteService.CreateAsync(createInfo, CancellationToken.None);
 
         Assert.That(paste.Pinned, Is.True);
         
@@ -114,7 +114,7 @@ public sealed class PasteTests
 
         _userContext.LoginUser(new User { Id = "1" }, _defaultScopes);
 
-        Assert.ThrowsAsync<HttpException>(async () => await _pasteService.CreateAsync(createInfo));
+        Assert.ThrowsAsync<HttpException>(async () => await _pasteService.CreateAsync(createInfo, CancellationToken.None));
 
         _userContext.LogoutUser();
     }
@@ -137,7 +137,7 @@ public sealed class PasteTests
 
         _userContext.LoginUser(new User { Id = "1" }, _defaultScopes);
 
-        Assert.ThrowsAsync<HttpException>(async () => await _pasteService.CreateAsync(createInfo));
+        Assert.ThrowsAsync<HttpException>(async () => await _pasteService.CreateAsync(createInfo, CancellationToken.None));
 
         _userContext.LogoutUser();
     }
@@ -157,7 +157,7 @@ public sealed class PasteTests
             ],
         };
 
-        Assert.ThrowsAsync<HttpException>(async () => await _pasteService.CreateAsync(createInfo));
+        Assert.ThrowsAsync<HttpException>(async () => await _pasteService.CreateAsync(createInfo, CancellationToken.None));
     }
 
     [Test]
@@ -178,7 +178,7 @@ public sealed class PasteTests
 
         _userContext.LoginUser(new User { Id = "1" }, _defaultScopes);
 
-        Assert.ThrowsAsync<HttpException>(async () => await _pasteService.CreateAsync(createInfo));
+        Assert.ThrowsAsync<HttpException>(async () => await _pasteService.CreateAsync(createInfo, CancellationToken.None));
 
         _userContext.LogoutUser();
     }
@@ -198,7 +198,7 @@ public sealed class PasteTests
             ],
         };
 
-        Assert.ThrowsAsync<HttpException>(async () => await _pasteService.CreateAsync(createInfo));
+        Assert.ThrowsAsync<HttpException>(async () => await _pasteService.CreateAsync(createInfo, CancellationToken.None));
     }
 
     [Test]
@@ -219,7 +219,7 @@ public sealed class PasteTests
 
         _userContext.LoginUser(new User { Id = "1" }, _defaultScopes);
 
-        Assert.ThrowsAsync<HttpException>(async () => await _pasteService.CreateAsync(createInfo));
+        Assert.ThrowsAsync<HttpException>(async () => await _pasteService.CreateAsync(createInfo, CancellationToken.None));
 
         _userContext.LogoutUser();
     }
@@ -241,7 +241,7 @@ public sealed class PasteTests
 
         _userContext.LoginUser(new User { Id = "1" }, _defaultScopes);
 
-        var paste = await _pasteService.CreateAsync(createInfo);
+        var paste = await _pasteService.CreateAsync(createInfo, CancellationToken.None);
 
         Assert.That(paste.OwnerId, Is.Null);
 
@@ -265,7 +265,7 @@ public sealed class PasteTests
 
         _userContext.LoginUser(new User { Id = "1" }, _defaultScopes);
 
-        var paste = await _pasteService.CreateAsync(createInfo);
+        var paste = await _pasteService.CreateAsync(createInfo, CancellationToken.None);
 
         Assert.That(paste.Private, Is.True);
 
@@ -287,7 +287,7 @@ public sealed class PasteTests
             ],
         };
 
-        var paste = await _pasteService.CreateAsync(createInfo);
+        var paste = await _pasteService.CreateAsync(createInfo, CancellationToken.None);
 
         Assert.That(paste.CreatedAt.AddHours(1).Ticks, Is.EqualTo(paste.DeletesAt!.Value.Ticks));
     }
@@ -306,7 +306,7 @@ public sealed class PasteTests
             ],
         };
 
-        var paste = await _pasteService.CreateAsync(createInfo);
+        var paste = await _pasteService.CreateAsync(createInfo, CancellationToken.None);
 
         Assert.That(paste, Is.Not.Null);
         Assert.That(paste.Pasties, Is.Not.Empty);
@@ -328,7 +328,7 @@ public sealed class PasteTests
             ],
         };
 
-        var paste = await _pasteService.CreateAsync(createInfo);
+        var paste = await _pasteService.CreateAsync(createInfo, CancellationToken.None);
 
         Assert.That(paste, Is.Not.Null);
         Assert.That(paste.Pasties, Is.Not.Empty);
@@ -351,7 +351,7 @@ public sealed class PasteTests
             Encrypted = true
         };
 
-        Assert.ThrowsAsync<HttpException>(async () => await _pasteService.CreateAsync(createInfo));
+        Assert.ThrowsAsync<HttpException>(async () => await _pasteService.CreateAsync(createInfo, CancellationToken.None));
     }
 
     [Test]
@@ -372,7 +372,7 @@ public sealed class PasteTests
 
         _encryptionContext.EncryptionKey = "epikepik";
 
-        var paste = await _pasteService.CreateAsync(createInfo);
+        var paste = await _pasteService.CreateAsync(createInfo, CancellationToken.None);
 
         Assert.That(paste, Is.Not.Null);
         Assert.That(paste.Pasties, Is.Not.Empty);
@@ -402,7 +402,7 @@ public sealed class PasteTests
             ],
         };
 
-        var paste = await _pasteService.CreateAsync(createInfo);
+        var paste = await _pasteService.CreateAsync(createInfo, CancellationToken.None);
 
         Assert.That(await _pasteService.ExistsByIdAsync(paste.Id), Is.True);
 
@@ -431,7 +431,7 @@ public sealed class PasteTests
 
         _userContext.LoginUser(new User { Id = "1" }, _defaultScopes);
 
-        var paste = await _pasteService.CreateAsync(createInfo);
+        var paste = await _pasteService.CreateAsync(createInfo, CancellationToken.None);
 
         _userContext.LogoutUser();
 
@@ -455,7 +455,7 @@ public sealed class PasteTests
 
         _userContext.LoginUser(new User { Id = "1" }, _defaultScopes);
 
-        var paste = await _pasteService.CreateAsync(createInfo);
+        var paste = await _pasteService.CreateAsync(createInfo, CancellationToken.None);
 
         _userContext.LoginUser(new User { Id = "2" }, _defaultScopes);
 
@@ -481,7 +481,7 @@ public sealed class PasteTests
 
         _userContext.LoginUser(new User { Id = "1" }, _defaultScopes);
 
-        var paste = await _pasteService.CreateAsync(createInfo);
+        var paste = await _pasteService.CreateAsync(createInfo, CancellationToken.None);
 
         var fetchedPaste = await _pasteService.GetAsync(paste.Id);
 
@@ -511,7 +511,7 @@ public sealed class PasteTests
 
         _encryptionContext.EncryptionKey = "epikepik";
 
-        var paste = await _pasteService.CreateAsync(createInfo);
+        var paste = await _pasteService.CreateAsync(createInfo, CancellationToken.None);
 
         _encryptionContext.EncryptionKey = null;
 
@@ -535,7 +535,7 @@ public sealed class PasteTests
 
         _encryptionContext.EncryptionKey = "epikepik";
 
-        var paste = await _pasteService.CreateAsync(createInfo);
+        var paste = await _pasteService.CreateAsync(createInfo, CancellationToken.None);
 
         _encryptionContext.EncryptionKey = "epik";
 
@@ -561,7 +561,7 @@ public sealed class PasteTests
 
         _encryptionContext.EncryptionKey = "epikepik";
 
-        var paste = await _pasteService.CreateAsync(createInfo);
+        var paste = await _pasteService.CreateAsync(createInfo, CancellationToken.None);
 
         _encryptionContext.EncryptionKey = "epikepik";
 
@@ -586,7 +586,7 @@ public sealed class PasteTests
             ],
         };
 
-        var paste = await _pasteService.CreateAsync(createInfo);
+        var paste = await _pasteService.CreateAsync(createInfo, CancellationToken.None);
 
         Assert.ThrowsAsync<HttpException>(async () => await _pasteService.DeleteAsync(paste.Id));
     }
@@ -605,7 +605,7 @@ public sealed class PasteTests
             ],
         };
 
-        var paste = await _pasteService.CreateAsync(createInfo);
+        var paste = await _pasteService.CreateAsync(createInfo, CancellationToken.None);
 
         _userContext.LoginUser(new User { Id = "1" }, _defaultScopes);
 
@@ -630,7 +630,7 @@ public sealed class PasteTests
 
         _userContext.LoginUser(new User { Id = "1" }, _defaultScopes);
 
-        var paste = await _pasteService.CreateAsync(createInfo);
+        var paste = await _pasteService.CreateAsync(createInfo, CancellationToken.None);
 
         _userContext.LoginUser(new User { Id = "2" }, _defaultScopes);
 
@@ -656,7 +656,7 @@ public sealed class PasteTests
 
         _userContext.LoginUser(new User { Id = "1" }, _defaultScopes);
 
-        var paste = await _pasteService.CreateAsync(createInfo);
+        var paste = await _pasteService.CreateAsync(createInfo, CancellationToken.None);
 
         _userContext.LoginUser(new User { Id = "2" }, _defaultScopes);
 
@@ -683,7 +683,7 @@ public sealed class PasteTests
 
         _userContext.LoginUser(new User { Id = "1" }, _defaultScopes);
 
-        var paste = await _pasteService.CreateAsync(createInfo);
+        var paste = await _pasteService.CreateAsync(createInfo, CancellationToken.None);
 
         await _pasteService.DeleteAsync(paste.Id);
 
@@ -706,7 +706,7 @@ public sealed class PasteTests
             ],
         };
 
-        var paste = await _pasteService.CreateAsync(createInfo);
+        var paste = await _pasteService.CreateAsync(createInfo, CancellationToken.None);
 
         Assert.ThrowsAsync<HttpException>(async () => await _pasteService.ToggleStarAsync(paste.Id));
     }
@@ -728,7 +728,7 @@ public sealed class PasteTests
 
         _userContext.LoginUser(new User { Id = "1" }, _defaultScopes);
 
-        var paste = await _pasteService.CreateAsync(createInfo);
+        var paste = await _pasteService.CreateAsync(createInfo, CancellationToken.None);
 
         _userContext.LoginUser(new User { Id = "2" }, _defaultScopes);
 
@@ -751,7 +751,7 @@ public sealed class PasteTests
             ],
         };
 
-        var paste = await _pasteService.CreateAsync(createInfo);
+        var paste = await _pasteService.CreateAsync(createInfo, CancellationToken.None);
 
         _userContext.LoginUser(new User { Id = "1" }, _defaultScopes);
         await _pasteService.ToggleStarAsync(paste.Id);
@@ -777,7 +777,7 @@ public sealed class PasteTests
             ],
         };
 
-        var paste = await _pasteService.CreateAsync(createInfo);
+        var paste = await _pasteService.CreateAsync(createInfo, CancellationToken.None);
 
         _userContext.LoginUser(new User { Id = "1" }, _defaultScopes);
         await _pasteService.ToggleStarAsync(paste.Id);
@@ -804,7 +804,7 @@ public sealed class PasteTests
             ],
         };
 
-        var paste = await _pasteService.CreateAsync(createInfo);
+        var paste = await _pasteService.CreateAsync(createInfo, CancellationToken.None);
 
         Assert.ThrowsAsync<HttpException>(async () => await _pasteService.IsStarredAsync(paste.Id));
     }
@@ -826,7 +826,7 @@ public sealed class PasteTests
 
         _userContext.LoginUser(new User { Id = "1" }, _defaultScopes);
 
-        var paste = await _pasteService.CreateAsync(createInfo);
+        var paste = await _pasteService.CreateAsync(createInfo, CancellationToken.None);
 
         _userContext.LoginUser(new User { Id = "2" }, _defaultScopes);
 
@@ -849,7 +849,7 @@ public sealed class PasteTests
             ],
         };
 
-        var paste = await _pasteService.CreateAsync(createInfo);
+        var paste = await _pasteService.CreateAsync(createInfo, CancellationToken.None);
 
         _userContext.LoginUser(new User { Id = "1" }, _defaultScopes);
 
@@ -874,7 +874,7 @@ public sealed class PasteTests
             ],
         };
 
-        var paste = await _pasteService.CreateAsync(createInfo);
+        var paste = await _pasteService.CreateAsync(createInfo, CancellationToken.None);
 
         _userContext.LoginUser(new User { Id = "1" }, _defaultScopes);
         await _pasteService.ToggleStarAsync(paste.Id);
@@ -900,7 +900,7 @@ public sealed class PasteTests
             ],
         };
 
-        var paste = await _pasteService.CreateAsync(createInfo);
+        var paste = await _pasteService.CreateAsync(createInfo, CancellationToken.None);
 
         Assert.ThrowsAsync<HttpException>(async () => await _pasteService.TogglePinnedAsync(paste.Id));
     }
@@ -919,7 +919,7 @@ public sealed class PasteTests
             ],
         };
 
-        var paste = await _pasteService.CreateAsync(createInfo);
+        var paste = await _pasteService.CreateAsync(createInfo, CancellationToken.None);
 
         _userContext.LoginUser(new User { Id = "1" }, _defaultScopes);
 
@@ -944,7 +944,7 @@ public sealed class PasteTests
 
         _userContext.LoginUser(new User { Id = "1" }, _defaultScopes);
 
-        var paste = await _pasteService.CreateAsync(createInfo);
+        var paste = await _pasteService.CreateAsync(createInfo, CancellationToken.None);
 
         _userContext.LoginUser(new User { Id = "2" }, _defaultScopes);
 
@@ -970,7 +970,7 @@ public sealed class PasteTests
 
         _userContext.LoginUser(new User { Id = "1" }, _defaultScopes);
 
-        var paste = await _pasteService.CreateAsync(createInfo);
+        var paste = await _pasteService.CreateAsync(createInfo, CancellationToken.None);
 
         Assert.ThrowsAsync<HttpException>(async () => await _pasteService.TogglePinnedAsync(paste.Id));
 
@@ -993,7 +993,7 @@ public sealed class PasteTests
 
         _userContext.LoginUser(new User { Id = "1" }, _defaultScopes);
 
-        var paste = await _pasteService.CreateAsync(createInfo);
+        var paste = await _pasteService.CreateAsync(createInfo, CancellationToken.None);
 
         await _pasteService.TogglePinnedAsync(paste.Id);
 
@@ -1021,7 +1021,7 @@ public sealed class PasteTests
 
         _userContext.LoginUser(new User { Id = "1" }, _defaultScopes);
 
-        var paste = await _pasteService.CreateAsync(createInfo);
+        var paste = await _pasteService.CreateAsync(createInfo, CancellationToken.None);
 
         await _pasteService.TogglePinnedAsync(paste.Id);
 
@@ -1046,7 +1046,7 @@ public sealed class PasteTests
             ],
         };
 
-        var paste = await _pasteService.CreateAsync(createInfo);
+        var paste = await _pasteService.CreateAsync(createInfo, CancellationToken.None);
 
         Assert.ThrowsAsync<HttpException>(async () => await _pasteService.TogglePrivateAsync(paste.Id));
     }
@@ -1065,7 +1065,7 @@ public sealed class PasteTests
             ],
         };
 
-        var paste = await _pasteService.CreateAsync(createInfo);
+        var paste = await _pasteService.CreateAsync(createInfo, CancellationToken.None);
 
         _userContext.LoginUser(new User { Id = "1" }, _defaultScopes);
 
@@ -1090,7 +1090,7 @@ public sealed class PasteTests
 
         _userContext.LoginUser(new User { Id = "1" }, _defaultScopes);
 
-        var paste = await _pasteService.CreateAsync(createInfo);
+        var paste = await _pasteService.CreateAsync(createInfo, CancellationToken.None);
 
         _userContext.LoginUser(new User { Id = "2" }, _defaultScopes);
 
@@ -1116,7 +1116,7 @@ public sealed class PasteTests
 
         _userContext.LoginUser(new User { Id = "1" }, _defaultScopes);
 
-        var paste = await _pasteService.CreateAsync(createInfo);
+        var paste = await _pasteService.CreateAsync(createInfo, CancellationToken.None);
 
         Assert.ThrowsAsync<HttpException>(async () => await _pasteService.TogglePrivateAsync(paste.Id));
 
@@ -1139,7 +1139,7 @@ public sealed class PasteTests
 
         _userContext.LoginUser(new User { Id = "1" }, _defaultScopes);
 
-        var paste = await _pasteService.CreateAsync(createInfo);
+        var paste = await _pasteService.CreateAsync(createInfo, CancellationToken.None);
 
         await _pasteService.TogglePrivateAsync(paste.Id);
 
@@ -1167,7 +1167,7 @@ public sealed class PasteTests
 
         _userContext.LoginUser(new User { Id = "1" }, _defaultScopes);
 
-        var paste = await _pasteService.CreateAsync(createInfo);
+        var paste = await _pasteService.CreateAsync(createInfo, CancellationToken.None);
 
         await _pasteService.TogglePrivateAsync(paste.Id);
 
@@ -1192,7 +1192,7 @@ public sealed class PasteTests
             ],
         };
 
-        var paste = await _pasteService.CreateAsync(createInfo);
+        var paste = await _pasteService.CreateAsync(createInfo, CancellationToken.None);
 
         var editInfo = new PasteEditInfo
         {
@@ -1207,7 +1207,7 @@ public sealed class PasteTests
             ]
         };
 
-        Assert.ThrowsAsync<HttpException>(async () => await _pasteService.EditAsync(paste.Id, editInfo));
+        Assert.ThrowsAsync<HttpException>(async () => await _pasteService.EditAsync(paste.Id, editInfo, CancellationToken.None));
     }
 
     [Test]
@@ -1224,7 +1224,7 @@ public sealed class PasteTests
             ],
         };
 
-        var paste = await _pasteService.CreateAsync(createInfo);
+        var paste = await _pasteService.CreateAsync(createInfo, CancellationToken.None);
 
         var editInfo = new PasteEditInfo
         {
@@ -1241,7 +1241,7 @@ public sealed class PasteTests
 
         _userContext.LoginUser(new User { Id = "1" }, _defaultScopes);
 
-        Assert.ThrowsAsync<HttpException>(async () => await _pasteService.EditAsync(paste.Id, editInfo));
+        Assert.ThrowsAsync<HttpException>(async () => await _pasteService.EditAsync(paste.Id, editInfo, CancellationToken.None));
 
         _userContext.LogoutUser();
     }
@@ -1262,7 +1262,7 @@ public sealed class PasteTests
 
         _userContext.LoginUser(new User { Id = "1" }, _defaultScopes);
 
-        var paste = await _pasteService.CreateAsync(createInfo);
+        var paste = await _pasteService.CreateAsync(createInfo, CancellationToken.None);
 
         var editInfo = new PasteEditInfo
         {
@@ -1279,7 +1279,7 @@ public sealed class PasteTests
 
         _userContext.LoginUser(new User { Id = "2" }, _defaultScopes);
 
-        Assert.ThrowsAsync<HttpException>(async () => await _pasteService.EditAsync(paste.Id, editInfo));
+        Assert.ThrowsAsync<HttpException>(async () => await _pasteService.EditAsync(paste.Id, editInfo, CancellationToken.None));
 
         _userContext.LogoutUser();
     }
@@ -1300,7 +1300,7 @@ public sealed class PasteTests
 
         _userContext.LoginUser(new User { Id = "1" }, _defaultScopes);
 
-        var paste = await _pasteService.CreateAsync(createInfo);
+        var paste = await _pasteService.CreateAsync(createInfo, CancellationToken.None);
 
         var editInfo = new PasteEditInfo
         {
@@ -1315,7 +1315,7 @@ public sealed class PasteTests
             ]
         };
 
-        await _pasteService.EditAsync(paste.Id, editInfo);
+        await _pasteService.EditAsync(paste.Id, editInfo, CancellationToken.None);
 
         var fetchedPaste = await _pasteService.GetAsync(paste.Id);
 
@@ -1348,7 +1348,7 @@ public sealed class PasteTests
         _userContext.LoginUser(new User { Id = "1" }, _defaultScopes);
         _encryptionContext.EncryptionKey = "epikepik";
 
-        var paste = await _pasteService.CreateAsync(createInfo);
+        var paste = await _pasteService.CreateAsync(createInfo, CancellationToken.None);
 
         var editInfo = new PasteEditInfo
         {
@@ -1363,7 +1363,7 @@ public sealed class PasteTests
             ]
         };
 
-        await _pasteService.EditAsync(paste.Id, editInfo);
+        await _pasteService.EditAsync(paste.Id, editInfo, CancellationToken.None);
 
         var fetchedPaste = await _pasteService.GetAsync(paste.Id);
 
@@ -1396,7 +1396,7 @@ public sealed class PasteTests
 
         _userContext.LoginUser(new User { Id = "1" }, _defaultScopes);
 
-        var paste = await _pasteService.CreateAsync(createInfo);
+        var paste = await _pasteService.CreateAsync(createInfo, CancellationToken.None);
 
         await _pasteService.EditTagsAsync(paste.Id, ["tag2", "tag3"]);
 
@@ -1423,7 +1423,7 @@ public sealed class PasteTests
 
         _userContext.LoginUser(new User { Id = "1" }, _defaultScopes);
 
-        var paste = await _pasteService.CreateAsync(createInfo);
+        var paste = await _pasteService.CreateAsync(createInfo, CancellationToken.None);
 
         Assert.ThrowsAsync<HttpException>(async () => await _pasteService.GetAtEditAsync(paste.Id, "1"));
 
@@ -1446,7 +1446,7 @@ public sealed class PasteTests
 
         _userContext.LoginUser(new User { Id = "1" }, _defaultScopes);
 
-        var paste = await _pasteService.CreateAsync(createInfo);
+        var paste = await _pasteService.CreateAsync(createInfo, CancellationToken.None);
 
         var editInfo = new PasteEditInfo
         {
@@ -1461,7 +1461,7 @@ public sealed class PasteTests
             ]
         };
 
-        await _pasteService.EditAsync(paste.Id, editInfo);
+        await _pasteService.EditAsync(paste.Id, editInfo, CancellationToken.None);
 
         var history = await _pasteService.GetHistoryCompactAsync(paste.Id);
 
@@ -1491,7 +1491,7 @@ public sealed class PasteTests
         _userContext.LoginUser(new User { Id = "1" }, _defaultScopes);
         _encryptionContext.EncryptionKey = "epikepik";
 
-        var paste = await _pasteService.CreateAsync(createInfo);
+        var paste = await _pasteService.CreateAsync(createInfo, CancellationToken.None);
 
         var editInfo = new PasteEditInfo
         {
@@ -1506,7 +1506,7 @@ public sealed class PasteTests
             ]
         };
 
-        await _pasteService.EditAsync(paste.Id, editInfo);
+        await _pasteService.EditAsync(paste.Id, editInfo, CancellationToken.None);
 
         var history = await _pasteService.GetHistoryCompactAsync(paste.Id);
 
@@ -1535,7 +1535,7 @@ public sealed class PasteTests
 
         _userContext.LoginUser(new User { Id = "1" }, _defaultScopes);
 
-        var paste = await _pasteService.CreateAsync(createInfo);
+        var paste = await _pasteService.CreateAsync(createInfo, CancellationToken.None);
 
         var editInfo = new PasteEditInfo
         {
@@ -1550,7 +1550,7 @@ public sealed class PasteTests
             ]
         };
 
-        await _pasteService.EditAsync(paste.Id, editInfo);
+        await _pasteService.EditAsync(paste.Id, editInfo, CancellationToken.None);
 
         var history = await _pasteService.GetHistoryCompactAsync(paste.Id);
 
@@ -1582,7 +1582,7 @@ public sealed class PasteTests
 
         _userContext.LoginUser(new User { Id = "1" }, _defaultScopes);
 
-        var paste = await _pasteService.CreateAsync(createInfo);
+        var paste = await _pasteService.CreateAsync(createInfo, CancellationToken.None);
 
         var editInfo = new PasteEditInfo
         {
@@ -1597,7 +1597,7 @@ public sealed class PasteTests
             ]
         };
 
-        await _pasteService.EditAsync(paste.Id, editInfo);
+        await _pasteService.EditAsync(paste.Id, editInfo, CancellationToken.None);
 
         editInfo = new PasteEditInfo
         {
@@ -1612,7 +1612,7 @@ public sealed class PasteTests
             ]
         };
 
-        await _pasteService.EditAsync(paste.Id, editInfo);
+        await _pasteService.EditAsync(paste.Id, editInfo, CancellationToken.None);
 
         var history = await _pasteService.GetHistoryCompactAsync(paste.Id);
 

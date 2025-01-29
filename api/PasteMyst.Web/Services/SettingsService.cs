@@ -16,7 +16,7 @@ public class SettingsService(
     IdProvider idProvider,
     MongoService mongo)
 {
-    public async Task SetUsernameAsync(string username)
+    public async Task SetUsernameAsync(string username, CancellationToken cancellationToken)
     {
         if (!userContext.IsLoggedIn())
         {
@@ -33,16 +33,16 @@ public class SettingsService(
             throw new HttpException(HttpStatusCode.BadRequest, "Same username.");
         }
 
-        if (await userProvider.ExistsByUsernameAsync(username))
+        if (await userProvider.ExistsByUsernameAsync(username, cancellationToken))
         {
             throw new HttpException(HttpStatusCode.BadRequest, "Username already taken.");
         }
 
         var update = Builders<User>.Update.Set(u => u.Username, username);
-        await mongo.Users.UpdateOneAsync(u => u.Id == userContext.Self.Id, update);
+        await mongo.Users.UpdateOneAsync(u => u.Id == userContext.Self.Id, update, cancellationToken: cancellationToken);
     }
 
-    public async Task SetAvatarAsync(byte[] bytes, string contentType)
+    public async Task SetAvatarAsync(byte[] bytes, string contentType, CancellationToken cancellationToken)
     {
         if (!userContext.IsLoggedIn())
         {
@@ -54,12 +54,12 @@ public class SettingsService(
             throw new HttpException(HttpStatusCode.Forbidden, $"Missing required scope: {Scope.User.ToEnumString()}.");
         }
 
-        await mongo.Images.DeleteAsync(ObjectId.Parse(userContext.Self.AvatarId));
+        await mongo.Images.DeleteAsync(ObjectId.Parse(userContext.Self.AvatarId), cancellationToken);
 
         var newAvatar = await imageService.UploadImageAsync(bytes, contentType);
 
         var update = Builders<User>.Update.Set(u => u.AvatarId, newAvatar);
-        await mongo.Users.UpdateOneAsync(u => u.Id == userContext.Self.Id, update);
+        await mongo.Users.UpdateOneAsync(u => u.Id == userContext.Self.Id, update, cancellationToken: cancellationToken);
     }
 
     public UserSettings GetUserSettings()
@@ -73,7 +73,7 @@ public class SettingsService(
         return userContext.Self.UserSettings;
     }
 
-    public async Task UpdateUserSettingsAsync(UserSettings settings)
+    public async Task UpdateUserSettingsAsync(UserSettings settings, CancellationToken cancellationToken)
     {
         if (!userContext.IsLoggedIn())
             throw new HttpException(HttpStatusCode.Unauthorized, "You must be authorized to update user settings.");
@@ -82,7 +82,7 @@ public class SettingsService(
             throw new HttpException(HttpStatusCode.Forbidden, $"Missing required scope: {Scope.User.ToEnumString()}.");
 
         var update = Builders<User>.Update.Set(u => u.UserSettings, settings);
-        await mongo.Users.UpdateOneAsync(u => u.Id == userContext.Self.Id, update);
+        await mongo.Users.UpdateOneAsync(u => u.Id == userContext.Self.Id, update, cancellationToken: cancellationToken);
     }
 
     public async Task<Settings> GetSettingsAsync(HttpContext httpContext)
@@ -137,7 +137,7 @@ public class SettingsService(
         return newSessionSettings.Settings;
     }
 
-    public async Task UpdateSettingsAsync(HttpContext httpContext, Settings settings)
+    public async Task UpdateSettingsAsync(HttpContext httpContext, Settings settings, CancellationToken cancellationToken)
     {
         if (userContext.IsLoggedIn())
         {
@@ -147,7 +147,7 @@ public class SettingsService(
             }
 
             var update = Builders<User>.Update.Set(u => u.Settings, settings);
-            await mongo.Users.UpdateOneAsync(u => u.Id == userContext.Self.Id, update);
+            await mongo.Users.UpdateOneAsync(u => u.Id == userContext.Self.Id, update, cancellationToken: cancellationToken);
         }
         else
         {
@@ -158,7 +158,7 @@ public class SettingsService(
                 throw new HttpException(HttpStatusCode.BadRequest, "Can't update the settings since the user is not logged in and the session settings cookie is missing.");
             }
 
-            var sessionSettings = await mongo.SessionSettings.Find(s => s.Id == sessionSettingsCookie).FirstOrDefaultAsync();
+            var sessionSettings = await mongo.SessionSettings.Find(s => s.Id == sessionSettingsCookie).FirstOrDefaultAsync(cancellationToken: cancellationToken);
 
             if (sessionSettings is null)
             {
@@ -166,7 +166,7 @@ public class SettingsService(
             }
 
             var update = Builders<SessionSettings>.Update.Set(s => s.Settings, settings).Set(s => s.LastAccessed, DateTime.UtcNow);
-            await mongo.SessionSettings.UpdateOneAsync(s => s.Id == sessionSettings.Id, update);
+            await mongo.SessionSettings.UpdateOneAsync(s => s.Id == sessionSettings.Id, update, cancellationToken: cancellationToken);
         }
     }
 

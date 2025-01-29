@@ -59,7 +59,8 @@ public class OAuthService
         };
     }
 
-    public async Task<OAuthProviderUser> GetProviderUserAsync(OAuthProviderConfig provider, string token)
+    public async Task<OAuthProviderUser> GetProviderUserAsync(OAuthProviderConfig provider, string token,
+        CancellationToken cancellationToken)
     {
         var httpClient = _httpClientFactory.CreateClient();
 
@@ -78,19 +79,19 @@ public class OAuthService
             requestMessage.Headers.Add("Authorization", "Bearer " + token);
         }
 
-        var response = await httpClient.SendAsync(requestMessage);
+        var response = await httpClient.SendAsync(requestMessage, cancellationToken);
 
         if (!response.IsSuccessStatusCode)
         {
             _logger.LogError($"Failed getting OAuth user, " +
                              $"status {response.StatusCode}, " +
-                             $"message: {await response.Content.ReadAsStringAsync()}");
+                             $"message: {await response.Content.ReadAsStringAsync(cancellationToken)}");
             throw new HttpException(HttpStatusCode.InternalServerError, "Failed getting OAuth user.");
         }
 
-        await using var contentStream = await response.Content.ReadAsStreamAsync();
+        await using var contentStream = await response.Content.ReadAsStreamAsync(cancellationToken);
 
-        var responseObject = await JsonSerializer.DeserializeAsync<Dictionary<string, JsonElement>>(contentStream);
+        var responseObject = await JsonSerializer.DeserializeAsync<Dictionary<string, JsonElement>>(contentStream, cancellationToken: cancellationToken);
 
         return new OAuthProviderUser
         {
@@ -100,23 +101,23 @@ public class OAuthService
         };
     }
 
-    public async Task<string> ExchangeTokenAsync(OAuthProviderConfig provider, string code)
+    public async Task<string> ExchangeTokenAsync(OAuthProviderConfig provider, string code, CancellationToken cancellationToken)
     {
         var httpClient = _httpClientFactory.CreateClient();
         var requestMessage = new HttpRequestMessage(HttpMethod.Post, GetProviderTokenUrl(provider, code));
 
         requestMessage.Headers.Add("Accept", "application/json");
 
-        var response = await httpClient.SendAsync(requestMessage);
+        var response = await httpClient.SendAsync(requestMessage, cancellationToken);
 
         if (!response.IsSuccessStatusCode)
         {
             throw new HttpException(HttpStatusCode.InternalServerError, "Failed getting the access token.");
         }
 
-        await using var contentStream = await response.Content.ReadAsStreamAsync();
+        await using var contentStream = await response.Content.ReadAsStreamAsync(cancellationToken);
 
-        var responseObject = await JsonSerializer.DeserializeAsync<Dictionary<string, JsonElement>>(contentStream);
+        var responseObject = await JsonSerializer.DeserializeAsync<Dictionary<string, JsonElement>>(contentStream, cancellationToken: cancellationToken);
 
         var accessToken = responseObject?["access_token"].GetString();
 
@@ -128,7 +129,7 @@ public class OAuthService
         return accessToken;
     }
 
-    private string GetProviderTokenUrl(OAuthProviderConfig provider, string code)
+    private static string GetProviderTokenUrl(OAuthProviderConfig provider, string code)
     {
         return provider.TokenUrl +
                "?client_id=" + provider.ClientId +

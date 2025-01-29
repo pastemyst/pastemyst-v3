@@ -21,15 +21,15 @@ public sealed class MetaController(
     }
 
     [HttpGet("releases")]
-    public async Task<List<Release>> GetReleasesAsync()
+    public async Task<List<Release>> GetReleases(CancellationToken cancellationToken)
     {
-        return (await changelogProvider.GenerateChangelogAsync()).ToList();
+        return (await changelogProvider.GenerateChangelogAsync(cancellationToken)).ToList();
     }
 
     [HttpGet("active_pastes")]
-    public async Task<ActivePastesResponse> GetActivePastesCount()
+    public async Task<ActivePastesResponse> GetActivePastesCount(CancellationToken cancellationToken)
     {
-        var count = await pasteService.GetActiveCountAsync();
+        var count = await pasteService.GetActiveCountAsync(cancellationToken);
 
         return new ActivePastesResponse
         {
@@ -38,8 +38,8 @@ public sealed class MetaController(
     }
 
     [HttpGet("stats")]
-    public async Task<AppStats> GetStats()
+    public async Task<AppStats> GetStats(CancellationToken cancellationToken)
     {
-        return await statsService.GetAppStatsAsync();
+        return await statsService.GetAppStatsAsync(cancellationToken);
     }
 }

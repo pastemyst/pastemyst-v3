@@ -6,7 +6,7 @@ namespace PasteMyst.Web.Controllers;
 
 [ApiController]
 [Route("/api/v3/langs")]
-public class LanguagesController(LanguageProvider languageProvider) : ControllerBase
+public sealed class LanguagesController(LanguageProvider languageProvider) : ControllerBase
 {
     [HttpGet]
     public List<Language> All()
@@ -27,8 +27,8 @@ public class LanguagesController(LanguageProvider languageProvider) : Controller
     }
 
     [HttpPost("autodetect")]
-    public Task<Language> AutodetectLanguage([FromBody] string content)
+    public Task<Language> AutodetectLanguage([FromBody] string content, CancellationToken cancellationToken)
     {
-        return languageProvider.AutodetectLanguageAsync(content);
+        return languageProvider.AutodetectLanguageAsync(content, cancellationToken);
     }
 }
