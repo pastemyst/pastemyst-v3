@@ -1,8 +1,8 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PasteMyst.Web", "src\PasteMyst.Web\PasteMyst.Web.csproj", "{213FA8A8-BB41-4E6C-94BD-31EE4EC37366}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PasteMyst.Web", "PasteMyst.Web\PasteMyst.Web.csproj", "{213FA8A8-BB41-4E6C-94BD-31EE4EC37366}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PasteMyst.Web.Test.Unit", "test\PasteMyst.Web.Test.Unit\PasteMyst.Web.Test.Unit.csproj", "{933519F1-CADA-48CD-8CD4-744B81D50551}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PasteMyst.Web.Test.Unit", "PasteMyst.Web.Test.Unit\PasteMyst.Web.Test.Unit.csproj", "{933519F1-CADA-48CD-8CD4-744B81D50551}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Source", "Source", "{B97C05A0-0F16-4EE4-B3D1-5329BFDF5592}"
 EndProject

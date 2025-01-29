@@ -21,7 +21,7 @@
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\..\src\PasteMyst.Web\PasteMyst.Web.csproj" />
+      <ProjectReference Include="..\PasteMyst.Web\PasteMyst.Web.csproj" />
     </ItemGroup>
 
 </Project>
