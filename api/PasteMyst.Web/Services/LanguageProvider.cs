@@ -60,10 +60,10 @@ public class LanguageProvider : IHostedService
         return foundLang;
     }
 
-    public async Task<Language> AutodetectLanguageAsync(string content, CancellationToken token)
+    public async Task<Language> AutodetectLanguageAsync(string content, CancellationToken cancellationToken)
     {
         var tempFile = Path.GetTempFileName();
-        await File.WriteAllTextAsync(tempFile, content, token);
+        await File.WriteAllTextAsync(tempFile, content, cancellationToken);
 
         var process = new Process
         {
@@ -79,7 +79,7 @@ public class LanguageProvider : IHostedService
 
         process.Start();
 
-        var languageName = (await process.StandardOutput.ReadToEndAsync(token)).Trim();
+        var languageName = (await process.StandardOutput.ReadToEndAsync(cancellationToken)).Trim();
 
         return FindByName(languageName);
     }

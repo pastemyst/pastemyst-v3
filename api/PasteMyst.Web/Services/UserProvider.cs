@@ -9,35 +9,35 @@ namespace PasteMyst.Web.Services;
 
 public class UserProvider(UserContext userContext, PasteService pasteService, MongoService mongo, ActionLogger actionLogger, ImageService imageService)
 {
-    public async Task<User> GetByUsernameOrIdAsync(string username, string id, CancellationToken token)
+    public async Task<User> GetByUsernameOrIdAsync(string username, string id, CancellationToken cancellationToken)
     {
         if (username is not null)
         {
-            return await GetByUsernameAsync(username, token);
+            return await GetByUsernameAsync(username, cancellationToken);
         }
 
         if (id is not null)
         {
-            return await mongo.Users.Find(u => u.Id == id).FirstOrDefaultAsync(cancellationToken: token);
+            return await mongo.Users.Find(u => u.Id == id).FirstOrDefaultAsync(cancellationToken: cancellationToken);
         }
 
         return null;
     }
 
-    public async Task<User> GetByUsernameAsync(string username, CancellationToken token)
+    public async Task<User> GetByUsernameAsync(string username, CancellationToken cancellationToken)
     {
         var filter = Builders<User>.Filter.Eq(u => u.Username, username);
-        return await mongo.Users.Find(filter).FirstOrDefaultAsync(cancellationToken: token);
+        return await mongo.Users.Find(filter).FirstOrDefaultAsync(cancellationToken: cancellationToken);
     }
 
-    public async Task<bool> ExistsByUsernameAsync(string username, CancellationToken token)
+    public async Task<bool> ExistsByUsernameAsync(string username, CancellationToken cancellationToken)
     {
-        return await GetByUsernameAsync(username, token) is not null;
+        return await GetByUsernameAsync(username, cancellationToken) is not null;
     }
 
-    public async Task<Page<PasteWithLangStats>> GetOwnedPastesAsync(string username, string tag, bool pinnedOnly, PageRequest pageRequest, CancellationToken token)
+    public async Task<Page<PasteWithLangStats>> GetOwnedPastesAsync(string username, string tag, bool pinnedOnly, PageRequest pageRequest, CancellationToken cancellationToken)
     {
-        var user = await GetByUsernameAsync(username, token) ?? throw new HttpException(HttpStatusCode.NotFound, "User not found.");
+        var user = await GetByUsernameAsync(username, cancellationToken) ?? throw new HttpException(HttpStatusCode.NotFound, "User not found.");
 
         // If not showing only pinned pastes, and show all pastes is disabled, return an empty list.
         if (!pinnedOnly && !userContext.UserIsSelf(user) && !user.UserSettings.ShowAllPastesOnProfile)
@@ -73,9 +73,9 @@ public class UserProvider(UserContext userContext, PasteService pasteService, Mo
             .SortByDescending(p => p.CreatedAt)
             .Skip(pageRequest.Page * pageRequest.PageSize)
             .Limit(pageRequest.PageSize)
-            .ToListAsync(cancellationToken: token);
+            .ToListAsync(cancellationToken: cancellationToken);
 
-        var totalItems = await mongo.BasePastes.CountDocumentsAsync(filter, cancellationToken: token);
+        var totalItems = await mongo.BasePastes.CountDocumentsAsync(filter, cancellationToken: cancellationToken);
         var totalPages = (int)Math.Ceiling((float)totalItems / pageRequest.PageSize);
 
         // hide all tags for everyone except the owner
@@ -108,12 +108,12 @@ public class UserProvider(UserContext userContext, PasteService pasteService, Mo
         };
     }
 
-    public async Task<List<string>> GetTagsAsync(string username, CancellationToken token)
+    public async Task<List<string>> GetTagsAsync(string username, CancellationToken cancellationToken)
     {
         if (!userContext.IsLoggedIn())
             throw new HttpException(HttpStatusCode.Unauthorized, "You must be authorized to get your own tags.");
 
-        var user = await GetByUsernameAsync(username, token);
+        var user = await GetByUsernameAsync(username, cancellationToken);
 
         if (!userContext.UserIsSelf(user))
             throw new HttpException(HttpStatusCode.Unauthorized, "You can only fetch your own tags.");
@@ -123,13 +123,13 @@ public class UserProvider(UserContext userContext, PasteService pasteService, Mo
 
         var filter = Builders<Paste>.Filter.Eq(p => p.OwnerId, user.Id);
 
-        return (await mongo.Pastes.Find(filter).Project(p => p.Tags).ToListAsync(cancellationToken: token))
+        return (await mongo.Pastes.Find(filter).Project(p => p.Tags).ToListAsync(cancellationToken: cancellationToken))
             .SelectMany(t => t)
             .Distinct()
             .ToList();
     }
 
-    public async Task DeleteUserAsync(string username, CancellationToken token)
+    public async Task DeleteUserAsync(string username, CancellationToken cancellationToken)
     {
         if (!userContext.IsLoggedIn())
             throw new HttpException(HttpStatusCode.Unauthorized, "You must be authorized to delete your account.");
@@ -137,20 +137,20 @@ public class UserProvider(UserContext userContext, PasteService pasteService, Mo
         if (!userContext.HasScope(Scope.User))
             throw new HttpException(HttpStatusCode.Forbidden, $"Missing required scope {Scope.User.ToEnumString()}.");
 
-        var user = await GetByUsernameAsync(username, token);
+        var user = await GetByUsernameAsync(username, cancellationToken);
 
         if (userContext.UserIsSelf(user))
             throw new HttpException(HttpStatusCode.Unauthorized, "You can delete only your account.");
 
         await imageService.DeleteAsync(user.AvatarId);
 
-        await mongo.Pastes.DeleteManyAsync(p => p.OwnerId == user.Id, cancellationToken: token);
-        await mongo.Users.DeleteOneAsync(u => u.Id == user.Id, cancellationToken: token);
+        await mongo.Pastes.DeleteManyAsync(p => p.OwnerId == user.Id, cancellationToken: cancellationToken);
+        await mongo.Users.DeleteOneAsync(u => u.Id == user.Id, cancellationToken: cancellationToken);
 
         // Delete all stars of this user
         var starsFilter = Builders<Paste>.Filter.AnyEq(p => p.Stars, user.Id);
         var starsUpdate = Builders<Paste>.Update.Pull(p => p.Stars, user.Id);
-        await mongo.Pastes.UpdateManyAsync(starsFilter, starsUpdate, cancellationToken: token);
+        await mongo.Pastes.UpdateManyAsync(starsFilter, starsUpdate, cancellationToken: cancellationToken);
 
         await actionLogger.LogActionAsync(ActionLogType.UserDeleted, user.Id);
     }

@@ -19,15 +19,15 @@ public class ImageService(MongoService mongo)
         return image.ToString();
     }
 
-    public async Task<GridFSFileInfo<ObjectId>> FindByIdAsync(string id, CancellationToken token)
+    public async Task<GridFSFileInfo<ObjectId>> FindByIdAsync(string id, CancellationToken cancellationToken)
     {
         var filter = Builders<GridFSFileInfo<ObjectId>>.Filter.Eq(fs => fs.Id, ObjectId.Parse(id));
-        return await (await mongo.Images.FindAsync(filter, cancellationToken: token)).FirstOrDefaultAsync(cancellationToken: token);
+        return await (await mongo.Images.FindAsync(filter, cancellationToken: cancellationToken)).FirstOrDefaultAsync(cancellationToken: cancellationToken);
     }
 
-    public async Task<byte[]> DownloadByIdAsync(string id, CancellationToken token)
+    public async Task<byte[]> DownloadByIdAsync(string id, CancellationToken cancellationToken)
     {
-        return await mongo.Images.DownloadAsBytesAsync(new ObjectId(id), cancellationToken: token);
+        return await mongo.Images.DownloadAsBytesAsync(new ObjectId(id), cancellationToken: cancellationToken);
     }
 
     public async Task DeleteAsync(string id)
@@ -35,5 +35,5 @@ public class ImageService(MongoService mongo)
         await mongo.Images.DeleteAsync(new ObjectId(id));
     }
 
-    public async Task<bool> ExistsByIdAsync(string id, CancellationToken token) => await FindByIdAsync(id, token) is not null;
+    public async Task<bool> ExistsByIdAsync(string id, CancellationToken cancellationToken) => await FindByIdAsync(id, cancellationToken) is not null;
 }

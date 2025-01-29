@@ -13,21 +13,21 @@ namespace PasteMyst.Web.Controllers;
 public sealed class AuthController(AuthService authService, UserContext userContext) : ControllerBase
 {
     [HttpGet("login/{provider}")]
-    public async Task<IActionResult> Login(string provider, CancellationToken token)
+    public async Task<IActionResult> Login(string provider, CancellationToken cancellationToken)
     {
-        return Redirect(await authService.InitiateLoginFlowAsync(provider, HttpContext, token));
+        return Redirect(await authService.InitiateLoginFlowAsync(provider, HttpContext, cancellationToken));
     }
 
     [HttpGet("login/{provider}/callback")]
-    public async Task<IActionResult> HandleCallback(string provider, [FromQuery] string state, [FromQuery] string code, CancellationToken token)
+    public async Task<IActionResult> HandleCallback(string provider, [FromQuery] string state, [FromQuery] string code, CancellationToken cancellationToken)
     {
-        return Redirect(await authService.HandleCallbackAsync(provider, state, code, HttpContext, token));
+        return Redirect(await authService.HandleCallbackAsync(provider, state, code, HttpContext, cancellationToken));
     }
 
     [HttpPost("auth/register")]
-    public async Task<IActionResult> Register([FromBody] RegisterRequest registerRequest, CancellationToken token)
+    public async Task<IActionResult> Register([FromBody] RegisterRequest registerRequest, CancellationToken cancellationToken)
     {
-        await authService.RegisterUserAsync(registerRequest.Username, HttpContext, token);
+        await authService.RegisterUserAsync(registerRequest.Username, HttpContext, cancellationToken);
         return Ok();
     }
 
@@ -48,26 +48,26 @@ public sealed class AuthController(AuthService authService, UserContext userCont
     }
 
     [HttpPost("auth/self/access_tokens")]
-    public async Task<GenerateAccessTokenResponse> GenerateAccessToken([FromBody] GenerateAccessTokenRequest accessTokenRequest, CancellationToken token)
+    public async Task<GenerateAccessTokenResponse> GenerateAccessToken([FromBody] GenerateAccessTokenRequest accessTokenRequest, CancellationToken cancellationToken)
     {
-        return await authService.GenerateAccessTokenForSelf(accessTokenRequest.Scopes, accessTokenRequest.ExpiresIn, accessTokenRequest.Description, token);
+        return await authService.GenerateAccessTokenForSelf(accessTokenRequest.Scopes, accessTokenRequest.ExpiresIn, accessTokenRequest.Description, cancellationToken);
     }
 
     [HttpGet("auth/self/access_tokens")]
-    public async Task<List<AccessTokenResponse>> GetAccessTokens(CancellationToken token)
+    public async Task<List<AccessTokenResponse>> GetAccessTokens(CancellationToken cancellationToken)
     {
-        return await authService.GetAccessTokensForSelf(token);
+        return await authService.GetAccessTokensForSelf(cancellationToken);
     }
 
     [HttpDelete("auth/self/access_tokens/{id}")]
-    public async Task DeleteAccessToken(string id, CancellationToken token)
+    public async Task DeleteAccessToken(string id, CancellationToken cancellationToken)
     {
-        await authService.DeleteAccessTokenForSelf(id, token);
+        await authService.DeleteAccessTokenForSelf(id, cancellationToken);
     }
 
     [HttpGet("auth/logout")]
-    public async Task<IActionResult> Logout(CancellationToken token)
+    public async Task<IActionResult> Logout(CancellationToken cancellationToken)
     {
-        return Redirect(await authService.Logout(HttpContext, token));
+        return Redirect(await authService.Logout(HttpContext, cancellationToken));
     }
 }

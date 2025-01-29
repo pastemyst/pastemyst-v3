@@ -6,17 +6,17 @@ namespace PasteMyst.Web.Services;
 
 public class StatsService(MongoService mongo)
 {
-    public async Task<AppStats> GetAppStatsAsync(CancellationToken token)
+    public async Task<AppStats> GetAppStatsAsync(CancellationToken cancellationToken)
     {
         var totalPastesFilter = Builders<ActionLog>.Filter.Eq(a => a.Type, ActionLogType.PasteCreated);
         var totalUsersFilter = Builders<ActionLog>.Filter.Eq(a => a.Type, ActionLogType.UserCreated);
 
         return new()
         {
-            ActivePastes = await mongo.Pastes.CountDocumentsAsync(new BsonDocument(), cancellationToken: token),
-            ActiveUsers = await mongo.Users.CountDocumentsAsync(new BsonDocument(), cancellationToken: token),
-            TotalPastes = await mongo.ActionLogs.CountDocumentsAsync(totalPastesFilter, cancellationToken: token),
-            TotalUsers = await mongo.ActionLogs.CountDocumentsAsync(totalUsersFilter, cancellationToken: token),
+            ActivePastes = await mongo.Pastes.CountDocumentsAsync(new BsonDocument(), cancellationToken: cancellationToken),
+            ActiveUsers = await mongo.Users.CountDocumentsAsync(new BsonDocument(), cancellationToken: cancellationToken),
+            TotalPastes = await mongo.ActionLogs.CountDocumentsAsync(totalPastesFilter, cancellationToken: cancellationToken),
+            TotalUsers = await mongo.ActionLogs.CountDocumentsAsync(totalUsersFilter, cancellationToken: cancellationToken),
             ActivePastesOverTime = await GetActivePasteStatsOverTime(),
             TotalPastesOverTime = await GetActionLogStatsOverTime(ActionLogType.PasteCreated),
         };
