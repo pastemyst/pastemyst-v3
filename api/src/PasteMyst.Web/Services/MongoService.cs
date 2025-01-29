@@ -56,7 +56,7 @@ public class MongoService
             ChunkSizeBytes = 1_000_000
         });
 
-        var usernameIndex = Builders<User>.IndexKeys.Text(u => u.Username);
+        var usernameIndex = Builders<User>.IndexKeys.Ascending(u => u.Username);
 
         Users.Indexes.CreateOne(new CreateIndexModel<User>(usernameIndex, new()
         {
