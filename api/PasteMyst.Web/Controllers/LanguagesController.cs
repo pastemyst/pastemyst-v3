@@ -27,8 +27,8 @@ public sealed class LanguagesController(LanguageProvider languageProvider) : Con
     }
 
     [HttpPost("autodetect")]
-    public Task<Language> AutodetectLanguage([FromBody] string content, CancellationToken token)
+    public Task<Language> AutodetectLanguage([FromBody] string content, CancellationToken cancellationToken)
     {
-        return languageProvider.AutodetectLanguageAsync(content, token);
+        return languageProvider.AutodetectLanguageAsync(content, cancellationToken);
     }
 }

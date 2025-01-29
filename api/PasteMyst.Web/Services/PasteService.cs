@@ -21,7 +21,7 @@ public class PasteService(
     ActionLogger actionLogger,
     MongoService mongo)
 {
-    public async Task<Paste> CreateAsync(PasteCreateInfo createInfo, CancellationToken token)
+    public async Task<Paste> CreateAsync(PasteCreateInfo createInfo, CancellationToken cancellationToken)
     {
         switch (createInfo.Pinned)
         {
@@ -65,7 +65,7 @@ public class PasteService(
 
             if (langName == "Autodetect")
             {
-                langName = (await languageProvider.AutodetectLanguageAsync(pasty.Content, token)).Name;
+                langName = (await languageProvider.AutodetectLanguageAsync(pasty.Content, cancellationToken)).Name;
             }
 
             pasties.Add(new Pasty
@@ -304,9 +304,9 @@ public class PasteService(
         return stats;
     }
 
-    public async Task<long> GetActiveCountAsync(CancellationToken token)
+    public async Task<long> GetActiveCountAsync(CancellationToken cancellationToken)
     {
-        return await mongo.Pastes.CountDocumentsAsync(new BsonDocument(), cancellationToken: token);
+        return await mongo.Pastes.CountDocumentsAsync(new BsonDocument(), cancellationToken: cancellationToken);
     }
 
     public async Task DeleteAsync(string id)
@@ -464,7 +464,7 @@ public class PasteService(
         return await mongo.Pastes.Find(p => p.Id == id).FirstOrDefaultAsync() is not null;
     }
 
-    public async Task<(byte[] zip, string title)> GetPasteAsZip(string id, CancellationToken token)
+    public async Task<(byte[] zip, string title)> GetPasteAsZip(string id, CancellationToken cancellationToken)
     {
         var paste = await GetAsync(id);
 
@@ -521,7 +521,7 @@ public class PasteService(
         return paste;
     }
 
-    public async Task<Paste> EditAsync(string id, PasteEditInfo editInfo, CancellationToken token)
+    public async Task<Paste> EditAsync(string id, PasteEditInfo editInfo, CancellationToken cancellationToken)
     {
         if (!userContext.IsLoggedIn())
         {
@@ -534,7 +534,7 @@ public class PasteService(
         }
 
         var paste = await GetAsync(id);
-        var isEncrypted = (await mongo.BasePastes.FindAsync(p => p.Id == paste.Id, cancellationToken: token)).FirstOrDefault(cancellationToken: token) is EncryptedPaste;
+        var isEncrypted = (await mongo.BasePastes.FindAsync(p => p.Id == paste.Id, cancellationToken: cancellationToken)).FirstOrDefault(cancellationToken: cancellationToken) is EncryptedPaste;
 
         if (paste.OwnerId is null)
         {
@@ -563,7 +563,7 @@ public class PasteService(
 
             if (langName == "Autodetect")
             {
-                langName = (await languageProvider.AutodetectLanguageAsync(pasty.Content, token)).Name;
+                langName = (await languageProvider.AutodetectLanguageAsync(pasty.Content, cancellationToken)).Name;
             }
 
             paste.Pasties.Add(new Pasty
@@ -622,7 +622,7 @@ public class PasteService(
                     .Set(p => p.EncryptedData, Convert.ToBase64String(ms.ToArray()))
                     .Set(p => p.Iv, Convert.ToBase64String(aes.IV))
                     .Set(p => p.Salt, Convert.ToBase64String(salt));
-                await mongo.EncryptedPastes.UpdateOneAsync(p => p.Id == paste.Id, update, cancellationToken: token);
+                await mongo.EncryptedPastes.UpdateOneAsync(p => p.Id == paste.Id, update, cancellationToken: cancellationToken);
             }
             catch(CryptographicException)
             {
@@ -635,7 +635,7 @@ public class PasteService(
                 .Set(p => p.Title, paste.Title ?? "")
                 .Set(p => p.Pasties, paste.Pasties)
                 .Set(p => p.History, paste.History);
-            await mongo.Pastes.UpdateOneAsync(p => p.Id == paste.Id, update, cancellationToken: token);
+            await mongo.Pastes.UpdateOneAsync(p => p.Id == paste.Id, update, cancellationToken: cancellationToken);
         }
 
         return paste;

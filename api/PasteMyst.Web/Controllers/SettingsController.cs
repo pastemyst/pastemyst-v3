@@ -16,9 +16,9 @@ public class SettingsController(SettingsService settingsService) : ControllerBas
     }
 
     [HttpPatch]
-    public async Task UpdateSettings([FromBody] Settings settings, CancellationToken token)
+    public async Task UpdateSettings([FromBody] Settings settings, CancellationToken cancellationToken)
     {
-        await settingsService.UpdateSettingsAsync(HttpContext, settings, token);
+        await settingsService.UpdateSettingsAsync(HttpContext, settings, cancellationToken);
     }
 
     [HttpGet("user")]
@@ -28,23 +28,23 @@ public class SettingsController(SettingsService settingsService) : ControllerBas
     }
 
     [HttpPatch("user")]
-    public async Task UpdateUserSettings([FromBody] UserSettings userSettings, CancellationToken token)
+    public async Task UpdateUserSettings([FromBody] UserSettings userSettings, CancellationToken cancellationToken)
     {
-        await settingsService.UpdateUserSettingsAsync(userSettings, token);
+        await settingsService.UpdateUserSettingsAsync(userSettings, cancellationToken);
     }
 
     [HttpPatch("username")]
-    public async Task SetUsername([FromBody] SetUsernameRequest setUsernameRequest, CancellationToken token)
+    public async Task SetUsername([FromBody] SetUsernameRequest setUsernameRequest, CancellationToken cancellationToken)
     {
-        await settingsService.SetUsernameAsync(setUsernameRequest.Username, token);
+        await settingsService.SetUsernameAsync(setUsernameRequest.Username, cancellationToken);
     }
 
     [HttpPatch("avatar")]
-    public async Task SetAvatar([Required] IFormFile file, CancellationToken token)
+    public async Task SetAvatar([Required] IFormFile file, CancellationToken cancellationToken)
     {
         await using var stream = file.OpenReadStream();
         var bytes = new byte[file.Length];
-        _ = await stream.ReadAsync(bytes.AsMemory(0, (int)file.Length), token);
-        await settingsService.SetAvatarAsync(bytes, file.ContentType, token);
+        _ = await stream.ReadAsync(bytes.AsMemory(0, (int)file.Length), cancellationToken);
+        await settingsService.SetAvatarAsync(bytes, file.ContentType, cancellationToken);
     }
 }
