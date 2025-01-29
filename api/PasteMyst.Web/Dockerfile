@@ -1,9 +1,9 @@
 FROM mcr.microsoft.com/dotnet/sdk:8.0-alpine AS build-env
 WORKDIR /app
 
-COPY api/src/PasteMyst.Web/*.csproj .
+COPY api/PasteMyst.Web/*.csproj .
 RUN dotnet restore
-COPY api/src/PasteMyst.Web/ .
+COPY api/PasteMyst.Web/ .
 RUN dotnet publish -c Release -o /publish
 
 # Build guesslang-bun in its own build stage using oven/bun-alpine
