@@ -4,6 +4,7 @@ using MongoDB.Bson.Serialization.Attributes;
 
 namespace PasteMyst.Web.Models;
 
+[BsonDiscriminator(RootClass = true)]
 [BsonKnownTypes(typeof(Paste), typeof(EncryptedPaste))]
 public abstract class BasePaste
 {
