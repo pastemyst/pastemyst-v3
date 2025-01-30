@@ -12,10 +12,10 @@ public sealed class VersionProvider
         // If we've already calculated the version, return it
         if (_version is not null)
             return _version;
-        
+
         // Otherwise, get the version information from the .git folder in the repository
-        var repoPath = "../";
-        if (!Repository.IsValid("../"))
+        var repoPath = "../../";
+        if (!Repository.IsValid("../../"))
         {
             repoPath = ".";
         }
