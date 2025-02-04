@@ -231,7 +231,7 @@ public class AuthService(
 
         var accessToken = new AccessToken
         {
-            Id = await idProvider.GenerateId(async (id) => await AccessTokenExistsById(id)),
+            Id = await idProvider.GenerateId(AccessTokenExistsById),
             Token = hashStringBuilder.ToString(),
             Scopes = scopes,
             OwnerId = owner.Id,

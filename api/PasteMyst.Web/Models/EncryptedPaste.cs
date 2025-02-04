@@ -7,4 +7,6 @@ public class EncryptedPaste : BasePaste
     public string Iv { get; set; }
 
     public string Salt { get; set; }
+
+    public int EncryptionVersion { get; set; } = 3;
 }
