@@ -20,6 +20,19 @@ RUN git clone https://github.com/CodeMyst/guesslang-bun.git .
 RUN bun install
 RUN bun build index.ts --compile --outfile dist/index.js --target node
 
+# Build pastemyst-decryptor
+FROM dlang2/dmd-ubuntu:2.096.1 AS pastemyst-decryptor-build
+
+RUN apt-get update && apt-get install -y git libscrypt-dev
+
+WORKDIR /pastemyst-decryptor
+
+RUN git clone --recurse-submodules https://github.com/pastemyst/pastemyst-decryptor.git .
+
+ENV DC=dmd
+
+RUN dub build --build=release
+
 FROM mcr.microsoft.com/dotnet/aspnet:8.0-alpine AS runtime
 WORKDIR /publish
 
@@ -31,5 +44,9 @@ EXPOSE 8080
 # Copy guesslang-bun binary from build stage, and make it executable
 COPY --from=guesslang-build /guesslang-bun/dist/index.js /bin/guesslang-bun
 RUN chmod +x /bin/guesslang-bun
+
+# Copy pastemyst-decryptor binary from build stage, and make it executable
+COPY --from=pastemyst-decryptor-build /pastemyst-decryptor/pastemyst-decryptor /bin/pastemyst-decryptor
+RUN chmod +x /bin/pastemyst-decryptor
 
 ENTRYPOINT [ "dotnet", "PasteMyst.Web.dll" ]

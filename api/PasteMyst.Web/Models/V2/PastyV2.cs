@@ -1,3 +1,4 @@
+using System.Text.Json.Serialization;
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
 
@@ -7,6 +8,7 @@ public class PastyV2
 {
     [BsonId]
     [BsonRepresentation(BsonType.String)]
+    [JsonPropertyName("_id")]
     public string Id { get; init; }
 
     public string Title { get; set; }
