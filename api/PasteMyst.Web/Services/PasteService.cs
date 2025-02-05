@@ -10,6 +10,8 @@ using PasteMyst.Web.Exceptions;
 using PasteMyst.Web.Models;
 using PasteMyst.Web.Models.Auth;
 using PasteMyst.Web.Utils;
+using System.Diagnostics;
+using PasteMyst.Web.Models.V2;
 
 namespace PasteMyst.Web.Services;
 
@@ -84,58 +86,14 @@ public class PasteService(
                 throw new HttpException(HttpStatusCode.BadRequest, "Missing encryption key");
             }
 
-            var decryptedPasteData = new DecryptedPasteData
-            {
-                Pasties = pasties
-            };
-
-            var decryptedPasteDataJson = JsonSerializer.Serialize(decryptedPasteData);
-
-            var salt = RandomNumberGenerator.GetBytes(32);
-            using var deriveBytes = new Rfc2898DeriveBytes(encryptionContext.EncryptionKey, salt, 100_000, HashAlgorithmName.SHA512);
-            var key = deriveBytes.GetBytes(32);
-
-            using var aes = Aes.Create();
-            aes.GenerateIV();
-
-            using var encryptor = aes.CreateEncryptor(key, aes.IV);
-            using var ms = new MemoryStream();
-            await using (var cs = new CryptoStream(ms, encryptor, CryptoStreamMode.Write))
-            await using (var sw = new StreamWriter(cs))
-            {
-                await sw.WriteAsync(decryptedPasteDataJson);
-            }
-
-            var paste = await CreateBasePaste<EncryptedPaste>(createInfo);
-            paste.EncryptedData = Convert.ToBase64String(ms.ToArray());
-            paste.Iv = Convert.ToBase64String(aes.IV);
-            paste.Salt = Convert.ToBase64String(salt);
-
-            await mongo.EncryptedPastes.InsertOneAsync(paste);
-            await actionLogger.LogActionAsync(ActionLogType.PasteCreated, paste.Id);
-
-            return new Paste
-            {
-                Id = paste.Id,
-                Title = paste.Title,
-                CreatedAt = paste.CreatedAt,
-                ExpiresIn = paste.ExpiresIn,
-                DeletesAt = paste.DeletesAt,
-                OwnerId = paste.OwnerId,
-                Private = paste.Private,
-                Pinned = paste.Pinned,
-                Tags = paste.Tags,
-                Stars = paste.Stars,
-                Pasties = decryptedPasteData.Pasties,
-                History = decryptedPasteData.History
-            };
+            return await CreateEncryptedPaste(createInfo, pasties, encryptionContext.EncryptionKey, cancellationToken);
         }
         else
         {
             var paste = await CreateBasePaste<Paste>(createInfo);
             paste.Pasties = pasties;
 
-            await mongo.Pastes.InsertOneAsync(paste);
+            await mongo.Pastes.InsertOneAsync(paste, cancellationToken: cancellationToken);
             await actionLogger.LogActionAsync(ActionLogType.PasteCreated, paste.Id);
 
             return paste;
@@ -144,9 +102,7 @@ public class PasteService(
 
     public async Task<Paste> GetAsync(string id)
     {
-        var paste = await mongo.BasePastes.Find(p => p.Id == id).FirstOrDefaultAsync();
-
-        if (paste is null) throw new HttpException(HttpStatusCode.NotFound, "Paste not found");
+        var paste = await mongo.BasePastes.Find(p => p.Id == id).FirstOrDefaultAsync() ?? throw new HttpException(HttpStatusCode.NotFound, "Paste not found");
 
         if (paste.DeletesAt <= DateTime.UtcNow)
         {
@@ -181,43 +137,13 @@ public class PasteService(
                     }
                 }
 
-                try
+                if (encryptedPaste.EncryptionVersion == 3)
                 {
-                    var salt = Convert.FromBase64String(encryptedPaste.Salt);
-                    using var deriveBytes = new Rfc2898DeriveBytes(encryptionKey, salt, 100_000, HashAlgorithmName.SHA512);
-                    var key = deriveBytes.GetBytes(32);
-
-                    using var aes = Aes.Create();
-                    aes.Key = key;
-                    aes.IV = Convert.FromBase64String(encryptedPaste.Iv);
-                    using var decryptor = aes.CreateDecryptor(key, Convert.FromBase64String(encryptedPaste.Iv));
-                    using var ms = new MemoryStream(Convert.FromBase64String(encryptedPaste.EncryptedData));
-                    await using var cs = new CryptoStream(ms, decryptor, CryptoStreamMode.Read);
-                    using var sr = new StreamReader(cs);
-
-                    var decryptedPasteDataJson = await sr.ReadToEndAsync();
-
-                    var decryptedPasteData = JsonSerializer.Deserialize<DecryptedPasteData>(decryptedPasteDataJson);
-
-                    return new Paste
-                    {
-                        Id = paste.Id,
-                        Title = paste.Title,
-                        CreatedAt = paste.CreatedAt,
-                        ExpiresIn = paste.ExpiresIn,
-                        DeletesAt = paste.DeletesAt,
-                        OwnerId = paste.OwnerId,
-                        Private = paste.Private,
-                        Pinned = paste.Pinned,
-                        Tags = paste.Tags,
-                        Stars = paste.Stars,
-                        Pasties = decryptedPasteData.Pasties,
-                        History = decryptedPasteData.History
-                    };
+                    return await DecryptPaste(encryptedPaste, encryptionKey);
                 }
-                catch(CryptographicException)
+                else
                 {
-                    throw new HttpException(HttpStatusCode.BadRequest, "Invalid encryption key");
+                    return await DecryptPasteV2(encryptedPaste, encryptionKey);
                 }
             }
         }
@@ -741,6 +667,174 @@ public class PasteService(
             Private = createInfo.Private,
             Pinned = createInfo.Pinned,
             Tags = createInfo.Tags.Select(t => t.Trim()).Where(s => !string.IsNullOrEmpty(s)).ToList(),
+        };
+    }
+
+    private async Task<Paste> CreateEncryptedPaste(PasteCreateInfo createInfo, List<Pasty> pasties, string encryptionKey, CancellationToken cancellationToken)
+    {
+        var decryptedPasteData = new DecryptedPasteData
+        {
+            Pasties = pasties
+        };
+
+        var (encryptedData, iv, salt) = await EncryptPaste(decryptedPasteData, encryptionKey);
+
+        var paste = await CreateBasePaste<EncryptedPaste>(createInfo);
+        paste.EncryptedData = encryptedData;
+        paste.Iv = iv;
+        paste.Salt = salt;
+
+        await mongo.EncryptedPastes.InsertOneAsync(paste, cancellationToken: cancellationToken);
+        await actionLogger.LogActionAsync(ActionLogType.PasteCreated, paste.Id);
+
+        return new Paste
+        {
+            Id = paste.Id,
+            Title = paste.Title,
+            CreatedAt = paste.CreatedAt,
+            ExpiresIn = paste.ExpiresIn,
+            DeletesAt = paste.DeletesAt,
+            OwnerId = paste.OwnerId,
+            Private = paste.Private,
+            Pinned = paste.Pinned,
+            Tags = paste.Tags,
+            Stars = paste.Stars,
+            Pasties = decryptedPasteData.Pasties,
+            History = decryptedPasteData.History
+        };
+    }
+
+    private async Task<(string data, string iv, string salt)> EncryptPaste(DecryptedPasteData decryptedPasteData, string encryptionKey)
+    {
+        var decryptedPasteDataJson = JsonSerializer.Serialize(decryptedPasteData);
+
+        var salt = RandomNumberGenerator.GetBytes(32);
+        using var deriveBytes = new Rfc2898DeriveBytes(encryptionKey, salt, 100_000, HashAlgorithmName.SHA512);
+        var key = deriveBytes.GetBytes(32);
+
+        using var aes = Aes.Create();
+        aes.GenerateIV();
+
+        using var encryptor = aes.CreateEncryptor(key, aes.IV);
+        using var ms = new MemoryStream();
+        await using (var cs = new CryptoStream(ms, encryptor, CryptoStreamMode.Write))
+        await using (var sw = new StreamWriter(cs))
+        {
+            await sw.WriteAsync(decryptedPasteDataJson);
+        }
+
+        var encryptedData = Convert.ToBase64String(ms.ToArray());
+        var iv = Convert.ToBase64String(aes.IV);
+        var saltBase64 = Convert.ToBase64String(salt);
+
+        return (encryptedData, iv, saltBase64);
+    }
+
+    private async Task<Paste> DecryptPaste(EncryptedPaste encryptedPaste, string encryptionKey)
+    {
+        try
+        {
+            var salt = Convert.FromBase64String(encryptedPaste.Salt);
+            using var deriveBytes = new Rfc2898DeriveBytes(encryptionKey, salt, 100_000, HashAlgorithmName.SHA512);
+            var key = deriveBytes.GetBytes(32);
+
+            using var aes = Aes.Create();
+            aes.Key = key;
+            aes.IV = Convert.FromBase64String(encryptedPaste.Iv);
+            using var decryptor = aes.CreateDecryptor(key, Convert.FromBase64String(encryptedPaste.Iv));
+            using var ms = new MemoryStream(Convert.FromBase64String(encryptedPaste.EncryptedData));
+            await using var cs = new CryptoStream(ms, decryptor, CryptoStreamMode.Read);
+            using var sr = new StreamReader(cs);
+
+            var decryptedPasteDataJson = await sr.ReadToEndAsync();
+
+            var decryptedPasteData = JsonSerializer.Deserialize<DecryptedPasteData>(decryptedPasteDataJson);
+
+            return new Paste
+            {
+                Id = encryptedPaste.Id,
+                Title = encryptedPaste.Title,
+                CreatedAt = encryptedPaste.CreatedAt,
+                ExpiresIn = encryptedPaste.ExpiresIn,
+                DeletesAt = encryptedPaste.DeletesAt,
+                OwnerId = encryptedPaste.OwnerId,
+                Private = encryptedPaste.Private,
+                Pinned = encryptedPaste.Pinned,
+                Tags = encryptedPaste.Tags,
+                Stars = encryptedPaste.Stars,
+                Pasties = decryptedPasteData.Pasties,
+                History = decryptedPasteData.History
+            };
+        }
+        catch (CryptographicException)
+        {
+            throw new HttpException(HttpStatusCode.BadRequest, "Invalid encryption key.");
+        }
+    }
+
+    private async Task<Paste> DecryptPasteV2(EncryptedPaste encryptedPaste, string encryptionKey)
+    {
+        var processStartInfo = new ProcessStartInfo
+        {
+            FileName = "pastemyst-decryptor",
+            Arguments = $"{encryptedPaste.EncryptedData} {encryptedPaste.Iv} {encryptedPaste.Salt} {encryptionKey}",
+            RedirectStandardOutput = true,
+            UseShellExecute = false,
+            CreateNoWindow = true
+        };
+
+        using var process = new Process { StartInfo = processStartInfo };
+        process.Start();
+
+        using var reader = process.StandardOutput;
+        var output = await reader.ReadToEndAsync();
+        process.WaitForExit();
+
+        if (process.ExitCode != 0)
+        {
+            throw new HttpException(HttpStatusCode.BadRequest, "Invalid encryption key.");
+        }
+
+        var decryptedPasteDataV2 = JsonSerializer.Deserialize<DecryptedPasteDataV2>(output.Trim(), new JsonSerializerOptions
+        {
+            PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+        });
+
+        var decryptedPasteData = new DecryptedPasteData
+        {
+            Pasties = [..decryptedPasteDataV2.Pasties.Select(p => new Pasty
+            {
+                Id = p.Id,
+                Title = p.Title,
+                Content = p.Code,
+                Language = p.Language
+            })]
+        };
+
+        var (encryptedData, iv, salt) = await EncryptPaste(decryptedPasteData, encryptionKey);
+
+        encryptedPaste.Title = decryptedPasteDataV2.Title;
+        encryptedPaste.EncryptedData = encryptedData;
+        encryptedPaste.Iv = iv;
+        encryptedPaste.Salt = salt;
+        encryptedPaste.EncryptionVersion = 3;
+
+        await mongo.EncryptedPastes.ReplaceOneAsync(p => p.Id == encryptedPaste.Id, encryptedPaste);
+
+        return new Paste
+        {
+            Id = encryptedPaste.Id,
+            Title = encryptedPaste.Title,
+            CreatedAt = encryptedPaste.CreatedAt,
+            ExpiresIn = encryptedPaste.ExpiresIn,
+            DeletesAt = encryptedPaste.DeletesAt,
+            OwnerId = encryptedPaste.OwnerId,
+            Private = encryptedPaste.Private,
+            Pinned = encryptedPaste.Pinned,
+            Tags = encryptedPaste.Tags,
+            Stars = encryptedPaste.Stars,
+            Pasties = decryptedPasteData.Pasties,
+            History = decryptedPasteData.History
         };
     }
 }
