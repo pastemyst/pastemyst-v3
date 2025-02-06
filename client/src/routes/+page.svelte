@@ -108,8 +108,6 @@
             tags: tags
         };
 
-        console.log(encryptionKey);
-
         const paste = await createPaste(pasteSkeleton, encryptionKey);
 
         // TODO: handle if creating paste failed.

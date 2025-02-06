@@ -60,10 +60,11 @@
 
             onEnd: (event: SortableEvent) => {
                 // once the reordering of tabs is done, replicate the reorder in the data array
-                if (event.oldIndex && event.newIndex) {
-                    const tab = tabs[event.oldIndex];
-                    tabs.splice(event.oldIndex, 1);
-                    tabs.splice(event.newIndex, 0, tab);
+                if (event.oldIndex !== undefined && event.newIndex !== undefined) {
+                    [tabs[event.oldIndex], tabs[event.newIndex]] = [
+                        tabs[event.newIndex],
+                        tabs[event.oldIndex]
+                    ];
                     tabs = tabs;
                 }
             }
