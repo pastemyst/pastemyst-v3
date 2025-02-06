@@ -1,3 +1,6 @@
 .vscode
 */.vscode
 .env
+*/.idea
+*/bin
+*/obj
