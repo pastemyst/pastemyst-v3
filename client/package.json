@@ -52,10 +52,10 @@
         "github-slugger": "^2.0.0",
         "highlight-words": "^2.0.0",
         "marked": "^15.0.3",
+        "nanoid": "^5.1.0",
         "sanitize-html": "^2.14.0",
         "shiki": "^1.14.1",
         "sortablejs": "^1.15.0",
-        "svelte-5-french-toast": "^2.0.1",
         "tippy.js": "^6.3.7",
         "tm-grammars": "^1.22.1"
     }
