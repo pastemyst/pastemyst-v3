@@ -7,13 +7,13 @@
     import { beforeNavigate, goto } from "$app/navigation";
     import ThemeContext from "$lib/ThemeContext.svelte";
     import { env } from "$env/dynamic/public";
-    import { Toaster } from "svelte-5-french-toast";
     import type { Snippet } from "svelte";
     import { activePastesStores, currentUserStore, versionStore } from "$lib/stores";
 
     import "tippy.js/dist/tippy.css";
     import "tippy.js/dist/svg-arrow.css";
     import "../app.scss";
+    import Toaster from "$lib/Toaster.svelte";
 
     interface Props {
         data: LayoutData;

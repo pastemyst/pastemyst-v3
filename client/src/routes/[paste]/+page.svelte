@@ -2,11 +2,11 @@
     import type { PageData } from "./$types";
     import { copyLinkToClipboardStore, currentUserStore } from "$lib/stores";
     import { onMount } from "svelte";
-    import toast from "svelte-5-french-toast";
     import PasteHeader from "$lib/PasteHeader.svelte";
     import Pasties from "$lib/Pasties.svelte";
     import TagInput from "$lib/TagInput.svelte";
     import { editPasteTags } from "$lib/api/paste";
+    import { addToast } from "$lib/toasts.svelte";
 
     interface Props {
         data: PageData;
@@ -19,17 +19,7 @@
 
     onMount(() => {
         if ($copyLinkToClipboardStore) {
-            // TODO: maybe implement custom toast messages...
-            toast.success("copied paste link to clipboard", {
-                style: `
-                    background-color: var(--color-bg);
-                    border: 1px solid var(--color-bg2);
-                    color: var(--color-fg);
-                    border-radius: 0.2rem;
-                    padding: 0.5rem;
-                    font-size: 1rem;
-                `
-            });
+            addToast("copied link to clipboard", "info");
             copyLinkToClipboardStore.set(false);
         }
     });
