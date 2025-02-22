@@ -9,10 +9,17 @@ public class AnnouncementService(MongoService mongo, UserContext userContext)
 {
     public async Task<Announcement> GetLatestAnnouncement(CancellationToken cancellationToken)
     {
-        return (await mongo.Announcements.FindAsync(x => true, new FindOptions<Announcement>
+        var announcement = (await mongo.Announcements.FindAsync(x => true, new FindOptions<Announcement>
         {
             Sort = Builders<Announcement>.Sort.Descending(x => x.CreatedAt)
         }, cancellationToken)).ToList(cancellationToken).FirstOrDefault();
+
+        if (announcement == null)
+        {
+            throw new HttpException(HttpStatusCode.NotFound, "No announcements found.");
+        }
+
+        return announcement;
     }
 
     public async Task<List<Announcement>> GetAllAnnouncements(CancellationToken cancellationToken)
