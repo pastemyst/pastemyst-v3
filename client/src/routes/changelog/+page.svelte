@@ -1,4 +1,5 @@
 <script lang="ts">
+    import { slug } from "github-slugger";
     import type { PageData } from "./$types";
 
     interface Props {
@@ -26,7 +27,7 @@
         </p>
     {:else}
         {#each data.releases as release, i}
-            <div class="release">
+            <div class="release" id={slug(release.title)}>
                 <div class="flex row center space-between">
                     <h4><a href={release.url} rel="external">{release.title}</a></h4>
 
