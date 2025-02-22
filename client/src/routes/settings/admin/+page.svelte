@@ -95,6 +95,10 @@
 
         await refetchAnnouncements();
     };
+
+    const isActive = (index: number, createdAt: string) => {
+        return index === 0 && Date.now() - new Date(createdAt).getTime() <= 7 * 24 * 60 * 60 * 1000;
+    };
 </script>
 
 <svelte:head>
@@ -131,7 +135,7 @@
 {/if}
 
 {#each announcements as announcement, i}
-    <div class="announcement">
+    <div class="announcement" class:active={isActive(i, announcement.createdAt)}>
         <div class="flex row space-between">
             <p class="title">{announcement.title}</p>
 
@@ -211,6 +215,10 @@
         border-radius: $border-radius;
         border: 1px solid var(--color-bg2);
         font-size: $fs-normal;
+
+        &.active {
+            border-color: var(--color-primary);
+        }
 
         .title {
             font-weight: bold;
