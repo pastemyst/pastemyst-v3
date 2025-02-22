@@ -50,6 +50,7 @@ builder.Services.AddScoped<SettingsService>();
 builder.Services.AddScoped<PasteService>();
 builder.Services.AddScoped<ActionLogger>();
 builder.Services.AddScoped<StatsService>();
+builder.Services.AddScoped<AnnouncementService>();
 
 builder.Services.AddQuartz(q =>
 {
