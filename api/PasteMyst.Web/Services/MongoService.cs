@@ -22,9 +22,11 @@ public class MongoService
 
     public IMongoCollection<AccessToken> AccessTokens { get; private set; }
 
+    public IMongoCollection<Announcement> Announcements { get; private set; }
+
     public GridFSBucket Images { get; private set; }
 
-    private MongoClient mongoClient;
+    private readonly MongoClient mongoClient;
 
     public MongoService(IConfiguration configuration)
     {
@@ -49,6 +51,7 @@ public class MongoService
         ActionLogs = mongoDb.GetCollection<ActionLog>("actionLogs");
         SessionSettings = mongoDb.GetCollection<SessionSettings>("sessionSettings");
         AccessTokens = mongoDb.GetCollection<AccessToken>("accessTokens");
+        Announcements = mongoDb.GetCollection<Announcement>("announcements");
 
         Images = new GridFSBucket(mongoDb, new()
         {
