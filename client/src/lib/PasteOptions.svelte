@@ -1,5 +1,6 @@
 <script lang="ts">
     import { tooltip } from "$lib/tooltips";
+    import Spinner from "./Spinner.svelte";
     import { currentUserStore } from "./stores";
 
     interface Props {
@@ -8,6 +9,7 @@
         isPrivate: boolean;
         pinned: boolean;
         anonymous: boolean;
+        loading: boolean;
         oncreatePaste: () => void;
     }
 
@@ -17,6 +19,7 @@
         isPrivate = $bindable(false),
         pinned = $bindable(false),
         anonymous = $bindable(false),
+        loading = $bindable(true),
         oncreatePaste
     }: Props = $props();
 
@@ -146,7 +149,10 @@
         {/if}
     </div>
 
-    <button class="btn-main" onclick={oncreatePaste}>create paste</button>
+    <button class="btn-main" onclick={oncreatePaste}>
+        <span class:hide={loading}>create paste</span>
+        <span class:hide={!loading} class="spinner"><Spinner /></span>
+    </button>
 </div>
 
 <style lang="scss">
@@ -201,5 +207,15 @@
 
     button {
         padding: 0.5rem 1rem;
+        display: grid;
+        grid-template-areas: "stack";
+
+        span {
+            grid-area: stack;
+
+            &.hide {
+                visibility: hidden;
+            }
+        }
     }
 </style>
