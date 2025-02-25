@@ -218,17 +218,18 @@ button,
     &.btn-main {
         background-color: var(--color-primary);
         color: var(--color-bg);
-        border-color: rgba(240, 246, 252, 0.1);
+        border-color: hsl(from var(--color-primary) h s calc(l - 20));
 
         &:hover {
             background-color: var(--color-secondary);
+            border-color: hsl(from var(--color-secondary) h s calc(l - 20));
         }
 
         &:focus,
         &:active {
-            background-color: transparent;
-            color: var(--color-fg);
-            border-color: var(--color-primary);
+            background-color: var(--color-secondary);
+            color: var(--color-bg);
+            border-color: hsl(from var(--color-bg) h s calc(l - 20));
             outline: none;
         }
     }

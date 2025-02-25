@@ -41,6 +41,7 @@
     let pinned: boolean = $state(false);
     let encrypt: boolean = $state(false);
     let encryptionKey: string = $state("");
+    let creatingPaste: boolean = $state(false);
 
     $effect(() => {
         if (anonymous) tags = [];
@@ -87,6 +88,8 @@
     });
 
     const onCreatePaste = async () => {
+        creatingPaste = true;
+
         let pasties: PastyCreateInfo[] = [];
 
         for (const tab of tabs) {
@@ -183,6 +186,7 @@
         bind:pinned
         bind:encrypt
         bind:encryptionKey
+        bind:loading={creatingPaste}
     />
 </div>
 
