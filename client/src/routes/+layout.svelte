@@ -27,11 +27,9 @@
     let latestAnnouncement = $state(data.latestAnnouncement);
     let hiddenAnnouncement = $state(true);
 
-    $effect(() => {
-        currentUserStore.set(data.self);
-        versionStore.set(data.version);
-        activePastesStores.set(data.activePastes);
-    });
+    versionStore.set(data.version);
+    activePastesStores.set(data.activePastes);
+    currentUserStore.set(data.self);
 
     onMount(() => {
         if (latestAnnouncement) {
