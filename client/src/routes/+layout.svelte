@@ -16,6 +16,7 @@
     import Toaster from "$lib/Toaster.svelte";
     import { tooltip } from "$lib/tooltips";
     import { formatDistanceToNow } from "date-fns";
+    import { page } from "$app/state";
 
     interface Props {
         data: LayoutData;
@@ -112,56 +113,64 @@
     };
 </script>
 
-<ThemeContext currentTheme={data.settings.theme}>
-    <Toaster />
+{#if page.route.id?.includes("embed")}
+    {@render children()}
+{:else}
+    <ThemeContext currentTheme={data.settings.theme}>
+        <Toaster />
 
-    <div id="container">
-        <Header />
+        <div id="container">
+            <Header />
 
-        {#if latestAnnouncement && !hiddenAnnouncement}
-            <div class="announcement">
-                <div class="flex row space-between">
-                    <p class="title">
-                        {latestAnnouncement.title}
-                        <span
-                            class="date"
+            {#if latestAnnouncement && !hiddenAnnouncement}
+                <div class="announcement">
+                    <div class="flex row space-between">
+                        <p class="title">
+                            {latestAnnouncement.title}
+                            <span
+                                class="date"
+                                use:tooltip
+                                aria-label={new Date(latestAnnouncement.createdAt).toString()}
+                                >{formatDistanceToNow(new Date(latestAnnouncement.createdAt), {
+                                    addSuffix: true
+                                })}</span
+                            >
+                        </p>
+                        <button
+                            class="close-icon flex center"
+                            onclick={dismissAnnouncement}
                             use:tooltip
-                            aria-label={new Date(latestAnnouncement.createdAt).toString()}
-                            >{formatDistanceToNow(new Date(latestAnnouncement.createdAt), {
-                                addSuffix: true
-                            })}</span
+                            aria-label="dismiss"
                         >
-                    </p>
-                    <button
-                        class="close-icon flex center"
-                        onclick={dismissAnnouncement}
-                        use:tooltip
-                        aria-label="dismiss"
-                    >
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" class="icon">
-                            <title>Close Icon</title>
-                            <path
-                                fill="currentColor"
-                                fill-rule="evenodd"
-                                d="M3.72 3.72a.75.75 0 011.06 0L8 6.94l3.22-3.22a.75.75 0 111.06 1.06L9.06 8l3.22 3.22a.75.75 0 11-1.06 1.06L8 9.06l-3.22 3.22a.75.75 0 01-1.06-1.06L6.94 8 3.72 4.78a.75.75 0 010-1.06z"
-                            />
-                        </svg>
-                    </button>
+                            <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                viewBox="0 0 16 16"
+                                class="icon"
+                            >
+                                <title>Close Icon</title>
+                                <path
+                                    fill="currentColor"
+                                    fill-rule="evenodd"
+                                    d="M3.72 3.72a.75.75 0 011.06 0L8 6.94l3.22-3.22a.75.75 0 111.06 1.06L9.06 8l3.22 3.22a.75.75 0 11-1.06 1.06L8 9.06l-3.22 3.22a.75.75 0 01-1.06-1.06L6.94 8 3.72 4.78a.75.75 0 010-1.06z"
+                                />
+                            </svg>
+                        </button>
+                    </div>
+                    <!-- eslint-disable-next-line svelte/no-at-html-tags -->
+                    <p class="content markdown">{@html data.latestAnnouncementRendered}</p>
                 </div>
-                <!-- eslint-disable-next-line svelte/no-at-html-tags -->
-                <p class="content markdown">{@html data.latestAnnouncementRendered}</p>
-            </div>
-        {/if}
+            {/if}
 
-        <main>
-            {@render children()}
-        </main>
+            <main>
+                {@render children()}
+            </main>
 
-        <Footer />
-    </div>
-</ThemeContext>
+            <Footer />
+        </div>
+    </ThemeContext>
 
-<CommandPalette />
+    <CommandPalette />
+{/if}
 
 <style lang="scss">
     main {
