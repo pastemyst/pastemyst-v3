@@ -1,6 +1,7 @@
 @import "normalize.css";
 
-#theme-context[data-theme="myst"] {
+#theme-context[data-theme="myst"],
+.pastemyst-embed {
     --color-bg: #141414;
     --color-bg1: #1c1c1c;
     --color-bg2: #222222;
