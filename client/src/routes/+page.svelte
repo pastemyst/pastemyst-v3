@@ -17,7 +17,6 @@
         currentUserStore
     } from "$lib/stores";
     import TabbedEditor from "$lib/TabbedEditor.svelte";
-    import type TabData from "$lib/TabData.svelte";
     import TagInput from "$lib/TagInput.svelte";
     import { onMount } from "svelte";
     import type { PageData } from "./$types";
@@ -33,15 +32,14 @@
 
     let tags: string[] = $state([]);
 
-    let tabs: TabData[] = $state([]);
-    let activeTab: TabData | undefined = $state();
-
     let anonymous: boolean = $state(false);
     let isPrivate: boolean = $state(false);
     let pinned: boolean = $state(false);
     let encrypt: boolean = $state(false);
     let encryptionKey: string = $state("");
     let creatingPaste: boolean = $state(false);
+
+    let editor: TabbedEditor;
 
     $effect(() => {
         if (anonymous) tags = [];
@@ -59,7 +57,7 @@
             {
                 name: "set editor language",
                 action: () => {
-                    const cmds = activeTab?.editor?.getLanguageCommands();
+                    const cmds = editor.getLanguageCommands();
                     (async () => {
                         if (cmds) setTempCommands(await cmds);
                     })();
@@ -69,7 +67,7 @@
             {
                 name: "set editor indentation",
                 action: () => {
-                    const cmds = activeTab?.editor?.getIndentUnitCommands();
+                    const cmds = editor.getIndentUnitCommands();
                     if (cmds) setTempCommands(cmds);
                     return Close.no;
                 }
@@ -77,7 +75,7 @@
             {
                 name: "convert indentation",
                 action: () => {
-                    const cmds = activeTab?.editor?.getIndentUnitCommands(true);
+                    const cmds = editor.getIndentUnitCommands(true);
                     if (cmds) setTempCommands(cmds);
                     return Close.no;
                 }
@@ -92,11 +90,11 @@
 
         let pasties: PastyCreateInfo[] = [];
 
-        for (const tab of tabs) {
+        for (const tab of editor.getTabs()) {
             pasties.push({
                 title: tab.title!,
-                content: tab.editor!.getContent(),
-                language: tab.editor!.getSelectedLang()!.name
+                content: tab.content,
+                language: tab.language?.name ?? "Text"
             });
         }
 
@@ -176,7 +174,7 @@
     <TagInput bind:tags existingTags={data.userTags} anonymousPaste={anonymous} readonly={false} />
 {/if}
 
-<TabbedEditor bind:tabs bind:activeTab settings={data.settings} />
+<TabbedEditor settings={data.settings} bind:this={editor} />
 
 <div class="paste-options">
     <PasteOptions
