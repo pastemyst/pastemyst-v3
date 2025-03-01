@@ -1,46 +1,36 @@
 <script lang="ts">
-    import { onMount, tick, mount, unmount } from "svelte";
-    import Sortable, { type SortableEvent } from "sortablejs";
     import Tab from "./Tab.svelte";
     import Editor from "./Editor.svelte";
+    import type { Settings } from "./api/settings";
     import TabData from "./TabData.svelte";
-    import { getLangs, type Language } from "./api/lang";
+    import { nanoid } from "nanoid";
+    import { onMount } from "svelte";
+    import Sortable, { type SortableEvent } from "sortablejs";
     import { beforeNavigate } from "$app/navigation";
     import { creatingPasteStore } from "./stores";
-    import type { Settings } from "./api/settings";
     import type { Pasty } from "./api/paste";
+    import { getLangs } from "./api/lang";
 
     interface Props {
         settings: Settings;
-        tabs: TabData[];
-        activeTab?: TabData;
         existingPasties?: Pasty[];
     }
 
-    let {
-        settings,
-        tabs = $bindable([]),
-        activeTab = $bindable(),
-        existingPasties = []
-    }: Props = $props();
+    let { settings, existingPasties = [] }: Props = $props();
 
-    // used for giving tabs their own unique ID
-    let tabCounter = 0;
+    let tabs = $state<TabData[]>([new TabData(nanoid(), "untitled")]);
+
+    // svelte-ignore state_referenced_locally
+    let activeTabId = $state(tabs[0].id);
 
     let tabGroupElement: HTMLElement;
-    let editorTarget: HTMLElement;
-
-    let activeTabId = $state("0");
+    let editor: Editor;
 
     let isDraggedOver = $state(false);
 
-    $effect(() => {
-        activeTab = tabs.find((t) => t.id === activeTabId)!;
-    });
-
     beforeNavigate((navigation) => {
-        if (creatingPasteStore) {
-            creatingPasteStore.set(false);
+        if ($creatingPasteStore) {
+            $creatingPasteStore = false;
             return;
         }
 
@@ -52,7 +42,7 @@
         }
     });
 
-    onMount(async () => {
+    onMount(() => {
         Sortable.create(tabGroupElement, {
             direction: "horizontal",
             animation: 150,
@@ -60,210 +50,191 @@
 
             onEnd: (event: SortableEvent) => {
                 // once the reordering of tabs is done, replicate the reorder in the data array
-                if (event.oldIndex !== undefined && event.newIndex !== undefined) {
-                    [tabs[event.oldIndex], tabs[event.newIndex]] = [
-                        tabs[event.newIndex],
-                        tabs[event.oldIndex]
-                    ];
-                    tabs = tabs;
-                }
+                const newOrder = Array.from(event.to.children).map(
+                    (el) => (el as HTMLElement).dataset.id
+                );
+                tabs = newOrder.map((id) => tabs.find((t) => t.id === id)!);
             }
         });
+    });
 
+    const onEditorMounted = async () => {
         if (existingPasties.length > 0) {
+            tabs = [];
             const langs = await getLangs(fetch);
             for (const pasty of existingPasties) {
                 const lang = langs.find((lang) => lang.name === pasty.language);
-                await addTab(pasty.title, pasty.content, lang, pasty.id);
+                const tab = new TabData(nanoid(), pasty.title);
+                tab.content = pasty.content;
+                tab.language = lang;
+
+                tabs = [...tabs, tab];
             }
 
-            await setActiveTab(tabs[0].id);
-        } else {
-            await addTab();
+            setActiveTab(tabs[tabs.length - 1].id);
         }
-    });
+    };
 
-    const onTabClose = async (id: string) => {
+    const hasModifiedTabs = () => {
+        console.log(editor.getContent());
+        if (editor.getContent() && editor.getContent() !== "") return true;
+
+        for (const tab of tabs) {
+            if (tab.content !== "") return true;
+        }
+
+        return false;
+    };
+
+    const onNewTab = () => {
+        const newTab = new TabData(nanoid(), "untitled");
+        tabs = [...tabs, newTab];
+
+        setActiveTab(newTab.id);
+    };
+
+    const onTabClose = (tabId: string) => {
         // cant close last tab
         if (tabs.length === 1) return;
 
-        const idx = tabs.findIndex((t) => t.id === id);
+        const idx = tabs.findIndex((t) => t.id === tabId);
 
-        // ask if it's okay to close a non empty tab
-        if (tabs[idx].editor!.getContent().length > 0) {
+        if ((tabId === activeTabId && editor.getContent() !== "") || tabs[idx].content !== "") {
             if (!confirm("are you sure you want to close a non-empty tab?")) {
                 return;
             }
         }
 
-        // destroy editor element
-        unmount(tabs[idx].editor!);
-
-        // remove from array
         tabs = [...tabs.slice(0, idx), ...tabs.slice(idx + 1, tabs.length)];
 
-        if (tabs.findIndex((t) => t.id === activeTabId) >= 1) {
-            // set the previous tab as active
-            await setActiveTab(tabs[tabs.length - 1].id);
-        } else {
-            // if the first tab is closed, set the next tab as active
-            await setActiveTab(tabs[0].id);
+        if (activeTabId === tabId) {
+            // if the closed tab was active, set the previous tab as active
+            setActiveTab(tabs[idx - 1]?.id ?? tabs[0].id);
         }
-
-        updateTabEditorVisibility();
     };
 
-    const onTabClick = async (
-        id: string,
-        event: Event & { currentTarget: EventTarget & Element }
-    ) => {
+    const onTabClick = (event: Event & { currentTarget: EventTarget & Element }, tabId: string) => {
         let target = event.target as HTMLElement;
 
+        // ignore if renaming
+        const tab = tabs.find((t) => t.id === tabId);
+        if (tab?.isInRenamingState) return;
+
         // ignore if close icon is pressed
-        if (target.nodeName === "SVG") return;
+        if (target.nodeName === "BUTTON") return;
 
         // ignore if double click, so the rename field doesn't unfocus
         if ((event as unknown as MouseEvent).detail > 1) return;
 
-        await setActiveTab(id);
+        setActiveTab(tabId);
     };
 
-    const onTabFinishRenaming = (id: string) => {
-        const idx = tabs.findIndex((t) => t.id === id);
-
-        tabs[idx].editor!.focus();
-    };
-
-    export const addTab = async (
-        title?: string,
-        content?: string,
-        language?: Language,
-        id?: string
-    ) => {
-        const name = title || "untitled";
-
-        let newtab: TabData = new TabData(
-            id || String(tabCounter),
-            name,
-            mount(Editor, {
-                target: editorTarget,
-                props: {
-                    settings,
-                    onMounted: () => {
-                        if (content && language) {
-                            newtab.editor?.setContent(content);
-                            newtab.editor?.setSelectedLang(language);
-
-                            // if the first tab is empty, remove it
-                            const firstTab = tabs[0];
-                            if (
-                                tabs.length > 1 &&
-                                !firstTab.editor?.getContent() &&
-                                firstTab.title === "untitled"
-                            ) {
-                                tabs = tabs.slice(1);
-                            }
-                        } else {
-                            copyPreviousTabSettings(newtab.editor!);
-                        }
-                    }
-                }
-            })
-        );
-
-        tabs = [...tabs, newtab];
-        await setActiveTab(tabs[tabs.length - 1].id);
-
-        tabCounter++;
-    };
-
-    // set the language and indentation same as the previous tab
-    const copyPreviousTabSettings = (newTabEditor: ReturnType<typeof Editor>) => {
-        if (tabs.length > 1) {
-            const previousEditor = tabs[tabs.length - 2].editor;
-
-            newTabEditor.setSelectedLang(previousEditor!.getSelectedLang()!);
-            newTabEditor.setIndentaion(...previousEditor!.getIndentation());
+    const setActiveTab = (tabId: string) => {
+        const previousTabIdx = tabs.findIndex((t) => t.id === activeTabId);
+        if (activeTabId && previousTabIdx !== -1) {
+            const cursor = editor.getCursorPos();
+            const indentation = editor.getIndentation();
+            tabs[previousTabIdx].content = editor.getContent();
+            tabs[previousTabIdx].cursorLine = cursor.line;
+            tabs[previousTabIdx].cursorCol = cursor.col;
+            tabs[previousTabIdx].language = editor.getSelectedLang();
+            tabs[previousTabIdx].indentationUnit = indentation[0];
+            tabs[previousTabIdx].indentationWidth = indentation[1];
         }
+
+        activeTabId = tabId;
+
+        const idx = tabs.findIndex((t) => t.id === tabId);
+        editor.setContent(tabs[idx].content);
+        editor.setCursorPos(tabs[idx].cursorLine, tabs[idx].cursorCol);
+        if (tabs[idx].language) editor.setSelectedLang(tabs[idx].language);
+        editor.setIndentaion(tabs[idx].indentationUnit, tabs[idx].indentationWidth);
+
+        editor.focus();
     };
-
-    const setActiveTab = async (id: string) => {
-        activeTabId = id;
-
-        updateTabEditorVisibility();
-
-        // for some reason requires 2 ticks to pass for the editor to be focused correctly
-        await tick();
-        await tick();
-
-        let tab = tabs.find((t) => t.id === activeTabId);
-
-        if (tab && !tab.isInRenamingState) {
-            tab.editor!.focus();
-        }
-    };
-
-    const updateTabEditorVisibility = () => {
-        for (let tab of tabs) {
-            tab.editor?.setHidden(!(tab.id === activeTabId));
-        }
-    };
-
-    const closeDragContainer = () => (isDraggedOver = false);
 
     const handleDragOver = (e: DragEvent) => {
         e.preventDefault();
+
         if (!e.dataTransfer?.types.includes("Files")) return;
+
         isDraggedOver = true;
     };
 
-    const handleDragDrop = (e: DragEvent) => {
+    const handleDragDrop = async (e: DragEvent) => {
         e.preventDefault();
 
-        closeDragContainer();
+        isDraggedOver = false;
 
         const files = e.dataTransfer?.files;
 
-        if (!files) return;
+        if (!files || files.length === 0) return;
 
-        Array.from(files).forEach(async (file) => {
+        const langs = await getLangs(fetch);
+
+        if (tabs[0].content === "") {
+            tabs = [];
+        }
+
+        for (let i = 0; i < files.length; i++) {
+            const file = files[i];
             const { name } = file;
 
             const content = await file.text();
 
-            const langs = await getLangs(fetch);
             const lang = langs.find(
-                (lang) =>
-                    lang.extensions && lang.extensions.includes(name.slice(name.lastIndexOf(".")))
+                (l) => l.extensions && l.extensions.includes(name.slice(name.lastIndexOf(".")))
             );
 
-            await addTab(name, content, lang);
-        });
-    };
+            const tab = new TabData(nanoid(), name);
+            tab.content = content;
+            tab.language = lang;
 
-    const hasModifiedTabs = () => {
-        for (const tab of tabs) {
-            if (tab.editor?.getContent()) return true;
+            tabs = [...tabs, tab];
         }
 
-        return false;
+        setActiveTab(tabs[tabs.length - 1].id);
+    };
+
+    const handleDragLeave = () => {
+        isDraggedOver = false;
+    };
+
+    export const getTabs = () => {
+        // save the current editor state to the current tab
+        const idx = tabs.findIndex((t) => t.id === activeTabId);
+        const cursor = editor.getCursorPos();
+        const indentation = editor.getIndentation();
+        tabs[idx].content = editor.getContent();
+        tabs[idx].cursorLine = cursor.line;
+        tabs[idx].cursorCol = cursor.col;
+        tabs[idx].language = editor.getSelectedLang();
+        tabs[idx].indentationUnit = indentation[0];
+        tabs[idx].indentationWidth = indentation[1];
+
+        return tabs;
+    };
+
+    export const getLanguageCommands = () => {
+        return editor.getLanguageCommands();
+    };
+
+    export const getIndentUnitCommands = (convertIndent = false) => {
+        return editor.getIndentUnitCommands(convertIndent);
     };
 </script>
 
 <svelte:window
     onbeforeunload={(e) => {
         if (hasModifiedTabs()) {
-            // prevent default only after the check, firefox issue
             e.preventDefault();
-
-            // next 2 lines are needed to work
             e.returnValue = "";
             return "";
         }
     }}
 />
 
-<svelte:body ondragover={handleDragOver} ondrop={handleDragDrop} ondragleave={closeDragContainer} />
+<svelte:body ondragover={handleDragOver} ondrop={handleDragDrop} ondragleave={handleDragLeave} />
 
 <div class="drop-container" class:drop-container--shown={isDraggedOver}>
     <div class="drop-container__cover"></div>
@@ -277,18 +248,18 @@
             <Tab
                 id={tab.id.toString()}
                 onclose={() => onTabClose(tab.id)}
-                onclick={(event) => onTabClick(tab.id, event)}
-                onfinishedRenaming={() => onTabFinishRenaming(tab.id)}
+                onclick={(event) => onTabClick(event, tab.id)}
+                onfinishedRenaming={() => editor.focus()}
                 bind:title={tab.title}
                 bind:isInRenamingState={tab.isInRenamingState}
-                isActive={activeTabId === tab.id}
+                isActive={tab.id === activeTabId}
                 closeable={tabs.length > 1}
                 isReadonly={false}
             />
         {/each}
     </div>
 
-    <button class="add-btn btn" onclick={() => addTab()}>
+    <button class="add-btn btn" onclick={() => onNewTab()}>
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" class="icon">
             <title>Plus Icon</title>
             <path
@@ -300,7 +271,7 @@
     </button>
 </div>
 
-<div class="editor" bind:this={editorTarget}></div>
+<Editor bind:this={editor} {settings} onMounted={onEditorMounted} />
 
 <style lang="scss">
     .drop-container {

@@ -110,6 +110,8 @@
             }
         });
 
+        // TODO: first create the view and then update it after fetching all the required things
+
         editorView = new EditorView({
             state: EditorState.create({
                 extensions: [
@@ -325,6 +327,19 @@
 
     export const getContent = (): string => {
         return editorView.state.doc.toString();
+    };
+
+    export const getCursorPos = (): { line: number; col: number } => {
+        return { line: cursorLine, col: cursorCol };
+    };
+
+    export const setCursorPos = (line: number, col: number) => {
+        editorView.dispatch({
+            selection: {
+                anchor: editorView.state.doc.line(line).from + col,
+                head: editorView.state.doc.line(line).from + col
+            }
+        });
     };
 
     export const setContent = (content: string) => {
