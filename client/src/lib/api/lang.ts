@@ -30,7 +30,6 @@ export const getLangs = async (fetchFunc: FetchFunc): Promise<Language[]> => {
 };
 
 export const getPopularLangNames = async (fetchFunc: FetchFunc): Promise<string[]> => {
-    console.log(API_URL);
     const res = await fetchFunc(`${API_URL}/langs/popular`);
 
     if (res.ok) return await res.json();
