@@ -1,8 +1,8 @@
 <script lang="ts">
     import type { PageData } from "./$types";
     import { tooltip } from "$lib/tooltips";
-    import { env } from "$env/dynamic/public";
     import PasteList from "$lib/PasteList.svelte";
+    import { API_URL } from "$lib/api/fetch";
 
     interface Props {
         data: PageData;
@@ -20,7 +20,7 @@
         <section class="user-header">
             <img
                 class="avatar"
-                src="{env.PUBLIC_API_BASE}/images/{data.user.avatarId}"
+                src="{API_URL}/images/{data.user.avatarId}"
                 alt="${data.user.username}'s avatar"
             />
 
@@ -101,7 +101,7 @@
                             </a>
 
                             <a
-                                href="{env.PUBLIC_API_BASE}/auth/logout"
+                                href="{API_URL}/auth/logout"
                                 use:tooltip
                                 aria-label="log out"
                                 class="logout btn btn-danger"

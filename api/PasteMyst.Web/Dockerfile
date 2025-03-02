@@ -18,7 +18,9 @@ RUN git clone https://github.com/CodeMyst/guesslang-bun.git .
 
 # Install dependencies and build the project
 RUN bun install
-RUN bun build index.ts --compile --outfile dist/index.js --target node
+RUN cp node_modules/@vscode/vscode-languagedetection/model/model.json .
+RUN cp node_modules/@vscode/vscode-languagedetection/model/group1-shard1of1.bin .
+RUN bun build index.ts --compile --outfile dist/guesslang-bun --assets model.json group1-shard1of1.bin
 
 # Build pastemyst-decryptor
 FROM dlang2/dmd-ubuntu:2.096.1 AS pastemyst-decryptor-build
@@ -42,7 +44,7 @@ COPY ../.git .git
 EXPOSE 8080
 
 # Copy guesslang-bun binary from build stage, and make it executable
-COPY --from=guesslang-build /guesslang-bun/dist/index.js /bin/guesslang-bun
+COPY --from=guesslang-build /guesslang-bun/dist/guesslang-bun /bin/guesslang-bun
 RUN chmod +x /bin/guesslang-bun
 
 # Copy pastemyst-decryptor binary from build stage, and make it executable
