@@ -2,6 +2,8 @@ services:
   mongodb:
     image: mongo:latest
     container_name: pastemyst-mongodb
+    networks:
+      - pastemyst
     volumes:
       - mongodb_data:/data/db
 
