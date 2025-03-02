@@ -1,5 +1,4 @@
-import { env } from "$env/dynamic/public";
-import type { FetchFunc } from "./fetch";
+import { API_URL, type FetchFunc } from "./fetch";
 
 export interface Language {
     name: string;
@@ -22,7 +21,7 @@ let langs: Language[] = [];
 
 export const getLangs = async (fetchFunc: FetchFunc): Promise<Language[]> => {
     if (langs.length === 0) {
-        const res = await fetchFunc(`${env.PUBLIC_API_BASE}/langs`);
+        const res = await fetchFunc(`${API_URL}/langs`);
 
         if (res.ok) langs = await res.json();
     }
@@ -31,7 +30,8 @@ export const getLangs = async (fetchFunc: FetchFunc): Promise<Language[]> => {
 };
 
 export const getPopularLangNames = async (fetchFunc: FetchFunc): Promise<string[]> => {
-    const res = await fetchFunc(`${env.PUBLIC_API_BASE}/langs/popular`);
+    console.log(API_URL);
+    const res = await fetchFunc(`${API_URL}/langs/popular`);
 
     if (res.ok) return await res.json();
 
@@ -39,7 +39,7 @@ export const getPopularLangNames = async (fetchFunc: FetchFunc): Promise<string[
 };
 
 export const autodetectLanguage = async (content: string): Promise<Language> => {
-    const res = await fetch(`${env.PUBLIC_API_BASE}/langs/autodetect`, {
+    const res = await fetch(`${API_URL}/langs/autodetect`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(content)
@@ -54,7 +54,7 @@ export const findLangByName = async (
     fetchFunc: FetchFunc,
     lang: string
 ): Promise<Language | undefined> => {
-    const res = await fetchFunc(`${env.PUBLIC_API_BASE}/langs/${lang}`);
+    const res = await fetchFunc(`${API_URL}/langs/${lang}`);
 
     if (res.ok) return await res.json();
 

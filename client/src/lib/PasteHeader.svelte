@@ -12,12 +12,12 @@
     import { tooltip } from "./tooltips";
     import type { User } from "./api/user";
     import { cmdPalOpen, cmdPalTitle, currentUserStore } from "./stores";
-    import { env } from "$env/dynamic/public";
     import { humanFileSize } from "./strings";
     import type { LangStat } from "./api/lang";
     import { Close, getConfirmActionCommands, setTempCommands } from "./command";
     import { goto } from "$app/navigation";
     import { colorIsDark } from "./utils/color";
+    import { API_URL } from "./api/fetch";
 
     interface Props {
         paste: Paste;
@@ -311,7 +311,7 @@
         {/if}
 
         <a
-            href="{env.PUBLIC_API_BASE}/pastes/{paste.id}.zip"
+            href="{API_URL}/pastes/{paste.id}.zip"
             class="btn"
             aria-label="download paste"
             use:tooltip

@@ -1,5 +1,4 @@
-import { env } from "$env/dynamic/public";
-import type { FetchFunc } from "./fetch";
+import { API_URL, type FetchFunc } from "./fetch";
 
 export interface Announcement {
     id: string;
@@ -11,7 +10,7 @@ export interface Announcement {
 export const getLatestAnnouncement = async (
     fetch: FetchFunc
 ): Promise<Announcement | undefined> => {
-    const res = await fetch(`${env.PUBLIC_API_BASE}/announcements/latest`, {
+    const res = await fetch(`${API_URL}/announcements/latest`, {
         method: "GET",
         credentials: "include"
     });
@@ -22,7 +21,7 @@ export const getLatestAnnouncement = async (
 };
 
 export const getAllAnnouncements = async (fetch: FetchFunc): Promise<Announcement[]> => {
-    const res = await fetch(`${env.PUBLIC_API_BASE}/announcements`, {
+    const res = await fetch(`${API_URL}/announcements`, {
         method: "GET",
         credentials: "include"
     });
@@ -31,7 +30,7 @@ export const getAllAnnouncements = async (fetch: FetchFunc): Promise<Announcemen
 };
 
 export const createAnnouncement = async (fetch: FetchFunc, title: string, content: string) => {
-    await fetch(`${env.PUBLIC_API_BASE}/announcements`, {
+    await fetch(`${API_URL}/announcements`, {
         method: "POST",
         credentials: "include",
         headers: {
@@ -42,7 +41,7 @@ export const createAnnouncement = async (fetch: FetchFunc, title: string, conten
 };
 
 export const deleteAnnouncement = async (fetch: FetchFunc, id: string) => {
-    await fetch(`${env.PUBLIC_API_BASE}/announcements/${id}`, {
+    await fetch(`${API_URL}/announcements/${id}`, {
         method: "DELETE",
         credentials: "include"
     });
@@ -54,7 +53,7 @@ export const editAnnouncement = async (
     title: string,
     content: string
 ) => {
-    await fetch(`${env.PUBLIC_API_BASE}/announcements/${id}`, {
+    await fetch(`${API_URL}/announcements/${id}`, {
         method: "PATCH",
         credentials: "include",
         headers: {

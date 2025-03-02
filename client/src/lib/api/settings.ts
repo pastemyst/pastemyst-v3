@@ -1,6 +1,5 @@
-import { env } from "$env/dynamic/public";
 import type { IndentUnit } from "$lib/indentation";
-import type { FetchFunc } from "./fetch";
+import { API_URL, type FetchFunc } from "./fetch";
 
 export interface UserSettings {
     showAllPastesOnProfile: boolean;
@@ -19,7 +18,7 @@ export interface Settings {
 export const getSettings = async (
     fetchFunc: FetchFunc
 ): Promise<[settings: Settings, cookie?: string]> => {
-    const res = await fetchFunc(`${env.PUBLIC_API_BASE}/settings`, {
+    const res = await fetchFunc(`${API_URL}/settings`, {
         method: "GET",
         credentials: "include"
     });
@@ -31,7 +30,7 @@ export const getSettings = async (
 };
 
 export const updateSettings = async (fetchFunc: FetchFunc, settings: Settings) => {
-    await fetchFunc(`${env.PUBLIC_API_BASE}/settings`, {
+    await fetchFunc(`${API_URL}/settings`, {
         method: "PATCH",
         credentials: "include",
         headers: {
@@ -42,7 +41,7 @@ export const updateSettings = async (fetchFunc: FetchFunc, settings: Settings) =
 };
 
 export const getUserSettings = async (fetchFunc: FetchFunc): Promise<UserSettings> => {
-    const res = await fetchFunc(`${env.PUBLIC_API_BASE}/settings/user`, {
+    const res = await fetchFunc(`${API_URL}/settings/user`, {
         method: "GET",
         credentials: "include"
     });
@@ -51,7 +50,7 @@ export const getUserSettings = async (fetchFunc: FetchFunc): Promise<UserSetting
 };
 
 export const updateUserSettings = async (fetchFunc: FetchFunc, userSettings: UserSettings) => {
-    await fetchFunc(`${env.PUBLIC_API_BASE}/settings/user`, {
+    await fetchFunc(`${API_URL}/settings/user`, {
         method: "PATCH",
         credentials: "include",
         headers: {

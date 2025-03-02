@@ -1,5 +1,5 @@
 <script lang="ts">
-    import { env } from "$env/dynamic/public";
+    import { API_URL } from "$lib/api/fetch";
 </script>
 
 <svelte:head>
@@ -17,7 +17,7 @@
 
     <ul>
         <li>
-            <a href="{env.PUBLIC_API_BASE}/login/github" rel="external" class="btn">
+            <a href="{API_URL}/login/github" rel="external" class="btn">
                 <svg
                     xmlns="http://www.w3.org/2000/svg"
                     width="64"
@@ -40,7 +40,7 @@
         </li>
 
         <li>
-            <a href="{env.PUBLIC_API_BASE}/login/gitlab" rel="external" class="btn">
+            <a href="{API_URL}/login/gitlab" rel="external" class="btn">
                 <svg
                     width="32px"
                     height="32px"

@@ -6,7 +6,6 @@
     import { Close, setBaseCommands, type Command } from "$lib/command";
     import { beforeNavigate, goto } from "$app/navigation";
     import ThemeContext from "$lib/ThemeContext.svelte";
-    import { env } from "$env/dynamic/public";
     import { onMount, type Snippet } from "svelte";
     import { activePastesStores, currentUserStore, versionStore } from "$lib/stores";
 
@@ -17,6 +16,7 @@
     import { tooltip } from "$lib/tooltips";
     import { formatDistanceToNow } from "date-fns";
     import { page } from "$app/state";
+    import { API_URL } from "$lib/api/fetch";
 
     interface Props {
         data: LayoutData;
@@ -69,7 +69,7 @@
                 {
                     name: "logout",
                     action: () => {
-                        window.location.href = `${env.PUBLIC_API_BASE}/auth/logout`;
+                        window.location.href = `${API_URL}/auth/logout`;
                         return Close.yes;
                     }
                 }

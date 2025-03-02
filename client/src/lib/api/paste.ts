@@ -1,5 +1,4 @@
-import { env } from "$env/dynamic/public";
-import type { FetchFunc } from "./fetch";
+import { API_URL, type FetchFunc } from "./fetch";
 import type { LangStat } from "./lang";
 import type { Page } from "./page";
 
@@ -167,7 +166,7 @@ export const createPaste = async (
 
         if (res.ok) return await res.json();
     } else {
-        const res = await fetch(`${env.PUBLIC_API_BASE}/pastes/`, {
+        const res = await fetch(`${API_URL}/pastes/`, {
             method: "POST",
             credentials: "include",
             headers: {
@@ -183,7 +182,7 @@ export const createPaste = async (
 };
 
 export const editPasteTags = async (id: string, tags: string[]): Promise<Paste | null> => {
-    const res = await fetch(`${env.PUBLIC_API_BASE}/pastes/${id}/tags`, {
+    const res = await fetch(`${API_URL}/pastes/${id}/tags`, {
         method: "PATCH",
         credentials: "include",
         headers: {
@@ -198,7 +197,7 @@ export const editPasteTags = async (id: string, tags: string[]): Promise<Paste |
 };
 
 export const editPaste = async (id: string, editInfo: PasteEditInfo): Promise<Paste | null> => {
-    const res = await fetch(`${env.PUBLIC_API_BASE}/pastes/${id}`, {
+    const res = await fetch(`${API_URL}/pastes/${id}`, {
         method: "PATCH",
         credentials: "include",
         headers: {
@@ -216,7 +215,7 @@ export const getPaste = async (
     fetchFunc: FetchFunc,
     id: string
 ): Promise<[Paste | null, number]> => {
-    const res = await fetchFunc(`${env.PUBLIC_API_BASE}/pastes/${id}`, {
+    const res = await fetchFunc(`${API_URL}/pastes/${id}`, {
         method: "GET",
         credentials: "include"
     });
@@ -230,7 +229,7 @@ export const getPasteHistoryCompact = async (
     fetchFunc: FetchFunc,
     id: string
 ): Promise<{ id: string; editedAt: string }[]> => {
-    const res = await fetchFunc(`${env.PUBLIC_API_BASE}/pastes/${id}/history_compact`, {
+    const res = await fetchFunc(`${API_URL}/pastes/${id}/history_compact`, {
         method: "GET",
         credentials: "include"
     });
@@ -245,7 +244,7 @@ export const getPasteAtEdit = async (
     id: string,
     historyId: string
 ): Promise<Paste | null> => {
-    const res = await fetchFunc(`${env.PUBLIC_API_BASE}/pastes/${id}/history/${historyId}`, {
+    const res = await fetchFunc(`${API_URL}/pastes/${id}/history/${historyId}`, {
         method: "GET",
         credentials: "include"
     });
@@ -260,7 +259,7 @@ export const getPasteDiff = async (
     id: string,
     historyId: string
 ): Promise<PasteDiff | null> => {
-    const res = await fetchFunc(`${env.PUBLIC_API_BASE}/pastes/${id}/history/${historyId}/diff`, {
+    const res = await fetchFunc(`${API_URL}/pastes/${id}/history/${historyId}/diff`, {
         method: "GET",
         credentials: "include"
     });
@@ -271,7 +270,7 @@ export const getPasteDiff = async (
 };
 
 export const deletePaste = async (id: string): Promise<boolean> => {
-    const res = await fetch(`${env.PUBLIC_API_BASE}/pastes/${id}`, {
+    const res = await fetch(`${API_URL}/pastes/${id}`, {
         method: "DELETE",
         credentials: "include"
     });
@@ -280,7 +279,7 @@ export const deletePaste = async (id: string): Promise<boolean> => {
 };
 
 export const starPaste = async (id: string): Promise<boolean> => {
-    const res = await fetch(`${env.PUBLIC_API_BASE}/pastes/${id}/star`, {
+    const res = await fetch(`${API_URL}/pastes/${id}/star`, {
         method: "POST",
         credentials: "include"
     });
@@ -289,7 +288,7 @@ export const starPaste = async (id: string): Promise<boolean> => {
 };
 
 export const pinPaste = async (id: string): Promise<boolean> => {
-    const res = await fetch(`${env.PUBLIC_API_BASE}/pastes/${id}/pin`, {
+    const res = await fetch(`${API_URL}/pastes/${id}/pin`, {
         method: "POST",
         credentials: "include"
     });
@@ -298,7 +297,7 @@ export const pinPaste = async (id: string): Promise<boolean> => {
 };
 
 export const isPasteStarred = async (fetchFunc: FetchFunc, id: string): Promise<boolean> => {
-    const res = await fetchFunc(`${env.PUBLIC_API_BASE}/pastes/${id}/star`, {
+    const res = await fetchFunc(`${API_URL}/pastes/${id}/star`, {
         method: "GET",
         credentials: "include"
     });
@@ -309,7 +308,7 @@ export const isPasteStarred = async (fetchFunc: FetchFunc, id: string): Promise<
 };
 
 export const togglePrivatePaste = async (id: string): Promise<boolean> => {
-    const res = await fetch(`${env.PUBLIC_API_BASE}/pastes/${id}/private`, {
+    const res = await fetch(`${API_URL}/pastes/${id}/private`, {
         method: "POST",
         credentials: "include"
     });
@@ -321,7 +320,7 @@ export const getPasteStats = async (
     fetchFunc: FetchFunc,
     id: string
 ): Promise<PasteStats | null> => {
-    const res = await fetchFunc(`${env.PUBLIC_API_BASE}/pastes/${id}/stats`, {
+    const res = await fetchFunc(`${API_URL}/pastes/${id}/stats`, {
         method: "GET",
         credentials: "include"
     });
@@ -332,7 +331,7 @@ export const getPasteStats = async (
 };
 
 export const getPasteLangs = async (fetchFunc: FetchFunc, id: string): Promise<LangStat[]> => {
-    const res = await fetchFunc(`${env.PUBLIC_API_BASE}/pastes/${id}/langs`, {
+    const res = await fetchFunc(`${API_URL}/pastes/${id}/langs`, {
         method: "GET",
         credentials: "include"
     });
@@ -350,7 +349,7 @@ export const getUserPastes = async (
     pageSize: number
 ): Promise<Page<PasteWithLangStats> | null> => {
     const res = await fetchFunc(
-        `${env.PUBLIC_API_BASE}/users/${username}/pastes${pinned ? "/pinned" : ""}` +
+        `${API_URL}/users/${username}/pastes${pinned ? "/pinned" : ""}` +
             `?page=${page}` +
             `&pageSize=${pageSize}`,
         {
@@ -365,7 +364,7 @@ export const getUserPastes = async (
 };
 
 export const isPasteEncrypted = async (fetchFunc: FetchFunc, id: string): Promise<boolean> => {
-    const res = await fetchFunc(`${env.PUBLIC_API_BASE}/pastes/${id}/encrypted`, {
+    const res = await fetchFunc(`${API_URL}/pastes/${id}/encrypted`, {
         method: "GET",
         credentials: "include"
     });

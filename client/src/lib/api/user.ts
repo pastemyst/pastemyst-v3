@@ -1,5 +1,4 @@
-import { env } from "$env/dynamic/public";
-import type { FetchFunc } from "./fetch";
+import { API_URL, type FetchFunc } from "./fetch";
 
 export interface User {
     id: string;
@@ -12,7 +11,7 @@ export interface User {
 }
 
 export const getUserByUsername = async (username: string): Promise<User | null> => {
-    const res = await fetch(`${env.PUBLIC_API_BASE}/users/${username}`, {
+    const res = await fetch(`${API_URL}/users/${username}`, {
         method: "GET"
     });
 
@@ -25,7 +24,7 @@ export const getUserById = async (
     fetchFunc: FetchFunc,
     id: string
 ): Promise<[User | null, number]> => {
-    const res = await fetchFunc(`${env.PUBLIC_API_BASE}/users?id=${id}`, {
+    const res = await fetchFunc(`${API_URL}/users?id=${id}`, {
         method: "GET"
     });
 
@@ -35,7 +34,7 @@ export const getUserById = async (
 };
 
 export const getUserTags = async (fetchFunc: FetchFunc, username: string): Promise<string[]> => {
-    const res = await fetchFunc(`${env.PUBLIC_API_BASE}/users/${username}/tags`, {
+    const res = await fetchFunc(`${API_URL}/users/${username}/tags`, {
         method: "GET",
         credentials: "include"
     });
@@ -46,7 +45,7 @@ export const getUserTags = async (fetchFunc: FetchFunc, username: string): Promi
 };
 
 export const deleteUser = async (username: string): Promise<boolean> => {
-    const res = await fetch(`${env.PUBLIC_API_BASE}/users/${username}`, {
+    const res = await fetch(`${API_URL}/users/${username}`, {
         method: "DELETE",
         credentials: "include"
     });

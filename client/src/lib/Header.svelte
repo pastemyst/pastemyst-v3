@@ -3,6 +3,7 @@
     import { tooltip } from "./tooltips";
     import { env } from "$env/dynamic/public";
     import { isMacOs } from "./utils/userAgent";
+    import { API_URL } from "./api/fetch";
 
     const isAlphaRelease = env.PUBLIC_ALPHA_RELEASE === "true";
 
@@ -43,7 +44,7 @@
         {#if $currentUserStore != null}
             <a href="/~{$currentUserStore.username}" class="nav-item user btn btn-icon">
                 <img
-                    src="{env.PUBLIC_API_BASE}/images/{$currentUserStore.avatarId}"
+                    src="{API_URL}/images/{$currentUserStore.avatarId}"
                     alt="{$currentUserStore.username}'s avatar"
                 />
             </a>

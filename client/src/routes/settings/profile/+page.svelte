@@ -1,6 +1,6 @@
 <script lang="ts">
-    import { env } from "$env/dynamic/public";
     import { getSelf } from "$lib/api/auth";
+    import { API_URL } from "$lib/api/fetch";
     import { updateUserSettings } from "$lib/api/settings";
     import { getUserByUsername, deleteUser } from "$lib/api/user";
     import Checkbox from "$lib/Checkbox.svelte";
@@ -29,7 +29,7 @@
     };
 
     const onAvatarChange = async () => {
-        await fetch(`${env.PUBLIC_API_BASE}/settings/avatar`, {
+        await fetch(`${API_URL}/settings/avatar`, {
             method: "PATCH",
             credentials: "include",
             body: new FormData(avatarForm)
@@ -79,7 +79,7 @@
             username: usernameInputValue
         };
 
-        await fetch(`${env.PUBLIC_API_BASE}/settings/username`, {
+        await fetch(`${API_URL}/settings/username`, {
             method: "PATCH",
             credentials: "include",
             body: JSON.stringify(usernameData),
@@ -113,7 +113,7 @@
                         alert("failed to delete user. try again later.");
                     }
 
-                    window.location.href = `${env.PUBLIC_API_BASE}/auth/logout`;
+                    window.location.href = `${API_URL}/auth/logout`;
                 })();
 
                 return Close.yes;
@@ -138,10 +138,7 @@
 <h4>avatar</h4>
 
 <div class="avatar flex sm-row center">
-    <img
-        src="{env.PUBLIC_API_BASE}/images/{data.self?.avatarId}"
-        alt="{data.self.username}'s avatar"
-    />
+    <img src="{API_URL}/images/{data.self?.avatarId}" alt="{data.self.username}'s avatar" />
 
     <button onclick={onAvatarEditClick}>
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" class="icon">

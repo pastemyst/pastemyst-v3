@@ -2,6 +2,7 @@ import { findLangByName } from "$lib/api/lang";
 import { themes } from "$lib/themes";
 import type { RequestEvent, RequestHandler } from "@sveltejs/kit";
 import { readFileSync } from "fs";
+import path from "path";
 import { getSingletonHighlighter, type LanguageRegistration } from "shiki";
 import { grammars } from "tm-grammars";
 
@@ -32,13 +33,15 @@ const highlight = async (
 
         if (lang && lang?.tmScope !== "none") {
             const name = grammars.find((g) => g.scopeName === lang.tmScope)!.name;
-            const langJson: LanguageRegistration = await import(
-                `../../../../node_modules/tm-grammars/grammars/${name}.json`,
-                { with: { type: "json" } }
-            );
+            const a = path.resolve(`node_modules/tm-grammars/grammars/${name}.json`);
+            console.log(a);
+            const langJson: LanguageRegistration = (await import(a, { with: { type: "json" } }))
+                .default;
+            console.log(langJson);
             await highlighter.loadLanguage(langJson);
 
             actualLanguage = langJson.name;
+            console.log(actualLanguage);
         }
     }
 

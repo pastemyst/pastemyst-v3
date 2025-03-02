@@ -1,13 +1,14 @@
 import { error, json, type RequestEvent, type RequestHandler } from "@sveltejs/kit";
 import { env } from "$env/dynamic/public";
 import { type Paste, type PasteCreateInfo } from "$lib/api/paste";
+import { API_URL } from "$lib/api/fetch";
 
 type CreateInfoWithEncryptionKey = PasteCreateInfo & { encryptionKey: string };
 
 export const POST: RequestHandler = async ({ request, fetch, cookies }: RequestEvent) => {
     const createInfo: CreateInfoWithEncryptionKey = await request.json();
 
-    const res = await fetch(`${env.PUBLIC_API_BASE}/pastes/`, {
+    const res = await fetch(`${API_URL}/pastes/`, {
         method: "POST",
         credentials: "include",
         headers: {

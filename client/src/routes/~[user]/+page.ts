@@ -3,24 +3,24 @@ import type { Page } from "$lib/api/page";
 import type { PageLoad } from "./$types";
 import type { PasteWithLangStats } from "$lib/api/paste";
 import { error } from "@sveltejs/kit";
-import { env } from "$env/dynamic/public";
 import { formatDistanceToNow } from "date-fns";
+import { API_URL } from "$lib/api/fetch";
 
 export const load: PageLoad = async ({ params, url, fetch }) => {
     const tag: string | null = url.searchParams.get("tag");
     const tagQuery = tag == null ? "" : "&tag=" + tag;
 
-    const userRes = await fetch(`${env.PUBLIC_API_BASE}/users/${params.user}`, {
+    const userRes = await fetch(`${API_URL}/users/${params.user}`, {
         method: "GET"
     });
 
-    const meRes = await fetch(`${env.PUBLIC_API_BASE}/auth/self`, {
+    const meRes = await fetch(`${API_URL}/auth/self`, {
         method: "GET",
         credentials: "include"
     });
 
     const userPastesRes = await fetch(
-        `${env.PUBLIC_API_BASE}/users/${params.user}/pastes?pageSize=5${tagQuery}`,
+        `${API_URL}/users/${params.user}/pastes?pageSize=5${tagQuery}`,
         {
             method: "GET",
             credentials: "include"
@@ -28,7 +28,7 @@ export const load: PageLoad = async ({ params, url, fetch }) => {
     );
 
     const userPinnedPastesRes = await fetch(
-        `${env.PUBLIC_API_BASE}/users/${params.user}/pastes/pinned?pageSize=5`,
+        `${API_URL}/users/${params.user}/pastes/pinned?pageSize=5`,
         {
             method: "GET",
             credentials: "include"
