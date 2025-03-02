@@ -76,7 +76,6 @@
     };
 
     const hasModifiedTabs = () => {
-        console.log(editor.getContent());
         if (editor.getContent() && editor.getContent() !== "") return true;
 
         for (const tab of tabs) {

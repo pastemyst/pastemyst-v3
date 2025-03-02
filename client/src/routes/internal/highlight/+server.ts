@@ -33,15 +33,13 @@ const highlight = async (
 
         if (lang && lang?.tmScope !== "none") {
             const name = grammars.find((g) => g.scopeName === lang.tmScope)!.name;
-            const a = path.resolve(`node_modules/tm-grammars/grammars/${name}.json`);
-            console.log(a);
-            const langJson: LanguageRegistration = (await import(a, { with: { type: "json" } }))
-                .default;
-            console.log(langJson);
+            const importPath = path.resolve(`node_modules/tm-grammars/grammars/${name}.json`);
+            const langJson: LanguageRegistration = (
+                await import(importPath, { with: { type: "json" } })
+            ).default;
             await highlighter.loadLanguage(langJson);
 
             actualLanguage = langJson.name;
-            console.log(actualLanguage);
         }
     }
 
