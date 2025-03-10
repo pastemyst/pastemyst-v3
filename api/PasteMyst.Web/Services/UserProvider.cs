@@ -4,6 +4,7 @@ using PasteMyst.Web.Extensions;
 using PasteMyst.Web.Exceptions;
 using PasteMyst.Web.Models;
 using PasteMyst.Web.Models.Auth;
+using MongoDB.Bson;
 
 namespace PasteMyst.Web.Services;
 
@@ -26,7 +27,7 @@ public class UserProvider(UserContext userContext, PasteService pasteService, Mo
 
     public async Task<User> GetByUsernameAsync(string username, CancellationToken cancellationToken)
     {
-        var filter = Builders<User>.Filter.Eq(u => u.Username, username);
+        var filter = Builders<User>.Filter.Regex(u => u.Username, new BsonRegularExpression(username, "i"));
         return await mongo.Users.Find(filter).FirstOrDefaultAsync(cancellationToken: cancellationToken);
     }
 
@@ -106,6 +107,32 @@ public class UserProvider(UserContext userContext, PasteService pasteService, Mo
             HasNextPage = pageRequest.Page < totalPages - 1,
             TotalPages = totalPages
         };
+    }
+
+    public async Task<List<Paste>> GetSelfOwnedPastesAsync()
+    {
+        if (!userContext.IsLoggedIn())
+            throw new HttpException(HttpStatusCode.Unauthorized, "You must be authorized to get your own pastes.");
+
+        if (!userContext.HasScope(Scope.Paste, Scope.PasteRead))
+            throw new HttpException(HttpStatusCode.Forbidden, $"Missing required scope {Scope.PasteRead.ToEnumString()}.");
+
+        var filter = Builders<Paste>.Filter.Eq(p => p.OwnerId, userContext.Self.Id);
+
+        return await mongo.Pastes.Find(filter).ToListAsync();
+    }
+
+    public async Task<List<Paste>> GetSelfStarredPastesAsync()
+    {
+        if (!userContext.IsLoggedIn())
+            throw new HttpException(HttpStatusCode.Unauthorized, "You must be authorized to get your own starred pastes.");
+
+        if (!userContext.HasScope(Scope.Paste, Scope.PasteRead))
+            throw new HttpException(HttpStatusCode.Forbidden, $"Missing required scope {Scope.PasteRead.ToEnumString()}.");
+
+        var filter = Builders<Paste>.Filter.AnyEq(p => p.Stars, userContext.Self.Id);
+
+        return await mongo.Pastes.Find(filter).ToListAsync();
     }
 
     public async Task<List<string>> GetTagsAsync(string username, CancellationToken cancellationToken)
