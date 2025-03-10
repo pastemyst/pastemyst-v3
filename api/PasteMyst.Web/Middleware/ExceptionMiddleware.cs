@@ -1,6 +1,7 @@
 using System.Net;
 using PasteMyst.Web.Exceptions;
 using PasteMyst.Web.Models;
+using PasteMyst.Web.Models.V2;
 
 namespace PasteMyst.Web.Middleware;
 
@@ -27,9 +28,18 @@ public class ExceptionMiddleware(RequestDelegate next, ILogger<ExceptionMiddlewa
         context.Response.ContentType = "application/json";
         context.Response.StatusCode = (int)exception.Status;
 
-        var response = new ErrorResponse((int)exception.Status, exception.Message);
+        var isV2 = context.Request.Path.StartsWithSegments("/api/v2");
 
-        await context.Response.WriteAsJsonAsync(response);
+        if (isV2)
+        {
+            var response = new ErrorResponseV2(exception.Message);
+            await context.Response.WriteAsJsonAsync(response);
+        }
+        else
+        {
+            var response = new ErrorResponse((int)exception.Status, exception.Message);
+            await context.Response.WriteAsJsonAsync(response);
+        }
     }
 
     private async Task HandleDefaultExceptionAsync(HttpContext context, Exception exception)
@@ -39,8 +49,17 @@ public class ExceptionMiddleware(RequestDelegate next, ILogger<ExceptionMiddlewa
         context.Response.ContentType = "application/json";
         context.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
 
-        var response = new ErrorResponse((int)HttpStatusCode.InternalServerError, "Internal server error.");
+        var isV2 = context.Request.Path.StartsWithSegments("/api/v2");
 
-        await context.Response.WriteAsJsonAsync(response);
+        if (isV2)
+        {
+            var response = new ErrorResponseV2("Internal server error.");
+            await context.Response.WriteAsJsonAsync(response);
+        }
+        else
+        {
+            var response = new ErrorResponse((int)HttpStatusCode.InternalServerError, "Internal server error.");
+            await context.Response.WriteAsJsonAsync(response);
+        }
     }
 }
