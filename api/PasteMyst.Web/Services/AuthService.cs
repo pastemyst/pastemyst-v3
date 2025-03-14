@@ -187,9 +187,17 @@ public class AuthService(
         {
             string authHeader = httpContext.Request.Headers.Authorization;
 
-            if (authHeader is null || authHeader.Length <= "Bearer ".Length) return (null, []);
+            if (authHeader is null) return (null, []);
 
-            accessToken = authHeader["Bearer ".Length..];
+            // Need to support V3 API Bearer auth, and V2 API (which doesn't require the Bearer string to be provided)
+            if (authHeader.Contains("Bearer"))
+            {
+                accessToken = authHeader["Bearer ".Length..];
+            }
+            else if (authHeader.Length > 0)
+            {
+                accessToken = authHeader;
+            }
         }
 
         var (valid, _, userId, scopes) = await AccessTokenValid(accessToken);

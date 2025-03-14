@@ -1,3 +1,4 @@
+using System.Text.Json.Serialization;
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
 
@@ -8,6 +9,7 @@ public class BasePasteV2
 {
     [BsonId]
     [BsonRepresentation(BsonType.String)]
+    [JsonPropertyName("_id")]
     public string Id { get; init; }
 
     public string OwnerId { get; set; }
