@@ -1,4 +1,7 @@
+using System.Net;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.DependencyInjection.Extensions;
+using PasteMyst.Web.Exceptions;
 using PasteMyst.Web.Jobs;
 using PasteMyst.Web.Middleware;
 using PasteMyst.Web.Services;
@@ -95,6 +98,21 @@ builder.Services.AddCors(options =>
         .AllowAnyMethod()
         .AllowCredentials()
     );
+});
+
+builder.Services.Configure<ApiBehaviorOptions>(options =>
+{
+    options.InvalidModelStateResponseFactory = context =>
+    {
+        var errors = context.ModelState.Values.SelectMany(x => x.Errors.Select(e => e.ErrorMessage)).ToList();
+
+        var errorResponse = new { StatusCode = HttpStatusCode.BadRequest, Message = string.Join(" ", errors) };
+
+        return new ObjectResult(errorResponse)
+        {
+            StatusCode = (int)HttpStatusCode.BadRequest
+        };
+    };
 });
 
 var app = builder.Build();

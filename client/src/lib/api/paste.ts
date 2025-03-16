@@ -1,3 +1,4 @@
+import type { ApiError } from "./errors";
 import { API_URL, type FetchFunc } from "./fetch";
 import type { LangStat } from "./lang";
 import type { Page } from "./page";
@@ -153,7 +154,7 @@ export const expiresInToLongString = (exp: ExpiresIn): string => {
 export const createPaste = async (
     createInfo: PasteCreateInfo,
     encryptionKey: string
-): Promise<Paste | null> => {
+): Promise<[Paste | null, ApiError | null]> => {
     if (createInfo.encrypted) {
         const res = await fetch(`/internal/create-encrypted-paste`, {
             method: "POST",
@@ -164,7 +165,9 @@ export const createPaste = async (
             body: JSON.stringify({ ...createInfo, encryptionKey })
         });
 
-        if (res.ok) return await res.json();
+        if (res.ok) return [await res.json(), null];
+
+        return [null, await res.json()];
     } else {
         const res = await fetch(`${API_URL}/pastes/`, {
             method: "POST",
@@ -175,10 +178,10 @@ export const createPaste = async (
             body: JSON.stringify(createInfo)
         });
 
-        if (res.ok) return await res.json();
-    }
+        if (res.ok) return [await res.json(), null];
 
-    return null;
+        return [null, await res.json()];
+    }
 };
 
 export const editPasteTags = async (id: string, tags: string[]): Promise<Paste | null> => {
@@ -196,7 +199,10 @@ export const editPasteTags = async (id: string, tags: string[]): Promise<Paste |
     return null;
 };
 
-export const editPaste = async (id: string, editInfo: PasteEditInfo): Promise<Paste | null> => {
+export const editPaste = async (
+    id: string,
+    editInfo: PasteEditInfo
+): Promise<[Paste | null, ApiError | null]> => {
     const res = await fetch(`${API_URL}/pastes/${id}`, {
         method: "PATCH",
         credentials: "include",
@@ -206,9 +212,9 @@ export const editPaste = async (id: string, editInfo: PasteEditInfo): Promise<Pa
         body: JSON.stringify(editInfo)
     });
 
-    if (res.ok) return await res.json();
+    if (res.ok) return [await res.json(), null];
 
-    return null;
+    return [null, await res.json()];
 };
 
 export const getPaste = async (

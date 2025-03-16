@@ -20,6 +20,7 @@
     import TagInput from "$lib/TagInput.svelte";
     import { onMount } from "svelte";
     import type { PageData } from "./$types";
+    import { addToast } from "$lib/toasts.svelte";
 
     interface Props {
         data: PageData;
@@ -109,18 +110,22 @@
             tags: tags
         };
 
-        const paste = await createPaste(pasteSkeleton, encryptionKey);
+        const [paste, createPasteError] = await createPaste(pasteSkeleton, encryptionKey);
 
-        // TODO: handle if creating paste failed.
+        if (paste) {
+            $creatingPasteStore = true;
 
-        $creatingPasteStore = true;
+            if (data.settings.copyLinkOnCreate) {
+                await navigator.clipboard.writeText(`${window.location}${paste?.id}`);
+                copyLinkToClipboardStore.set(true);
+            }
 
-        if (data.settings.copyLinkOnCreate) {
-            await navigator.clipboard.writeText(`${window.location}${paste?.id}`);
-            copyLinkToClipboardStore.set(true);
+            await goto(`/${paste.id}`);
+        } else {
+            addToast(`failed to create paste: ${createPasteError!.message.toLowerCase()}`, "error");
+
+            creatingPaste = false;
         }
-
-        await goto(`/${paste?.id}`);
     };
 
     const getExpiresInCommands = (): Command[] => {

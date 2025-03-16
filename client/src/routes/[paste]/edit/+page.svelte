@@ -4,6 +4,7 @@
     import { creatingPasteStore } from "$lib/stores";
     import TabbedEditor from "$lib/TabbedEditor.svelte";
     import TagInput from "$lib/TagInput.svelte";
+    import { addToast } from "$lib/toasts.svelte";
     import type { PageData } from "./$types";
 
     interface Props {
@@ -31,13 +32,15 @@
             pasties
         };
 
-        await editPaste(data.paste.id, paste);
+        const editPasteError = (await editPaste(data.paste.id, paste))[1];
 
-        // TODO: handle if editing paste failed.
+        if (editPasteError) {
+            addToast(`failed to edit paste: ${editPasteError.message}`, "error");
+        } else {
+            $creatingPasteStore = true;
 
-        $creatingPasteStore = true;
-
-        goto(`/${data.paste.id}`);
+            goto(`/${data.paste.id}`);
+        }
     };
 </script>
 
