@@ -18,6 +18,7 @@
     import { goto } from "$app/navigation";
     import { colorIsDark } from "./utils/color";
     import { API_URL } from "./api/fetch";
+    import { env } from "$env/dynamic/public";
 
     interface Props {
         paste: Paste;
@@ -67,7 +68,11 @@
     };
 
     const onCopyLink = async () => {
-        await navigator.clipboard.writeText(location.href);
+        if (env.PUBLIC_ALPHA_RELEASE === "true") {
+            await navigator.clipboard.writeText(location.href);
+        } else {
+            await navigator.clipboard.writeText(`https://paste.ax/${paste.id}`);
+        }
 
         linkCopied = true;
 
@@ -275,9 +280,13 @@
         {/if}
 
         <button
-            aria-label="copy link"
+            aria-label={env.PUBLIC_ALPHA_RELEASE === "true" ? "copy link" : "copy short link"}
             use:tooltip={{
-                content: linkCopied ? "copied" : "copy link",
+                content: linkCopied
+                    ? "copied"
+                    : env.PUBLIC_ALPHA_RELEASE === "true"
+                      ? "copy link"
+                      : "copy short link",
                 hideOnClick: false
             }}
             onclick={onCopyLink}
