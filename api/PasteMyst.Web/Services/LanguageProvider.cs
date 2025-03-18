@@ -79,9 +79,16 @@ public class LanguageProvider : IHostedService
 
         process.Start();
 
-        var languageName = (await process.StandardOutput.ReadToEndAsync(cancellationToken)).Trim();
+        await process.WaitForExitAsync(cancellationToken);
 
-        return FindByName(languageName);
+        if (process.ExitCode == 0)
+        {
+            var languageName = (await process.StandardOutput.ReadToEndAsync(cancellationToken)).Trim();
+
+            return FindByName(languageName);
+        }
+
+        return FindByName("Text");
     }
 
     public async Task StartAsync(CancellationToken cancellationToken)
