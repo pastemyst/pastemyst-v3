@@ -36,8 +36,7 @@
         if (p) activePasty = p;
     });
 
-    let previewMarkdownStacked: boolean[] = $state([]);
-    let previewMarkdownTabbed: boolean = $state(false);
+    let previewMarkdown: boolean[] = $state(paste.pasties.map(() => true));
 
     const setActiveTab = (id: string) => {
         activePastyId = id;
@@ -73,14 +72,14 @@
                                     {langStats}
                                     {historyId}
                                     stats={pasteStats.pasties[pasty.id]}
-                                    bind:previewMarkdown={previewMarkdownStacked[i]}
+                                    bind:previewMarkdown={previewMarkdown[i]}
                                 />
                             </div>
                         {/if}
                     </div>
                 </div>
 
-                {#if isLanguageMarkdown(pasty.language) && previewMarkdownStacked[i]}
+                {#if isLanguageMarkdown(pasty.language) && previewMarkdown[i]}
                     <div class="markdown" use:focusMarkdownHeading>
                         <!-- eslint-disable-next-line svelte/no-at-html-tags -->
                         {@html renderedMarkdown.find((p) => p.id === pasty.id)?.renderedMarkdown}
@@ -115,14 +114,16 @@
                         {langStats}
                         {historyId}
                         stats={pasteStats.pasties[activePastyId]}
-                        bind:previewMarkdown={previewMarkdownTabbed}
+                        bind:previewMarkdown={previewMarkdown[
+                            paste.pasties.findIndex((p) => p.id === activePastyId)
+                        ]}
                     />
                 </div>
             {/if}
         </div>
 
         <!-- eslint-disable-next-line svelte/no-at-html-tags -->
-        {#if isLanguageMarkdown(activePasty.language) && previewMarkdownTabbed}
+        {#if isLanguageMarkdown(activePasty.language) && previewMarkdown[paste.pasties.findIndex((p) => p.id === activePastyId)]}
             <div class="markdown" use:focusMarkdownHeading>
                 <!-- eslint-disable-next-line svelte/no-at-html-tags -->
                 {@html renderedMarkdown.find((p) => p.id === activePasty.id)?.renderedMarkdown}
