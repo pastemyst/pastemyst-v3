@@ -32,17 +32,22 @@ const highlight = async (
         const lang = await findLangByName(fetch, language);
 
         if (lang && lang?.tmScope !== "none") {
-            const name = grammars.find(
+            const grammar = grammars.find(
                 (g) =>
                     g.scopeName === lang.tmScope || g.name.toLowerCase() === lang.name.toLowerCase()
-            )!.name;
-            const importPath = path.resolve(`node_modules/tm-grammars/grammars/${name}.json`);
-            const langJson: LanguageRegistration = (
-                await import(importPath, { with: { type: "json" } })
-            ).default;
-            await highlighter.loadLanguage(langJson);
+            );
 
-            actualLanguage = langJson.name;
+            if (grammar) {
+                const importPath = path.resolve(
+                    `node_modules/tm-grammars/grammars/${grammar.name}.json`
+                );
+                const langJson: LanguageRegistration = (
+                    await import(importPath, { with: { type: "json" } })
+                ).default;
+                await highlighter.loadLanguage(langJson);
+
+                actualLanguage = langJson.name;
+            }
         }
     }
 
