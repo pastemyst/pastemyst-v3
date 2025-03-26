@@ -3,8 +3,9 @@ import { themes } from "$lib/themes";
 import type { RequestEvent, RequestHandler } from "@sveltejs/kit";
 import { readFileSync } from "fs";
 import path from "path";
-import { getSingletonHighlighter, type LanguageRegistration } from "shiki";
+import { getSingletonHighlighter, type BundledLanguage, type BundledTheme, type LanguageRegistration } from "shiki";
 import { grammars } from "tm-grammars";
+import he from 'he';
 
 export const POST: RequestHandler = async ({ request }: RequestEvent) => {
     const json = await request.json();
@@ -38,12 +39,8 @@ const highlight = async (
             );
 
             if (grammar) {
-                const importPath = path.resolve(
-                    `node_modules/tm-grammars/grammars/${grammar.name}.json`
-                );
-                const langJson: LanguageRegistration = (
-                    await import(importPath, { with: { type: "json" } })
-                ).default;
+                const importPath = path.resolve(`node_modules/tm-grammars/grammars/${grammar.name}.json`);
+                const langJson: LanguageRegistration = JSON.parse(readFileSync(importPath, "utf8"));
                 await highlighter.loadLanguage(langJson);
 
                 actualLanguage = langJson.name;
@@ -55,15 +52,25 @@ const highlight = async (
         await highlighter.loadTheme(themeJson);
     }
 
-    return highlighter.codeToHtml(content, {
-        lang: actualLanguage,
-        theme: themeJson["name"],
-        transformers: [
-            {
-                pre(pre) {
-                    if (wrap) this.addClassToHast(pre, "wrap");
-                }
-            }
-        ]
+    const tokens = highlighter.codeToTokensWithThemes(content, {
+        lang: actualLanguage as BundledLanguage,
+        themes: { dark: themeJson["name"] }
     });
+
+    const shikiTheme = highlighter.getTheme(themeJson["name"]);
+
+    let result = `<pre class="shiki ${wrap && "wrap"}" style="background-color: ${shikiTheme.bg}"><code>`;
+
+    for (const [i, line] of tokens.entries()) {
+        let lineHtml = `<span class="line" data-line="${i+1}"><span class="line-number">${i+1}</span>`;
+        for (const token of line) {
+            lineHtml += `<span style="color: ${token.variants.dark.color}">${he.encode(token.content)}</span>`;
+        }
+        lineHtml += `</span>`;
+        result += lineHtml;
+    }
+
+    result += "</code></pre>";
+
+    return result;
 };

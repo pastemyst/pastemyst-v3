@@ -7,6 +7,7 @@
     import { isLanguageMarkdown } from "./utils/markdown";
     import { browser } from "$app/environment";
     import type { Action } from "svelte/action";
+    import { onMount } from "svelte";
 
     interface Props {
         paste: Paste;
@@ -54,6 +55,77 @@
             }
         }
     };
+
+    onMount(() => {
+        const lineNumberElements = window.document.querySelectorAll(".line-number");
+
+        const highlight = window.location.hash.match(/L(\d+)(?:-L(\d+))?/);
+
+        let lastClickedLine: number | null = (highlight && highlight[1]) ? parseInt(highlight[1], 10) : null;
+
+        for (const lineNumberElement of lineNumberElements) {
+            lineNumberElement.addEventListener("click", (el: Event) => {
+                const line = parseInt((el.currentTarget as HTMLElement).innerText, 10);
+
+                if ((el as MouseEvent).shiftKey && lastClickedLine !== null) {
+                    const start = Math.min(lastClickedLine, line);
+                    const end = Math.max(lastClickedLine, line);
+
+                    const highlighted = window.document.querySelectorAll(".line.highlight");
+                    highlighted.forEach((hl) => {
+                        hl.classList.remove("highlight", "first", "last");
+                    });
+
+                    for (let i = start; i <= end; i++) {
+                        const element = window.document.querySelector(`.line[data-line="${i}"]`);
+                        if (element) {
+                            element.classList.add("highlight");
+                            if (i === start) element.classList.add("first");
+                            if (i === end) element.classList.add("last");
+                        }
+                    }
+
+                    window.location.hash = `L${start}-L${end}`;
+                } else {
+                    const highlighted = window.document.querySelectorAll(".line.highlight");
+                    highlighted.forEach((hl) => {
+                        hl.classList.remove("highlight", "first", "last");
+                    });
+
+                    const element = window.document.querySelector(`.line[data-line="${line}"]`);
+                    if (element) {
+                        element.classList.add("highlight", "first", "last");
+                    }
+
+                    window.location.hash = `L${line}`;
+                }
+
+                lastClickedLine = line;
+            });
+        }
+
+        if (highlight) {
+            const start = parseInt(highlight[1], 10);
+            const end = highlight[2] ? parseInt(highlight[2], 10) : start;
+
+            for (let i = start; i <= end; i++) {
+                const element = window.document.querySelector(`.line[data-line="${i}"]`);
+                if (element) {
+                    element.classList.add("highlight");
+                    if (i === start) element.classList.add("first");
+                    if (i === end) element.classList.add("last");
+                }
+            }
+
+            const firstLine = window.document.querySelector(`.line[data-line="${start}"]`);
+            if (firstLine) {
+                const yOffset = -90;
+                const y = firstLine.getBoundingClientRect().top + window.scrollY + yOffset;
+
+                window.scrollTo({ top: y, behavior: "instant" });
+            }
+        }
+    });
 </script>
 
 <div class="pasties">
@@ -208,22 +280,44 @@
             padding: 0;
             border-radius: 0;
             background-color: transparent;
+            display: flex;
+            flex-direction: column;
+            width: max-content;
         }
 
-        :global(.shiki code) {
-            counter-reset: step;
-            counter-increment: step 0;
-        }
-
-        :global(.shiki code .line::before) {
-            content: counter(step);
-            counter-increment: step;
+        :global(.shiki code .line-number) {
             width: 1rem;
             margin-right: 1rem;
             display: inline-block;
             text-align: right;
             color: var(--color-bg3);
             font-size: $fs-normal;
+            user-select: none;
+            cursor: pointer;
+            @include transition();
+
+            &:hover {
+                color: var(--color-fg);
+            }
+        }
+
+        :global(.shiki .line) {
+            @include transition();
+        }
+
+        :global(.shiki .line.highlight) {
+            background-color: color-mix(in srgb, var(--color-secondary) 15%, transparent);
+            width: 100%;
+        }
+
+        :global(.shiki .line.highlight.first) {
+            border-top-left-radius: $border-radius;
+            border-top-right-radius: $border-radius;
+        }
+
+        :global(.shiki .line.highlight.last) {
+            border-bottom-left-radius: $border-radius;
+            border-bottom-right-radius: $border-radius;
         }
     }
 
