@@ -57,6 +57,9 @@ const highlight = async (
         await highlighter.loadTheme(themeJson);
     }
 
+    const lines = content.split("\n").length;
+    const maxDigits = lines.toString().length;
+
     const tokens = highlighter.codeToTokensWithThemes(content, {
         lang: actualLanguage as BundledLanguage,
         themes: { dark: themeJson["name"] }
@@ -69,7 +72,7 @@ const highlight = async (
     for (const [i, line] of tokens.entries()) {
         let lineHtml = `<span class="line" data-line="${i + 1}">`;
         if (showLineNumbers) {
-            lineHtml += `<span class="line-number">${i + 1}</span>`;
+            lineHtml += `<span class="line-number" style="width: ${maxDigits}ch">${i + 1}</span>`;
         }
         for (const token of line) {
             lineHtml += `<span style="color: ${token.variants.dark.color}">${he.encode(token.content)}</span>`;

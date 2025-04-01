@@ -324,8 +324,7 @@
         }
 
         :global(.shiki code .line-number) {
-            width: 1rem;
-            margin-right: 1rem;
+            margin-right: 0.5rem;
             display: inline-block;
             text-align: right;
             color: var(--color-bg3);
