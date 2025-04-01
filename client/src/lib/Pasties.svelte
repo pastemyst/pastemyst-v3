@@ -7,6 +7,7 @@
     import { isLanguageMarkdown } from "./utils/markdown";
     import { browser } from "$app/environment";
     import type { Action } from "svelte/action";
+    import { onMount, tick } from "svelte";
 
     interface Props {
         paste: Paste;
@@ -38,8 +39,12 @@
 
     let previewMarkdown: boolean[] = $state(paste.pasties.map(() => true));
 
-    const setActiveTab = (id: string) => {
+    const setActiveTab = async (id: string) => {
         activePastyId = id;
+
+        await tick();
+
+        createLineHighlightingEventHandlers();
     };
 
     const focusMarkdownHeading: Action = () => {
@@ -54,17 +59,121 @@
             }
         }
     };
+
+    const createLineHighlightingEventHandlers = () => {
+        if (!browser) return;
+
+        const lineNumberElements = window.document.querySelectorAll(".line-number");
+
+        let lastClickedLine: number | null = null;
+
+        for (const lineNumberElement of lineNumberElements) {
+            lineNumberElement.addEventListener("click", (el: Event) => {
+                const currentTarget = el.currentTarget as HTMLElement;
+                const line = parseInt(currentTarget.innerText, 10);
+                const selectingRange = (el as MouseEvent).shiftKey && lastClickedLine !== null;
+                const startLine = selectingRange ? Math.min(lastClickedLine!, line) : line;
+                const endLine = selectingRange ? Math.max(lastClickedLine!, line) : line;
+
+                const pastyIndex =
+                    settings.pasteView === "stacked"
+                        ? currentTarget
+                              .closest(".pasty")!
+                              .attributes.getNamedItem("data-pastyindex")!.value
+                        : paste.pasties.findIndex((p) => p.id === activePastyId);
+
+                const highlighted = window.document.querySelectorAll(".line.highlight");
+                highlighted.forEach((hl) => {
+                    hl.classList.remove("highlight", "first", "last");
+                });
+
+                for (let i = startLine; i <= endLine; i++) {
+                    const element =
+                        settings.pasteView === "stacked"
+                            ? window.document.querySelector(
+                                  `.pasty[data-pastyindex="${pastyIndex}"] .line[data-line="${i}"]`
+                              )!
+                            : window.document.querySelector(`.line[data-line="${i}"]`)!;
+
+                    if (i === startLine) element.classList.add("highlight", "first");
+
+                    if (i === endLine) element.classList.add("highlight", "last");
+
+                    element.classList.add("highlight");
+                }
+
+                let hash = `${pastyIndex}L${startLine}`;
+                if (selectingRange) {
+                    hash += `-L${endLine}`;
+                }
+
+                window.location.hash = hash;
+
+                lastClickedLine = line;
+            });
+        }
+    };
+
+    const highlightLines = async () => {
+        if (!browser) return;
+
+        const match = /(\d+)L(\d+)(?:-L(\d+))?/.exec(window.location.hash);
+        if (match) {
+            let [, pastyIndex, startLine, endLine] = match.map((m) => (m ? parseInt(m, 10) : null));
+
+            if (!startLine) return;
+
+            if (!endLine) {
+                endLine = startLine;
+            }
+
+            await setActiveTab(paste.pasties[pastyIndex!].id);
+
+            let firstElement: Element | null = null;
+
+            for (let i = startLine; i <= endLine; i++) {
+                const element =
+                    settings.pasteView === "stacked"
+                        ? window.document.querySelector(
+                              `.pasty[data-pastyindex="${pastyIndex}"] .line[data-line="${i}"]`
+                          )
+                        : window.document.querySelector(`.line[data-line="${i}"]`);
+
+                if (!firstElement) {
+                    firstElement = element;
+                }
+
+                if (element) {
+                    element.classList.add("highlight");
+                    if (i === startLine) element.classList.add("first");
+                    if (i === endLine) element.classList.add("last");
+                }
+            }
+
+            if (firstElement) {
+                const yOffset = -90;
+                const y = firstElement.getBoundingClientRect().top + window.scrollY + yOffset;
+
+                window.scrollTo({ top: y, behavior: "instant" });
+            }
+        }
+    };
+
+    onMount(() => {
+        createLineHighlightingEventHandlers();
+        highlightLines();
+    });
 </script>
 
 <div class="pasties">
     {#if settings.pasteView === "stacked"}
         {#each paste.pasties as pasty, i}
-            <div class="pasty">
+            <div class="pasty" data-pastyindex={i}>
                 <div class="sticky">
                     <div class="title flex row space-between center">
                         <span>{pasty.title || "untitled"}</span>
 
-                        {#if pasteStats}
+                        {#if pasteStats && pasteStats.pasties[pasty.id]}
                             <div class="meta-stacked flex row center">
                                 <PastyMeta
                                     {paste}
@@ -100,13 +209,13 @@
                             isReadonly
                             title={pasty.title}
                             isActive={pasty.id === activePastyId}
-                            onclick={() => setActiveTab(pasty.id)}
+                            onclick={async () => await setActiveTab(pasty.id)}
                         />
                     {/each}
                 </div>
             </div>
 
-            {#if pasteStats}
+            {#if pasteStats && pasteStats.pasties[activePastyId]}
                 <div class="meta-tabbed">
                     <PastyMeta
                         {paste}
@@ -208,22 +317,45 @@
             padding: 0;
             border-radius: 0;
             background-color: transparent;
+            display: flex;
+            flex-direction: column;
+            min-width: max-content;
+            width: auto;
         }
 
-        :global(.shiki code) {
-            counter-reset: step;
-            counter-increment: step 0;
-        }
-
-        :global(.shiki code .line::before) {
-            content: counter(step);
-            counter-increment: step;
+        :global(.shiki code .line-number) {
             width: 1rem;
             margin-right: 1rem;
             display: inline-block;
             text-align: right;
             color: var(--color-bg3);
             font-size: $fs-normal;
+            user-select: none;
+            cursor: pointer;
+            @include transition();
+
+            &:hover {
+                color: var(--color-fg);
+            }
+        }
+
+        :global(.shiki .line) {
+            @include transition();
+        }
+
+        :global(.shiki .line.highlight) {
+            background-color: color-mix(in srgb, var(--color-secondary) 15%, transparent);
+            width: 100%;
+        }
+
+        :global(.shiki .line.highlight.first) {
+            border-top-left-radius: $border-radius;
+            border-top-right-radius: $border-radius;
+        }
+
+        :global(.shiki .line.highlight.last) {
+            border-bottom-left-radius: $border-radius;
+            border-bottom-right-radius: $border-radius;
         }
     }
 

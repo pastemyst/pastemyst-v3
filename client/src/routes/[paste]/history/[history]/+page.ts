@@ -56,7 +56,8 @@ export const load: PageLoad = async ({ params, fetch, parent }) => {
                 content: pasty.content,
                 language: pasty.language,
                 wrap: settings.textWrap,
-                theme: settings.theme
+                theme: settings.theme,
+                showLineNumbers: true
             })
         });
 

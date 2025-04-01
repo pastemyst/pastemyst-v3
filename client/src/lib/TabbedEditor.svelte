@@ -64,7 +64,7 @@
             const langs = await getLangs(fetch);
             for (const pasty of existingPasties) {
                 const lang = langs.find((lang) => lang.name === pasty.language);
-                const tab = new TabData(nanoid(), pasty.title);
+                const tab = new TabData(pasty.id, pasty.title);
                 tab.content = pasty.content;
                 tab.language = lang;
 
