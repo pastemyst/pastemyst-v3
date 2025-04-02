@@ -41,4 +41,12 @@ public class UserController(UserProvider userProvider) : ControllerBase
     {
         return await userProvider.GetTagsAsync(username, cancellationToken);
     }
+
+    [HttpGet("{username}.zip")]
+    public async Task<FileContentResult> DownloadUserData(string username, CancellationToken cancellationToken)
+    {
+        var (zip, filename) = await userProvider.DownloadUserData(username, cancellationToken);
+
+        return File(zip, "application/zip", filename);
+    }
 }
