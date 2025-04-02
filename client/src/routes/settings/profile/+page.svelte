@@ -121,7 +121,7 @@
         );
 
         cmdPalTitle.set(
-            "are you sure you want to delete your account? this will delete your account and all the associated data, including the pastes"
+            "are you sure you want to delete your profile? this will delete your profile and all the associated data, including the pastes"
         );
         cmdPalOpen.set(true);
     };
@@ -231,7 +231,12 @@
         toggle whether to show only your pinned pastes or all your public pastes on your profile
     </span>
 
-    <button class="delete-account btn btn-danger" onclick={onAccountDelete}>delete account</button>
+    <a class="download-account-data btn" href="{API_URL}/users/{data.self.username}.zip"
+        >download profile data</a
+    >
+    <span class="hint"> download all data associated with your profile </span>
+
+    <button class="delete-account btn btn-danger" onclick={onAccountDelete}>delete profile</button>
     <span class="hint">
         this will delete your account and all the associated data, including the pastes
     </span>
@@ -283,8 +288,14 @@
     .privacy {
         margin-bottom: 2rem;
 
+        .download-account-data {
+            margin-top: 2rem;
+            width: 100%;
+        }
+
         .delete-account {
             margin-top: 2rem;
+            width: 100%;
         }
     }
 

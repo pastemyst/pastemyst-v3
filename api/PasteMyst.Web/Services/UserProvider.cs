@@ -5,6 +5,10 @@ using PasteMyst.Web.Exceptions;
 using PasteMyst.Web.Models;
 using PasteMyst.Web.Models.Auth;
 using MongoDB.Bson;
+using System.IO.Compression;
+using System.Text.Json;
+using System.Net.Mime;
+using Microsoft.AspNetCore.StaticFiles;
 
 namespace PasteMyst.Web.Services;
 
@@ -166,7 +170,7 @@ public class UserProvider(UserContext userContext, PasteService pasteService, Mo
 
         var user = await GetByUsernameAsync(username, cancellationToken);
 
-        if (userContext.UserIsSelf(user))
+        if (!userContext.UserIsSelf(user))
             throw new HttpException(HttpStatusCode.Unauthorized, "You can delete only your account.");
 
         await imageService.DeleteAsync(user.AvatarId);
@@ -180,5 +184,93 @@ public class UserProvider(UserContext userContext, PasteService pasteService, Mo
         await mongo.Pastes.UpdateManyAsync(starsFilter, starsUpdate, cancellationToken: cancellationToken);
 
         await actionLogger.LogActionAsync(ActionLogType.UserDeleted, user.Id);
+    }
+
+    public async Task<(byte[] zip, string filename)> DownloadUserData(string username, CancellationToken cancellationToken)
+    {
+        if (!userContext.IsLoggedIn())
+            throw new HttpException(HttpStatusCode.Unauthorized, "You must be authorized to download your own user data.");
+
+        if (!userContext.HasScope(Scope.User))
+            throw new HttpException(HttpStatusCode.Forbidden, $"Missing required scope {Scope.User.ToEnumString()}.");
+
+        var user = await GetByUsernameAsync(username, cancellationToken);
+
+        if (!userContext.UserIsSelf(user))
+            throw new HttpException(HttpStatusCode.Unauthorized, "You can download user data only for your account.");
+
+        var accessTokens = await mongo.AccessTokens.Find(t => t.OwnerId == user.Id).ToListAsync(cancellationToken);
+        var avatarMeta = await imageService.FindByIdAsync(user.AvatarId, cancellationToken);
+        var avatarBytes = await imageService.DownloadByIdAsync(user.AvatarId, cancellationToken);
+        var pastes = await mongo.Pastes.Find(p => p.OwnerId == user.Id).ToListAsync(cancellationToken);
+        var encryptedPastes = await mongo.EncryptedPastes.Find(p => p.OwnerId == user.Id).ToListAsync(cancellationToken);
+        var pasteIds = pastes.Select(p => p.Id).ToList();
+        var actionLogs = await mongo.ActionLogs.Find(a => a.ObjectId == user.Id || pasteIds.Contains(a.ObjectId)).ToListAsync(cancellationToken);
+
+        using var memoryStream = new MemoryStream();
+
+        using (var zipArchive = new ZipArchive(memoryStream, ZipArchiveMode.Create, true))
+        {
+            {
+                var pastesEntry = zipArchive.CreateEntry("pastes.json");
+                await using var pastesStream = pastesEntry.Open();
+                var jsonBytes = JsonSerializer.SerializeToUtf8Bytes(pastes);
+                await pastesStream.WriteAsync(jsonBytes, cancellationToken);
+            }
+
+            {
+                var encryptedPastesEntry = zipArchive.CreateEntry("encrypted_pastes.json");
+                await using var encryptedPastesStream = encryptedPastesEntry.Open();
+                var jsonBytes = JsonSerializer.SerializeToUtf8Bytes(encryptedPastes);
+                await encryptedPastesStream.WriteAsync(jsonBytes, cancellationToken);
+            }
+
+            {
+                var accessTokensEntry = zipArchive.CreateEntry("access_tokens.json");
+                await using var accessTokensStream = accessTokensEntry.Open();
+                var jsonBytes = JsonSerializer.SerializeToUtf8Bytes(accessTokens);
+                await accessTokensStream.WriteAsync(jsonBytes, cancellationToken);
+            }
+
+            {
+                var actionLogsEntry = zipArchive.CreateEntry("action_logs.json");
+                await using var actionLogsStream = actionLogsEntry.Open();
+                var jsonBytes = JsonSerializer.SerializeToUtf8Bytes(actionLogs);
+                await actionLogsStream.WriteAsync(jsonBytes, cancellationToken);
+            }
+
+            {
+                var avatarEntry = zipArchive.CreateEntry($"avatar{GetFileExtensionFromMimeType(avatarMeta.Metadata["Content-Type"].ToString()!)}");
+                await using var avatarStream = avatarEntry.Open();
+                await avatarStream.WriteAsync(avatarBytes, cancellationToken);
+            }
+
+            {
+                var userEntry = zipArchive.CreateEntry("user.json");
+                await using var userStream = userEntry.Open();
+                var jsonBytes = JsonSerializer.SerializeToUtf8Bytes(user);
+                await userStream.WriteAsync(jsonBytes, cancellationToken);
+            }
+        }
+
+        memoryStream.Position = 0;
+
+        var filename = $"{user.Username}_{DateTime.UtcNow:yyyy-MM-dd_HH-mm-ss}.zip";
+
+        return (memoryStream.ToArray(), filename);
+    }
+
+    private static string GetFileExtensionFromMimeType(string mimeType)
+    {
+        var contentTypeProvider = new FileExtensionContentTypeProvider();
+        foreach (var mapping in contentTypeProvider.Mappings)
+        {
+            if (mapping.Value.Equals(mimeType, StringComparison.OrdinalIgnoreCase))
+            {
+                return mapping.Key;
+            }
+        }
+
+        return ".png";
     }
 }
