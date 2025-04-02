@@ -668,6 +668,34 @@ public sealed class PasteTests
     }
 
     [Test]
+    public async Task TestDelete_ShouldThrowNotFound_WhenAdminAndPrivate()
+    {
+        var createInfo = new PasteCreateInfo
+        {
+            Private = true,
+            Pasties =
+            [
+                new PastyCreateInfo
+                {
+                    Content = "Hello, World!"
+                }
+            ],
+        };
+
+        _userContext.LoginUser(new User { Id = "1" }, _defaultScopes);
+
+        var paste = await _pasteService.CreateAsync(createInfo, CancellationToken.None);
+
+        _userContext.LoginUser(new User { Id = "2", IsAdmin = true }, _defaultScopes);
+
+        var exception = Assert.ThrowsAsync<HttpException>(async () => await _pasteService.DeleteAsync(paste.Id));
+
+        Assert.That(exception.Status, Is.EqualTo(HttpStatusCode.NotFound));
+
+        _userContext.LogoutUser();
+    }
+
+    [Test]
     public async Task TestDelete_ShouldDelete_WhenOwner()
     {
         var createInfo = new PasteCreateInfo
@@ -684,6 +712,33 @@ public sealed class PasteTests
         _userContext.LoginUser(new User { Id = "1" }, _defaultScopes);
 
         var paste = await _pasteService.CreateAsync(createInfo, CancellationToken.None);
+
+        await _pasteService.DeleteAsync(paste.Id);
+
+        Assert.That(await _pasteService.ExistsByIdAsync(paste.Id), Is.False);
+
+        _userContext.LogoutUser();
+    }
+
+    [Test]
+    public async Task TestDelete_ShouldDelete_WhenAdmin()
+    {
+        var createInfo = new PasteCreateInfo
+        {
+            Pasties =
+            [
+                new PastyCreateInfo
+                {
+                    Content = "Hello, World!"
+                }
+            ],
+        };
+
+        _userContext.LoginUser(new User { Id = "1" }, _defaultScopes);
+
+        var paste = await _pasteService.CreateAsync(createInfo, CancellationToken.None);
+
+        _userContext.LoginUser(new User { Id = "2", IsAdmin = true }, _defaultScopes);
 
         await _pasteService.DeleteAsync(paste.Id);
 
