@@ -94,6 +94,7 @@
             <a
                 href="/~{$currentUserStore.username}"
                 class="nav-item user btn btn-icon"
+                class:admin={$currentUserStore.isAdmin}
                 aria-label="my profile"
                 use:tooltip
             >
@@ -202,6 +203,10 @@
                 height: 34px;
                 margin: 0;
                 border-radius: $border-radius;
+            }
+
+            &.admin {
+                border-color: var(--color-danger);
             }
         }
     }

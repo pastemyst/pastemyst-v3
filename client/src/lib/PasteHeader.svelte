@@ -338,7 +338,7 @@
             </svg>
         </a>
 
-        {#if paste.ownerId === $currentUserStore?.id}
+        {#if paste.ownerId === $currentUserStore?.id || $currentUserStore?.isAdmin}
             <button
                 use:tooltip
                 aria-label="delete paste"

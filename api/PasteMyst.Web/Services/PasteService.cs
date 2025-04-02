@@ -243,9 +243,7 @@ public class PasteService(
         if (!userContext.HasScope(Scope.Paste))
             throw new HttpException(HttpStatusCode.Forbidden, $"Missing required scope {Scope.Paste.ToEnumString()}.");
 
-        var paste = await mongo.BasePastes.Find(p => p.Id == id).FirstOrDefaultAsync();
-
-        if (paste is null) throw new HttpException(HttpStatusCode.NotFound, "Paste not found");
+        var paste = await mongo.BasePastes.Find(p => p.Id == id).FirstOrDefaultAsync() ?? throw new HttpException(HttpStatusCode.NotFound, "Paste not found");
 
         if (paste.DeletesAt <= DateTime.UtcNow)
         {
@@ -263,7 +261,8 @@ public class PasteService(
             if (paste.Private)
                 throw new HttpException(HttpStatusCode.NotFound, "Paste not found.");
 
-            throw new HttpException(HttpStatusCode.Unauthorized, "You can only delete your own pastes.");
+            if (!userContext.Self.IsAdmin)
+                throw new HttpException(HttpStatusCode.Unauthorized, "You can only delete your own pastes.");
         }
 
         await mongo.BasePastes.DeleteOneAsync(p => p.Id == paste.Id);
