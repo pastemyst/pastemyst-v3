@@ -7,8 +7,7 @@ using PasteMyst.Web.Models.Auth;
 using MongoDB.Bson;
 using System.IO.Compression;
 using System.Text.Json;
-using System.Net.Mime;
-using Microsoft.AspNetCore.StaticFiles;
+using PasteMyst.Web.Utils;
 
 namespace PasteMyst.Web.Services;
 
@@ -240,7 +239,7 @@ public class UserProvider(UserContext userContext, PasteService pasteService, Mo
             }
 
             {
-                var avatarEntry = zipArchive.CreateEntry($"avatar{GetFileExtensionFromMimeType(avatarMeta.Metadata["Content-Type"].ToString()!)}");
+                var avatarEntry = zipArchive.CreateEntry($"avatar{FileUtils.GetFileExtensionFromMimeType(avatarMeta.Metadata["Content-Type"].ToString()!)}");
                 await using var avatarStream = avatarEntry.Open();
                 await avatarStream.WriteAsync(avatarBytes, cancellationToken);
             }
@@ -258,19 +257,5 @@ public class UserProvider(UserContext userContext, PasteService pasteService, Mo
         var filename = $"{user.Username}_{DateTime.UtcNow:yyyy-MM-dd_HH-mm-ss}.zip";
 
         return (memoryStream.ToArray(), filename);
-    }
-
-    private static string GetFileExtensionFromMimeType(string mimeType)
-    {
-        var contentTypeProvider = new FileExtensionContentTypeProvider();
-        foreach (var mapping in contentTypeProvider.Mappings)
-        {
-            if (mapping.Value.Equals(mimeType, StringComparison.OrdinalIgnoreCase))
-            {
-                return mapping.Key;
-            }
-        }
-
-        return ".png";
     }
 }
