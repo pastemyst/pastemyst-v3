@@ -169,7 +169,7 @@ public class UserProvider(UserContext userContext, PasteService pasteService, Mo
 
         var user = await GetByUsernameAsync(username, cancellationToken);
 
-        if (!userContext.UserIsSelf(user))
+        if (!userContext.UserIsSelf(user) && !userContext.Self.IsAdmin)
             throw new HttpException(HttpStatusCode.Unauthorized, "You can delete only your account.");
 
         await imageService.DeleteAsync(user.AvatarId);
