@@ -3,12 +3,39 @@
     import { tooltip } from "$lib/tooltips";
     import PasteList from "$lib/PasteList.svelte";
     import { API_URL } from "$lib/api/fetch";
+    import { cmdPalOpen, cmdPalTitle, currentUserStore } from "$lib/stores";
+    import { Close, getConfirmActionCommands, setTempCommands } from "$lib/command";
+    import { deleteUser } from "$lib/api/user";
 
     interface Props {
         data: PageData;
     }
 
     let { data }: Props = $props();
+
+    const onDeleteUser = () => {
+        setTempCommands(
+            getConfirmActionCommands(() => {
+                (async () => {
+                    const ok = await deleteUser(data.user.username);
+
+                    if (!ok) {
+                        // TODO: nicer error handling
+                        alert("failed to delete user. try again later.");
+                    }
+
+                    window.location.href = "/";
+                })();
+
+                return Close.yes;
+            })
+        );
+
+        cmdPalTitle.set(
+            "are you sure you want to delete this user? this will delete the user and all the associated data, including the pastes"
+        );
+        cmdPalOpen.set(true);
+    };
 </script>
 
 <svelte:head>
@@ -126,6 +153,12 @@
                 <p class="joined" use:tooltip aria-label={new Date(data.user.createdAt).toString()}>
                     joined: {data.relativeJoined}
                 </p>
+
+                {#if $currentUserStore && $currentUserStore.isAdmin && !data.isCurrentUser}
+                    <button class="btn-danger delete-user-btn" onclick={onDeleteUser}
+                        >delete user</button
+                    >
+                {/if}
             </div>
         </section>
 
@@ -271,6 +304,10 @@
                 color: var(--color-bg3);
                 margin: 0;
                 margin-top: 0.25rem;
+            }
+
+            .delete-user-btn {
+                margin-top: 1rem;
             }
         }
     }
