@@ -41,6 +41,7 @@ const config: Config = {
           // Remove this to remove the "edit this page" links.
           editUrl:
             'https://github.com/pastemyst/pastemyst-v3/tree/main/packages/create-docusaurus/templates/shared/',
+          routeBasePath: '/'
         },
         blog: {
           showReadingTime: true,
@@ -68,17 +69,17 @@ const config: Config = {
     // Replace with your project's social card
     image: 'img/docusaurus-social-card.jpg',
     navbar: {
-      title: 'pastemyst docs',
+      title: 'PasteMyst Docs',
       logo: {
         alt: 'pastemyst logo',
-        src: 'img/logo.svg',
+        src: 'img/pastemyst.svg',
       },
       items: [
         {
           type: 'docSidebar',
           sidebarId: 'tutorialSidebar',
           position: 'left',
-          label: 'Tutorial',
+          label: 'API Docs',
         },
         {to: '/blog', label: 'Blog', position: 'left'},
         {
@@ -95,8 +96,8 @@ const config: Config = {
           title: 'Docs',
           items: [
             {
-              label: 'Tutorial',
-              to: '/docs/intro',
+              label: 'API Docs',
+              to: '/docs/api',
             },
           ],
         },
@@ -104,16 +105,8 @@ const config: Config = {
           title: 'Community',
           items: [
             {
-              label: 'Stack Overflow',
-              href: 'https://stackoverflow.com/questions/tagged/docusaurus',
-            },
-            {
               label: 'Discord',
-              href: 'https://discordapp.com/invite/docusaurus',
-            },
-            {
-              label: 'X',
-              href: 'https://x.com/docusaurus',
+              href: 'https://discord.gg/SdKbcbq',
             },
           ],
         },
@@ -126,12 +119,12 @@ const config: Config = {
             },
             {
               label: 'GitHub',
-              href: 'https://github.com/facebook/docusaurus',
+              href: 'https://github.com/pastemyst/pastemyst-v3',
             },
           ],
         },
       ],
-      copyright: `Copyright © ${new Date().getFullYear()} My Project, Inc. Built with Docusaurus.`,
+      copyright: `Copyright © ${new Date().getFullYear()} CodeMyst. Built with Docusaurus.`,
     },
     prism: {
       theme: prismThemes.github,
