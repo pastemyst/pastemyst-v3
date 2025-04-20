@@ -10,10 +10,10 @@ const config: Config = {
   favicon: 'img/favicon.ico',
 
   // Set the production url of your site here
-  url: 'https://paste.myst.rs/',
+  url: 'https://pastemyst.github.io/',
   // Set the /<baseUrl>/ pathname under which your site is served
   // For GitHub pages deployment, it is often '/<projectName>/'
-  baseUrl: '/docs',
+  baseUrl: '/pastemyst-v3',
 
   trailingSlash: false,
 
@@ -42,7 +42,7 @@ const config: Config = {
           // Please change this to your repo.
           // Remove this to remove the "edit this page" links.
           editUrl:
-            'https://github.com/pastemyst/pastemyst-v3/tree/main/main/docs',
+            'https://github.com/pastemyst/pastemyst-v3/tree/main/docs',
           routeBasePath: '/'
         },
         blog: {
