@@ -42,7 +42,7 @@ const config: Config = {
           // Please change this to your repo.
           // Remove this to remove the "edit this page" links.
           editUrl:
-            'https://github.com/pastemyst/pastemyst-v3/tree/main/packages/create-docusaurus/templates/shared/',
+            'https://github.com/pastemyst/pastemyst-v3/tree/main/main/docs',
           routeBasePath: '/'
         },
         blog: {
@@ -54,7 +54,7 @@ const config: Config = {
           // Please change this to your repo.
           // Remove this to remove the "edit this page" links.
           editUrl:
-            'https://github.com/pastemyst/pastemyst-v3/tree/main/packages/create-docusaurus/templates/shared/',
+            'https://github.com/pastemyst/pastemyst-v3/tree/main/docs',
           // Useful options to enforce blogging best practices
           onInlineTags: 'warn',
           onInlineAuthors: 'warn',
