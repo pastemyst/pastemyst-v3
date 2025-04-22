@@ -5,8 +5,8 @@ import type * as Preset from '@docusaurus/preset-classic';
 // This runs in Node.js - Don't use client-side code here (browser APIs, JSX...)
 
 const config: Config = {
-  title: 'pastemyst | docs',
-  tagline: 'api documentation for pastemyst',
+  title: 'PasteMyst Docs',
+  tagline: 'API documentation for PasteMyst',
   favicon: 'img/favicon.ico',
 
   // Set the production url of your site here
@@ -129,8 +129,9 @@ const config: Config = {
       copyright: `Copyright © ${new Date().getFullYear()} CodeMyst. Built with Docusaurus.`,
     },
     prism: {
-      theme: prismThemes.github,
-      darkTheme: prismThemes.dracula,
+      theme: prismThemes.gruvboxMaterialLight,
+      darkTheme: prismThemes.gruvboxMaterialDark,
+      additionalLanguages: ['http']
     },
   } satisfies Preset.ThemeConfig,
 };
