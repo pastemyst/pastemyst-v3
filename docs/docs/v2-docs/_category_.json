@@ -1,6 +1,6 @@
 {
-  "label": "API V2 Docs",
-  "position": 2,
+  "label": "API V2 Docs (deprecated)",
+  "position": 3,
   "link": {
     "type": "generated-index",
     "description": "Documentation for the deprecated API V2."
