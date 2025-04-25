@@ -18,7 +18,7 @@ Returns a single user by username or ID.
 
     `GET /api/v3/users?id=userId`
 
-    To get the avatar of the user as an image, check out the docs for the images endpoint.
+    To get the avatar of the user as an image, check out the docs for the [images endpoint](/docs/api-docs/images.md).
 
     ##### Response
 
