@@ -13,7 +13,7 @@ const config: Config = {
   url: 'https://pastemyst.github.io/',
   // Set the /<baseUrl>/ pathname under which your site is served
   // For GitHub pages deployment, it is often '/<projectName>/'
-  baseUrl: '/pastemyst-v3',
+  baseUrl: '/',
 
   trailingSlash: false,
 
@@ -99,7 +99,7 @@ const config: Config = {
           items: [
             {
               label: 'API Docs',
-              to: '/pastemyst-v3',
+              to: '/',
             },
           ],
         },
