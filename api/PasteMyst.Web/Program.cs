@@ -1,11 +1,11 @@
 using System.Net;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.DependencyInjection.Extensions;
-using PasteMyst.Web.Exceptions;
 using PasteMyst.Web.Jobs;
 using PasteMyst.Web.Middleware;
 using PasteMyst.Web.Services;
 using Quartz;
+using Quartz.AspNetCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
