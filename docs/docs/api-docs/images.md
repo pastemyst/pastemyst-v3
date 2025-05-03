@@ -7,7 +7,7 @@ slug: /images
 
 These are the docs for the images endpoint. Used for fetching images (mainly user's avatars).
 
-# Get an image
+## Get an image
 
 Returns an image based on its ID. To get the user's avatar, use the `avatarId` field.
 

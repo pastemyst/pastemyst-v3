@@ -7,7 +7,7 @@ slug: /languages
 
 These are the docs for the languages endpoints. Used for getting information about supported languages on PasteMyst, and autodetecting languages based on content.
 
-# List all languages
+## List all languages
 
 Lists all of the languages that are supported on PasteMyst.
 
@@ -145,7 +145,7 @@ Lists the names of only the popular (most commonly used) languages.
     ```
 </details>
 
-# Get a language by name
+## Get a language by name
 
 Finds a language by name. For the name it will accept any of the following: name, alias, extension. A name match has the highest priority.
 
@@ -177,7 +177,7 @@ Finds a language by name. For the name it will accept any of the following: name
     ```
 </details>
 
-# Autodetect the language
+## Autodetect the language
 
 Tries to autodetect the language of the provided content.
 
