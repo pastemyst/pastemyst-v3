@@ -22,3 +22,7 @@ To use the access token send it in the `Authorization` header like so:
 ```http
 Authorization: Bearer <token>
 ```
+
+The V2 API is still working, but it is deprecated. You can view the docs [here](v2-docs/v2-api-docs.md).
+
+The V1 API is now **removed**.

@@ -7,7 +7,7 @@ slug: /meta
 
 These are the docs for the meta endpoints. Used for fetching some stats and info about PasteMyst itself.
 
-# Get the active paste count
+## Get the active paste count
 
 Returns the number of currently active pastes.
 
@@ -23,7 +23,7 @@ Returns the number of currently active pastes.
     ```
 </details>
 
-# Get the PasteMyst version
+## Get the PasteMyst version
 
 Returns the current running PasteMyst version.
 
@@ -39,7 +39,7 @@ Returns the current running PasteMyst version.
     ```
 </details>
 
-# Get all releases
+## Get all releases
 
 Returns the list of all releases ever released on PasteMyst, along with their own changelogs.
 
@@ -80,7 +80,7 @@ Returns the list of all releases ever released on PasteMyst, along with their ow
     ```
 </details>
 
-# Get the PasteMyst stats
+## Get the PasteMyst stats
 
 Returns the stats of active/total pastes and active/total users on PasteMyst over time.
 
