@@ -14,3 +14,5 @@ The old way of providing the API key (without the Bearer keyword) is still valid
 ```sh
 Authorization: <token>
 ```
+
+The old API keys from PasteMyst V2 are migrated to V3 and are still valid. They are automatically given all the scopes to maintain backwards compatibility. It is not possible to view this token again, so if you rely on this token make sure you have it saved somewhere!
