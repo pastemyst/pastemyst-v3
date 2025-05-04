@@ -1,8 +1,18 @@
 <script lang="ts">
     import { onMount } from "svelte";
     import type { PageData } from "./$types";
-    import { Chart, Legend, LinearScale, LineController, LineElement, PointElement, TimeScale, Title, Tooltip } from "chart.js";
-    import 'chartjs-adapter-date-fns';
+    import {
+        Chart,
+        Legend,
+        LinearScale,
+        LineController,
+        LineElement,
+        PointElement,
+        TimeScale,
+        Title,
+        Tooltip
+    } from "chart.js";
+    import "chartjs-adapter-date-fns";
 
     interface Props {
         data: PageData;
@@ -13,16 +23,25 @@
     let canvasElement: HTMLCanvasElement;
 
     onMount(() => {
-        Chart.register(LineController, LineElement, PointElement, LinearScale, TimeScale, Title, Tooltip, Legend);
+        Chart.register(
+            LineController,
+            LineElement,
+            PointElement,
+            LinearScale,
+            TimeScale,
+            Title,
+            Tooltip,
+            Legend
+        );
 
         new Chart(canvasElement, {
             type: "line",
             data: {
-                labels: data.weeklyPasteStats.map(s => new Date(s.date)),
+                labels: data.weeklyPasteStats.map((s) => new Date(s.date)),
                 datasets: [
                     {
                         label: "total pastes",
-                        data: data.weeklyPasteStats.map(s => s.total),
+                        data: data.weeklyPasteStats.map((s) => s.total),
                         borderColor: "rgb(238, 114, 13)",
                         tension: 0.6,
                         cubicInterpolationMode: "monotone",
@@ -30,7 +49,7 @@
                     },
                     {
                         label: "active pastes",
-                        data: data.weeklyPasteStats.map(s => s.active),
+                        data: data.weeklyPasteStats.map((s) => s.active),
                         borderColor: "rgb(30, 174, 219)",
                         tension: 0.6,
                         cubicInterpolationMode: "monotone",
@@ -54,7 +73,7 @@
                             display: true,
                             text: "date"
                         },
-                        min: '2019-01-01T00:00:00Z',
+                        min: "2019-01-01T00:00:00Z"
                     },
                     y: {
                         title: {
