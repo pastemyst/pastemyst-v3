@@ -83,6 +83,7 @@ const config: Config = {
           position: 'left',
           label: 'API Docs',
         },
+        {to: '/cli', label: 'CLI Tool', position: 'left'},
         {to: '/blog', label: 'Blog', position: 'left'},
         {
           href: 'https://github.com/pastemyst/pastemyst-v3',
