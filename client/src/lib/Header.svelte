@@ -57,7 +57,12 @@
                 </svg>
             </a>
 
-            <a href="https://docs.paste.myst.rs" class="btn nav-item btn-icon" aria-label="docs" use:tooltip>
+            <a
+                href="https://docs.paste.myst.rs"
+                class="btn nav-item btn-icon"
+                aria-label="docs"
+                use:tooltip
+            >
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" class="icon">
                     <title>Book Icon</title>
                     <path
@@ -67,7 +72,13 @@
                 </svg>
             </a>
 
-            <a href="https://docs.paste.myst.rs/cli" class="btn nav-item btn-icon" aria-label="cli tool" use:tooltip data-sveltekit-preload-code="false">
+            <a
+                href="https://docs.paste.myst.rs/cli"
+                class="btn nav-item btn-icon"
+                aria-label="cli tool"
+                use:tooltip
+                data-sveltekit-preload-code="false"
+            >
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" class="icon">
                     <title>Command Line Icon</title>
                     <path
