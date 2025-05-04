@@ -7,6 +7,5 @@ public class AppStats
     public long ActiveUsers { get; set; }
     public long TotalUsers { get; set; }
 
-    public SortedDictionary<DateTime, long> ActivePastesOverTime { get; set; }
-    public SortedDictionary<DateTime, long> TotalPastesOverTime { get; set; }
+    public List<WeeklyPasteStats> WeeklyPasteStats { get; set; }
 }
