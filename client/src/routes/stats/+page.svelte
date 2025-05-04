@@ -1,7 +1,8 @@
 <script lang="ts">
     import { onMount } from "svelte";
     import type { PageData } from "./$types";
-    import * as frappe from "frappe-charts";
+    import { Chart, Legend, LinearScale, LineController, LineElement, PointElement, TimeScale, Title, Tooltip } from "chart.js";
+    import 'chartjs-adapter-date-fns';
 
     interface Props {
         data: PageData;
@@ -9,34 +10,59 @@
 
     let { data }: Props = $props();
 
+    let canvasElement: HTMLCanvasElement;
+
     onMount(() => {
-        const labels = Object.keys(data.activePastesOverTime).map((d) =>
-            new Date(d).toDateString()
-        );
+        Chart.register(LineController, LineElement, PointElement, LinearScale, TimeScale, Title, Tooltip, Legend);
 
-        const chartData = {
-            labels: labels,
-            datasets: [
-                {
-                    name: "active pastes",
-                    chartType: "line",
-                    values: Object.values(data.activePastesOverTime)
-                },
-                {
-                    name: "total pastes",
-                    chartType: "line",
-                    values: Object.values(data.totalPastesOverTime)
-                }
-            ]
-        };
-
-        new frappe.Chart("#chart", {
-            data: chartData,
+        new Chart(canvasElement, {
             type: "line",
-            colors: ["#fff"],
-            lineOptions: {
-                hideDots: 1,
-                spline: 1
+            data: {
+                labels: data.weeklyPasteStats.map(s => new Date(s.date)),
+                datasets: [
+                    {
+                        label: "total pastes",
+                        data: data.weeklyPasteStats.map(s => s.total),
+                        borderColor: "rgb(238, 114, 13)",
+                        tension: 0.6,
+                        cubicInterpolationMode: "monotone",
+                        pointRadius: 0
+                    },
+                    {
+                        label: "active pastes",
+                        data: data.weeklyPasteStats.map(s => s.active),
+                        borderColor: "rgb(30, 174, 219)",
+                        tension: 0.6,
+                        cubicInterpolationMode: "monotone",
+                        pointRadius: 0
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                interaction: {
+                    mode: "index",
+                    intersect: false
+                },
+                scales: {
+                    x: {
+                        type: "time",
+                        time: {
+                            unit: "week"
+                        },
+                        title: {
+                            display: true,
+                            text: "date"
+                        },
+                        min: '2019-01-01T00:00:00Z',
+                    },
+                    y: {
+                        title: {
+                            display: true,
+                            text: "pastes"
+                        }
+                    }
+                }
             }
         });
     });
@@ -61,7 +87,7 @@
         </ul>
     </div>
 
-    <div id="chart"></div>
+    <canvas bind:this={canvasElement}></canvas>
 </section>
 
 <style lang="scss">
@@ -97,67 +123,6 @@
                 &:last-child {
                     margin-left: auto;
                 }
-            }
-        }
-    }
-
-    :global(#chart) {
-        background-color: var(--color-bg);
-        border-radius: $border-radius;
-        border: 1px solid var(--color-bg2);
-
-        :global(.dataset-1 .line-graph-path) {
-            stroke: var(--color-primary) !important;
-        }
-
-        :global(.dataset-0 .line-graph-path) {
-            stroke: var(--color-secondary) !important;
-        }
-
-        :global(text),
-        :global(span) {
-            font-size: $fs-small;
-            font-family: $font-stack;
-            font-weight: normal;
-            text-transform: lowercase;
-        }
-
-        :global(.chart-legend) {
-            :global(g:first-child .legend-bar) {
-                fill: var(--color-secondary);
-            }
-
-            :global(g:last-child .legend-bar) {
-                fill: var(--color-primary);
-            }
-        }
-
-        :global(.graph-svg-tip .data-point-list) {
-            :global(li:first-child) {
-                border-top: 3px solid var(--color-secondary) !important;
-            }
-
-            :global(li:last-child) {
-                border-top: 3px solid var(--color-primary) !important;
-            }
-        }
-
-        :global(.y.axis) {
-            stroke: var(--color-bg3);
-            font-family: $font-stack;
-
-            :global(line) {
-                opacity: 0;
-            }
-        }
-
-        :global(.x.axis) {
-            :global(line) {
-                opacity: 0;
-            }
-
-            :global(text) {
-                fill: var(--color-bg3);
             }
         }
     }

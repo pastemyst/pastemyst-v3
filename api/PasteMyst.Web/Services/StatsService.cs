@@ -8,68 +8,165 @@ public class StatsService(MongoService mongo)
 {
     public async Task<AppStats> GetAppStatsAsync(CancellationToken cancellationToken)
     {
-        var totalPastesFilter = Builders<ActionLog>.Filter.Eq(a => a.Type, ActionLogType.PasteCreated);
-        var totalUsersFilter = Builders<ActionLog>.Filter.Eq(a => a.Type, ActionLogType.UserCreated);
+        // Explicitly cast ActionLogType enum to its integer value
+        var pasteCreated = ActionLogType.PasteCreated;
+        var pasteDeleted = ActionLogType.PasteDeleted;
+        var pasteExpired = ActionLogType.PasteExpired;
 
-        return new()
+        var userCreated = ActionLogType.UserCreated;
+        var userDeleted = ActionLogType.UserDeleted;
+
+        // 1. Count total and active pastes
+        var pasteCountsTask = mongo.ActionLogs.Aggregate()
+        .Match(log => log.Type == pasteCreated || log.Type == pasteDeleted || log.Type == pasteExpired) // Match with integer values
+        .Group(new BsonDocument
         {
-            ActivePastes = await mongo.Pastes.CountDocumentsAsync(new BsonDocument(), cancellationToken: cancellationToken),
-            ActiveUsers = await mongo.Users.CountDocumentsAsync(new BsonDocument(), cancellationToken: cancellationToken),
-            TotalPastes = await mongo.ActionLogs.CountDocumentsAsync(totalPastesFilter, cancellationToken: cancellationToken),
-            TotalUsers = await mongo.ActionLogs.CountDocumentsAsync(totalUsersFilter, cancellationToken: cancellationToken),
-            ActivePastesOverTime = await GetActivePasteStatsOverTime(),
-            TotalPastesOverTime = await GetActionLogStatsOverTime(ActionLogType.PasteCreated),
+            { "_id", "$type" }, // Group by ActionLogType (stored as integer)
+            { "count", new BsonDocument("$sum", 1) }
+        })
+        .ToListAsync(cancellationToken);
+
+        // 2. Count total and active users
+        var userCountsTask = mongo.ActionLogs.Aggregate()
+            .Match(log => log.Type == userCreated || log.Type == userDeleted)
+            .Group(new BsonDocument
+            {
+                { "_id", "$type" },
+                { "count", new BsonDocument("$sum", 1) }
+            })
+            .ToListAsync(cancellationToken);
+
+        // 3. Weekly paste stats
+        var weeklyStatsTask = GetWeeklyPasteStatsAsync(cancellationToken);
+
+        await Task.WhenAll(pasteCountsTask, userCountsTask, weeklyStatsTask);
+
+        var pasteCounts = pasteCountsTask.Result;
+        var userCounts = userCountsTask.Result;
+        var weeklyStats = weeklyStatsTask.Result;
+
+        Console.WriteLine(pasteCounts[0]);
+
+        long GetCount(BsonValue type, List<BsonDocument> counts) =>
+            counts.FirstOrDefault(d => d["_id"] == type)?.GetValue("count", 0).ToInt64() ?? 0;
+
+        long totalPastes = GetCount((int)pasteCreated, pasteCounts);
+        long deletedPastes = GetCount((int)pasteDeleted, pasteCounts);
+        long expiredPastes = GetCount((int)pasteExpired, pasteCounts);
+        long activePastes = totalPastes - deletedPastes - expiredPastes;
+
+        long totalUsers = GetCount((int)userCreated, userCounts);
+        long deletedUsers = GetCount((int)userDeleted, userCounts);
+        long activeUsers = totalUsers - deletedUsers;
+
+        return new AppStats
+        {
+            ActivePastes = activePastes,
+            TotalPastes = totalPastes,
+            ActiveUsers = activeUsers,
+            TotalUsers = totalUsers,
+            WeeklyPasteStats = weeklyStats
         };
     }
 
-    private async Task<SortedDictionary<DateTime, long>> GetActionLogStatsOverTime(ActionLogType type)
+    private async Task<List<WeeklyPasteStats>> GetWeeklyPasteStatsAsync(CancellationToken cancellationToken)
     {
-        var filter = Builders<ActionLog>.Filter.Eq(a => a.Type, type);
+        var pasteTypes = new[] {
+            (int)ActionLogType.PasteCreated,
+            (int)ActionLogType.PasteDeleted,
+            (int)ActionLogType.PasteExpired
+        };
 
-        var statsOverTime = (await mongo.ActionLogs
-            .Find(filter)
-            .ToListAsync())
-            .GroupBy(a => a.CreatedAt)
-            .ToDictionary(g => g.Key, g => (long) g.Count());
+        var match = new BsonDocument("$match", new BsonDocument("type", new BsonDocument("$in", new BsonArray(pasteTypes))));
 
-        var statsOverTimeSorted = new SortedDictionary<DateTime, long>(statsOverTime);
-
-        for (int i = 1; i < statsOverTimeSorted.Count; i++)
+        var pipeline = new[]
         {
-            var prev = statsOverTimeSorted.ElementAt(i - 1);
-            var cur = statsOverTimeSorted.ElementAt(i);
+            match,
 
-            statsOverTimeSorted[cur.Key] += prev.Value;
+            // 1. Group by ISO week/year and type
+            new BsonDocument("$group", new BsonDocument
+            {
+                { "_id", new BsonDocument
+                    {
+                        { "year", new BsonDocument("$isoWeekYear", "$createdAt") },
+                        { "week", new BsonDocument("$isoWeek", "$createdAt") },
+                        { "type", "$type" }
+                    }
+                },
+                { "count", new BsonDocument("$sum", 1) }
+            }),
+
+            // 2. Group by week to consolidate event types
+            new BsonDocument("$group", new BsonDocument
+            {
+                { "_id", new BsonDocument
+                    {
+                        { "year", "$_id.year" },
+                        { "week", "$_id.week" }
+                    }
+                },
+                { "events", new BsonDocument("$push", new BsonDocument
+                    {
+                        { "type", "$_id.type" },
+                        { "count", "$count" }
+                    })
+                }
+            }),
+
+            // 3. Project counts and date
+            new BsonDocument("$project", new BsonDocument
+            {
+                { "_id", 0 },
+                { "year", "$_id.year" },
+                { "week", "$_id.week" },
+                { "created", BuildEventExtract((int)ActionLogType.PasteCreated) },
+                { "deleted", BuildEventExtract((int)ActionLogType.PasteDeleted) },
+                { "expired", BuildEventExtract((int)ActionLogType.PasteExpired) }
+            }),
+
+            // 4. Build actual date from ISO year/week
+            new BsonDocument("$project", new BsonDocument
+            {
+                { "date", new BsonDocument("$dateFromParts", new BsonDocument
+                    {
+                        { "isoWeekYear", "$year" },
+                        { "isoWeek", "$week" },
+                        { "isoDayOfWeek", 1 } // Monday
+                    })
+                },
+                { "created", "$created.count" },
+                { "deleted", "$deleted.count" },
+                { "expired", "$expired.count" }
+            }),
+
+            new BsonDocument("$sort", new BsonDocument("date", 1))
+        };
+
+        var result = await mongo.ActionLogs.Aggregate<WeeklyPasteStats>(pipeline, cancellationToken: cancellationToken).ToListAsync(cancellationToken);
+
+        // 5. Compute cumulative totals
+        int total = 0, active = 0;
+        foreach (var stat in result)
+        {
+            total += stat.Created;
+            active += stat.Created - stat.Deleted - stat.Expired;
+            stat.Total = total;
+            stat.Active = active;
         }
 
-        return statsOverTimeSorted;
+        return result;
     }
 
-    private async Task<SortedDictionary<DateTime, long>> GetActivePasteStatsOverTime()
+    private static BsonDocument BuildEventExtract(int typeValue)
     {
-        var filter = Builders<ActionLog>.Filter.Eq(a => a.Type, ActionLogType.PasteCreated) |
-                     Builders<ActionLog>.Filter.Eq(a => a.Type, ActionLogType.PasteDeleted) |
-                     Builders<ActionLog>.Filter.Eq(a => a.Type, ActionLogType.PasteExpired);
-
-        var statsOverTime = (await mongo.ActionLogs
-            .Find(filter)
-            .ToListAsync())
-            .GroupBy(a => a.CreatedAt)
-            .ToDictionary(
-                grp => grp.Key,
-                grp => (long) grp.Count(g => g.Type == ActionLogType.PasteCreated) - grp.Count(g => g.Type == ActionLogType.PasteDeleted || g.Type == ActionLogType.PasteExpired)
-            );
-
-        var statsOverTimeSorted = new SortedDictionary<DateTime, long>(statsOverTime);
-
-        for (int i = 1; i < statsOverTimeSorted.Count; i++)
-        {
-            var prev = statsOverTimeSorted.ElementAt(i - 1);
-            var cur = statsOverTimeSorted.ElementAt(i);
-
-            statsOverTimeSorted[cur.Key] += prev.Value;
-        }
-
-        return statsOverTimeSorted;
+        return new BsonDocument("$ifNull", new BsonArray {
+            new BsonDocument("$first", new BsonDocument("$filter", new BsonDocument
+            {
+                { "input", "$events" },
+                { "as", "e" },
+                { "cond", new BsonDocument("$eq", new BsonArray { "$$e.type", typeValue }) }
+            })),
+            new BsonDocument("count", 0)
+        });
     }
 }

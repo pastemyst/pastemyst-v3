@@ -61,10 +61,15 @@ public class MongoService
 
         var usernameIndex = Builders<User>.IndexKeys.Ascending(u => u.Username);
 
-        Users.Indexes.CreateOne(new CreateIndexModel<User>(usernameIndex, new()
+        Users.Indexes.CreateOneAsync(new CreateIndexModel<User>(usernameIndex, new()
         {
             Unique = true
-        }));
+        })).Wait();
+
+
+        var actionLogsIndex = Builders<ActionLog>.IndexKeys.Ascending(l => l.CreatedAt).Ascending(l => l.Type);
+
+        ActionLogs.Indexes.CreateOneAsync(new CreateIndexModel<ActionLog>(actionLogsIndex)).Wait();
     }
 
     public void DeleteTestDatabase()
