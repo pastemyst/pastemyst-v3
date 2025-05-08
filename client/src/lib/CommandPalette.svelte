@@ -42,6 +42,7 @@
         filteredCommands = commands;
 
         selectedCommand = commands[0];
+        selectedCommand?.onHover?.();
 
         showingTempCommands = true;
     });
@@ -104,6 +105,7 @@
                     if (newIndex < 0) newIndex = filteredCommands.length - 1;
 
                     selectedCommand = filteredCommands[newIndex];
+                    selectedCommand.onHover?.();
 
                     scrollIntoView();
                 }
@@ -117,6 +119,7 @@
                     const newIndex = (index + 1) % filteredCommands.length;
 
                     selectedCommand = filteredCommands[newIndex];
+                    selectedCommand.onHover?.();
 
                     scrollIntoView();
                 }
@@ -161,6 +164,7 @@
             });
 
             selectedCommand = filteredCommands[0];
+            selectedCommand.onHover?.();
         } else {
             // deselect commands
             isCommandSelected = false;
@@ -212,6 +216,7 @@
         searchElement?.focus();
 
         selectedCommand = commands[0];
+        selectedCommand.onHover?.();
 
         cmdPalOpen.set(true);
 
@@ -233,6 +238,8 @@
             commands = getBaseCommands();
             filteredCommands = commands;
         }
+
+        selectedCommand?.onClose?.();
 
         // restore focus
         (lastFocusedElement as HTMLElement)?.focus();

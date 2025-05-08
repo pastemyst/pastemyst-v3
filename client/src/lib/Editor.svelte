@@ -8,7 +8,7 @@
     import { getLangs, getPopularLangNames, autodetectLanguage, type Language } from "./api/lang";
     import { tooltip } from "$lib/tooltips";
     import { Close, setTempCommands, type Command } from "./command";
-    import { cmdPalOpen, cmdPalTitle } from "./stores";
+    import { cmdPalOpen, cmdPalTitle, themeStore } from "./stores";
     import { languages as cmLangs } from "@codemirror/language-data";
     import { isLanguageMarkdown } from "./utils/markdown";
     import type { IndentUnit } from "./indentation";
@@ -39,11 +39,23 @@
     let selectedIndentUnit: IndentUnit = $state("spaces");
     let selectedIndentWidth = $state(4);
 
+    let themeCompartment = new Compartment();
+
     let previewEnabled = $state(false);
     let currentPreviewContent: string = $state("");
     let langSupported = $state(true);
 
     let langs: Language[];
+
+    themeStore.subscribe((theme) => {
+        if (!theme || !editorView) return;
+
+        const codemirrorTheme = (themes.find((t) => t.name === theme.name) || themes[0]).codemirrorTheme;
+
+        editorView.dispatch({
+            effects: themeCompartment.reconfigure(codemirrorTheme)
+        });
+    });
 
     onMount(async () => {
         langs = await getLangs(fetch);
@@ -118,7 +130,7 @@
                     baseTheme,
                     basicSetup,
                     keymap.of([indentWithTab]),
-                    codemirrorTheme,
+                    themeCompartment.of([codemirrorTheme]),
                     editorUpdateListener,
                     langCompartment.of([]),
                     indentUnitCompartment.of(

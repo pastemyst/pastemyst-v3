@@ -4,6 +4,8 @@ export interface Command {
     name: string;
     description?: string;
     action: CommandAction;
+    onHover?: CommandHoverAction;
+    onClose?: CommandPaletteCloseAction;
 }
 
 export enum Close {
@@ -12,6 +14,8 @@ export enum Close {
 }
 
 export type CommandAction = () => Close;
+export type CommandHoverAction = () => void;
+export type CommandPaletteCloseAction = () => void;
 
 let baseCommands: Command[] = [];
 
