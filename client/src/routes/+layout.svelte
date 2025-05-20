@@ -3,11 +3,17 @@
     import Footer from "$lib/Footer.svelte";
     import type { LayoutData } from "./$types";
     import CommandPalette from "$lib/CommandPalette.svelte";
-    import { Close, setBaseCommands, type Command } from "$lib/command";
+    import { Close, setBaseCommands, setTempCommands, type Command } from "$lib/command";
     import { beforeNavigate, goto } from "$app/navigation";
     import ThemeContext from "$lib/ThemeContext.svelte";
     import { onMount, type Snippet } from "svelte";
-    import { activePastesStores, currentUserStore, versionStore } from "$lib/stores";
+    import {
+        activePastesStores,
+        cmdPalTitle,
+        currentUserStore,
+        themeStore,
+        versionStore
+    } from "$lib/stores";
 
     import "tippy.js/dist/tippy.css";
     import "tippy.js/dist/svg-arrow.css";
@@ -17,6 +23,8 @@
     import { formatDistanceToNow } from "date-fns";
     import { page } from "$app/state";
     import { API_URL } from "$lib/api/fetch";
+    import { themes } from "$lib/themes";
+    import { updateSettings } from "$lib/api/settings";
 
     interface Props {
         data: LayoutData;
@@ -39,13 +47,38 @@
         }
     });
 
-    const getCommands = (): Command[] => {
+    const themeCommands = (): Command[] => {
+        return themes.map(
+            (theme) =>
+                ({
+                    name: theme.name,
+                    action: () => {
+                        data.settings.theme = theme.name;
+                        updateSettings(fetch, data.settings);
+                        themeStore.set(theme);
+
+                        return Close.yes;
+                    },
+                    onHover: () => {
+                        themeStore.set(theme);
+                    },
+                    onClose: () => {
+                        const theme = themes.find((t) => t.name === data.settings.theme)!;
+                        themeStore.set(theme);
+                    }
+                }) satisfies Command
+        );
+    };
+
+    const baseCommands = (): Command[] => {
         const commands: Command[] = [
             {
-                name: "view changelog",
+                name: "change theme",
                 action: () => {
-                    goto("/changelog");
-                    return Close.yes;
+                    cmdPalTitle.set("select a theme");
+                    setTempCommands(themeCommands());
+
+                    return Close.no;
                 }
             }
         ];
@@ -60,7 +93,7 @@
                     }
                 },
                 {
-                    name: "settings",
+                    name: "settings page",
                     action: () => {
                         goto("/settings/profile");
                         return Close.yes;
@@ -77,7 +110,7 @@
         } else {
             commands.push(
                 {
-                    name: "settings",
+                    name: "settings page",
                     action: () => {
                         goto("/settings/behaviour");
                         return Close.yes;
@@ -93,13 +126,21 @@
             );
         }
 
+        commands.push({
+            name: "view changelog",
+            action: () => {
+                goto("/changelog");
+                return Close.yes;
+            }
+        });
+
         return commands;
     };
 
-    setBaseCommands(getCommands());
+    setBaseCommands(baseCommands());
 
     beforeNavigate(() => {
-        setBaseCommands(getCommands());
+        setBaseCommands(baseCommands());
     });
 
     const dismissAnnouncement = () => {
