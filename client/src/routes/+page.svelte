@@ -156,6 +156,8 @@
 
 <svelte:head>
     <title>pastemyst</title>
+    <meta property="og:title" content="pastemyst" />
+    <meta property="twitter:title" content="pastemyst" />
 </svelte:head>
 
 <div class="title-input flex sm-row">

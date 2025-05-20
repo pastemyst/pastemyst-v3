@@ -89,6 +89,8 @@
 
 <svelte:head>
     <title>pastemyst | stats</title>
+    <meta property="og:title" content="pastemyst | stats" />
+    <meta property="twitter:title" content="pastemyst | stats" />
 </svelte:head>
 
 <section>

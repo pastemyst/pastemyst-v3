@@ -4,6 +4,8 @@
 
 <svelte:head>
     <title>pastemyst | login / register</title>
+    <meta property="og:title" content="pastemyst | login / register" />
+    <meta property="twitter:title" content="pastemyst | login / register" />
 </svelte:head>
 
 <section class="centered">

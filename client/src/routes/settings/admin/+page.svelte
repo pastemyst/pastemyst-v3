@@ -103,6 +103,8 @@
 
 <svelte:head>
     <title>pastemyst | admin</title>
+    <meta property="og:title" content="pastemyst | admin" />
+    <meta property="twitter:title" content="pastemyst | admin" />
 </svelte:head>
 
 <h3>admin settings</h3>
