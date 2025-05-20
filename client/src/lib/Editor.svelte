@@ -50,7 +50,8 @@
     themeStore.subscribe((theme) => {
         if (!theme || !editorView) return;
 
-        const codemirrorTheme = (themes.find((t) => t.name === theme.name) || themes[0]).codemirrorTheme;
+        const codemirrorTheme = (themes.find((t) => t.name === theme.name) || themes[0])
+            .codemirrorTheme;
 
         editorView.dispatch({
             effects: themeCompartment.reconfigure(codemirrorTheme)

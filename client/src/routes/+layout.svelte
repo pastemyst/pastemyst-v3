@@ -7,7 +7,13 @@
     import { beforeNavigate, goto } from "$app/navigation";
     import ThemeContext from "$lib/ThemeContext.svelte";
     import { onMount, type Snippet } from "svelte";
-    import { activePastesStores, cmdPalTitle, currentUserStore, themeStore, versionStore } from "$lib/stores";
+    import {
+        activePastesStores,
+        cmdPalTitle,
+        currentUserStore,
+        themeStore,
+        versionStore
+    } from "$lib/stores";
 
     import "tippy.js/dist/tippy.css";
     import "tippy.js/dist/svg-arrow.css";
@@ -42,23 +48,26 @@
     });
 
     const themeCommands = (): Command[] => {
-        return themes.map(theme => ({
-            name: theme.name,
-            action: () => {
-                data.settings.theme = theme.name;
-                updateSettings(fetch, data.settings);
-                themeStore.set(theme);
+        return themes.map(
+            (theme) =>
+                ({
+                    name: theme.name,
+                    action: () => {
+                        data.settings.theme = theme.name;
+                        updateSettings(fetch, data.settings);
+                        themeStore.set(theme);
 
-                return Close.yes;
-            },
-            onHover: () => {
-                themeStore.set(theme);
-            },
-            onClose: () => {
-                const theme = themes.find(t => t.name === data.settings.theme)!;
-                themeStore.set(theme);
-            }
-        } satisfies Command));
+                        return Close.yes;
+                    },
+                    onHover: () => {
+                        themeStore.set(theme);
+                    },
+                    onClose: () => {
+                        const theme = themes.find((t) => t.name === data.settings.theme)!;
+                        themeStore.set(theme);
+                    }
+                }) satisfies Command
+        );
     };
 
     const baseCommands = (): Command[] => {
@@ -71,7 +80,7 @@
 
                     return Close.no;
                 }
-            },
+            }
         ];
 
         if (data.self) {
@@ -117,15 +126,13 @@
             );
         }
 
-        commands.push(
-            {
-                name: "view changelog",
-                action: () => {
-                    goto("/changelog");
-                    return Close.yes;
-                }
+        commands.push({
+            name: "view changelog",
+            action: () => {
+                goto("/changelog");
+                return Close.yes;
             }
-        );
+        });
 
         return commands;
     };
