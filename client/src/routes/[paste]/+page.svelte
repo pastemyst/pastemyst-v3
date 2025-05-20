@@ -31,6 +31,8 @@
 
 <svelte:head>
     <title>pastemyst | {data.paste.title || "untitled"}</title>
+    <meta property="og:title" content="pastemyst | {data.paste.title || 'untitled'}" />
+    <meta property="twitter:title" content="pastemyst | {data.paste.title || 'untitled'}" />
 </svelte:head>
 
 <PasteHeader

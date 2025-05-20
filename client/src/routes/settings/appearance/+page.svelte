@@ -68,6 +68,8 @@
 
 <svelte:head>
     <title>pastemyst | appearance settings</title>
+    <meta property="og:title" content="pastemyst | appearance settings" />
+    <meta property="twitter:title" content="pastemyst | appearance settings" />
 </svelte:head>
 
 <h3>appearance settings</h3>

@@ -11,6 +11,8 @@
 
 <svelte:head>
     <title>pastemyst | changelog</title>
+    <meta property="og:title" content="pastemyst | changelog" />
+    <meta property="twitter:title" content="pastemyst | changelog" />
 </svelte:head>
 
 <section>

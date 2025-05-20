@@ -46,6 +46,8 @@
 
 <svelte:head>
     <title>pastemyst | editing {data.paste.title || "untitled"}</title>
+    <meta property="og:title" content="pastemyst | editing {data.paste.title || 'untitled'}" />
+    <meta property="twitter:title" content="pastemyst | editing {data.paste.title || 'untitled'}" />
 </svelte:head>
 
 <div class="title-input flex sm-row">

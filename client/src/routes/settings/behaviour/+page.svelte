@@ -134,6 +134,8 @@
 
 <svelte:head>
     <title>pastemyst | behaviour settings</title>
+    <meta property="og:title" content="pastemyst | behaviour settings" />
+    <meta property="twitter:title" content="pastemyst | behaviour settings" />
 </svelte:head>
 
 <h3>behaviour settings</h3>

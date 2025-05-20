@@ -129,6 +129,8 @@
 
 <svelte:head>
     <title>pastemyst | profile settings</title>
+    <meta property="og:title" content="pastemyst | profile settings" />
+    <meta property="twitter:title" content="pastemyst | profile settings" />
 </svelte:head>
 
 <h3>profile settings</h3>

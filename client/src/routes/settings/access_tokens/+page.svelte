@@ -118,6 +118,8 @@
 
 <svelte:head>
     <title>pastemyst | access tokens</title>
+    <meta property="og:title" content="pastemyst | access tokens" />
+    <meta property="twitter:title" content="pastemyst | access tokens" />
 </svelte:head>
 
 <h3>access tokens</h3>

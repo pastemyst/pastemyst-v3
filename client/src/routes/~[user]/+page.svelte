@@ -39,7 +39,9 @@
 </script>
 
 <svelte:head>
-    <title>pastemyst | {data.user.username}</title>
+    <title>pastemyst | ~{data.user.username}</title>
+    <meta property="og:title" content="pastemyst | ~{data.user.username}" />
+    <meta property="twitter:title" content="pastemyst | ~{data.user.username}" />
 </svelte:head>
 
 <div class="flex sm-row">
