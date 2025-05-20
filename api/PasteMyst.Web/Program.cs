@@ -6,12 +6,23 @@ using PasteMyst.Web.Middleware;
 using PasteMyst.Web.Services;
 using Quartz;
 using Quartz.AspNetCore;
+using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Logging.ClearProviders();
-builder.Services.AddLogging();
-builder.Logging.AddConsole();
+Log.Logger = new LoggerConfiguration()
+    .MinimumLevel.Information()
+    .WriteTo.File(
+        path: "logs/app-.log",
+        rollingInterval: RollingInterval.Month,
+        retainedFileCountLimit: 12,
+        rollOnFileSizeLimit: true,
+        shared: true
+    )
+    .WriteTo.Console()
+    .CreateLogger();
+
+builder.Host.UseSerilog();
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();

@@ -17,6 +17,8 @@ services:
       - ${API_PORT}:8080
     networks:
       - pastemyst
+    volumes:
+      - ./logs:/publish/logs
     environment:
       - ConnectionStrings:DefaultDb=mongodb://mongodb:27017
       - JwtSecret=${JWT_SECRET}
