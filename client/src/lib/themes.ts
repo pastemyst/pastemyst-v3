@@ -1,6 +1,7 @@
 import type { Extension } from "@codemirror/state";
 import { dracula } from "./codemirror-themes/dracula";
 import { myst } from "./codemirror-themes/myst";
+import { catppuccin } from "./codemirror-themes/catppuccin";
 
 export interface Theme {
     name: string;
@@ -59,5 +60,22 @@ export const themes: Theme[] = [
         },
         codemirrorTheme: dracula,
         shikiTheme: "dracula"
+    },
+    {
+        name: "catppuccin",
+        colors: {
+            bg: "#1e1e2e",
+            bg1: "#313244",
+            bg2: "#45475a",
+            bg3: "#6c7086",
+            fg: "#cdd6f4",
+            primary: "#f5e0dc",
+            secondary: "#cba6f7",
+            danger: "#f38ba8",
+            success: "#a6e3a1",
+            pink: "#f5c2e7"
+        },
+        codemirrorTheme: catppuccin,
+        shikiTheme: "catppuccin-mocha"
     }
 ];
