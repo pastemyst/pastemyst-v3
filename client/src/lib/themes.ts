@@ -2,6 +2,7 @@ import type { Extension } from "@codemirror/state";
 import { dracula } from "./codemirror-themes/dracula";
 import { myst } from "./codemirror-themes/myst";
 import { catppuccin } from "./codemirror-themes/catppuccin";
+import { solarizedDark } from "./codemirror-themes/solarized";
 
 export interface Theme {
     name: string;
@@ -77,5 +78,22 @@ export const themes: Theme[] = [
         },
         codemirrorTheme: catppuccin,
         shikiTheme: "catppuccin-mocha"
+    },
+    {
+        name: "solarized",
+        colors: {
+            bg: "#002b36",
+            bg1: "#073642",
+            bg2: "#586e75",
+            bg3: "#839496",
+            fg: "#eee8d5",
+            primary: "#268bd2",
+            secondary: "#2aa198",
+            danger: "#dc322f",
+            success: "#859900",
+            pink: "#d33682"
+        },
+        codemirrorTheme: solarizedDark,
+        shikiTheme: "solarized-dark"
     }
 ];
