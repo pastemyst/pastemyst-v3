@@ -7,110 +7,33 @@ import { rosePine } from "./codemirror-themes/rose-pine";
 
 export interface Theme {
     name: string;
-    colors: ThemeColors;
     codemirrorTheme: Extension;
     shikiTheme: string;
-}
-
-export interface ThemeColors {
-    bg: string;
-    bg1: string;
-    bg2: string;
-    bg3: string;
-
-    fg: string;
-
-    primary: string;
-    secondary: string;
-
-    danger: string;
-    success: string;
-    pink: string;
 }
 
 export const themes: Theme[] = [
     {
         name: "myst",
-        colors: {
-            bg: "#141414",
-            bg1: "#1c1c1c",
-            bg2: "#222222",
-            bg3: "#777777",
-            fg: "#cccccc",
-            primary: "#ee720d",
-            secondary: "#1eaedb",
-            danger: "#ff4c4c",
-            success: "#2ec933",
-            pink: "#cb6dce"
-        },
         codemirrorTheme: myst,
         shikiTheme: "tomorrowmyst"
     },
     {
         name: "dracula",
-        colors: {
-            bg: "#16171e",
-            bg1: "#282a36",
-            bg2: "#44475a",
-            bg3: "#777777",
-            fg: "#F8F8F2",
-            primary: "#FFB86C",
-            secondary: "#BD93F9",
-            danger: "#FF5555",
-            success: "#50FA7B",
-            pink: "#FF79C6"
-        },
         codemirrorTheme: dracula,
         shikiTheme: "dracula"
     },
     {
         name: "catppuccin",
-        colors: {
-            bg: "#1e1e2e",
-            bg1: "#313244",
-            bg2: "#45475a",
-            bg3: "#6c7086",
-            fg: "#cdd6f4",
-            primary: "#f5e0dc",
-            secondary: "#cba6f7",
-            danger: "#f38ba8",
-            success: "#a6e3a1",
-            pink: "#f5c2e7"
-        },
         codemirrorTheme: catppuccin,
         shikiTheme: "catppuccin-mocha"
     },
     {
         name: "solarized",
-        colors: {
-            bg: "#002b36",
-            bg1: "#073642",
-            bg2: "#586e75",
-            bg3: "#839496",
-            fg: "#eee8d5",
-            primary: "#268bd2",
-            secondary: "#2aa198",
-            danger: "#dc322f",
-            success: "#859900",
-            pink: "#d33682"
-        },
         codemirrorTheme: solarizedDark,
         shikiTheme: "solarized-dark"
     },
     {
         name: "rose-pine",
-        colors: {
-            bg: "#191724",
-            bg1: "#1f1d2e",
-            bg2: "#26233a",
-            bg3: "#6e6a86",
-            fg: "#e0def4",
-            primary: "#c4a7e7",
-            secondary: "#31748f",
-            danger: "#eb6f92",
-            success: "#9ccfd8",
-            pink: "#ebbcba"
-        },
         codemirrorTheme: rosePine,
         shikiTheme: "rose-pine"
     }
