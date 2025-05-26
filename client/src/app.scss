@@ -33,6 +33,54 @@
     --color-pink: #ff79c6;
 }
 
+#theme-context[data-theme="catppuccin"] {
+    --color-bg: #1e1e2e;
+    --color-bg1: #313244;
+    --color-bg2: #45475a;
+    --color-bg3: #6c7086;
+
+    --color-fg: #cdd6f4;
+
+    --color-primary: #f5e0dc;
+    --color-secondary: #cba6f7;
+
+    --color-danger: #f38ba8;
+    --color-success: #a6e3a1;
+    --color-pink: #f5c2e7;
+}
+
+#theme-context[data-theme="solarized"] {
+    --color-bg: #002b36;
+    --color-bg1: #073642;
+    --color-bg2: #586e75;
+    --color-bg3: #839496;
+
+    --color-fg: #eee8d5;
+
+    --color-primary: #268bd2;
+    --color-secondary: #2aa198;
+
+    --color-danger: #dc322f;
+    --color-success: #859900;
+    --color-pink: #d33682;
+}
+
+#theme-context[data-theme="rose-pine"] {
+    --color-bg: #191724;
+    --color-bg1: #1f1d2e;
+    --color-bg2: #26233a;
+    --color-bg3: #6e6a86;
+
+    --color-fg: #e0def4;
+
+    --color-primary: #c4a7e7;
+    --color-secondary: #31748f;
+
+    --color-danger: #eb6f92;
+    --color-success: #9ccfd8;
+    --color-pink: #ebbcba;
+}
+
 #theme-context,
 body {
     background-color: var(--color-bg);
