@@ -5,6 +5,7 @@ import { catppuccin } from "./codemirror-themes/catppuccin";
 import { solarizedDark } from "./codemirror-themes/solarized";
 import { rosePine } from "./codemirror-themes/rose-pine";
 import { catppuccinLatte } from "./codemirror-themes/catppuccin-late";
+import { rosePineDawn } from "./codemirror-themes/rose-pine-dawn";
 
 export interface Theme {
     name: string;
@@ -131,5 +132,22 @@ export const themes: Theme[] = [
         },
         codemirrorTheme: rosePine,
         shikiTheme: "rose-pine"
+    },
+    {
+        name: "rose-pine-dawn",
+        colors: {
+            bg: "#faf4ed",
+            bg1: "#fffaf3",
+            bg2: "#f2e9e1",
+            bg3: "#9893a5",
+            fg: "#575279",
+            primary: "#d7827e",
+            secondary: "#286983",
+            danger: "#b4637a",
+            success: "#56949f",
+            pink: "#907aa9"
+        },
+        codemirrorTheme: rosePineDawn,
+        shikiTheme: "rose-pine-dawn"
     }
 ];
