@@ -206,9 +206,9 @@
 
             <Footer />
         </div>
-    </ThemeContext>
 
-    <CommandPalette />
+        <CommandPalette />
+    </ThemeContext>
 {/if}
 
 <style lang="scss">

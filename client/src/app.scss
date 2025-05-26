@@ -49,6 +49,22 @@
     --color-pink: #f5c2e7;
 }
 
+#theme-context[data-theme="catppuccin-latte"] {
+    --color-bg: #eff1f5;
+    --color-bg1: #e6e9ef;
+    --color-bg2: #ccd0da;
+    --color-bg3: #acb0be;
+
+    --color-fg: #4c4f69;
+
+    --color-primary: #dc8a78;
+    --color-secondary: #8839ef;
+
+    --color-danger: #d20f39;
+    --color-success: #40a02b;
+    --color-pink: #ea76cb;
+}
+
 #theme-context[data-theme="solarized"] {
     --color-bg: #002b36;
     --color-bg1: #073642;

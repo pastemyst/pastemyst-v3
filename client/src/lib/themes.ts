@@ -4,6 +4,7 @@ import { myst } from "./codemirror-themes/myst";
 import { catppuccin } from "./codemirror-themes/catppuccin";
 import { solarizedDark } from "./codemirror-themes/solarized";
 import { rosePine } from "./codemirror-themes/rose-pine";
+import { catppuccinLatte } from "./codemirror-themes/catppuccin-late";
 
 export interface Theme {
     name: string;
@@ -79,6 +80,23 @@ export const themes: Theme[] = [
         },
         codemirrorTheme: catppuccin,
         shikiTheme: "catppuccin-mocha"
+    },
+    {
+        name: "catppuccin-latte",
+        colors: {
+            bg: "#eff1f5",
+            bg1: "#e6e9ef",
+            bg2: "#ccd0da",
+            bg3: "#acb0be",
+            fg: "#4c4f69",
+            primary: "#dc8a78",
+            secondary: "#8839ef",
+            danger: "#d20f39",
+            success: "#40a02b",
+            pink: "#ea76cb"
+        },
+        codemirrorTheme: catppuccinLatte,
+        shikiTheme: "catppuccin-latte"
     },
     {
         name: "solarized",
