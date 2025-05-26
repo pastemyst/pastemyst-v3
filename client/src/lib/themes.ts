@@ -3,6 +3,7 @@ import { dracula } from "./codemirror-themes/dracula";
 import { myst } from "./codemirror-themes/myst";
 import { catppuccin } from "./codemirror-themes/catppuccin";
 import { solarizedDark } from "./codemirror-themes/solarized";
+import { rosePine } from "./codemirror-themes/rose-pine";
 
 export interface Theme {
     name: string;
@@ -95,5 +96,22 @@ export const themes: Theme[] = [
         },
         codemirrorTheme: solarizedDark,
         shikiTheme: "solarized-dark"
+    },
+    {
+        name: "rose-pine",
+        colors: {
+            bg: "#191724",
+            bg1: "#1f1d2e",
+            bg2: "#26233a",
+            bg3: "#6e6a86",
+            fg: "#e0def4",
+            primary: "#c4a7e7",
+            secondary: "#31748f",
+            danger: "#eb6f92",
+            success: "#9ccfd8",
+            pink: "#ebbcba"
+        },
+        codemirrorTheme: rosePine,
+        shikiTheme: "rose-pine"
     }
 ];
