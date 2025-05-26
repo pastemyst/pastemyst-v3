@@ -97,6 +97,22 @@
     --color-pink: #ebbcba;
 }
 
+#theme-context[data-theme="rose-pine-dawn"] {
+    --color-bg: #faf4ed;
+    --color-bg1: #fffaf3;
+    --color-bg2: #f2e9e1;
+    --color-bg3: #9893a5;
+
+    --color-fg: #575279;
+
+    --color-primary: #d7827e;
+    --color-secondary: #286983;
+
+    --color-danger: #b4637a;
+    --color-success: #56949f;
+    --color-pink: #907aa9;
+}
+
 #theme-context,
 body {
     background-color: var(--color-bg);
