@@ -8,6 +8,7 @@
     import { browser } from "$app/environment";
     import type { Action } from "svelte/action";
     import { onMount, tick } from "svelte";
+    import { themeStore } from "./stores";
 
     interface Props {
         paste: Paste;
@@ -35,6 +36,30 @@
     $effect(() => {
         const p = paste.pasties.find((p) => p.id === activePastyId);
         if (p) activePasty = p;
+    });
+
+    themeStore.subscribe(async (theme) => {
+        if (!theme) return;
+
+        for (const [i, pasty] of paste.pasties.entries()) {
+            const res = await fetch("/internal/highlight", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    content: pasty.content,
+                    language: pasty.language,
+                    wrap: settings.textWrap,
+                    theme: theme.name,
+                    showLineNumbers: true
+                })
+            });
+
+            highlightedCode[i] = await res.text();
+        }
+
+        highlightedCode = [...highlightedCode];
     });
 
     let previewMarkdown: boolean[] = $state(paste.pasties.map(() => true));
