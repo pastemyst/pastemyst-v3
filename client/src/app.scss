@@ -17,6 +17,22 @@
     --color-pink: #cb6dce;
 }
 
+#theme-context[data-theme="myst-light"] {
+    --color-bg: #ffffff;
+    --color-bg1: #efefef;
+    --color-bg2: #d6d6d6;
+    --color-bg3: #8e908c;
+
+    --color-fg: #4d4d4c;
+
+    --color-primary: #ff5e00;
+    --color-secondary: #1a8eed;
+
+    --color-danger: #c82829;
+    --color-success: #718c00;
+    --color-pink: #8959a8;
+}
+
 #theme-context[data-theme="dracula"] {
     --color-bg: #16171e;
     --color-bg1: #282a36;

@@ -6,6 +6,7 @@ import { solarizedDark } from "./codemirror-themes/solarized";
 import { rosePine } from "./codemirror-themes/rose-pine";
 import { catppuccinLatte } from "./codemirror-themes/catppuccin-late";
 import { rosePineDawn } from "./codemirror-themes/rose-pine-dawn";
+import { mystLight } from "./codemirror-themes/myst-light";
 
 export interface Theme {
     name: string;
@@ -47,6 +48,23 @@ export const themes: Theme[] = [
         },
         codemirrorTheme: myst,
         shikiTheme: "tomorrowmyst"
+    },
+    {
+        name: "myst-light",
+        colors: {
+            bg: "#ffffff",
+            bg1: "#efefef",
+            bg2: "#d6d6d6",
+            bg3: "#8e908c",
+            fg: "#4d4d4c",
+            primary: "#ff5e00",
+            secondary: "#1a8eed",
+            danger: "#c82829",
+            success: "#718c00",
+            pink: "#8959a8"
+        },
+        codemirrorTheme: mystLight,
+        shikiTheme: "tomorrowmyst-light"
     },
     {
         name: "dracula",
