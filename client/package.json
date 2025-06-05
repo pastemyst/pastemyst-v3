@@ -16,7 +16,7 @@
         "@sveltejs/kit": "^2.20.6",
         "@sveltejs/vite-plugin-svelte": "^4.0.0",
         "@types/eslint": "^9.6.1",
-        "@types/node": "^22.13.0",
+        "@types/node": "^22.15.29",
         "@types/sanitize-html": "^2.16.0",
         "@types/sortablejs": "^1.15.1",
         "eslint": "^9.19.0",
