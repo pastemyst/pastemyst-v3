@@ -1,28 +1,47 @@
 <script lang="ts">
     import { onMount, type Snippet } from "svelte";
-    import { themeStore } from "./stores";
+    import { settingsStore, systemThemeStore, themeStore } from "./stores.svelte";
     import { themes, type Theme } from "./themes";
 
     interface Props {
-        currentTheme: string;
+        theme: string;
+        darkTheme: string;
+        followSystemTheme: boolean;
         children: Snippet;
     }
 
-    let { currentTheme = $bindable(), children }: Props = $props();
+    let { theme, darkTheme, followSystemTheme, children }: Props = $props();
 
     let mounted = false;
 
     themeStore.subscribe((theme) => {
         if (!theme) return;
 
-        currentTheme = theme.name;
         if (mounted) setRootColors(theme);
+    });
+
+    systemThemeStore.subscribe((systemTheme) => {
+        if (!systemTheme) return;
+
+        if (!settingsStore.settings?.followSystemTheme) return;
+
+        const themeName =
+            systemTheme === "dark"
+                ? settingsStore.settings.darkTheme
+                : settingsStore.settings.theme;
+        themeStore.set(themes.find((t) => t.name === themeName)!);
     });
 
     onMount(() => {
         mounted = true;
 
-        const themeObj = themes.find((t) => t.name === currentTheme) || themes[0];
+        const themeName = followSystemTheme
+            ? $systemThemeStore === "dark"
+                ? darkTheme
+                : theme
+            : theme;
+
+        const themeObj = themes.find((t) => t.name === themeName) || themes[0];
         themeStore.set(themeObj);
     });
 
@@ -34,6 +53,6 @@
     };
 </script>
 
-<div id="theme-context" data-theme={currentTheme}>
+<div id="theme-context" data-theme={$themeStore?.name}>
     {@render children()}
 </div>

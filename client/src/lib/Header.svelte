@@ -1,5 +1,5 @@
 <script lang="ts">
-    import { cmdPalOpen, cmdPalTitle, currentUserStore } from "./stores";
+    import { cmdPalOpen, cmdPalTitle, currentUserStore } from "./stores.svelte";
     import { tooltip } from "./tooltips";
     import { env } from "$env/dynamic/public";
     import { isMacOs } from "./utils/userAgent";

@@ -7,7 +7,7 @@
     import { onMount } from "svelte";
     import Sortable, { type SortableEvent } from "sortablejs";
     import { beforeNavigate } from "$app/navigation";
-    import { creatingPasteStore } from "./stores";
+    import { creatingPasteStore } from "./stores.svelte";
     import type { Pasty } from "./api/paste";
     import { getLangs } from "./api/lang";
 

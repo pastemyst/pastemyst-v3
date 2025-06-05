@@ -1,6 +1,6 @@
 <script lang="ts">
     import { afterNavigate } from "$app/navigation";
-    import { activePastesStores, versionStore } from "$lib/stores";
+    import { activePastesStores, versionStore } from "$lib/stores.svelte";
     import { getActivePastes } from "./api/meta";
 
     // force update of current active pastes on page change

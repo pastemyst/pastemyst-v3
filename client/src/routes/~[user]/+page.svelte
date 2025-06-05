@@ -3,7 +3,7 @@
     import { tooltip } from "$lib/tooltips";
     import PasteList from "$lib/PasteList.svelte";
     import { API_URL } from "$lib/api/fetch";
-    import { cmdPalOpen, cmdPalTitle, currentUserStore } from "$lib/stores";
+    import { cmdPalOpen, cmdPalTitle, currentUserStore } from "$lib/stores.svelte";
     import { Close, getConfirmActionCommands, setTempCommands } from "$lib/command";
     import { deleteUser } from "$lib/api/user";
 

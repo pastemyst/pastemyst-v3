@@ -11,7 +11,7 @@
     } from "./api/paste";
     import { tooltip } from "./tooltips";
     import type { User } from "./api/user";
-    import { cmdPalOpen, cmdPalTitle, currentUserStore } from "./stores";
+    import { cmdPalOpen, cmdPalTitle, currentUserStore } from "./stores.svelte";
     import { humanFileSize } from "./strings";
     import type { LangStat } from "./api/lang";
     import { Close, getConfirmActionCommands, setTempCommands } from "./command";

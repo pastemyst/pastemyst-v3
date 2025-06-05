@@ -1,7 +1,7 @@
 <script lang="ts">
     import { tick } from "svelte";
     import { tooltip } from "./tooltips";
-    import { currentUserStore } from "./stores";
+    import { currentUserStore } from "./stores.svelte";
 
     interface Props {
         readonly: boolean;

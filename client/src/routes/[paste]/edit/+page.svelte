@@ -1,7 +1,7 @@
 <script lang="ts">
     import { goto } from "$app/navigation";
     import { editPaste, type PasteEditInfo, type PastyEditInfo } from "$lib/api/paste";
-    import { creatingPasteStore } from "$lib/stores";
+    import { creatingPasteStore } from "$lib/stores.svelte";
     import TabbedEditor from "$lib/TabbedEditor.svelte";
     import TagInput from "$lib/TagInput.svelte";
     import { addToast } from "$lib/toasts.svelte";

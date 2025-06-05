@@ -1,7 +1,7 @@
 <script lang="ts">
     import { tooltip } from "$lib/tooltips";
     import Spinner from "./Spinner.svelte";
-    import { currentUserStore } from "./stores";
+    import { currentUserStore } from "./stores.svelte";
 
     interface Props {
         encrypt: boolean;

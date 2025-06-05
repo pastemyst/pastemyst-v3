@@ -8,7 +8,7 @@
     import { browser } from "$app/environment";
     import type { Action } from "svelte/action";
     import { onMount, tick } from "svelte";
-    import { themeStore } from "./stores";
+    import { themeStore } from "./stores.svelte";
 
     interface Props {
         paste: Paste;

@@ -1,9 +1,10 @@
 <script lang="ts">
     import { updateSettings } from "$lib/api/settings";
     import type { PageData } from "./$types";
-    import { cmdPalOpen, cmdPalTitle, themeStore } from "$lib/stores";
+    import { cmdPalOpen, cmdPalTitle, systemThemeStore, themeStore } from "$lib/stores.svelte";
     import { Close, setTempCommands, type Command } from "$lib/command";
     import { themes } from "$lib/themes";
+    import Checkbox from "$lib/Checkbox.svelte";
 
     interface Props {
         data: PageData;
@@ -11,13 +12,15 @@
 
     let { data = $bindable() }: Props = $props();
 
+    let settings = $state(data.settings);
+
     const getPasteViewCommands = (): Command[] => {
         return [
             {
                 name: "tabbed",
                 action: () => {
-                    data.settings.pasteView = "tabbed";
-                    updateSettings(fetch, data.settings);
+                    settings.pasteView = "tabbed";
+                    updateSettings(fetch, settings);
 
                     return Close.yes;
                 }
@@ -25,8 +28,8 @@
             {
                 name: "stacked",
                 action: () => {
-                    data.settings.pasteView = "stacked";
-                    updateSettings(fetch, data.settings);
+                    settings.pasteView = "stacked";
+                    updateSettings(fetch, settings);
 
                     return Close.yes;
                 }
@@ -34,16 +37,28 @@
         ];
     };
 
-    const getThemeCommands = (): Command[] => {
+    const getThemeCommands = (isDarkTheme: boolean): Command[] => {
         const commands: Command[] = [];
         for (const theme of themes) {
             commands.push({
                 name: theme.name,
                 action: () => {
-                    data.settings.theme = theme.name;
-                    updateSettings(fetch, data.settings);
+                    if (isDarkTheme) {
+                        settings.darkTheme = theme.name;
+                    } else {
+                        settings.theme = theme.name;
+                    }
 
-                    themeStore.set(theme);
+                    updateSettings(fetch, settings);
+
+                    if (settings.followSystemTheme) {
+                        const themeName =
+                            $systemThemeStore === "dark" ? settings.darkTheme : settings.theme;
+                        const theme = themes.find((t) => t.name === themeName);
+                        themeStore.set(theme!);
+                    } else if (!isDarkTheme) {
+                        themeStore.set(theme);
+                    }
 
                     return Close.yes;
                 }
@@ -60,9 +75,31 @@
     };
 
     const onThemeClicked = () => {
-        setTempCommands(getThemeCommands());
+        setTempCommands(getThemeCommands(false));
         cmdPalTitle.set("select the theme");
         cmdPalOpen.set(true);
+    };
+
+    const onDarkThemeClicked = () => {
+        setTempCommands(getThemeCommands(true));
+        cmdPalTitle.set("select the theme");
+        cmdPalOpen.set(true);
+    };
+
+    const onFollowSystemThemeChanged = () => {
+        updateSettings(fetch, settings);
+
+        const themeName = settings.followSystemTheme
+            ? $systemThemeStore === "dark"
+                ? settings.darkTheme
+                : settings.theme
+            : settings.theme;
+
+        const theme = themes.find((t) => t.name === themeName);
+
+        if (theme) {
+            themeStore.set(theme);
+        }
     };
 </script>
 
@@ -80,16 +117,35 @@
 
 <div class="flex row center gap-s">
     <p>theme:</p>
-    <button onclick={onThemeClicked}>{data.settings.theme}</button>
+    <button onclick={onThemeClicked}>{settings.theme}</button>
 </div>
 
 <span class="hint">change the theme of pastemyst</span>
+
+<div class="flex row center gap-s">
+    <Checkbox
+        label="follow system theme"
+        bind:checked={settings.followSystemTheme}
+        onchange={onFollowSystemThemeChanged}
+    />
+</div>
+
+<span class="hint">sets the theme based on your system theme</span>
+
+{#if settings.followSystemTheme}
+    <div class="flex row center gap-s">
+        <p>dark theme:</p>
+        <button onclick={onDarkThemeClicked}>{settings.darkTheme}</button>
+    </div>
+
+    <span class="hint">change the dark theme of pastemyst</span>
+{/if}
 
 <h4>paste</h4>
 
 <div class="flex row center gap-s">
     <p>paste view:</p>
-    <button onclick={onPasteViewClicked}>{data.settings.pasteView}</button>
+    <button onclick={onPasteViewClicked}>{settings.pasteView}</button>
 </div>
 
 <span class="hint">change how the files look when viewing a paste: tabbed or stacked</span>

@@ -1,7 +1,7 @@
 <script lang="ts">
     import DiffEditor from "$lib/DiffEditor.svelte";
     import PasteHeader from "$lib/PasteHeader.svelte";
-    import { currentUserStore } from "$lib/stores";
+    import { currentUserStore } from "$lib/stores.svelte";
     import TagInput from "$lib/TagInput.svelte";
     import { tooltip } from "$lib/tooltips";
     import type { PageData } from "./$types";

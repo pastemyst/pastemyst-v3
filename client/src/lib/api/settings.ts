@@ -1,4 +1,5 @@
 import type { IndentUnit } from "$lib/indentation";
+import { settingsStore } from "$lib/stores.svelte";
 import { API_URL, type FetchFunc } from "./fetch";
 
 export interface UserSettings {
@@ -13,6 +14,8 @@ export interface Settings {
     copyLinkOnCreate: boolean;
     pasteView: "tabbed" | "stacked";
     theme: string;
+    darkTheme: string;
+    followSystemTheme: boolean;
 }
 
 export const getSettings = async (
@@ -30,6 +33,8 @@ export const getSettings = async (
 };
 
 export const updateSettings = async (fetchFunc: FetchFunc, settings: Settings) => {
+    settingsStore.settings = settings;
+
     await fetchFunc(`${API_URL}/settings`, {
         method: "PATCH",
         credentials: "include",

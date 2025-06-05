@@ -15,7 +15,7 @@
         copyLinkToClipboardStore,
         creatingPasteStore,
         currentUserStore
-    } from "$lib/stores";
+    } from "$lib/stores.svelte";
     import TabbedEditor from "$lib/TabbedEditor.svelte";
     import TagInput from "$lib/TagInput.svelte";
     import { onMount } from "svelte";

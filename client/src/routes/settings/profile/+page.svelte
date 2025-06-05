@@ -6,7 +6,7 @@
     import Checkbox from "$lib/Checkbox.svelte";
     import { Close, getConfirmActionCommands, setTempCommands } from "$lib/command";
     import { usernameRegex } from "$lib/patterns";
-    import { cmdPalOpen, cmdPalTitle, currentUserStore } from "$lib/stores";
+    import { cmdPalOpen, cmdPalTitle, currentUserStore } from "$lib/stores.svelte";
     import type { PageData } from "./$types";
 
     interface Props {

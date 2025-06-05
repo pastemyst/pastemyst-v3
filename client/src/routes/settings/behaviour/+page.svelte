@@ -3,7 +3,7 @@
     import { getLangs, getPopularLangNames } from "$lib/api/lang";
     import { updateSettings } from "$lib/api/settings";
     import { Close, setTempCommands, type Command } from "$lib/command";
-    import { cmdPalOpen, cmdPalTitle } from "$lib/stores";
+    import { cmdPalOpen, cmdPalTitle } from "$lib/stores.svelte";
     import type { PageData } from "./$types";
 
     interface Props {

@@ -11,9 +11,11 @@
         activePastesStores,
         cmdPalTitle,
         currentUserStore,
+        settingsStore,
+        systemThemeStore,
         themeStore,
         versionStore
-    } from "$lib/stores";
+    } from "$lib/stores.svelte";
 
     import "tippy.js/dist/tippy.css";
     import "tippy.js/dist/svg-arrow.css";
@@ -45,6 +47,8 @@
             hiddenAnnouncement =
                 localStorage.getItem(`dismissedAnnouncement-${latestAnnouncement.id}`) === "true";
         }
+
+        settingsStore.settings = data.settings;
     });
 
     const themeCommands = (): Command[] => {
@@ -53,8 +57,14 @@
                 ({
                     name: theme.name,
                     action: () => {
-                        data.settings.theme = theme.name;
+                        if (data.settings.followSystemTheme && $systemThemeStore === "dark") {
+                            data.settings.darkTheme = theme.name;
+                        } else {
+                            data.settings.theme = theme.name;
+                        }
+
                         updateSettings(fetch, data.settings);
+
                         themeStore.set(theme);
 
                         return Close.yes;
@@ -63,7 +73,12 @@
                         themeStore.set(theme);
                     },
                     onClose: () => {
-                        const theme = themes.find((t) => t.name === data.settings.theme)!;
+                        const themeName = data.settings.followSystemTheme
+                            ? $systemThemeStore === "dark"
+                                ? data.settings.darkTheme
+                                : data.settings.theme
+                            : data.settings.theme;
+                        const theme = themes.find((t) => t.name === themeName)!;
                         themeStore.set(theme);
                     }
                 }) satisfies Command
@@ -155,7 +170,11 @@
 {#if page.route.id?.includes("embed")}
     {@render children()}
 {:else}
-    <ThemeContext currentTheme={data.settings.theme}>
+    <ThemeContext
+        theme={data.settings.theme}
+        darkTheme={data.settings.darkTheme}
+        followSystemTheme={data.settings.followSystemTheme}
+    >
         <Toaster />
 
         <div id="container">

@@ -1,7 +1,7 @@
 <script lang="ts">
     import PasteHeader from "$lib/PasteHeader.svelte";
     import Pasties from "$lib/Pasties.svelte";
-    import { currentUserStore } from "$lib/stores";
+    import { currentUserStore } from "$lib/stores.svelte";
     import TagInput from "$lib/TagInput.svelte";
     import { tooltip } from "$lib/tooltips";
     import type { PageData } from "./$types";

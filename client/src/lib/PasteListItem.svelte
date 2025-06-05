@@ -7,7 +7,7 @@
         pinPaste,
         togglePrivatePaste
     } from "./api/paste";
-    import { cmdPalOpen, cmdPalTitle, currentUserStore } from "./stores";
+    import { cmdPalOpen, cmdPalTitle, currentUserStore } from "./stores.svelte";
     import { tooltip } from "./tooltips";
     import type { LangStat } from "./api/lang";
     import { Close, getConfirmActionCommands, setTempCommands } from "./command";
