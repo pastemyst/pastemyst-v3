@@ -10,7 +10,7 @@
     import { formatDistanceToNow } from "date-fns";
     import { tooltip } from "$lib/tooltips";
     import { Close, getConfirmActionCommands, setTempCommands } from "$lib/command";
-    import { cmdPalOpen, cmdPalTitle } from "$lib/stores";
+    import { cmdPalOpen, cmdPalTitle } from "$lib/stores.svelte";
 
     interface Props {
         data: PageData;

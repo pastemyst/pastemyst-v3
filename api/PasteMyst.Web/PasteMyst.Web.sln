@@ -1,0 +1,24 @@
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.5.2.0
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PasteMyst.Web", "PasteMyst.Web.csproj", "{D7E9126E-1B3E-4163-C134-8BB406F2519B}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{D7E9126E-1B3E-4163-C134-8BB406F2519B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D7E9126E-1B3E-4163-C134-8BB406F2519B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D7E9126E-1B3E-4163-C134-8BB406F2519B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D7E9126E-1B3E-4163-C134-8BB406F2519B}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {3CA4C737-EADB-480A-AEEB-9289D9D4CBE0}
+	EndGlobalSection
+EndGlobal

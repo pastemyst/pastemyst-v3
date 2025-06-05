@@ -3,7 +3,7 @@
     import type { PageData } from "./$types";
     import { tooltip } from "$lib/tooltips";
     import PasteHeader from "$lib/PasteHeader.svelte";
-    import { currentUserStore } from "$lib/stores";
+    import { currentUserStore } from "$lib/stores.svelte";
     import TagInput from "$lib/TagInput.svelte";
 
     interface Props {

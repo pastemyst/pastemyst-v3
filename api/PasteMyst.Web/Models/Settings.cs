@@ -12,6 +12,8 @@ public class Settings
     public bool CopyLinkOnCreate { get; set; } = false;
     public string PasteView { get; set; } = "tabbed";
     public string Theme { get; set; } = "myst";
+    public string DarkTheme { get; set; } = "myst";
+    public bool FollowSystemTheme { get; set; } = false;
 }
 
 public class SessionSettings

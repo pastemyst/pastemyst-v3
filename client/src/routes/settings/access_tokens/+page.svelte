@@ -9,7 +9,7 @@
         type GenerateAccessTokenResponse
     } from "$lib/api/auth";
     import { Close, getConfirmActionCommands, setTempCommands, type Command } from "$lib/command";
-    import { cmdPalOpen, cmdPalTitle } from "$lib/stores";
+    import { cmdPalOpen, cmdPalTitle } from "$lib/stores.svelte";
     import { ExpiresIn, expiresInToLongString } from "$lib/api/paste";
     import Checkbox from "$lib/Checkbox.svelte";
 

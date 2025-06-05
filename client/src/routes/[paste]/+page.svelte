@@ -1,6 +1,6 @@
 <script lang="ts">
     import type { PageData } from "./$types";
-    import { copyLinkToClipboardStore, currentUserStore } from "$lib/stores";
+    import { copyLinkToClipboardStore, currentUserStore } from "$lib/stores.svelte";
     import { onMount } from "svelte";
     import PasteHeader from "$lib/PasteHeader.svelte";
     import Pasties from "$lib/Pasties.svelte";

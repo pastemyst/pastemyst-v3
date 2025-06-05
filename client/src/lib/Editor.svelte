@@ -8,7 +8,7 @@
     import { getLangs, getPopularLangNames, autodetectLanguage, type Language } from "./api/lang";
     import { tooltip } from "$lib/tooltips";
     import { Close, setTempCommands, type Command } from "./command";
-    import { cmdPalOpen, cmdPalTitle, themeStore } from "./stores";
+    import { cmdPalOpen, cmdPalTitle, themeStore } from "./stores.svelte";
     import { languages as cmLangs } from "@codemirror/language-data";
     import { isLanguageMarkdown } from "./utils/markdown";
     import type { IndentUnit } from "./indentation";
@@ -114,8 +114,7 @@
             }
         });
 
-        const codemirrorTheme = (themes.find((t) => t.name === settings.theme) || themes[0])
-            .codemirrorTheme;
+        const codemirrorTheme = ($themeStore || themes[0]).codemirrorTheme;
 
         const baseTheme = EditorView.theme({
             "*": {

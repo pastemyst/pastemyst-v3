@@ -9,7 +9,7 @@
         tempCommandsStore,
         type Command
     } from "./command";
-    import { cmdPalOpen, cmdPalTitle } from "./stores";
+    import { cmdPalOpen, cmdPalTitle } from "./stores.svelte";
     import { isMacOs } from "./utils/userAgent";
 
     let isOpen = $state(false);
