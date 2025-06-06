@@ -53,6 +53,6 @@
     };
 </script>
 
-<div id="theme-context" data-theme={$themeStore?.name}>
+<div id="theme-context" data-theme={$themeStore?.name || theme}>
     {@render children()}
 </div>
