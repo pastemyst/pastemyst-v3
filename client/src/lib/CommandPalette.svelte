@@ -30,7 +30,7 @@
     let showingTempCommands = false;
 
     // keep track of the last focused element, so we can focus it back once the command palette is closed
-    let lastFocusedElement: Element | null;
+    let lastFocusedElement: Element | null = $state(null);
 
     baseCommandsStore.subscribe((cmd) => {
         commands = cmd;
@@ -208,10 +208,12 @@
     };
 
     const open = () => {
-        isOpen = true;
+        if (isOpen) return;
 
         // save the focused element
         lastFocusedElement = document.activeElement;
+
+        isOpen = true;
 
         searchElement?.focus();
 
@@ -242,7 +244,7 @@
         selectedCommand?.onClose?.();
 
         // restore focus
-        (lastFocusedElement as HTMLElement)?.focus();
+        if (lastFocusedElement) (lastFocusedElement as HTMLElement).focus();
     };
 
     const onCmd = (cmd: Command) => {
