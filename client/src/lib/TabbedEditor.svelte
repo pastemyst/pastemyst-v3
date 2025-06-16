@@ -5,7 +5,7 @@
     import TabData from "./TabData.svelte";
     import { nanoid } from "nanoid";
     import { onMount } from "svelte";
-    import Sortable, { type SortableEvent } from "sortablejs";
+    import Sortable from "sortablejs";
     import { beforeNavigate } from "$app/navigation";
     import { creatingPasteStore } from "./stores.svelte";
     import type { Pasty } from "./api/paste";
@@ -23,8 +23,9 @@
     // svelte-ignore state_referenced_locally
     let activeTabId = $state(tabs[0].id);
 
-    let tabGroupElement: HTMLElement;
-    let editor: Editor;
+    let sortable: Sortable | null = $state(null);
+    let tabGroupElement = $state<HTMLElement | null>(null);
+    let editor = $state<Editor | null>(null);
 
     let isDraggedOver = $state(false);
 
@@ -43,18 +44,12 @@
     });
 
     onMount(() => {
-        Sortable.create(tabGroupElement, {
+        if (!tabGroupElement) return;
+
+        sortable = Sortable.create(tabGroupElement, {
             direction: "horizontal",
             animation: 150,
-            delay: 50,
-
-            onEnd: (event: SortableEvent) => {
-                // once the reordering of tabs is done, replicate the reorder in the data array
-                const newOrder = Array.from(event.to.children).map(
-                    (el) => (el as HTMLElement).dataset.id
-                );
-                tabs = newOrder.map((id) => tabs.find((t) => t.id === id)!);
-            }
+            delay: 50
         });
     });
 
@@ -76,6 +71,8 @@
     };
 
     const hasModifiedTabs = () => {
+        if (!editor) return false;
+
         if (editor.getContent() && editor.getContent() !== "") return true;
 
         for (const tab of tabs) {
@@ -95,6 +92,8 @@
     const onTabClose = (tabId: string) => {
         // cant close last tab
         if (tabs.length === 1) return;
+
+        if (!editor) return;
 
         const idx = tabs.findIndex((t) => t.id === tabId);
 
@@ -129,6 +128,8 @@
     };
 
     const setActiveTab = (tabId: string) => {
+        if (!editor) return;
+
         const previousTabIdx = tabs.findIndex((t) => t.id === activeTabId);
         if (activeTabId && previousTabIdx !== -1) {
             const cursor = editor.getCursorPos();
@@ -200,6 +201,8 @@
     };
 
     export const getTabs = () => {
+        if (!editor) return tabs;
+
         // save the current editor state to the current tab
         const idx = tabs.findIndex((t) => t.id === activeTabId);
         const cursor = editor.getCursorPos();
@@ -211,14 +214,25 @@
         tabs[idx].indentationUnit = indentation[0];
         tabs[idx].indentationWidth = indentation[1];
 
-        return tabs;
+        if (!sortable) return [];
+
+        // sort tabs based on their current order in the DOM
+        const sortedTabs = sortable.toArray().map((id) => {
+            return tabs.find((tab) => tab.id === id)!;
+        });
+
+        return sortedTabs;
     };
 
     export const getLanguageCommands = () => {
+        if (!editor) return [];
+
         return editor.getLanguageCommands();
     };
 
     export const getIndentUnitCommands = (convertIndent = false) => {
+        if (!editor) return [];
+
         return editor.getIndentUnitCommands(convertIndent);
     };
 </script>
@@ -248,7 +262,7 @@
                 id={tab.id.toString()}
                 onclose={() => onTabClose(tab.id)}
                 onclick={(event) => onTabClick(event, tab.id)}
-                onfinishedRenaming={() => editor.focus()}
+                onfinishedRenaming={() => editor?.focus()}
                 bind:title={tab.title}
                 bind:isInRenamingState={tab.isInRenamingState}
                 isActive={tab.id === activeTabId}
