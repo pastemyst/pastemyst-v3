@@ -53,7 +53,7 @@ export const findLangByName = async (
     fetchFunc: FetchFunc,
     lang: string
 ): Promise<Language | undefined> => {
-    const res = await fetchFunc(`${API_URL}/langs/${lang}`);
+    const res = await fetchFunc(`${API_URL}/langs/${encodeURIComponent(lang)}`);
 
     if (res.ok) return await res.json();
 
