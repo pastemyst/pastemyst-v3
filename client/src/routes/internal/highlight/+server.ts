@@ -38,7 +38,9 @@ const highlight = async (
         if (lang && lang?.tmScope !== "none") {
             const grammar = grammars.find(
                 (g) =>
-                    g.scopeName === lang.tmScope || g.displayName.toLowerCase() === lang.name.toLowerCase() || g.name.toLowerCase() === lang.name.toLowerCase()
+                    g.scopeName === lang.tmScope ||
+                    g.displayName.toLowerCase() === lang.name.toLowerCase() ||
+                    g.name.toLowerCase() === lang.name.toLowerCase()
             );
 
             if (grammar) {
