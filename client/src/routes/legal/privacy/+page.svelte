@@ -9,5 +9,6 @@
 </script>
 
 <section class="markdown">
+    <!-- eslint-disable-next-line svelte/no-at-html-tags -->
     {@html data.renderedMarkdown}
 </section>

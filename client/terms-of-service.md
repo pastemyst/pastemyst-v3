@@ -8,7 +8,7 @@ Welcome to pastemyst (“the Service”), a free and open-source website for sto
 
 You may use the Service without an account or by creating an account through GitHub or GitLab login. By using the Service, you confirm that you are at least 13 years old (or the minimum age of digital consent in your country).
 
-##  2. Accounts
+## 2. Accounts
 
 When you sign in, we collect and store your username, OAuth provider name (GitHub/GitLab), and your provider ID.
 

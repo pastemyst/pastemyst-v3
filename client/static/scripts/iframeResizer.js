@@ -57,7 +57,7 @@
                 }
             },
             k = {};
-        window.jQuery &&
+        (window.jQuery &&
             ((e = window.jQuery).fn
                 ? e.fn.iFrameResize ||
                   (e.fn.iFrameResize = function (i) {
@@ -73,7 +73,7 @@
                 : "object" == typeof module &&
                   "object" == typeof module.exports &&
                   (module.exports = q()),
-            (window.iFrameResize = window.iFrameResize || q());
+            (window.iFrameResize = window.iFrameResize || q()));
     }
     function p() {
         return (
@@ -121,25 +121,25 @@
     }
     function n(n) {
         function e() {
-            i("Height"),
+            (i("Height"),
                 i("Width"),
                 A(
                     function () {
-                        P(b), S(y), d("onResized", b);
+                        (P(b), S(y), d("onResized", b));
                     },
                     b,
                     "init"
-                );
+                ));
         }
         function i(e) {
             var n = Number(M[y]["max" + e]),
                 i = Number(M[y]["min" + e]),
                 t = e.toLowerCase(),
                 o = Number(b[t]);
-            R(y, "Checking " + t + " is in range " + i + "-" + n),
+            (R(y, "Checking " + t + " is in range " + i + "-" + n),
                 o < i && ((o = i), R(y, "Set " + t + " to min value")),
                 n < o && ((o = n), R(y, "Set " + t + " to max value")),
-                (b[t] = "" + o);
+                (b[t] = "" + o));
         }
         function t(e) {
             return p.substr(p.indexOf(":") + v + e);
@@ -148,7 +148,7 @@
             !(function (e, n, i) {
                 k[i] ||
                     (k[i] = setTimeout(function () {
-                        (k[i] = null), e();
+                        ((k[i] = null), e());
                     }, n));
             })(
                 function () {
@@ -200,7 +200,7 @@
         function o(e) {
             var n = e ? r(b.iframe) : { x: 0, y: 0 },
                 i = { x: Number(b.width) + n.x, y: Number(b.height) + n.y };
-            R(y, "Reposition requested from iFrame (offset x:" + n.x + " y:" + n.y + ")"),
+            (R(y, "Reposition requested from iFrame (offset x:" + n.x + " y:" + n.y + ")"),
                 window.top !== window.self
                     ? window.parentIFrame
                         ? window.parentIFrame["scrollTo" + (e ? "Offset" : "")](i.x, i.y)
@@ -208,7 +208,7 @@
                               y,
                               "Unable to scroll to requested position, window.parentIFrame not found"
                           )
-                    : ((F = i), s(), R(y, "--"));
+                    : ((F = i), s(), R(y, "--")));
         }
         function s() {
             !1 !== d("onScroll", F) ? S(y) : H();
@@ -319,7 +319,7 @@
                                     break;
                                 case "message":
                                     !(function (e) {
-                                        R(
+                                        (R(
                                             y,
                                             "onMessage passed: {iframe: " +
                                                 b.iframe.id +
@@ -331,7 +331,7 @@
                                                 iframe: b.iframe,
                                                 message: JSON.parse(e)
                                             }),
-                                            R(y, "--");
+                                            R(y, "--"));
                                     })(t(6));
                                     break;
                                 case "autoResize":
@@ -344,23 +344,23 @@
                                     o(!0);
                                     break;
                                 case "pageInfo":
-                                    a(M[y] && M[y].iframe, y),
+                                    (a(M[y] && M[y].iframe, y),
                                         (function () {
                                             function e(n, i) {
                                                 function t() {
                                                     M[r] ? a(M[r].iframe, r) : o();
                                                 }
                                                 ["scroll", "resize"].forEach(function (e) {
-                                                    R(r, n + e + " listener for sendPageInfo"),
-                                                        i(window, e, t);
+                                                    (R(r, n + e + " listener for sendPageInfo"),
+                                                        i(window, e, t));
                                                 });
                                             }
                                             function o() {
                                                 e("Remove ", O);
                                             }
                                             var r = y;
-                                            e("Add ", z), M[r] && (M[r].stopPageInfo = o);
-                                        })();
+                                            (e("Add ", z), M[r] && (M[r].stopPageInfo = o));
+                                        })());
                                     break;
                                 case "pageInfoStop":
                                     M[y] &&
@@ -405,7 +405,7 @@
                                     j(b);
                                     break;
                                 case "init":
-                                    e(), d("onInit", b.iframe);
+                                    (e(), d("onInit", b.iframe));
                                     break;
                                 default:
                                     e();
@@ -436,7 +436,7 @@
             } catch (e) {
                 E(e);
             }
-            W(n, "onClosed", n), R(n, "--"), b(e);
+            (W(n, "onClosed", n), R(n, "--"), b(e));
         } else R(n, "Close iframe cancelled by onClose event");
     }
     function N(e) {
@@ -466,15 +466,15 @@
         F = null;
     }
     function j(e) {
-        R(e.id, "Size reset requested by " + ("init" === e.type ? "host page" : "iFrame")),
+        (R(e.id, "Size reset requested by " + ("init" === e.type ? "host page" : "iFrame")),
             N(e.id),
             A(
                 function () {
-                    P(e), B("reset", "reset", e.iframe, e.id);
+                    (P(e), B("reset", "reset", e.iframe, e.id));
                 },
                 e,
                 "reset"
-            );
+            ));
     }
     function P(n) {
         function i(e) {
@@ -497,8 +497,8 @@
                         });
                     }
                     function i(e) {
-                        R("window", "Mutation observed: " + e[0].target + " " + e[0].type),
-                            c(n, 16);
+                        (R("window", "Mutation observed: " + e[0].target + " " + e[0].type),
+                            c(n, 16));
                     }
                     var t = p();
                     t &&
@@ -516,13 +516,13 @@
                 })());
         }
         function e(e) {
-            !(function (e) {
+            (!(function (e) {
                 n.id
                     ? ((n.iframe.style[e] = n[e] + "px"),
                       R(n.id, "IFrame (" + t + ") " + e + " set to " + n[e] + "px"))
                     : R("undefined", "messageData id not set");
             })(e),
-                i(e);
+                i(e));
         }
         var t = n.iframe.id;
         M[t] && (M[t].sizeHeight && e("height"), M[t].sizeWidth && e("width"));
@@ -533,7 +533,7 @@
     function B(e, n, i, t, o) {
         var r,
             a = !1;
-        (t = t || i.id),
+        ((t = t || i.id),
             M[t] &&
                 (i && "contentWindow" in i && null !== i.contentWindow
                     ? ((r = M[t] && M[t].targetOrigin),
@@ -564,7 +564,7 @@
                                     M[t].warningTimeout / 1e3 +
                                     " seconds. Check iFrameResizer.contentWindow.js has been loaded in iFrame. This message can be ignored if everything is working, or you can set the warningTimeout option to a higher value or zero to suppress this warning."
                             ));
-                    }, M[t].warningTimeout)));
+                    }, M[t].warningTimeout))));
     }
     function L(e) {
         return (
@@ -604,7 +604,7 @@
             var n = e.split("Callback");
             if (2 === n.length) {
                 var i = "on" + n[0].charAt(0).toUpperCase() + n[0].slice(1);
-                (this[i] = this[e]),
+                ((this[i] = this[e]),
                     delete this[e],
                     E(
                         c,
@@ -613,7 +613,7 @@
                             "' has been renamed '" +
                             i +
                             "'. The old method will be removed in the next major version."
-                    );
+                    ));
             }
         }
         var t,
@@ -712,12 +712,12 @@
                           });
                       }).observe(i.parentNode, { childList: !0 })),
               z(i, "load", function () {
-                  B("iFrame.onload", r, i, l, !0),
+                  (B("iFrame.onload", r, i, l, !0),
                       (function () {
                           var e = M[c] && M[c].firstRun,
                               n = M[c] && M[c].heightCalculationMethod in h;
                           !e && n && j({ iframe: i, height: 0, width: 0, type: "init" });
-                      })();
+                      })());
               }),
               B("init", r, i, l, !0),
               M[c] &&
@@ -736,7 +736,7 @@
     function c(e, n) {
         null === i &&
             (i = setTimeout(function () {
-                (i = null), e();
+                ((i = null), e());
             }, n));
     }
     function u() {
@@ -754,17 +754,17 @@
         });
     }
     function y() {
-        z(window, "message", n),
+        (z(window, "message", n),
             z(window, "resize", function () {
                 !(function (e) {
-                    R("window", "Trigger event: " + e),
+                    (R("window", "Trigger event: " + e),
                         c(function () {
                             f("Window " + e, "resize");
-                        }, 16);
+                        }, 16));
                 })("resize");
             }),
             z(document, "visibilitychange", u),
-            z(document, "-webkit-visibilitychange", u);
+            z(document, "-webkit-visibilitychange", u));
     }
     function q() {
         function i(e, n) {
