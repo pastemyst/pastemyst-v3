@@ -248,9 +248,9 @@
                         {langStats}
                         {historyId}
                         stats={pasteStats.pasties[activePastyId]}
-                        bind:previewMarkdown={previewMarkdown[
-                            paste.pasties.findIndex((p) => p.id === activePastyId)
-                        ]}
+                        bind:previewMarkdown={
+                            previewMarkdown[paste.pasties.findIndex((p) => p.id === activePastyId)]
+                        }
                     />
                 </div>
             {/if}

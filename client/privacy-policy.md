@@ -79,6 +79,6 @@ The Service is not directed to children under 13. If you are under 13 (or the mi
 
 We may update this Privacy Policy from time to time. We will post changes here, and significant changes may also be announced on the website.
 
-##  9. Contact
+## 9. Contact
 
 If you have questions about this Privacy Policy or your data, contact us at: code@myst.rs

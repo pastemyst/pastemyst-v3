@@ -76,7 +76,7 @@
                     }
                 }
             );
-            window.addEventListener("test", ee, J), window.removeEventListener("test", ee, J);
+            (window.addEventListener("test", ee, J), window.removeEventListener("test", ee, J));
         } catch (e) {}
         var U,
             V,
@@ -178,16 +178,16 @@
                         Q
                     );
                 });
-        te(window, "message", function (t) {
+        (te(window, "message", function (t) {
             var n = {
                 init: function () {
-                    (v = t.data),
+                    ((v = t.data),
                         (A = t.source),
                         ae(),
                         (f = !1),
                         setTimeout(function () {
                             p = !1;
-                        }, l);
+                        }, l));
                 },
                 reset: function () {
                     p
@@ -205,11 +205,13 @@
                 },
                 pageInfo: function () {
                     var e = i();
-                    ie("PageInfoFromParent called from parent: " + e), q(JSON.parse(e)), ie(" --");
+                    (ie("PageInfoFromParent called from parent: " + e),
+                        q(JSON.parse(e)),
+                        ie(" --"));
                 },
                 message: function () {
                     var e = i();
-                    ie("onMessage called from parent: " + e), D(JSON.parse(e)), ie(" --");
+                    (ie("onMessage called from parent: " + e), D(JSON.parse(e)), ie(" --"));
                 }
             };
             function o() {
@@ -241,7 +243,7 @@
                         ));
         }),
             te(window, "readystatechange", Ae),
-            Ae();
+            Ae());
     }
     function ee() {}
     function te(e, t, n, o) {
@@ -260,12 +262,12 @@
         "object" == typeof window.console && console.warn(oe(e));
     }
     function ae() {
-        !(function () {
+        (!(function () {
             function e(e) {
                 return "true" === e;
             }
             var t = v.substr(O).split(":");
-            (S = t[0]),
+            ((S = t[0]),
                 (r = d !== t[1] ? Number(t[1]) : r),
                 (c = d !== t[2] ? e(t[2]) : c),
                 (T = d !== t[3] ? e(t[3]) : T),
@@ -278,7 +280,7 @@
                 (z = d !== t[11] ? Number(t[11]) : z),
                 (y.enable = d !== t[12] && e(t[12])),
                 (I = d !== t[13] ? t[13] : I),
-                (F = d !== t[14] ? t[14] : F);
+                (F = d !== t[14] ? t[14] : F));
         })(),
             ie("Initialising iFrame (" + location.href + ")"),
             (function () {
@@ -293,13 +295,13 @@
                     Object === window.iFrameResizer.constructor &&
                     ((function () {
                         var e = window.iFrameResizer;
-                        ie("Reading data from page: " + JSON.stringify(e)),
+                        (ie("Reading data from page: " + JSON.stringify(e)),
                             Object.keys(e).forEach(ue, e),
                             (D = "onMessage" in e ? e.onMessage : D),
                             (j = "onReady" in e ? e.onReady : j),
                             (C = "targetOrigin" in e ? e.targetOrigin : C),
                             (g = "heightCalculationMethod" in e ? e.heightCalculationMethod : g),
-                            (F = "widthCalculationMethod" in e ? e.widthCalculationMethod : F);
+                            (F = "widthCalculationMethod" in e ? e.widthCalculationMethod : F));
                     })(),
                     (g = e(g, "height")),
                     (F = e(F, "width")));
@@ -320,10 +322,10 @@
             ce("padding", u),
             (function () {
                 var e = document.createElement("div");
-                (e.style.clear = "both"),
+                ((e.style.clear = "both"),
                     (e.style.display = "block"),
                     (e.style.height = "0"),
-                    document.body.appendChild(e);
+                    document.body.appendChild(e));
             })(),
             fe(),
             me(),
@@ -373,13 +375,13 @@
                     Ne(0, 0, "message", JSON.stringify(e), t);
                 },
                 setHeightCalculationMethod: function (e) {
-                    (g = e), fe();
+                    ((g = e), fe());
                 },
                 setWidthCalculationMethod: function (e) {
-                    (F = e), me();
+                    ((F = e), me());
                 },
                 setTargetOrigin: function (e) {
-                    ie("Set targetOrigin: " + e), (C = e);
+                    (ie("Set targetOrigin: " + e), (C = e));
                 },
                 size: function (e, t) {
                     Oe("size", "parentIFrame.size(" + ((e || "") + (t ? "," + t : "")) + ")", e, t);
@@ -427,7 +429,7 @@
                         function (e) {
                             "#" !== e.getAttribute("href") &&
                                 te(e, "click", function (e) {
-                                    e.preventDefault(), t(this.getAttribute("href"));
+                                    (e.preventDefault(), t(this.getAttribute("href")));
                                 });
                         }
                     );
@@ -445,13 +447,13 @@
                 return { findTarget: t };
             })()),
             Oe("init", "Init message from host page"),
-            j();
+            j());
     }
     function ue(e) {
         var t = e.split("Callback");
         if (2 === t.length) {
             var n = "on" + t[0].charAt(0).toUpperCase() + t[0].slice(1);
-            (this[n] = this[e]),
+            ((this[n] = this[e]),
                 delete this[e],
                 re(
                     "Deprecated: '" +
@@ -459,7 +461,7 @@
                         "' has been renamed '" +
                         n +
                         "'. The old method will be removed in the next major version."
-                );
+                ));
         }
     }
     function ce(e, t) {
@@ -474,23 +476,23 @@
                 function t() {
                     Oe(n.eventName, n.eventType);
                 }
-                (W[e] = t), te(window, e, t, { passive: !0 });
+                ((W[e] = t), te(window, e, t, { passive: !0 }));
             },
             remove: function (e) {
                 var t = W[e];
-                delete W[e],
+                (delete W[e],
                     (function (e, t, n) {
                         e.removeEventListener(t, n, !1);
-                    })(window, e, t);
+                    })(window, e, t));
             }
         };
-        n.eventNames && Array.prototype.map
+        (n.eventNames && Array.prototype.map
             ? ((n.eventName = n.eventNames[0]), n.eventNames.map(e[n.method]))
             : e[n.method](n.eventName),
-            ie(ne(n.method) + " event listener: " + n.eventType);
+            ie(ne(n.method) + " event listener: " + n.eventType));
     }
     function de(e) {
-        se({
+        (se({
             method: e,
             eventType: "Animation Start",
             eventNames: ["animationstart", "webkitAnimationStart"]
@@ -547,7 +549,7 @@
                     "otransitionend"
                 ]
             }),
-            "child" === I && se({ method: e, eventType: "IFrame Resized", eventName: "resize" });
+            "child" === I && se({ method: e, eventType: "IFrame Resized", eventName: "resize" }));
     }
     function le(e, t, n, o) {
         return (
@@ -590,15 +592,15 @@
                                           );
                                 }
                                 function o(e) {
-                                    ie("Remove listeners from " + e.src),
+                                    (ie("Remove listeners from " + e.src),
                                         e.removeEventListener("load", i, !1),
                                         e.removeEventListener("error", r, !1),
                                         (function (e) {
                                             u.splice(u.indexOf(e), 1);
-                                        })(e);
+                                        })(e));
                                 }
                                 function n(e, t, n) {
-                                    o(e.target), Oe(t, n + ": " + e.target.src, d, d);
+                                    (o(e.target), Oe(t, n + ": " + e.target.src, d, d));
                                 }
                                 function i(e) {
                                     n(e, "imageLoad", "Image loaded");
@@ -607,11 +609,11 @@
                                     n(e, "imageLoadFailed", "Image load failed");
                                 }
                                 function a(e) {
-                                    Oe(
+                                    (Oe(
                                         "mutationObserver",
                                         "mutationObserver: " + e[0].target + " " + e[0].type
                                     ),
-                                        e.forEach(t);
+                                        e.forEach(t));
                                 }
                                 var u = [],
                                     c = window.MutationObserver || window.WebKitMutationObserver,
@@ -697,16 +699,16 @@
         function a(e, t) {
             return !(Math.abs(e - t) <= z);
         }
-        (i = d !== n ? n : Z[g]()),
+        ((i = d !== n ? n : Z[g]()),
             (r = d !== o ? o : $[F]()),
             a(m, i) || (c && a(x, r)) || "init" === e
                 ? (Se(), Ne((m = i), (x = r), e))
                 : e in { init: 1, interval: 1, size: 1 } || !(g in M || (c && F in M))
                   ? e in { interval: 1 } || ie("No change in size detected")
-                  : Ie(t);
+                  : Ie(t));
     }
     function Ee() {
-        (Y = G()), (X = null), (Q = U.apply(V, K)), X || (V = K = null);
+        ((Y = G()), (X = null), (Q = U.apply(V, K)), X || (V = K = null));
     }
     function Oe(e, t, n, o) {
         k && e in s
@@ -715,18 +717,18 @@
               "init" === e ? Te(e, t, n, o) : _(e, t, n, o));
     }
     function Se() {
-        k || ((k = !0), ie("Trigger event lock on")),
+        (k || ((k = !0), ie("Trigger event lock on")),
             clearTimeout(e),
             (e = setTimeout(function () {
-                (k = !1), ie("Trigger event lock off"), ie("--");
-            }, l));
+                ((k = !1), ie("Trigger event lock off"), ie("--"));
+            }, l)));
     }
     function Me(e) {
-        (m = Z[g]()), (x = $[F]()), Ne(m, x, e);
+        ((m = Z[g]()), (x = $[F]()), Ne(m, x, e));
     }
     function Ie(e) {
         var t = g;
-        (g = h), ie("Reset trigger event: " + e), Se(), Me("reset"), (g = t);
+        ((g = h), ie("Reset trigger event: " + e), Se(), Me("reset"), (g = t));
     }
     function Ne(e, t, n, o, i) {
         var r;
