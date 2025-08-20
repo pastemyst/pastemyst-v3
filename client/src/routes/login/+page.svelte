@@ -8,13 +8,17 @@
     <meta property="twitter:title" content="pastemyst | login / register" />
 </svelte:head>
 
-<section class="centered">
+<section>
     <h2>login / register</h2>
 
     <p>
         here you can create a pastemyst account, or login to an existing one. accounts provide a lot
         of functionality, biggest ones are: viewing all your pastes (including tagging), private
         pastes, editing pastes and much more.
+    </p>
+
+    <p>
+        you can view our <a href="/legal/privacy">privacy policy</a> to see how we handle your data.
     </p>
 
     <ul>
@@ -64,10 +68,10 @@
 <style lang="scss">
     ul {
         list-style: none;
-        padding-left: 10%;
-        padding-right: 10%;
 
         li {
+            max-width: 20rem;
+            margin: 0 auto;
             margin-top: 2rem;
 
             a {

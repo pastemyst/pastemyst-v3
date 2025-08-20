@@ -58,7 +58,7 @@
     };
 </script>
 
-<section class="centered">
+<section>
     <h2>create a new account</h2>
 
     <p>
