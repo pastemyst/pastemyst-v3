@@ -371,8 +371,13 @@ section {
     margin-top: 2rem;
     margin-bottom: 2rem;
 
-    h2:first-child {
+    h2:first-child,
+    h1:first-child {
         margin-top: 0;
+    }
+
+    p, ul {
+        font-size: $fs-normal;
     }
 
     input[type="text"],
@@ -381,16 +386,6 @@ section {
     textarea,
     .btn {
         background-color: var(--color-bg);
-    }
-
-    &.centered {
-        padding-left: 20%;
-        padding-right: 20%;
-
-        @media screen and (max-width: $break-med) {
-            padding-left: 1rem;
-            padding-right: 1rem;
-        }
     }
 }
 
