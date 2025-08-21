@@ -4,7 +4,6 @@
     import { env } from "$env/dynamic/public";
     import { isMacOs } from "./utils/userAgent";
     import { API_URL } from "./api/fetch";
-    import { PUBLIC_DOCS_URL } from "$env/static/public";
 
     const isAlphaRelease = env.PUBLIC_ALPHA_RELEASE === "true";
 
@@ -73,7 +72,7 @@
                 </svg>
             </a>
 
-            <a href={PUBLIC_DOCS_URL} class="btn nav-item btn-icon" aria-label="docs" use:tooltip>
+            <a href={env.PUBLIC_DOCS_URL} class="btn nav-item btn-icon" aria-label="docs" use:tooltip>
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" class="icon">
                     <title>Book Icon</title>
                     <path
@@ -84,7 +83,7 @@
             </a>
 
             <a
-                href="{PUBLIC_DOCS_URL}/cli"
+                href="{env.PUBLIC_DOCS_URL}/cli"
                 class="btn nav-item btn-icon"
                 aria-label="cli tool"
                 use:tooltip
