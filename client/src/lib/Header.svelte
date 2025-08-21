@@ -73,7 +73,7 @@
             </a>
 
             <a
-                href="https://docs.paste.myst.rs"
+                href={env.PUBLIC_DOCS_URL}
                 class="btn nav-item btn-icon"
                 aria-label="docs"
                 use:tooltip
@@ -88,7 +88,7 @@
             </a>
 
             <a
-                href="https://docs.paste.myst.rs/cli"
+                href="{env.PUBLIC_DOCS_URL}/cli"
                 class="btn nav-item btn-icon"
                 aria-label="cli tool"
                 use:tooltip

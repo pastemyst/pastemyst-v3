@@ -43,7 +43,9 @@ services:
     environment:
       - PUBLIC_API_SERVER_BASE=http://api:8080/api/v3
       - PUBLIC_API_CLIENT_BASE=${API_URL}/api/v3
+      - PUBLIC_DOCS_URL=${DOCS_URL}
       - PUBLIC_ALPHA_RELEASE=${ALPHA_RELEASE}
+      - PUBLIC_USE_HTTP=${USE_HTTPS}
     depends_on:
       - api
 
