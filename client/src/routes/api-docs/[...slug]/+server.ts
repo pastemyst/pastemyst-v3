@@ -1,6 +1,6 @@
-import { PUBLIC_DOCS_URL } from "$env/static/public";
+import { env } from "$env/dynamic/public";
 import { redirect, type RequestHandler } from "@sveltejs/kit";
 
 export const GET: RequestHandler = async () => {
-    redirect(301, PUBLIC_DOCS_URL);
+    redirect(301, env.PUBLIC_DOCS_URL);
 };
