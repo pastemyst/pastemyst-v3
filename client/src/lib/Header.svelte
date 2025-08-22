@@ -127,12 +127,7 @@
             </svg>
         </a>
 
-        <a
-            href="https://docs.paste.myst.rs"
-            class="btn nav-item btn-icon"
-            aria-label="docs"
-            use:tooltip
-        >
+        <a href={env.PUBLIC_DOCS_URL} class="btn nav-item btn-icon" aria-label="docs" use:tooltip>
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" class="icon">
                 <title>Book Icon</title>
                 <path
@@ -143,7 +138,7 @@
         </a>
 
         <a
-            href="https://docs.paste.myst.rs/cli"
+            href="{env.PUBLIC_DOCS_URL}/cli"
             class="btn nav-item btn-icon"
             aria-label="cli tool"
             use:tooltip
