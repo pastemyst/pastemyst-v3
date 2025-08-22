@@ -1,3 +1,9 @@
+<svelte:head>
+    <title>pastemyst | legal</title>
+    <meta property="og:title" content="pastemyst | legal" />
+    <meta property="twitter:title" content="pastemyst | legal" />
+</svelte:head>
+
 <section>
     <h1>Legal</h1>
 
