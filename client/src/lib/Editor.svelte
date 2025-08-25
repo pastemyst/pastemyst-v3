@@ -315,11 +315,15 @@
         } else {
             const res = await fetch("/internal/highlight", {
                 method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
                 body: JSON.stringify({
                     content: getContent(),
                     language: selectedLanguage.name,
                     wrap: settings.textWrap,
-                    theme: settings.theme
+                    theme: settings.theme,
+                    showLineNumbers: true
                 })
             });
 
@@ -551,6 +555,7 @@
 
         :global(pre) {
             margin-top: 0;
+            padding-top: 0;
         }
 
         :global(code) {
@@ -559,6 +564,20 @@
             padding: 0;
             border-radius: 0;
             background-color: transparent;
+            display: flex;
+            flex-direction: column;
+            min-width: max-content;
+            width: auto;
+        }
+
+        :global(code .line-number) {
+            margin-right: 1rem;
+            display: inline-block;
+            text-align: right;
+            color: var(--color-bg3);
+            font-size: $fs-normal;
+            user-select: none;
+            @include transition();
         }
 
         &.markdown {
