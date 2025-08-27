@@ -6,7 +6,7 @@ import { error } from "@sveltejs/kit";
 import { formatDistanceToNow } from "date-fns";
 import { API_URL } from "$lib/api/fetch";
 
-export const load: PageLoad = async ({ params, url, fetch }) => {
+export const load: PageLoad = async ({ params, url, fetch, parent }) => {
     const tag: string | null = url.searchParams.get("tag");
     const tagQuery = tag == null ? "" : "&tag=" + tag;
 
@@ -14,10 +14,7 @@ export const load: PageLoad = async ({ params, url, fetch }) => {
         method: "GET"
     });
 
-    const meRes = await fetch(`${API_URL}/auth/self`, {
-        method: "GET",
-        credentials: "include"
-    });
+    const { self } = await parent();
 
     const userPastesRes = await fetch(
         `${API_URL}/users/${params.user}/pastes?pageSize=5${tagQuery}`,
@@ -44,10 +41,8 @@ export const load: PageLoad = async ({ params, url, fetch }) => {
         user = await userRes.json();
         relativeJoined = formatDistanceToNow(new Date(user.createdAt), { addSuffix: true });
 
-        if (meRes.ok) {
-            const loggedInUser: User = await meRes.json();
-
-            isCurrentUser = loggedInUser.id === user.id;
+        if (self) {
+            isCurrentUser = self.id === user.id;
         }
 
         if (userPastesRes.ok) {

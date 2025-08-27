@@ -1,9 +1,8 @@
-import { getSelf } from "$lib/api/auth";
 import { getUserTags } from "$lib/api/user";
 import type { PageLoad } from "./$types";
 
-export const load: PageLoad = async ({ fetch }) => {
-    const self = await getSelf(fetch);
+export const load: PageLoad = async ({ parent }) => {
+    const { self } = await parent();
 
     let tags: string[] = [];
     if (self) {
