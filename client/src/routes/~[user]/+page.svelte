@@ -6,7 +6,7 @@
     import { Close, getConfirmActionCommands, setTempCommands } from "$lib/command";
     import { deleteUser } from "$lib/api/user";
     import { getApiUrl } from "$lib/api/fetch";
-    import { PUBLIC_API_CLIENT_BASE } from "$env/static/public";
+    import { env } from "$env/dynamic/public";
 
     interface Props {
         data: PageData;
@@ -50,7 +50,7 @@
         <section class="user-header">
             <img
                 class="avatar"
-                src="{PUBLIC_API_CLIENT_BASE}/images/{data.user.avatarId}"
+                src="{env.PUBLIC_API_CLIENT_BASE}/images/{data.user.avatarId}"
                 alt="${data.user.username}'s avatar"
             />
 
