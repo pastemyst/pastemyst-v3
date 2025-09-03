@@ -3,7 +3,6 @@
     import { tooltip } from "./tooltips";
     import { env } from "$env/dynamic/public";
     import { isMacOs } from "./utils/userAgent";
-    import { PUBLIC_API_CLIENT_BASE } from "$env/static/public";
 
     const isAlphaRelease = env.PUBLIC_ALPHA_RELEASE === "true";
 
@@ -61,7 +60,7 @@
                 use:tooltip
             >
                 <img
-                    src="{PUBLIC_API_CLIENT_BASE}/images/{$currentUserStore.avatarId}"
+                    src="{env.PUBLIC_API_CLIENT_BASE}/images/{$currentUserStore.avatarId}"
                     alt="{$currentUserStore.username}'s avatar"
                 />
             </a>
