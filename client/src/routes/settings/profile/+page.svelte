@@ -1,5 +1,5 @@
 <script lang="ts">
-    import { PUBLIC_API_CLIENT_BASE } from "$env/static/public";
+    import { env } from "$env/dynamic/public";
     import { getSelf } from "$lib/api/auth";
     import { getApiUrl } from "$lib/api/fetch";
     import { updateUserSettings } from "$lib/api/settings";
@@ -142,7 +142,7 @@
 
 <div class="avatar flex sm-row center">
     <img
-        src="{PUBLIC_API_CLIENT_BASE}/images/{data.self?.avatarId}"
+        src="{env.PUBLIC_API_CLIENT_BASE}/images/{data.self?.avatarId}"
         alt="{data.self.username}'s avatar"
     />
 
