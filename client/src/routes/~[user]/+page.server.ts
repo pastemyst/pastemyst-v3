@@ -1,34 +1,42 @@
 import { getUserTags, type User } from "$lib/api/user";
 import type { Page } from "$lib/api/page";
-import type { PageLoad } from "./$types";
+import type { PageServerLoad } from "./$types";
 import type { PasteWithLangStats } from "$lib/api/paste";
 import { error } from "@sveltejs/kit";
 import { formatDistanceToNow } from "date-fns";
-import { API_URL } from "$lib/api/fetch";
+import { getApiUrl } from "$lib/api/fetch";
 
-export const load: PageLoad = async ({ params, url, fetch, parent }) => {
+export const load: PageServerLoad = async ({ params, url, fetch, parent, request }) => {
     const tag: string | null = url.searchParams.get("tag");
     const tagQuery = tag == null ? "" : "&tag=" + tag;
 
-    const userRes = await fetch(`${API_URL}/users/${params.user}`, {
+    const userRes = await fetch(`${getApiUrl()}/users/${params.user}`, {
         method: "GET"
     });
 
     const { self } = await parent();
 
+    const cookie = request.headers.get("cookie") ?? "";
+
     const userPastesRes = await fetch(
-        `${API_URL}/users/${params.user}/pastes?pageSize=5${tagQuery}`,
+        `${getApiUrl()}/users/${params.user}/pastes?pageSize=5${tagQuery}`,
         {
             method: "GET",
-            credentials: "include"
+            credentials: "include",
+            headers: {
+                cookie
+            }
         }
     );
 
     const userPinnedPastesRes = await fetch(
-        `${API_URL}/users/${params.user}/pastes/pinned?pageSize=5`,
+        `${getApiUrl()}/users/${params.user}/pastes/pinned?pageSize=5`,
         {
             method: "GET",
-            credentials: "include"
+            credentials: "include",
+            headers: {
+                cookie
+            }
         }
     );
 
@@ -63,7 +71,7 @@ export const load: PageLoad = async ({ params, url, fetch, parent }) => {
             error(userPastesRes.status);
         }
 
-        const tags = await getUserTags(fetch, user.username);
+        const tags = await getUserTags(fetch, user.username, cookie);
 
         return {
             user: user,

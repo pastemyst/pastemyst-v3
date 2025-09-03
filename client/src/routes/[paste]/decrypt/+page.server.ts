@@ -1,6 +1,6 @@
 import { type Actions, redirect } from "@sveltejs/kit";
 import { env } from "$env/dynamic/public";
-import { API_URL } from "$lib/api/fetch";
+import { getApiUrl } from "$lib/api/fetch";
 
 export const actions = {
     default: async (event) => {
@@ -12,11 +12,12 @@ export const actions = {
             return { success: false };
         }
 
-        const res = await event.fetch(`${API_URL}/pastes/${pasteId}`, {
+        const res = await event.fetch(`${getApiUrl()}/pastes/${pasteId}`, {
             method: "GET",
             credentials: "include",
             headers: {
-                "Encryption-Key": encryptionKey.toString()
+                "Encryption-Key": encryptionKey.toString(),
+                cookie: event.request.headers.get("cookie") ?? ""
             }
         });
 

@@ -1,7 +1,7 @@
 <script lang="ts">
     import Header from "$lib/Header.svelte";
     import Footer from "$lib/Footer.svelte";
-    import type { LayoutData } from "./$types";
+    import type { LayoutServerData } from "./$types";
     import CommandPalette from "$lib/CommandPalette.svelte";
     import { Close, setBaseCommands, setTempCommands, type Command } from "$lib/command";
     import { beforeNavigate, goto } from "$app/navigation";
@@ -24,12 +24,12 @@
     import { tooltip } from "$lib/tooltips";
     import { formatDistanceToNow } from "date-fns";
     import { page } from "$app/state";
-    import { API_URL } from "$lib/api/fetch";
     import { themes } from "$lib/themes";
     import { updateSettings } from "$lib/api/settings";
+    import { getApiUrl } from "$lib/api/fetch";
 
     interface Props {
-        data: LayoutData;
+        data: LayoutServerData;
         children: Snippet;
     }
 
@@ -43,6 +43,11 @@
     currentUserStore.set(data.self);
 
     onMount(() => {
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.has("login_redirect")) {
+            window.location.href = "/";
+        }
+
         if (latestAnnouncement) {
             hiddenAnnouncement =
                 localStorage.getItem(`dismissedAnnouncement-${latestAnnouncement.id}`) === "true";
@@ -117,7 +122,7 @@
                 {
                     name: "logout",
                     action: () => {
-                        window.location.href = `${API_URL}/auth/logout`;
+                        window.location.href = `${getApiUrl()}/auth/logout`;
                         return Close.yes;
                     }
                 }

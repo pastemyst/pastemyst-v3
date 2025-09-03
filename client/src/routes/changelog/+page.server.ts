@@ -1,8 +1,8 @@
 import { getReleases } from "$lib/api/meta";
 import { marked } from "marked";
-import type { PageLoad } from "./$types";
+import type { PageServerLoad } from "./$types";
 
-export const load: PageLoad = async ({ fetch }) => {
+export const load: PageServerLoad = async ({ fetch }) => {
     const releases = await getReleases(fetch);
 
     const renderedMarkdown: string[] = [];

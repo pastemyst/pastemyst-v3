@@ -1,5 +1,5 @@
 <script lang="ts">
-    import { API_URL } from "$lib/api/fetch";
+    import { getApiUrl } from "$lib/api/fetch";
 </script>
 
 <svelte:head>
@@ -23,7 +23,7 @@
 
     <ul>
         <li>
-            <a href="{API_URL}/login/github" rel="external" class="btn">
+            <a href="{getApiUrl()}/login/github" rel="external" class="btn">
                 <svg
                     xmlns="http://www.w3.org/2000/svg"
                     width="64"
@@ -46,7 +46,7 @@
         </li>
 
         <li>
-            <a href="{API_URL}/login/gitlab" rel="external" class="btn">
+            <a href="{getApiUrl()}/login/gitlab" rel="external" class="btn">
                 <svg
                     width="32px"
                     height="32px"

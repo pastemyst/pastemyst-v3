@@ -1,4 +1,4 @@
-import { API_URL, type FetchFunc } from "./fetch";
+import { getApiUrl, type FetchFunc } from "./fetch";
 
 export interface Announcement {
     id: string;
@@ -10,7 +10,7 @@ export interface Announcement {
 export const getLatestAnnouncement = async (
     fetch: FetchFunc
 ): Promise<Announcement | undefined> => {
-    const res = await fetch(`${API_URL}/announcements/latest`, {
+    const res = await fetch(`${getApiUrl()}/announcements/latest`, {
         method: "GET",
         credentials: "include"
     });
@@ -20,17 +20,23 @@ export const getLatestAnnouncement = async (
     return undefined;
 };
 
-export const getAllAnnouncements = async (fetch: FetchFunc): Promise<Announcement[]> => {
-    const res = await fetch(`${API_URL}/announcements`, {
+export const getAllAnnouncements = async (
+    fetch: FetchFunc,
+    cookie?: string
+): Promise<Announcement[]> => {
+    const res = await fetch(`${getApiUrl()}/announcements`, {
         method: "GET",
-        credentials: "include"
+        credentials: "include",
+        headers: {
+            cookie: cookie ?? ""
+        }
     });
 
     return await res.json();
 };
 
 export const createAnnouncement = async (fetch: FetchFunc, title: string, content: string) => {
-    await fetch(`${API_URL}/announcements`, {
+    await fetch(`${getApiUrl()}/announcements`, {
         method: "POST",
         credentials: "include",
         headers: {
@@ -41,7 +47,7 @@ export const createAnnouncement = async (fetch: FetchFunc, title: string, conten
 };
 
 export const deleteAnnouncement = async (fetch: FetchFunc, id: string) => {
-    await fetch(`${API_URL}/announcements/${id}`, {
+    await fetch(`${getApiUrl()}/announcements/${id}`, {
         method: "DELETE",
         credentials: "include"
     });
@@ -53,7 +59,7 @@ export const editAnnouncement = async (
     title: string,
     content: string
 ) => {
-    await fetch(`${API_URL}/announcements/${id}`, {
+    await fetch(`${getApiUrl()}/announcements/${id}`, {
         method: "PATCH",
         credentials: "include",
         headers: {
