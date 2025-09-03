@@ -1,14 +1,14 @@
 import { getAllAnnouncements } from "$lib/api/announcement";
 import { marked } from "marked";
-import type { PageLoad } from "./$types";
+import type { PageServerLoad } from "./$types";
 import { error } from "@sveltejs/kit";
 
-export const load: PageLoad = async ({ fetch, parent }) => {
+export const load: PageServerLoad = async ({ fetch, parent, request }) => {
     const { self } = await parent();
 
     if (!self) throw error(401);
 
-    const announcements = await getAllAnnouncements(fetch);
+    const announcements = await getAllAnnouncements(fetch, request.headers.get("cookie") ?? "");
 
     const renderedMarkdown: string[] = [];
     for (const announcement of announcements) {

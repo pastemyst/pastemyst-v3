@@ -1,6 +1,7 @@
 <script lang="ts">
+    import { PUBLIC_API_CLIENT_BASE } from "$env/static/public";
     import { getSelf } from "$lib/api/auth";
-    import { API_URL } from "$lib/api/fetch";
+    import { getApiUrl } from "$lib/api/fetch";
     import { updateUserSettings } from "$lib/api/settings";
     import { getUserByUsername, deleteUser } from "$lib/api/user";
     import Checkbox from "$lib/Checkbox.svelte";
@@ -29,7 +30,7 @@
     };
 
     const onAvatarChange = async () => {
-        await fetch(`${API_URL}/settings/avatar`, {
+        await fetch(`${getApiUrl()}/settings/avatar`, {
             method: "PATCH",
             credentials: "include",
             body: new FormData(avatarForm)
@@ -79,7 +80,7 @@
             username: usernameInputValue
         };
 
-        await fetch(`${API_URL}/settings/username`, {
+        await fetch(`${getApiUrl()}/settings/username`, {
             method: "PATCH",
             credentials: "include",
             body: JSON.stringify(usernameData),
@@ -113,7 +114,7 @@
                         alert("failed to delete user. try again later.");
                     }
 
-                    window.location.href = `${API_URL}/auth/logout`;
+                    window.location.href = `${getApiUrl()}/auth/logout`;
                 })();
 
                 return Close.yes;
@@ -140,7 +141,10 @@
 <h4>avatar</h4>
 
 <div class="avatar flex sm-row center">
-    <img src="{API_URL}/images/{data.self?.avatarId}" alt="{data.self.username}'s avatar" />
+    <img
+        src="{PUBLIC_API_CLIENT_BASE}/images/{data.self?.avatarId}"
+        alt="{data.self.username}'s avatar"
+    />
 
     <button onclick={onAvatarEditClick}>
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" class="icon">
@@ -233,7 +237,7 @@
         toggle whether to show only your pinned pastes or all your public pastes on your profile
     </span>
 
-    <a class="download-account-data btn" href="{API_URL}/users/{data.self.username}.zip"
+    <a class="download-account-data btn" href="{getApiUrl()}/users/{data.self.username}.zip"
         >download profile data</a
     >
     <span class="hint"> download all data associated with your profile </span>

@@ -7,7 +7,7 @@ import {
     isPasteEncrypted,
     isPasteStarred
 } from "$lib/api/paste";
-import type { PageLoad } from "./$types";
+import type { PageServerLoad } from "./$types";
 import { getUserById, getUserTags } from "$lib/api/user";
 import { formatDistanceToNow } from "date-fns";
 import { isLanguageMarkdown } from "$lib/utils/markdown";
@@ -15,11 +15,13 @@ import { marked } from "marked";
 import { markedHeadingAnchorExtension } from "$lib/marked-heading-anchor";
 import { markedShikiExtension } from "$lib/marked-shiki-extension";
 
-export const load: PageLoad = async ({ params, fetch, parent }) => {
-    const [paste, pasteStatus] = await getPaste(fetch, params.paste);
+export const load: PageServerLoad = async ({ params, fetch, parent, request }) => {
+    const cookieHeader = request.headers.get("cookie") ?? "";
+
+    const [paste, pasteStatus] = await getPaste(fetch, params.paste, cookieHeader);
 
     if (!paste) {
-        const isEncrypted = await isPasteEncrypted(fetch, params.paste);
+        const isEncrypted = await isPasteEncrypted(fetch, params.paste, cookieHeader);
 
         if (isEncrypted) {
             redirect(302, `/${params.paste}/decrypt`);
@@ -37,11 +39,11 @@ export const load: PageLoad = async ({ params, fetch, parent }) => {
     const relativeEditedAt = paste.editedAt
         ? formatDistanceToNow(new Date(paste.editedAt), { addSuffix: true })
         : undefined;
-    const pasteStats = await getPasteStats(fetch, paste.id);
-    const langStats = await getPasteLangs(fetch, paste.id);
+    const pasteStats = await getPasteStats(fetch, paste.id, cookieHeader);
+    const langStats = await getPasteLangs(fetch, paste.id, cookieHeader);
     const [owner, ownerStatus] =
         paste.ownerId !== null ? await getUserById(fetch, paste.ownerId) : [null, 0];
-    const isStarred = await isPasteStarred(fetch, paste.id);
+    const isStarred = await isPasteStarred(fetch, paste.id, cookieHeader);
 
     if (paste.ownerId !== null && !owner) {
         // TODO: error handling
@@ -90,7 +92,7 @@ export const load: PageLoad = async ({ params, fetch, parent }) => {
 
     let tags: string[] = [];
     if (self) {
-        tags = await getUserTags(fetch, self.username);
+        tags = await getUserTags(fetch, self.username, cookieHeader);
     }
 
     return {

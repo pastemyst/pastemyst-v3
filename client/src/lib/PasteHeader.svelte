@@ -17,8 +17,8 @@
     import { Close, getConfirmActionCommands, setTempCommands } from "./command";
     import { goto } from "$app/navigation";
     import { colorIsDark } from "./utils/color";
-    import { API_URL } from "./api/fetch";
     import { env } from "$env/dynamic/public";
+    import { getApiUrl } from "./api/fetch";
 
     interface Props {
         paste: Paste;
@@ -320,7 +320,7 @@
         {/if}
 
         <a
-            href="{API_URL}/pastes/{paste.id}.zip"
+            href="{getApiUrl()}/pastes/{paste.id}.zip"
             class="btn"
             aria-label="download paste"
             use:tooltip

@@ -2,14 +2,16 @@ import { getPaste, getPasteLangs } from "$lib/api/paste";
 import { error } from "@sveltejs/kit";
 import type { PageServerLoad } from "./$types";
 
-export const load: PageServerLoad = async ({ fetch, params }) => {
-    const [paste, pasteStatus] = await getPaste(fetch, params.paste);
+export const load: PageServerLoad = async ({ fetch, params, request }) => {
+    const cookieHeader = request.headers.get("cookie") ?? "";
+
+    const [paste, pasteStatus] = await getPaste(fetch, params.paste, cookieHeader);
 
     if (!paste || pasteStatus !== 200) {
         error(pasteStatus);
     }
 
-    const langStats = await getPasteLangs(fetch, paste.id);
+    const langStats = await getPasteLangs(fetch, paste.id, cookieHeader);
 
     const highlightedCode: string[] = [];
 

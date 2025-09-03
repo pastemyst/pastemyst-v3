@@ -2,10 +2,11 @@
     import type { PageData } from "./$types";
     import { tooltip } from "$lib/tooltips";
     import PasteList from "$lib/PasteList.svelte";
-    import { API_URL } from "$lib/api/fetch";
     import { cmdPalOpen, cmdPalTitle, currentUserStore } from "$lib/stores.svelte";
     import { Close, getConfirmActionCommands, setTempCommands } from "$lib/command";
     import { deleteUser } from "$lib/api/user";
+    import { getApiUrl } from "$lib/api/fetch";
+    import { PUBLIC_API_CLIENT_BASE } from "$env/static/public";
 
     interface Props {
         data: PageData;
@@ -49,7 +50,7 @@
         <section class="user-header">
             <img
                 class="avatar"
-                src="{API_URL}/images/{data.user.avatarId}"
+                src="{PUBLIC_API_CLIENT_BASE}/images/{data.user.avatarId}"
                 alt="${data.user.username}'s avatar"
             />
 
@@ -129,7 +130,7 @@
                             </a>
 
                             <a
-                                href="{API_URL}/auth/logout"
+                                href="{getApiUrl()}/auth/logout"
                                 use:tooltip
                                 aria-label="log out"
                                 class="logout btn btn-danger"

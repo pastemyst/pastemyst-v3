@@ -1,5 +1,5 @@
 import type { ApiError } from "./errors";
-import { API_URL, type FetchFunc } from "./fetch";
+import { getApiUrl, type FetchFunc } from "./fetch";
 import type { LangStat } from "./lang";
 import type { Page } from "./page";
 
@@ -169,7 +169,7 @@ export const createPaste = async (
 
         return [null, await res.json()];
     } else {
-        const res = await fetch(`${API_URL}/pastes/`, {
+        const res = await fetch(`${getApiUrl()}/pastes/`, {
             method: "POST",
             credentials: "include",
             headers: {
@@ -185,7 +185,7 @@ export const createPaste = async (
 };
 
 export const editPasteTags = async (id: string, tags: string[]): Promise<Paste | null> => {
-    const res = await fetch(`${API_URL}/pastes/${id}/tags`, {
+    const res = await fetch(`${getApiUrl()}/pastes/${id}/tags`, {
         method: "PATCH",
         credentials: "include",
         headers: {
@@ -203,7 +203,7 @@ export const editPaste = async (
     id: string,
     editInfo: PasteEditInfo
 ): Promise<[Paste | null, ApiError | null]> => {
-    const res = await fetch(`${API_URL}/pastes/${id}`, {
+    const res = await fetch(`${getApiUrl()}/pastes/${id}`, {
         method: "PATCH",
         credentials: "include",
         headers: {
@@ -219,11 +219,15 @@ export const editPaste = async (
 
 export const getPaste = async (
     fetchFunc: FetchFunc,
-    id: string
+    id: string,
+    cookie: string
 ): Promise<[Paste | null, number]> => {
-    const res = await fetchFunc(`${API_URL}/pastes/${id}`, {
+    const res = await fetchFunc(`${getApiUrl()}/pastes/${id}`, {
         method: "GET",
-        credentials: "include"
+        credentials: "include",
+        headers: {
+            cookie
+        }
     });
 
     if (res.ok) return [await res.json(), res.status];
@@ -233,11 +237,15 @@ export const getPaste = async (
 
 export const getPasteHistoryCompact = async (
     fetchFunc: FetchFunc,
-    id: string
+    id: string,
+    cookie: string
 ): Promise<{ id: string; editedAt: string }[]> => {
-    const res = await fetchFunc(`${API_URL}/pastes/${id}/history_compact`, {
+    const res = await fetchFunc(`${getApiUrl()}/pastes/${id}/history_compact`, {
         method: "GET",
-        credentials: "include"
+        credentials: "include",
+        headers: {
+            cookie
+        }
     });
 
     if (res.ok) return await res.json();
@@ -248,11 +256,15 @@ export const getPasteHistoryCompact = async (
 export const getPasteAtEdit = async (
     fetchFunc: FetchFunc,
     id: string,
-    historyId: string
+    historyId: string,
+    cookie: string
 ): Promise<Paste | null> => {
-    const res = await fetchFunc(`${API_URL}/pastes/${id}/history/${historyId}`, {
+    const res = await fetchFunc(`${getApiUrl()}/pastes/${id}/history/${historyId}`, {
         method: "GET",
-        credentials: "include"
+        credentials: "include",
+        headers: {
+            cookie
+        }
     });
 
     if (res.ok) return await res.json();
@@ -263,11 +275,15 @@ export const getPasteAtEdit = async (
 export const getPasteDiff = async (
     fetchFunc: FetchFunc,
     id: string,
-    historyId: string
+    historyId: string,
+    cookie: string
 ): Promise<PasteDiff | null> => {
-    const res = await fetchFunc(`${API_URL}/pastes/${id}/history/${historyId}/diff`, {
+    const res = await fetchFunc(`${getApiUrl()}/pastes/${id}/history/${historyId}/diff`, {
         method: "GET",
-        credentials: "include"
+        credentials: "include",
+        headers: {
+            cookie
+        }
     });
 
     if (res.ok) return await res.json();
@@ -276,7 +292,7 @@ export const getPasteDiff = async (
 };
 
 export const deletePaste = async (id: string): Promise<boolean> => {
-    const res = await fetch(`${API_URL}/pastes/${id}`, {
+    const res = await fetch(`${getApiUrl()}/pastes/${id}`, {
         method: "DELETE",
         credentials: "include"
     });
@@ -285,7 +301,7 @@ export const deletePaste = async (id: string): Promise<boolean> => {
 };
 
 export const starPaste = async (id: string): Promise<boolean> => {
-    const res = await fetch(`${API_URL}/pastes/${id}/star`, {
+    const res = await fetch(`${getApiUrl()}/pastes/${id}/star`, {
         method: "POST",
         credentials: "include"
     });
@@ -294,7 +310,7 @@ export const starPaste = async (id: string): Promise<boolean> => {
 };
 
 export const pinPaste = async (id: string): Promise<boolean> => {
-    const res = await fetch(`${API_URL}/pastes/${id}/pin`, {
+    const res = await fetch(`${getApiUrl()}/pastes/${id}/pin`, {
         method: "POST",
         credentials: "include"
     });
@@ -302,10 +318,17 @@ export const pinPaste = async (id: string): Promise<boolean> => {
     return res.ok;
 };
 
-export const isPasteStarred = async (fetchFunc: FetchFunc, id: string): Promise<boolean> => {
-    const res = await fetchFunc(`${API_URL}/pastes/${id}/star`, {
+export const isPasteStarred = async (
+    fetchFunc: FetchFunc,
+    id: string,
+    cookie: string
+): Promise<boolean> => {
+    const res = await fetchFunc(`${getApiUrl()}/pastes/${id}/star`, {
         method: "GET",
-        credentials: "include"
+        credentials: "include",
+        headers: {
+            cookie
+        }
     });
 
     if (res.ok) return await res.json();
@@ -314,7 +337,7 @@ export const isPasteStarred = async (fetchFunc: FetchFunc, id: string): Promise<
 };
 
 export const togglePrivatePaste = async (id: string): Promise<boolean> => {
-    const res = await fetch(`${API_URL}/pastes/${id}/private`, {
+    const res = await fetch(`${getApiUrl()}/pastes/${id}/private`, {
         method: "POST",
         credentials: "include"
     });
@@ -324,11 +347,15 @@ export const togglePrivatePaste = async (id: string): Promise<boolean> => {
 
 export const getPasteStats = async (
     fetchFunc: FetchFunc,
-    id: string
+    id: string,
+    cookie: string
 ): Promise<PasteStats | null> => {
-    const res = await fetchFunc(`${API_URL}/pastes/${id}/stats`, {
+    const res = await fetchFunc(`${getApiUrl()}/pastes/${id}/stats`, {
         method: "GET",
-        credentials: "include"
+        credentials: "include",
+        headers: {
+            cookie
+        }
     });
 
     if (res.ok) return await res.json();
@@ -336,10 +363,17 @@ export const getPasteStats = async (
     return null;
 };
 
-export const getPasteLangs = async (fetchFunc: FetchFunc, id: string): Promise<LangStat[]> => {
-    const res = await fetchFunc(`${API_URL}/pastes/${id}/langs`, {
+export const getPasteLangs = async (
+    fetchFunc: FetchFunc,
+    id: string,
+    cookie: string
+): Promise<LangStat[]> => {
+    const res = await fetchFunc(`${getApiUrl()}/pastes/${id}/langs`, {
         method: "GET",
-        credentials: "include"
+        credentials: "include",
+        headers: {
+            cookie
+        }
     });
 
     if (res.ok) return await res.json();
@@ -355,7 +389,7 @@ export const getUserPastes = async (
     pageSize: number
 ): Promise<Page<PasteWithLangStats> | null> => {
     const res = await fetchFunc(
-        `${API_URL}/users/${username}/pastes${pinned ? "/pinned" : ""}` +
+        `${getApiUrl()}/users/${username}/pastes${pinned ? "/pinned" : ""}` +
             `?page=${page}` +
             `&pageSize=${pageSize}`,
         {
@@ -369,10 +403,17 @@ export const getUserPastes = async (
     return null;
 };
 
-export const isPasteEncrypted = async (fetchFunc: FetchFunc, id: string): Promise<boolean> => {
-    const res = await fetchFunc(`${API_URL}/pastes/${id}/encrypted`, {
+export const isPasteEncrypted = async (
+    fetchFunc: FetchFunc,
+    id: string,
+    cookie: string
+): Promise<boolean> => {
+    const res = await fetchFunc(`${getApiUrl()}/pastes/${id}/encrypted`, {
         method: "GET",
-        credentials: "include"
+        credentials: "include",
+        headers: {
+            cookie
+        }
     });
 
     if (res.ok) return await res.json();

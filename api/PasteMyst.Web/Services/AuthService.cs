@@ -90,7 +90,7 @@ public class AuthService(
 
             httpContext.Response.Cookies.Append("pastemyst", newAccessToken, cookie);
 
-            return configuration["ClientUrl"]!;
+            return configuration["ClientUrl"]! + "?login_redirect=true";
         }
         else
         {

@@ -1,4 +1,4 @@
-import { API_URL, type FetchFunc } from "./fetch";
+import { getApiUrl, type FetchFunc } from "./fetch";
 
 export interface User {
     id: string;
@@ -11,7 +11,7 @@ export interface User {
 }
 
 export const getUserByUsername = async (username: string): Promise<User | null> => {
-    const res = await fetch(`${API_URL}/users/${username}`, {
+    const res = await fetch(`${getApiUrl()}/users/${username}`, {
         method: "GET"
     });
 
@@ -24,7 +24,7 @@ export const getUserById = async (
     fetchFunc: FetchFunc,
     id: string
 ): Promise<[User | null, number]> => {
-    const res = await fetchFunc(`${API_URL}/users?id=${id}`, {
+    const res = await fetchFunc(`${getApiUrl()}/users?id=${id}`, {
         method: "GET"
     });
 
@@ -33,10 +33,18 @@ export const getUserById = async (
     return [null, res.status];
 };
 
-export const getUserTags = async (fetchFunc: FetchFunc, username: string): Promise<string[]> => {
-    const res = await fetchFunc(`${API_URL}/users/${username}/tags`, {
+// TODO
+export const getUserTags = async (
+    fetchFunc: FetchFunc,
+    username: string,
+    cookie: string
+): Promise<string[]> => {
+    const res = await fetchFunc(`${getApiUrl()}/users/${username}/tags`, {
         method: "GET",
-        credentials: "include"
+        credentials: "include",
+        headers: {
+            cookie: cookie ?? ""
+        }
     });
 
     if (res.ok) return await res.json();
@@ -45,7 +53,7 @@ export const getUserTags = async (fetchFunc: FetchFunc, username: string): Promi
 };
 
 export const deleteUser = async (username: string): Promise<boolean> => {
-    const res = await fetch(`${API_URL}/users/${username}`, {
+    const res = await fetch(`${getApiUrl()}/users/${username}`, {
         method: "DELETE",
         credentials: "include"
     });

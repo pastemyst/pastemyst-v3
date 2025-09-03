@@ -1,6 +1,6 @@
 import type { IndentUnit } from "$lib/indentation";
 import { settingsStore } from "$lib/stores.svelte";
-import { API_URL, type FetchFunc } from "./fetch";
+import { getApiUrl, type FetchFunc } from "./fetch";
 
 export interface UserSettings {
     showAllPastesOnProfile: boolean;
@@ -21,7 +21,7 @@ export interface Settings {
 export const getSettings = async (
     fetchFunc: FetchFunc
 ): Promise<[settings: Settings, cookie?: string]> => {
-    const res = await fetchFunc(`${API_URL}/settings`, {
+    const res = await fetchFunc(`${getApiUrl()}/settings`, {
         method: "GET",
         credentials: "include"
     });
@@ -35,7 +35,7 @@ export const getSettings = async (
 export const updateSettings = async (fetchFunc: FetchFunc, settings: Settings) => {
     settingsStore.settings = settings;
 
-    await fetchFunc(`${API_URL}/settings`, {
+    await fetchFunc(`${getApiUrl()}/settings`, {
         method: "PATCH",
         credentials: "include",
         headers: {
@@ -45,17 +45,23 @@ export const updateSettings = async (fetchFunc: FetchFunc, settings: Settings) =
     });
 };
 
-export const getUserSettings = async (fetchFunc: FetchFunc): Promise<UserSettings> => {
-    const res = await fetchFunc(`${API_URL}/settings/user`, {
+export const getUserSettings = async (
+    fetchFunc: FetchFunc,
+    cookie: string
+): Promise<UserSettings> => {
+    const res = await fetchFunc(`${getApiUrl()}/settings/user`, {
         method: "GET",
-        credentials: "include"
+        credentials: "include",
+        headers: {
+            cookie
+        }
     });
 
     return await res.json();
 };
 
 export const updateUserSettings = async (fetchFunc: FetchFunc, userSettings: UserSettings) => {
-    await fetchFunc(`${API_URL}/settings/user`, {
+    await fetchFunc(`${getApiUrl()}/settings/user`, {
         method: "PATCH",
         credentials: "include",
         headers: {

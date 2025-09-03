@@ -1,4 +1,4 @@
-import { API_URL, type FetchFunc } from "./fetch";
+import { getApiUrl, type FetchFunc } from "./fetch";
 
 export interface Release {
     url: string;
@@ -25,7 +25,7 @@ export interface AppStats {
 }
 
 export const getVersion = async (fetchFunc: FetchFunc): Promise<string> => {
-    const res = await fetchFunc(`${API_URL}/meta/version`, {
+    const res = await fetchFunc(`${getApiUrl()}/meta/version`, {
         method: "GET"
     });
 
@@ -35,7 +35,7 @@ export const getVersion = async (fetchFunc: FetchFunc): Promise<string> => {
 };
 
 export const getReleases = async (fetchFunc: FetchFunc): Promise<Release[]> => {
-    const res = await fetchFunc(`${API_URL}/meta/releases`, {
+    const res = await fetchFunc(`${getApiUrl()}/meta/releases`, {
         method: "GET"
     });
 
@@ -45,7 +45,7 @@ export const getReleases = async (fetchFunc: FetchFunc): Promise<Release[]> => {
 };
 
 export const getActivePastes = async (fetchFunc: FetchFunc): Promise<number> => {
-    const res = await fetchFunc(`${API_URL}/meta/active_pastes`, {
+    const res = await fetchFunc(`${getApiUrl()}/meta/active_pastes`, {
         method: "GET"
     });
 
@@ -55,7 +55,7 @@ export const getActivePastes = async (fetchFunc: FetchFunc): Promise<number> => 
 };
 
 export const getAppStats = async (fetchFunc: FetchFunc): Promise<[AppStats | null, number]> => {
-    const res = await fetchFunc(`${API_URL}/meta/stats`, {
+    const res = await fetchFunc(`${getApiUrl()}/meta/stats`, {
         method: "GET"
     });
 
