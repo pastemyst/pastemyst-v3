@@ -192,7 +192,7 @@
 
 <div class="pasties">
     {#if settings.pasteView === "stacked"}
-        {#each paste.pasties as pasty, i}
+        {#each paste.pasties as pasty, i (pasty.id)}
             <div class="pasty" data-pastyindex={i}>
                 <div class="sticky">
                     <div class="title flex row space-between center">
@@ -228,7 +228,7 @@
         <div class="sticky">
             <div class="tabs flex row center">
                 <div class="tabgroup flex row">
-                    {#each paste.pasties as pasty}
+                    {#each paste.pasties as pasty (pasty.id)}
                         <Tab
                             id={pasty.id}
                             isReadonly

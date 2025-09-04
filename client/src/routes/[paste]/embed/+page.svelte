@@ -23,7 +23,7 @@
         <p class="pastemyst-powered-by">powered by <a href="/" target="_blank">pastemyst</a></p>
     </div>
 
-    {#each data.paste.pasties as pasty, i}
+    {#each data.paste.pasties as pasty, i (pasty.id)}
         <div class="pastemyst-pasty">
             <div class="pastemyst-pasty-title">
                 <p>{pasty.title}</p>

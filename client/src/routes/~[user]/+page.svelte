@@ -201,7 +201,7 @@
                 </summary>
 
                 <div class="tags-wrapper">
-                    {#each data.tags as tag}
+                    {#each data.tags as tag (tag)}
                         <a
                             href="/~{data.self?.username}?tag={tag}"
                             class="btn"

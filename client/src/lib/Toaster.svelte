@@ -4,7 +4,7 @@
 </script>
 
 <div class="toaster flex col gap-m">
-    {#each toasts as { id, message, type }}
+    {#each toasts as { id, message, type } (id)}
         <button
             class="toast flex row center gap-m {type}"
             transition:fade

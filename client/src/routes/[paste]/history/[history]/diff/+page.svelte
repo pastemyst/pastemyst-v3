@@ -81,15 +81,15 @@
     </section>
 {/if}
 
-{#each data.addedPasties as addedPasty}
+{#each data.addedPasties as addedPasty (addedPasty.id)}
     <DiffEditor newPasty={addedPasty} settings={data.settings} />
 {/each}
 
-{#each data.deletedPasties as deletedPasty}
+{#each data.deletedPasties as deletedPasty (deletedPasty.id)}
     <DiffEditor oldPasty={deletedPasty} settings={data.settings} />
 {/each}
 
-{#each data.modifiedPasties as { oldPasty, newPasty }}
+{#each data.modifiedPasties as { oldPasty, newPasty } (oldPasty.id + newPasty.id)}
     <DiffEditor {oldPasty} {newPasty} settings={data.settings} />
 {/each}
 

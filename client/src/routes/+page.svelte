@@ -27,7 +27,9 @@
         selectedExpiresIn?: ExpiresIn;
     }
 
-    let { data, selectedExpiresIn = $bindable(ExpiresIn.never) }: Props = $props();
+    let { data }: Props = $props();
+
+    let selectedExpiresIn = $state(ExpiresIn.never);
 
     let title: string = $state("");
 

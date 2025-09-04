@@ -28,7 +28,7 @@
             <a href="https://github.com/pastemyst/pastemyst-v3" rel="external">on github</a>.
         </p>
     {:else}
-        {#each data.releases as release, i}
+        {#each data.releases as release, i (release.title)}
             <div class="release" id={slug(release.title)}>
                 <div class="flex row center space-between">
                     <h4><a href={release.url} rel="external">{release.title}</a></h4>

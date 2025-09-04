@@ -174,7 +174,7 @@
     </div>
 {/if}
 
-{#each accessTokens as accessToken}
+{#each accessTokens as accessToken (accessToken.id)}
     <div class="access-token block">
         <p>description: {accessToken.description || "<no description>"}</p>
         <p use:tooltip aria-label={new Date(accessToken.createdAt).toString()}>
@@ -189,7 +189,7 @@
         {/if}
         <p>
             scopes:
-            {#each accessToken.scopes as scope, index}
+            {#each accessToken.scopes as scope, index (scope)}
                 <code>{scope}</code>{index < accessToken.scopes.length - 1 ? ", " : ""}
             {/each}
         </p>
