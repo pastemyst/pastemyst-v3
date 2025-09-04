@@ -375,7 +375,7 @@
         </div>
 
         <div class="lang-stats flex wrap row center gap-m">
-            {#each langStats as lang}
+            {#each langStats as lang (lang.language.name)}
                 <div
                     class="lang flex row center gap-s"
                     style="background-color: {lang.language.color ?? 'var(--color-fg)'}"

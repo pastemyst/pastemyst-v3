@@ -136,7 +136,7 @@
     </div>
 {/if}
 
-{#each announcements as announcement, i}
+{#each announcements as announcement, i (announcement.id)}
     <div class="announcement" class:active={isActive(i, announcement.createdAt)}>
         <div class="flex row space-between">
             <p class="title">{announcement.title}</p>

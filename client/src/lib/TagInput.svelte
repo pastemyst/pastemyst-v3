@@ -69,7 +69,7 @@
 <div class="tags flex row center">
     <p class="btn">tags</p>
 
-    {#each tags as tag}
+    {#each tags as tag (tag)}
         <div class="tag flex row center">
             <span><a href="/~{$currentUserStore?.username}?tag={tag}">{tag}</a></span>
             {#if !readonly}
@@ -96,7 +96,7 @@
             list="taglist"
         />
         <datalist id="taglist">
-            {#each existingTags as tag}
+            {#each existingTags as tag (tag)}
                 <option value={tag}>{tag}</option>
             {/each}
         </datalist>

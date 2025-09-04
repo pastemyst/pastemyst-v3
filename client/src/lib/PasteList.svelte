@@ -46,7 +46,7 @@
         {user.username} doesn't have any {pinned ? "pinned" : "public"} pastes yet.
     </p>
 {:else}
-    {#each pastes.items as pasteWithLangStats}
+    {#each pastes.items as pasteWithLangStats (pasteWithLangStats.paste.id)}
         <PasteListItem {pasteWithLangStats} />
     {/each}
 

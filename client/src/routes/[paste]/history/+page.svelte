@@ -35,7 +35,7 @@
         list of all edits made to this paste, <a href="/{data.paste.id}">go back to the paste</a>
     </h3>
 
-    {#each data.history as history}
+    {#each data.history as history (history.id)}
         <div class="edit flex row center space-between">
             <div class="flex col">
                 <a href="/{data.paste.id}/history/{history.id}/diff"

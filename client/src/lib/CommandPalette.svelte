@@ -300,7 +300,7 @@
                 <p class="no-commands">no matching commands</p>
             {/if}
 
-            {#each filteredCommands as cmd, i}
+            {#each filteredCommands as cmd, i (cmd.name)}
                 <button
                     class="command flex col"
                     onclick={() => onCmd(cmd)}
