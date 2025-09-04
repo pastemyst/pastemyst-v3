@@ -28,7 +28,9 @@
     // returns the full lang from the name
     // uses the already fetched langStats which already hold the full lang
     const getLanguage = (name: string): Language | undefined => {
-        return langStats.find((s) => s.language.name === name)?.language;
+        return langStats.find(
+            (s) => s.language.name === name || s.language.aliases.includes(name.toLowerCase())
+        )?.language;
     };
 
     const onCopyClick = async () => {
