@@ -98,7 +98,7 @@ public class UserProvider(UserContext userContext, PasteService pasteService, Mo
             }
             else
             {
-                pastesWithLangStags.Add(new PasteWithLangStats { Paste = paste, LanguageStats = null });
+                pastesWithLangStags.Add(new PasteWithLangStats { Paste = paste, LanguageStats = null, Encrypted = true });
             }
         }
 
