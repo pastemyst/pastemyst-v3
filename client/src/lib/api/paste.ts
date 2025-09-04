@@ -95,6 +95,7 @@ export interface PastyEditInfo {
 export interface PasteWithLangStats {
     paste: Paste;
     languageStats: LangStat[];
+    encrypted: boolean;
 }
 
 /**
