@@ -198,6 +198,7 @@
 
     .title {
         text-decoration: none;
+        min-width: fit-content;
 
         &.alpha {
             border-color: var(--color-danger);
