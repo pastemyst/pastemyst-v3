@@ -200,6 +200,22 @@
         isDraggedOver = false;
     };
 
+    const onTabFinishedRenaming = async (tab: TabData) => {
+        const langs = await getLangs(fetch);
+
+        const lang = langs.find(
+            (l) =>
+                l.extensions && l.extensions.includes(tab.title.slice(tab.title.lastIndexOf(".")))
+        );
+
+        if (lang) {
+            tab.language = lang;
+            editor?.setSelectedLang(tab.language);
+        }
+
+        editor?.focus();
+    };
+
     export const getTabs = () => {
         if (!editor) return tabs;
 
@@ -262,7 +278,7 @@
                 id={tab.id.toString()}
                 onclose={() => onTabClose(tab.id)}
                 onclick={(event) => onTabClick(event, tab.id)}
-                onfinishedRenaming={() => editor?.focus()}
+                onfinishedRenaming={() => onTabFinishedRenaming(tab)}
                 bind:title={tab.title}
                 bind:isInRenamingState={tab.isInRenamingState}
                 isActive={tab.id === activeTabId}
