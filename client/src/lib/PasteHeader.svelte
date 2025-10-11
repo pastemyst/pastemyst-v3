@@ -432,6 +432,8 @@
         }
 
         .options {
+            min-width: fit-content;
+
             button,
             .btn {
                 svg {
