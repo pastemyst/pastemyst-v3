@@ -3,7 +3,13 @@
     import Footer from "$lib/Footer.svelte";
     import type { LayoutServerData } from "./$types";
     import CommandPalette from "$lib/CommandPalette.svelte";
-    import { Close, setBaseCommands, setTempCommands, type Command } from "$lib/command";
+    import {
+        Close,
+        setBaseCommands,
+        setPreselectedCommand,
+        setTempCommands,
+        type Command
+    } from "$lib/command";
     import { beforeNavigate, goto } from "$app/navigation";
     import ThemeContext from "$lib/ThemeContext.svelte";
     import { onMount, type Snippet } from "svelte";
@@ -97,6 +103,12 @@
                 action: () => {
                     cmdPalTitle.set("select a theme");
                     setTempCommands(themeCommands());
+
+                    if (data.settings.followSystemTheme && $systemThemeStore === "dark") {
+                        setPreselectedCommand(data.settings.darkTheme);
+                    } else {
+                        setPreselectedCommand(data.settings.theme);
+                    }
 
                     return Close.no;
                 }

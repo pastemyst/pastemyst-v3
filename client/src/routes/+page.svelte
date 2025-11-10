@@ -7,7 +7,13 @@
         type PasteCreateInfo,
         type PastyCreateInfo
     } from "$lib/api/paste";
-    import { addBaseCommands, Close, setTempCommands, type Command } from "$lib/command";
+    import {
+        addBaseCommands,
+        Close,
+        setPreselectedCommand,
+        setTempCommands,
+        type Command
+    } from "$lib/command";
     import PasteOptions from "$lib/PasteOptions.svelte";
     import {
         cmdPalOpen,
@@ -54,6 +60,7 @@
                 name: "set expires in",
                 action: () => {
                     setTempCommands(getExpiresInCommands());
+                    setPreselectedCommand(expiresInToLongString(selectedExpiresIn));
                     return Close.no;
                 }
             },
@@ -62,7 +69,11 @@
                 action: () => {
                     const cmds = editor.getLanguageCommands();
                     (async () => {
-                        if (cmds) setTempCommands(await cmds);
+                        if (cmds) {
+                            setTempCommands(await cmds);
+                            const selectedLang = editor.getSelectedLang();
+                            if (selectedLang) setPreselectedCommand(selectedLang.name);
+                        }
                     })();
                     return Close.no;
                 }
@@ -71,7 +82,11 @@
                 name: "set editor indentation",
                 action: () => {
                     const cmds = editor.getIndentUnitCommands();
-                    if (cmds) setTempCommands(cmds);
+                    if (cmds) {
+                        setTempCommands(cmds);
+                        const selectedIndentationUnit = editor.getSelectedIndentationUnit();
+                        if (selectedIndentationUnit) setPreselectedCommand(selectedIndentationUnit);
+                    }
                     return Close.no;
                 }
             },
@@ -150,6 +165,7 @@
 
     const openExpiresSelect = () => {
         setTempCommands(getExpiresInCommands());
+        setPreselectedCommand(expiresInToLongString(selectedExpiresIn));
 
         cmdPalTitle.set("select when the paste will expire");
         cmdPalOpen.set(true);

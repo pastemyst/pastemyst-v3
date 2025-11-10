@@ -251,6 +251,18 @@
 
         return editor.getIndentUnitCommands(convertIndent);
     };
+
+    export const getSelectedLang = () => {
+        if (!editor) return undefined;
+
+        return editor.getSelectedLang();
+    };
+
+    export const getSelectedIndentationUnit = () => {
+        if (!editor) return undefined;
+
+        return editor.getIndentation()[0];
+    };
 </script>
 
 <svelte:window
