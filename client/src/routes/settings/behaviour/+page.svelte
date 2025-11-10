@@ -2,7 +2,7 @@
     import Checkbox from "$lib/Checkbox.svelte";
     import { getLangs, getPopularLangNames } from "$lib/api/lang";
     import { updateSettings } from "$lib/api/settings";
-    import { Close, setTempCommands, type Command } from "$lib/command";
+    import { Close, setPreselectedCommand, setTempCommands, type Command } from "$lib/command";
     import { cmdPalOpen, cmdPalTitle } from "$lib/stores.svelte";
     import type { PageData } from "./$types";
 
@@ -23,6 +23,7 @@
                     cmdPalTitle.set("select indentation width (spaces)");
 
                     setTempCommands(getIndentWidthCommands());
+                    setPreselectedCommand(settings.defaultIndentationWidth.toString());
 
                     updateSettings(fetch, settings);
 
@@ -34,7 +35,9 @@
                 action: () => {
                     settings.defaultIndentationUnit = "tabs";
                     cmdPalTitle.set("select indentation width (tabs)");
+
                     setTempCommands(getIndentWidthCommands());
+                    setPreselectedCommand(settings.defaultIndentationWidth.toString());
 
                     updateSettings(fetch, settings);
 
@@ -111,6 +114,7 @@
 
     const onDefaultLanguageClicked = async () => {
         setTempCommands(await getLanguageCommands());
+        setPreselectedCommand(settings.defaultLanguage);
 
         cmdPalTitle.set("select language");
         cmdPalOpen.set(true);
@@ -118,6 +122,7 @@
 
     const onDefaultIndentationClicked = () => {
         setTempCommands(getIndentUnitCommands());
+        setPreselectedCommand(settings.defaultIndentationUnit);
 
         cmdPalTitle.set("select indentation unit");
         cmdPalOpen.set(true);

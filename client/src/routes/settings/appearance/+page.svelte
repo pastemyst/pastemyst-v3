@@ -2,7 +2,7 @@
     import { updateSettings } from "$lib/api/settings";
     import type { PageData } from "./$types";
     import { cmdPalOpen, cmdPalTitle, systemThemeStore, themeStore } from "$lib/stores.svelte";
-    import { Close, setTempCommands, type Command } from "$lib/command";
+    import { Close, setPreselectedCommand, setTempCommands, type Command } from "$lib/command";
     import { themes } from "$lib/themes";
     import Checkbox from "$lib/Checkbox.svelte";
 
@@ -70,18 +70,21 @@
 
     const onPasteViewClicked = () => {
         setTempCommands(getPasteViewCommands());
+        setPreselectedCommand(settings.pasteView);
         cmdPalTitle.set("select default paste view");
         cmdPalOpen.set(true);
     };
 
     const onThemeClicked = () => {
         setTempCommands(getThemeCommands(false));
+        setPreselectedCommand(settings.theme);
         cmdPalTitle.set("select the theme");
         cmdPalOpen.set(true);
     };
 
     const onDarkThemeClicked = () => {
         setTempCommands(getThemeCommands(true));
+        setPreselectedCommand(settings.darkTheme);
         cmdPalTitle.set("select the theme");
         cmdPalOpen.set(true);
     };

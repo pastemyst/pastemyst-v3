@@ -21,6 +21,7 @@ let baseCommands: Command[] = [];
 
 export const baseCommandsStore: Writable<Command[]> = writable(baseCommands);
 export const tempCommandsStore: Writable<Command[]> = writable([]);
+export const preselectedCommandStore: Writable<string | undefined> = writable();
 
 export const getBaseCommands = (): Command[] => {
     return baseCommands;
@@ -40,6 +41,10 @@ export const addBaseCommands = (commands: Command[]) => {
 
 export const setTempCommands = (commands: Command[]) => {
     tempCommandsStore.set(commands);
+};
+
+export const setPreselectedCommand = (command: string) => {
+    preselectedCommandStore.set(command);
 };
 
 export const getConfirmActionCommands = (confirmAction: CommandAction): Command[] => [

@@ -1,11 +1,12 @@
 <script lang="ts">
     import type { HighlightWords } from "highlight-words";
     import highlightWords from "highlight-words";
-    import { onMount } from "svelte";
+    import { onMount, tick } from "svelte";
     import {
         baseCommandsStore,
         Close,
         getBaseCommands,
+        preselectedCommandStore,
         tempCommandsStore,
         type Command
     } from "./command";
@@ -45,6 +46,19 @@
         selectedCommand?.onHover?.();
 
         showingTempCommands = true;
+    });
+
+    preselectedCommandStore.subscribe(async (cmd) => {
+        const command = commands.find((c) => c.name.toLowerCase() === cmd?.toLowerCase());
+
+        if (command) {
+            selectedCommand = command;
+            selectedCommand?.onHover?.();
+
+            await tick();
+
+            scrollIntoView(false);
+        }
     });
 
     onMount(() => {
@@ -127,13 +141,13 @@
         }
     };
 
-    const scrollIntoView = () => {
+    const scrollIntoView = (smooth: boolean = true) => {
         const index = filteredCommands.findIndex((cmd) => cmd === selectedCommand);
 
         if (index === -1) return;
 
         commandElements[index]?.scrollIntoView({
-            behavior: "smooth",
+            behavior: smooth ? "smooth" : "instant",
             block: "nearest"
         });
     };
@@ -165,6 +179,8 @@
 
             selectedCommand = filteredCommands[0];
             selectedCommand.onHover?.();
+
+            scrollIntoView(false);
         } else {
             // deselect commands
             isCommandSelected = false;
@@ -207,7 +223,7 @@
         }
     };
 
-    const open = () => {
+    const open = async () => {
         if (isOpen) return;
 
         // save the focused element
@@ -217,12 +233,23 @@
 
         searchElement?.focus();
 
-        selectedCommand = commands[0];
-        selectedCommand.onHover?.();
+        const preselectedCommand = commands.find(
+            (c) => c.name.toLowerCase() === $preselectedCommandStore?.toLowerCase()
+        );
+
+        if (preselectedCommand) {
+            selectedCommand = preselectedCommand;
+        } else {
+            selectedCommand = commands[0];
+        }
+
+        selectedCommand?.onHover?.();
 
         cmdPalOpen.set(true);
 
-        scrollIntoView();
+        await tick();
+
+        scrollIntoView(false);
     };
 
     const close = () => {
