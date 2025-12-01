@@ -158,13 +158,22 @@
             );
         }
 
-        commands.push({
-            name: "view changelog",
-            action: () => {
-                goto("/changelog");
-                return Close.yes;
+        commands.push(
+            {
+                name: "view changelog",
+                action: () => {
+                    goto("/changelog");
+                    return Close.yes;
+                }
+            },
+            {
+                name: "home page",
+                action: () => {
+                    goto("/");
+                    return Close.yes;
+                }
             }
-        });
+        );
 
         return commands;
     };
