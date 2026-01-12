@@ -11,7 +11,7 @@ const config = {
         csp: {
             mode: "auto",
             directives: {
-                "script-src": ["self"]
+                "script-src": ["self", "wasm-unsafe-eval"]
             }
         }
     }

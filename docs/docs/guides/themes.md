@@ -17,6 +17,8 @@ There already exists quite a few CodeMirror themes you can add, but in the case 
 
 To add a CodeMirror theme to PasteMyst add the theme file to the `client/src/lib/codemirror-themes` directory.
 
+The CodeMirror theme is only used to change the looks of things outside the syntax highlighting, things like selections, gutters, etc. Syntax highlighting is rendered using shiki.
+
 ## Shiki
 
 Shiki is a library that renders code with syntax highlighting while utilizing the already standard [TextMate grammars](https://macromates.com/manual/en/language_grammars). These grammar files are also in vscode, so you should be able to easily find the grammar file for the theme you want to add, or use one of the tools to create your own.
