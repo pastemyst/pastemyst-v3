@@ -2,10 +2,13 @@ import { findLangByName } from "$lib/api/lang";
 import { themes } from "$lib/themes";
 import type { RequestEvent, RequestHandler } from "@sveltejs/kit";
 import { readFileSync } from "fs";
-import path from "path";
 import { getSingletonHighlighter, type BundledLanguage, type LanguageRegistration } from "shiki";
 import { grammars } from "tm-grammars";
 import he from "he";
+
+const loadedGrammars = import.meta.glob("tm-grammars/grammars/*.json", {
+    import: "default"
+});
 
 export const POST: RequestHandler = async ({ request }: RequestEvent) => {
     const json = await request.json();
@@ -44,10 +47,9 @@ const highlight = async (
             );
 
             if (grammar) {
-                const importPath = path.resolve(
-                    `node_modules/tm-grammars/grammars/${grammar.name}.json`
-                );
-                const langJson: LanguageRegistration = JSON.parse(readFileSync(importPath, "utf8"));
+                const loader =
+                    loadedGrammars[`/node_modules/tm-grammars/grammars/${grammar.name}.json`]!;
+                const langJson: LanguageRegistration = (await loader()) as LanguageRegistration;
                 await highlighter.loadLanguage(langJson);
 
                 actualLanguage = langJson.name;
