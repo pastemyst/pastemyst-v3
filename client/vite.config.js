@@ -14,8 +14,11 @@ const config = {
     server: {
         port: 3000,
         fs: {
-            allow: ["static/scripts/"]
+            allow: ["static/scripts/", "static/themes/"]
         }
+    },
+    resolve: {
+        alias: { "tm-grammars": "node_modules/tm-grammars" }
     }
 };
 
