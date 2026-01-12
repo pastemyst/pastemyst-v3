@@ -1,4 +1,5 @@
 import { sveltekit } from "@sveltejs/kit/vite";
+import path from "node:path";
 
 /** @type {import('vite').UserConfig} */
 const config = {
@@ -18,7 +19,7 @@ const config = {
         }
     },
     resolve: {
-        alias: { "tm-grammars": "node_modules/tm-grammars" }
+        alias: { "tm-grammars": path.resolve("node_modules/tm-grammars") }
     }
 };
 
