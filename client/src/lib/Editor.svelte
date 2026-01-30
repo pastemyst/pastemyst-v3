@@ -1,20 +1,34 @@
 <script lang="ts">
-    import { onMount } from "svelte";
+    import { onMount, tick } from "svelte";
     import { basicSetup } from "codemirror";
     import { EditorView, keymap } from "@codemirror/view";
     import { indentWithTab } from "@codemirror/commands";
     import { indentUnit } from "@codemirror/language";
     import { Compartment, EditorState } from "@codemirror/state";
     import { getLangs, getPopularLangNames, autodetectLanguage, type Language } from "./api/lang";
-    import { tooltip } from "$lib/tooltips";
     import { Close, setPreselectedCommand, setTempCommands, type Command } from "./command";
     import { cmdPalOpen, cmdPalTitle, themeStore } from "./stores.svelte";
-    import { languages as cmLangs } from "@codemirror/language-data";
     import { isLanguageMarkdown } from "./utils/markdown";
     import type { IndentUnit } from "./indentation";
     import type { Settings } from "./api/settings";
-    import { themes } from "./themes";
+    import { themes, type Theme } from "./themes";
     import { marked } from "marked";
+    import { getSingletonHighlighter, type LanguageRegistration } from "shiki";
+    import shiki from "codemirror-shiki";
+    import { grammars } from "tm-grammars";
+    import { markedHeadingAnchorExtension } from "./marked-heading-anchor";
+    import { markedShikiExtension } from "./marked-shiki-extension";
+
+    const loadedGrammars = import.meta.glob("tm-grammars/grammars/*.json", {
+        import: "default"
+    });
+
+    type ShikiTheme = { name: string; [key: string]: unknown };
+
+    // Cache parsed shiki theme JSON by theme.shikiTheme to avoid repeated fetches
+    const shikiThemeJsonCache: Record<string, ShikiTheme> = {};
+    // Remember which shiki theme name is currently loaded into the singleton highlighter
+    let currentLoadedShikiTheme: string | null = null;
 
     interface Props {
         hidden?: boolean;
@@ -31,7 +45,6 @@
     let cursorLine = $state(0);
     let cursorCol = $state(0);
 
-    let langCompartment = new Compartment();
     let selectedLanguage: Language | undefined = $state();
 
     let indentUnitCompartment = new Compartment();
@@ -41,24 +54,70 @@
 
     let themeCompartment = new Compartment();
 
+    let shikiCompartment = new Compartment();
+
     let previewEnabled = $state(false);
     let currentPreviewContent: string = $state("");
-    let langSupported = $state(true);
 
     let langs: Language[];
 
-    themeStore.subscribe((theme) => {
+    themeStore.subscribe(async (theme) => {
         if (!theme || !editorView) return;
 
-        const codemirrorTheme = (themes.find((t) => t.name === theme.name) || themes[0])
-            .codemirrorTheme;
+        const themeObject = themes.find((t) => t.name === theme.name) || themes[0];
 
-        editorView.dispatch({
-            effects: themeCompartment.reconfigure(codemirrorTheme)
-        });
+        await setCodemirrorThemeAndLanguage(selectedLanguage, themeObject);
     });
 
     onMount(async () => {
+        const baseTheme = EditorView.theme({
+            "*": {
+                fontFamily: '"Ubuntu Mono", monospace'
+            }
+        });
+
+        const editorUpdateListener = EditorView.updateListener.of((update) => {
+            // get the current line
+            const line = update.state.doc.lineAt(update.state.selection.main.head);
+
+            cursorLine = line.number;
+            cursorCol = update.state.selection.main.head - line.from;
+        });
+
+        const autodetectLanguageOnPasteExtension = EditorView.domEventHandlers({
+            paste(event) {
+                if (selectedLanguage?.name !== "Autodetect") return;
+
+                const content = event.clipboardData?.getData("text/plain");
+
+                if (!content) return;
+
+                autodetectLanguage(content).then((lang) => {
+                    setSelectedLang(lang);
+                });
+            }
+        });
+
+        editorView = new EditorView({
+            state: EditorState.create({
+                extensions: [
+                    baseTheme,
+                    basicSetup,
+                    keymap.of([indentWithTab]),
+                    themeCompartment.of([($themeStore || themes[0]).codemirrorTheme]),
+                    editorUpdateListener,
+                    indentUnitCompartment.of(
+                        indentUnit.of(selectedIndentUnit === "spaces" ? " " : "\t")
+                    ),
+                    indentWidthCompartment.of(EditorState.tabSize.of(selectedIndentWidth)),
+                    settings.textWrap ? [EditorView.lineWrapping] : [],
+                    autodetectLanguageOnPasteExtension,
+                    shikiCompartment.of([])
+                ]
+            }),
+            parent: editorElement
+        });
+
         langs = await getLangs(fetch);
 
         const popularLangs = await getPopularLangNames(fetch);
@@ -91,58 +150,6 @@
 
         selectedIndentUnit = settings.defaultIndentationUnit;
         selectedIndentWidth = settings.defaultIndentationWidth;
-
-        const editorUpdateListener = EditorView.updateListener.of((update) => {
-            // get the current line
-            const line = update.state.doc.lineAt(update.state.selection.main.head);
-
-            cursorLine = line.number;
-            cursorCol = update.state.selection.main.head - line.from;
-        });
-
-        const autodetectLanguageOnPasteExtension = EditorView.domEventHandlers({
-            paste(event) {
-                if (selectedLanguage?.name !== "Autodetect") return;
-
-                const content = event.clipboardData?.getData("text/plain");
-
-                if (!content) return;
-
-                autodetectLanguage(content).then((lang) => {
-                    setSelectedLang(lang);
-                });
-            }
-        });
-
-        const codemirrorTheme = ($themeStore || themes[0]).codemirrorTheme;
-
-        const baseTheme = EditorView.theme({
-            "*": {
-                fontFamily: '"Ubuntu Mono", monospace'
-            }
-        });
-
-        // TODO: first create the view and then update it after fetching all the required things
-
-        editorView = new EditorView({
-            state: EditorState.create({
-                extensions: [
-                    baseTheme,
-                    basicSetup,
-                    keymap.of([indentWithTab]),
-                    themeCompartment.of([codemirrorTheme]),
-                    editorUpdateListener,
-                    langCompartment.of([]),
-                    indentUnitCompartment.of(
-                        indentUnit.of(selectedIndentUnit === "spaces" ? " " : "\t")
-                    ),
-                    indentWidthCompartment.of(EditorState.tabSize.of(selectedIndentWidth)),
-                    settings.textWrap ? [EditorView.lineWrapping] : [],
-                    autodetectLanguageOnPasteExtension
-                ]
-            }),
-            parent: editorElement
-        });
 
         const settingsLang = langs.find((l) => l.name === settings.defaultLanguage) || textLang;
         setSelectedLang(settingsLang);
@@ -315,31 +322,15 @@
     };
 
     const preview = async () => {
-        if (!selectedLanguage) return;
+        if (!selectedLanguage || !isLanguageMarkdown(selectedLanguage.name)) return;
 
-        if (isLanguageMarkdown(selectedLanguage.name)) {
-            currentPreviewContent = marked.parse(getContent(), { gfm: true }) as string;
-        } else {
-            const res = await fetch("/internal/highlight", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify({
-                    content: getContent(),
-                    language: selectedLanguage.name,
-                    wrap: settings.textWrap,
-                    theme: settings.theme,
-                    showLineNumbers: true
-                })
-            });
-
-            currentPreviewContent = await res.text();
-        }
+        marked.use(markedHeadingAnchorExtension());
+        marked.use(markedShikiExtension(fetch, settings.textWrap, settings.theme));
+        currentPreviewContent = (await marked.parse(getContent(), { gfm: true })) as string;
     };
 
-    const onPreviewClick = async () => {
-        await preview();
+    const onPreviewClick = () => {
+        preview();
 
         previewEnabled = !previewEnabled;
     };
@@ -377,31 +368,69 @@
         return selectedLanguage;
     };
 
-    export const setSelectedLang = (lang: Language) => {
+    const setCodemirrorThemeAndLanguage = async (lang: Language | undefined, theme: Theme) => {
+        const highlighter = getSingletonHighlighter();
+
+        const key = theme.shikiTheme;
+        let themeJson: ShikiTheme;
+
+        // theme.shikiTheme is expected to be defined; fetch/cache accordingly
+        if (Object.prototype.hasOwnProperty.call(shikiThemeJsonCache, key)) {
+            themeJson = shikiThemeJsonCache[key];
+        } else {
+            const themeJsonResponse = await fetch(`/themes/${key}.json`);
+            themeJson = (await themeJsonResponse.json()) as ShikiTheme;
+            shikiThemeJsonCache[key] = themeJson;
+        }
+
+        // Only load the theme into the highlighter if it's not already the current one
+        if (currentLoadedShikiTheme !== key) {
+            await (await highlighter).loadTheme(themeJson);
+            currentLoadedShikiTheme = key;
+        }
+
+        let actualLanguage: string = "";
+
+        if (lang) {
+            const grammar = grammars.find(
+                (g) =>
+                    g.scopeName === lang.tmScope ||
+                    g.displayName.toLowerCase() === lang.name.toLowerCase() ||
+                    g.name.toLowerCase() === lang.name.toLowerCase()
+            );
+
+            if (grammar) {
+                const loader =
+                    loadedGrammars[`/node_modules/tm-grammars/grammars/${grammar.name}.json`]!;
+                const langJson: LanguageRegistration = (await loader()) as LanguageRegistration;
+                await (await highlighter).loadLanguage(langJson);
+
+                actualLanguage = langJson.name || "text";
+            }
+        }
+
+        editorView.dispatch({
+            effects: [
+                shikiCompartment.reconfigure(
+                    shiki({ highlighter, language: actualLanguage, theme: themeJson["name"] })
+                ),
+                themeCompartment.reconfigure([theme.codemirrorTheme])
+            ],
+            // need to force rerender things when changing the shiki theme or language
+            changes: {
+                from: 0,
+                to: editorView.state.doc.length,
+                insert: editorView.state.doc
+            }
+        });
+    };
+
+    export const setSelectedLang = async (lang: Language) => {
         selectedLanguage = lang;
 
-        const langDescription = cmLangs.find(
-            (l) => selectedLanguage!.name.toLowerCase() === l.name.toLowerCase()
-        );
+        await setCodemirrorThemeAndLanguage(lang, $themeStore || themes[0]);
 
-        if (langDescription) {
-            langSupported = true;
-
-            langDescription.load().then((langSupport) => {
-                editorView.dispatch({
-                    effects: langCompartment.reconfigure(langSupport)
-                });
-            });
-        } else {
-            langSupported = false;
-            if (["Text", "Autodetect"].includes(selectedLanguage.name)) {
-                langSupported = true;
-            }
-
-            editorView.dispatch({
-                effects: langCompartment.reconfigure([])
-            });
-        }
+        tick().then(() => focus());
 
         if (previewEnabled) preview();
     };
@@ -415,27 +444,7 @@
         </div>
     {/if}
 
-    <div class="editor" bind:this={editorElement} class:hidden={previewEnabled}>
-        {#if !langSupported}
-            <div
-                class="lang-not-supported flex row center"
-                use:tooltip
-                aria-label="the language doesn't have highlighting support in the editor, but will have it in
-                the actual paste view when the paste is created. use the preview button to see the
-                final result."
-            >
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" class="icon">
-                    <title>Info Icon</title>
-                    <path
-                        fill="currentColor"
-                        fill-rule="evenodd"
-                        d="M8 1.5a6.5 6.5 0 100 13 6.5 6.5 0 000-13zM0 8a8 8 0 1116 0A8 8 0 010 8zm6.5-.25A.75.75 0 017.25 7h1a.75.75 0 01.75.75v2.75h.25a.75.75 0 010 1.5h-2a.75.75 0 010-1.5h.25v-2h-.25a.75.75 0 01-.75-.75zM8 6a1 1 0 100-2 1 1 0 000 2z"
-                    />
-                </svg>
-                <p>limited language support</p>
-            </div>
-        {/if}
-    </div>
+    <div class="editor" bind:this={editorElement} class:hidden={previewEnabled}></div>
 
     <div class="toolbar flex sm-row center space-between">
         <div class="flex sm-row center">
@@ -443,7 +452,9 @@
 
             <button onclick={onIndentClick}>{selectedIndentUnit}: {selectedIndentWidth}</button>
 
-            <button onclick={onPreviewClick} class:enabled={previewEnabled}>preview</button>
+            {#if selectedLanguage && isLanguageMarkdown(selectedLanguage.name)}
+                <button onclick={onPreviewClick} class:enabled={previewEnabled}>preview</button>
+            {/if}
         </div>
 
         <div class="flex row center">
@@ -508,30 +519,6 @@
         }
     }
 
-    .lang-not-supported {
-        position: absolute;
-        z-index: 100;
-        user-select: none;
-        font-size: $fs-small;
-        box-sizing: border-box;
-        bottom: 0;
-        right: 0;
-        background-color: var(--color-secondary);
-        margin: 0.5rem;
-        padding: 0.25rem 0.5rem;
-        border-radius: $border-radius;
-        color: var(--color-bg2);
-
-        .icon {
-            color: var(--color-bg2);
-            margin-right: 0.5rem;
-        }
-
-        p {
-            margin: 0;
-        }
-    }
-
     .toolbar {
         font-size: $fs-small;
         background-color: var(--color-bg2);
@@ -562,7 +549,6 @@
 
         :global(pre) {
             margin-top: 0;
-            padding-top: 0;
         }
 
         :global(code) {
