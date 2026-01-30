@@ -16,6 +16,8 @@
     import { getSingletonHighlighter, type LanguageRegistration } from "shiki";
     import shiki from "codemirror-shiki";
     import { grammars } from "tm-grammars";
+    import { markedHeadingAnchorExtension } from "./marked-heading-anchor";
+    import { markedShikiExtension } from "./marked-shiki-extension";
 
     const loadedGrammars = import.meta.glob("tm-grammars/grammars/*.json", {
         import: "default"
@@ -319,10 +321,12 @@
         cmdPalOpen.set(true);
     };
 
-    const preview = () => {
+    const preview = async () => {
         if (!selectedLanguage || !isLanguageMarkdown(selectedLanguage.name)) return;
 
-        currentPreviewContent = marked.parse(getContent(), { gfm: true }) as string;
+        marked.use(markedHeadingAnchorExtension());
+        marked.use(markedShikiExtension(fetch, settings.textWrap, settings.theme));
+        currentPreviewContent = (await marked.parse(getContent(), { gfm: true })) as string;
     };
 
     const onPreviewClick = () => {
@@ -545,7 +549,6 @@
 
         :global(pre) {
             margin-top: 0;
-            padding-top: 0;
         }
 
         :global(code) {
