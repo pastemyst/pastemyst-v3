@@ -52,7 +52,7 @@ const highlight = async (
                 const langJson: LanguageRegistration = (await loader()) as LanguageRegistration;
                 await highlighter.loadLanguage(langJson);
 
-                actualLanguage = langJson.name;
+                actualLanguage = langJson.name || "text";
             }
         }
     }
