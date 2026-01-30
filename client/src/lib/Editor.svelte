@@ -17,6 +17,10 @@
     import shiki from "codemirror-shiki";
     import { grammars } from "tm-grammars";
 
+    const loadedGrammars = import.meta.glob("tm-grammars/grammars/*.json", {
+        import: "default"
+    });
+
     interface Props {
         hidden?: boolean;
         settings: Settings;
@@ -372,9 +376,9 @@
             );
 
             if (grammar) {
-                const langJson: LanguageRegistration = await import(
-                    `tm-grammars/grammars/${grammar.name}.json`
-                );
+                const loader =
+                    loadedGrammars[`/node_modules/tm-grammars/grammars/${grammar.name}.json`]!;
+                const langJson: LanguageRegistration = (await loader()) as LanguageRegistration;
                 await (await highlighter).loadLanguage(langJson);
 
                 actualLanguage = grammar.name;
