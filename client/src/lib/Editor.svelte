@@ -21,8 +21,9 @@
         import: "default"
     });
 
-    // Cache parsed shiki theme JSON by theme.shikiTheme to avoid repeated fetches
     type ShikiTheme = { name: string; [key: string]: unknown };
+
+    // Cache parsed shiki theme JSON by theme.shikiTheme to avoid repeated fetches
     const shikiThemeJsonCache: Record<string, ShikiTheme> = {};
     // Remember which shiki theme name is currently loaded into the singleton highlighter
     let currentLoadedShikiTheme: string | null = null;
@@ -400,7 +401,7 @@
                 const langJson: LanguageRegistration = (await loader()) as LanguageRegistration;
                 await (await highlighter).loadLanguage(langJson);
 
-                actualLanguage = grammar.name;
+                actualLanguage = langJson.name || "text";
             }
         }
 
