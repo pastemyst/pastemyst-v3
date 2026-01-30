@@ -7,8 +7,7 @@ const config = {
     css: {
         preprocessorOptions: {
             scss: {
-                additionalData: '@use "/src/variables.scss" as *;',
-                api: "modern-compiler"
+                additionalData: '@use "/src/variables.scss" as *;'
             }
         }
     },
