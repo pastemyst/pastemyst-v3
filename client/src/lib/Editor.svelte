@@ -21,6 +21,12 @@
         import: "default"
     });
 
+    // Cache parsed shiki theme JSON by theme.shikiTheme to avoid repeated fetches
+    type ShikiTheme = { name: string; [key: string]: unknown };
+    const shikiThemeJsonCache: Record<string, ShikiTheme> = {};
+    // Remember which shiki theme name is currently loaded into the singleton highlighter
+    let currentLoadedShikiTheme: string | null = null;
+
     interface Props {
         hidden?: boolean;
         settings: Settings;
@@ -360,10 +366,23 @@
     const setCodemirrorThemeAndLanguage = async (lang: Language | undefined, theme: Theme) => {
         const highlighter = getSingletonHighlighter();
 
-        const themeJsonResponse = await fetch(`/themes/${theme.shikiTheme}.json`);
-        const themeJson = await themeJsonResponse.json();
+        const key = theme.shikiTheme;
+        let themeJson: ShikiTheme;
 
-        await (await highlighter).loadTheme(themeJson);
+        // theme.shikiTheme is expected to be defined; fetch/cache accordingly
+        if (Object.prototype.hasOwnProperty.call(shikiThemeJsonCache, key)) {
+            themeJson = shikiThemeJsonCache[key];
+        } else {
+            const themeJsonResponse = await fetch(`/themes/${key}.json`);
+            themeJson = (await themeJsonResponse.json()) as ShikiTheme;
+            shikiThemeJsonCache[key] = themeJson;
+        }
+
+        // Only load the theme into the highlighter if it's not already the current one
+        if (currentLoadedShikiTheme !== key) {
+            await (await highlighter).loadTheme(themeJson);
+            currentLoadedShikiTheme = key;
+        }
 
         let actualLanguage: string = "";
 
