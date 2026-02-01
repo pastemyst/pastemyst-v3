@@ -61,6 +61,6 @@
         "shiki": "^3.11.0",
         "sortablejs": "^1.15.6",
         "tippy.js": "^6.3.7",
-        "tm-grammars": "^1.24.5"
+        "tm-grammars": "^1.30.2"
     }
 }
