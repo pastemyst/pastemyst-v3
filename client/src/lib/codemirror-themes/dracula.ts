@@ -8,7 +8,6 @@ import { tags as t } from "@lezer/highlight";
 const background = "#2d2f3f";
 const foreground = "#f8f8f2";
 const caret = "#f8f8f0";
-const selection = "#44475a";
 const gutterBackground = "#282a36";
 const gutterForeground = "rgb(144, 145, 148)";
 const lineHighlight = "#44475a";
@@ -25,11 +24,16 @@ const theme = EditorView.theme(
         ".cm-cursor, .cm-dropCursor": {
             borderLeftColor: caret
         },
-        "&.cm-focused .cm-selectionBackgroundm .cm-selectionBackground, .cm-content ::selection": {
-            backgroundColor: selection
+        "&.cm-focused > .cm-scroller > .cm-selectionLayer .cm-selectionBackground": {
+            backgroundColor: "#99ff7780"
+        },
+        "&.cm-focused .cm-selectionBackground, .cm-selectionBackground, .cm-content ::selection": {
+            backgroundColor: "#99ff7780"
         },
         ".cm-activeLine": {
-            backgroundColor: lineHighlight
+            backgroundColor: lineHighlight,
+            position: "relative",
+            zIndex: -3
         },
         ".cm-gutters": {
             backgroundColor: gutterBackground,

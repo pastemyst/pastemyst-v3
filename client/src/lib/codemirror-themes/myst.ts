@@ -5,7 +5,6 @@ import { tags as t } from "@lezer/highlight";
 
 const bg = "#141414",
     cl = "#282a2e",
-    sel = "#373b41",
     fg = "#c5c8c6",
     com = "#969896",
     red = "#cc6666",
@@ -30,8 +29,12 @@ const theme = EditorView.theme(
             borderLeftColor: orange
         },
 
+        "&.cm-focused > .cm-scroller > .cm-selectionLayer .cm-selectionBackground": {
+            backgroundColor: "#aafe661a"
+        },
+
         "&.cm-focused .cm-selectionBackground, .cm-selectionBackground, ::selection": {
-            backgroundColor: sel
+            backgroundColor: "#aafe661a"
         },
 
         ".cm-panels": {
@@ -57,7 +60,9 @@ const theme = EditorView.theme(
         },
 
         ".cm-activeLine": {
-            backgroundColor: cl
+            backgroundColor: cl,
+            position: "relative",
+            zIndex: -3
         },
 
         ".cm-selectionMatch": {

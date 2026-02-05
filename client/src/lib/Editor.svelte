@@ -480,13 +480,7 @@
             @include transition();
 
             &:hover {
-                background-color: var(--color-bg1);
                 border-color: var(--color-bg3);
-
-                :global(.cm-gutter),
-                :global(.cm-activeLineGutter) {
-                    background-color: var(--color-bg1);
-                }
             }
         }
 

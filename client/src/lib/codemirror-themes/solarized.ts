@@ -26,7 +26,6 @@ const invalid = "#d30102",
     highlightBackground = "#173541",
     background = base00,
     tooltipBackground = base01,
-    selection = "#173541",
     cursor = base04;
 
 export const solarizedDarkTheme = EditorView.theme(
@@ -42,7 +41,7 @@ export const solarizedDarkTheme = EditorView.theme(
 
         ".cm-cursor, .cm-dropCursor": { borderLeftColor: cursor },
         "&.cm-focused > .cm-scroller > .cm-selectionLayer .cm-selectionBackground, .cm-selectionBackground, .cm-content ::selection":
-            { backgroundColor: selection },
+            { backgroundColor: "#aafe661a" },
 
         ".cm-panels": { backgroundColor: darkBackground, color: base03 },
         ".cm-panels.cm-panels-top": { borderBottom: "2px solid black" },
@@ -56,7 +55,11 @@ export const solarizedDarkTheme = EditorView.theme(
             backgroundColor: "#6199ff2f"
         },
 
-        ".cm-activeLine": { backgroundColor: highlightBackground },
+        ".cm-activeLine": {
+            backgroundColor: highlightBackground,
+            position: "relative",
+            zIndex: -3
+        },
         ".cm-selectionMatch": { backgroundColor: "#aafe661a" },
 
         "&.cm-focused .cm-matchingBracket, &.cm-focused .cm-nonmatchingBracket": {

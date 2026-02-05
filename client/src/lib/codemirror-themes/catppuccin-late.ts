@@ -20,7 +20,7 @@ const theme = EditorView.theme(
 
         "&.cm-focused > .cm-scroller > .cm-selectionLayer .cm-selectionBackground, .cm-selectionBackground, .cm-content ::selection":
             {
-                backgroundColor: "#acb0be"
+                backgroundColor: "#acb0be80"
             },
 
         ".cm-panels": {
@@ -38,7 +38,11 @@ const theme = EditorView.theme(
             backgroundColor: `${"#1e66f5"}2f`
         },
 
-        ".cm-activeLine": { backgroundColor: "#ccd0da" },
+        ".cm-activeLine": {
+            backgroundColor: "#ccd0da",
+            position: "relative",
+            zIndex: -3
+        },
         ".cm-selectionMatch": {
             backgroundColor: `${"#acb0be"}4d`
         },
