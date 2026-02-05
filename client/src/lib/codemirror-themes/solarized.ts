@@ -40,9 +40,6 @@ export const solarizedDarkTheme = EditorView.theme(
         },
 
         ".cm-cursor, .cm-dropCursor": { borderLeftColor: cursor },
-        "&.cm-focused > .cm-scroller > .cm-selectionLayer .cm-selectionBackground": {
-            backgroundColor: "#aafe661a"
-        },
         "&.cm-focused > .cm-scroller > .cm-selectionLayer .cm-selectionBackground, .cm-selectionBackground, .cm-content ::selection":
             { backgroundColor: "#aafe661a" },
 
