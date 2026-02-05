@@ -24,6 +24,9 @@ const theme = EditorView.theme(
         ".cm-cursor, .cm-dropCursor": {
             borderLeftColor: caret
         },
+        "&.cm-focused > .cm-scroller > .cm-selectionLayer .cm-selectionBackground": {
+            backgroundColor: "#99ff7780"
+        },
         "&.cm-focused .cm-selectionBackground, .cm-selectionBackground, .cm-content ::selection": {
             backgroundColor: "#99ff7780"
         },
