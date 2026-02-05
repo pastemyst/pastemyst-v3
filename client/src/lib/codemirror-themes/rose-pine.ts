@@ -18,10 +18,6 @@ const theme = EditorView.theme(
             borderLeftColor: "#ebbcba"
         },
 
-        "&.cm-focused > .cm-scroller > .cm-selectionLayer .cm-selectionBackground": {
-            backgroundColor: "#6e6a864d"
-        },
-
         "&.cm-focused > .cm-scroller > .cm-selectionLayer .cm-selectionBackground, .cm-selectionBackground, .cm-content ::selection":
             {
                 backgroundColor: "#6e6a864d"
