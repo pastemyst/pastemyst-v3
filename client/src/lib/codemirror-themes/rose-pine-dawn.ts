@@ -18,9 +18,13 @@ const theme = EditorView.theme(
             borderLeftColor: "#d7827e"
         },
 
+        "&.cm-focused > .cm-scroller > .cm-selectionLayer .cm-selectionBackground": {
+            backgroundColor: "#9893a54d"
+        },
+
         "&.cm-focused > .cm-scroller > .cm-selectionLayer .cm-selectionBackground, .cm-selectionBackground, .cm-content ::selection":
             {
-                backgroundColor: "#f2e9e1"
+                backgroundColor: "#9893a54d"
             },
 
         ".cm-panels": {
@@ -38,7 +42,11 @@ const theme = EditorView.theme(
             backgroundColor: `#56949f2f`
         },
 
-        ".cm-activeLine": { backgroundColor: "#fffaf3" },
+        ".cm-activeLine": {
+            backgroundColor: "#fffaf3",
+            position: "relative",
+            zIndex: -3
+        },
         ".cm-selectionMatch": {
             backgroundColor: `#9893a54d`
         },
