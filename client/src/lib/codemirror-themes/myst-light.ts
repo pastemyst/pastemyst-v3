@@ -29,10 +29,6 @@ const theme = EditorView.theme(
             borderLeftColor: orange
         },
 
-        "&.cm-focused > .cm-scroller > .cm-selectionLayer .cm-selectionBackground": {
-            backgroundColor: "#aafe6640"
-        },
-
         "&.cm-focused .cm-selectionBackground, .cm-selectionBackground, ::selection": {
             backgroundColor: "#aafe6640"
         },
