@@ -81,6 +81,10 @@ const highlight = async (
         for (const token of line) {
             lineHtml += `<span style="color: ${token.variants.dark.color}">${he.encode(token.content)}</span>`;
         }
+        // ensure empty lines are rendered
+        if (line.length === 0) {
+            lineHtml += `\n`;
+        }
         lineHtml += `</span>`;
         result += lineHtml;
     }
