@@ -25,6 +25,7 @@ public static class V2LanguageMapper
         "MS SQL" => "SQL",
         "Plain Text" => "Text",
         "Autodetect" => "Text",
+        "PGP" => "Public Key",
         _ => language
     };
 }

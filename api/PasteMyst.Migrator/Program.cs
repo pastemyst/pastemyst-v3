@@ -48,11 +48,12 @@ Console.WriteLine("Migrating the database...");
 var connectionArg = Array.FindIndex(args, a => a == "--connection");
 if (connectionArg == -1 || connectionArg + 1 >= args.Length)
 {
-    Console.Error.WriteLine("Usage: dotnet run -- --connection <mongodb-connection-string>");
+    Console.Error.WriteLine("Usage: dotnet run -- --connection <mongodb-connection-string> [--drop-existing]");
     return;
 }
 
 var connectionString = args[connectionArg + 1];
+var dropExisting = Array.IndexOf(args, "--drop-existing") != -1;
 
 BsonSerializer.TryRegisterSerializer(new CustomEnumStringSerializer<ExpiresIn>());
 BsonSerializer.TryRegisterSerializer(new CustomEnumStringSerializer<Scope>());
@@ -67,6 +68,13 @@ var mongoClient = new MongoClient(connectionString);
 
 var v2Db = mongoClient.GetDatabase("pastemyst-v2");
 var v3Db = mongoClient.GetDatabase("pastemyst");
+
+if (dropExisting)
+{
+    Console.Write("Dropping existing v3 database... ");
+    await mongoClient.DropDatabaseAsync("pastemyst");
+    Console.WriteLine("done.");
+}
 
 var usersV2 = v2Db.GetCollection<UserV2>("users");
 var pastesV2 = v2Db.GetCollection<PasteV2>("pastes").Find(Builders<PasteV2>.Filter.Eq(p => p.Encrypted, false)).ToList();
@@ -265,9 +273,9 @@ async Task MigrateUnencryptedPastes()
 
     if (unmappedLanguages.Count > 0)
     {
-        Console.WriteLine("\nWarning: the following language names were not recognised and fell back to \"Text\":");
+        progressBar.WriteLine("\nWarning: the following language names were not recognised and fell back to \"Text\":");
         foreach (var (lang, count) in unmappedLanguages.OrderByDescending(x => x.Value))
-            Console.WriteLine($"  {lang} ({count} pasties)");
+            progressBar.WriteLine($"  {lang} ({count} pasties)");
     }
 }
 
