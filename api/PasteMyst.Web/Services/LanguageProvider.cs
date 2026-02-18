@@ -22,6 +22,18 @@ public class LanguageProvider : IHostedService
     ];
 
     /// <summary>
+    /// Tries to find a language based on extension only (e.g. "js", without the leading dot).
+    /// </summary>
+    public Language FindByExtension(string extension)
+    {
+        var lang = Languages.FirstOrDefault(l =>
+            l.Extensions is not null &&
+            l.Extensions.Any(ext => extension.EqualsIgnoreCase(ext[1..]))) ?? throw new LanguageNotFoundException();
+
+        return lang;
+    }
+
+    /// <summary>
     /// Tries to find a language based on the name (it will search names, aliases and extensions).
     /// </summary>
     public Language FindByName(string name)

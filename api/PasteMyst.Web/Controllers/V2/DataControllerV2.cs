@@ -26,7 +26,7 @@ public class DataControllerV2(LanguageProvider languageProvider, PasteService pa
     [HttpGet("languageExt")]
     public LanguageV2 GetLanguageByExtension([FromQuery] string extension)
     {
-        var lang = languageProvider.FindByName(extension);
+        var lang = languageProvider.FindByExtension(extension);
 
         return new LanguageV2
         {
