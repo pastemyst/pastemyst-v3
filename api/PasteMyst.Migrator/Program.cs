@@ -53,6 +53,7 @@ if (connectionArg == -1 || connectionArg + 1 >= args.Length)
 var connectionString = args[connectionArg + 1];
 
 BsonSerializer.TryRegisterSerializer(new CustomEnumStringSerializer<ExpiresIn>());
+BsonSerializer.TryRegisterSerializer(new CustomEnumStringSerializer<Scope>());
 
 var camelCaseConvention = new ConventionPack { new CamelCaseElementNameConvention() };
 ConventionRegistry.Register("CamelCase", camelCaseConvention, type => true);

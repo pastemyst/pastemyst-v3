@@ -320,34 +320,55 @@ public class AuthService(
         await mongo.AccessTokens.DeleteOneAsync(a => a.Id == accessTokenId, cancellationToken: cancellationToken);
     }
 
-    private async Task<(bool, string, string, Scope[])> AccessTokenValid(String accessToken)
+    private async Task<(bool, string, string, Scope[])> AccessTokenValid(string accessToken)
     {
-        var splitted = accessToken.Split("-");
-        var accessTokenId = splitted[0];
-        var accessTokenRaw = splitted[1];
-
-        var accessTokenDb = await mongo.AccessTokens.Find(a => a.Id == accessTokenId).FirstOrDefaultAsync();
-
-        if (accessTokenDb is null) return (false, null, null, []);
-
-        if (accessTokenDb.ExpiresAt <= DateTime.UtcNow)
+        // V3 tokens are in the format {8-char-id}-{raw-secret}.
+        // V2 tokens are plain strings with no ID prefix — fall back to a full-token hash lookup.
+        var splitted = accessToken.Split("-", 2);
+        if (splitted.Length == 2 && splitted[0].Length == 8 && splitted[1].Length > 0)
         {
-            await mongo.AccessTokens.DeleteOneAsync(a => a.Id == accessTokenId);
+            var accessTokenId = splitted[0];
+            var accessTokenRaw = splitted[1];
+
+            var accessTokenDb = await mongo.AccessTokens.Find(a => a.Id == accessTokenId).FirstOrDefaultAsync();
+
+            if (accessTokenDb is not null)
+            {
+                if (accessTokenDb.ExpiresAt <= DateTime.UtcNow)
+                {
+                    await mongo.AccessTokens.DeleteOneAsync(a => a.Id == accessTokenId);
+                    return (false, null, null, []);
+                }
+
+                using var sha = SHA512.Create();
+                var hashedToken = sha.ComputeHash(Encoding.UTF8.GetBytes(accessTokenRaw));
+
+                var hashStringBuilder = new StringBuilder();
+                foreach (byte b in hashedToken)
+                    hashStringBuilder.Append(b.ToString("x2"));
+
+                if (accessTokenDb.Token.Equals(hashStringBuilder.ToString()))
+                    return (true, accessTokenDb.Id, accessTokenDb.OwnerId, accessTokenDb.Scopes);
+            }
+        }
+
+        // Fall back to V2 format: hash the entire token and search directly by Token field.
+        var hashedV2Token = SHA512.HashData(Encoding.UTF8.GetBytes(accessToken));
+        var v2HashBuilder = new StringBuilder();
+        foreach (var b in hashedV2Token)
+            v2HashBuilder.Append(b.ToString("x2"));
+
+        var v2TokenDb = await mongo.AccessTokens.Find(a => a.Token == v2HashBuilder.ToString()).FirstOrDefaultAsync();
+
+        if (v2TokenDb is null) return (false, null, null, []);
+
+        if (v2TokenDb.ExpiresAt <= DateTime.UtcNow)
+        {
+            await mongo.AccessTokens.DeleteOneAsync(a => a.Id == v2TokenDb.Id);
             return (false, null, null, []);
         }
 
-        using var sha = SHA512.Create();
-        var hashedToken = sha.ComputeHash(Encoding.UTF8.GetBytes(accessTokenRaw));
-
-        var hashStringBuilder = new StringBuilder();
-        foreach (byte b in hashedToken)
-        {
-            hashStringBuilder.Append(b.ToString("x2"));
-        }
-
-        if (!accessTokenDb.Token.Equals(hashStringBuilder.ToString())) return (false, null, null, []);
-
-        return (true, accessTokenDb.Id, accessTokenDb.OwnerId, accessTokenDb.Scopes);
+        return (true, v2TokenDb.Id, v2TokenDb.OwnerId, v2TokenDb.Scopes);
     }
 
     private async Task<bool> AccessTokenExistsById(string id)
