@@ -159,7 +159,7 @@ async Task MigrateUsers(ObjectId defaultAvatarId)
             AvatarId = avatarId.ToString(),
             IsContributor = userV2.Contributor,
             IsSupporter = userV2.SupporterLength > 0,
-            IsAdmin = false,
+            IsAdmin = userV2.Username == "CodeMyst",
             ProviderName = userV2.ServiceIds.FirstOrDefault().Key,
             ProviderId = userV2.ServiceIds.FirstOrDefault().Value,
             UserSettings = new() {
