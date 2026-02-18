@@ -5,11 +5,13 @@ using MongoDB.Bson.Serialization;
 using MongoDB.Bson.Serialization.Conventions;
 using MongoDB.Driver;
 using MongoDB.Driver.GridFS;
+using PasteMyst.Web.Exceptions;
 using PasteMyst.Web.Models;
 using PasteMyst.Web.Models.Auth;
 using PasteMyst.Web.Models.V2;
 using PasteMyst.Web.Serializers;
 using PasteMyst.Web.Services;
+using PasteMyst.Web.Utils;
 using ShellProgressBar;
 
 Console.WriteLine("Preprocessing the database...");
@@ -57,6 +59,9 @@ BsonSerializer.TryRegisterSerializer(new CustomEnumStringSerializer<Scope>());
 
 var camelCaseConvention = new ConventionPack { new CamelCaseElementNameConvention() };
 ConventionRegistry.Register("CamelCase", camelCaseConvention, type => true);
+
+var languageProvider = new LanguageProvider();
+await languageProvider.StartAsync(CancellationToken.None);
 
 var mongoClient = new MongoClient(connectionString);
 
@@ -187,8 +192,7 @@ async Task MigrateUsers(ObjectId defaultAvatarId)
 }
 
 async Task MigrateUnencryptedPastes()
-{
-    var progressBarOptions = new ProgressBarOptions
+{    var progressBarOptions = new ProgressBarOptions
     {
         ForegroundColor = ConsoleColor.Yellow,
         ForegroundColorDone = ConsoleColor.DarkGreen,
@@ -198,26 +202,25 @@ async Task MigrateUnencryptedPastes()
 
     using var progressBar = new ProgressBar(pastesV2.Count, "Migrating unencrypted pastes", progressBarOptions);
 
+    var unmappedLanguages = new Dictionary<string, int>();
+
     foreach (var pasteV2 in pastesV2)
     {
         foreach (var pasty in pasteV2.Pasties)
         {
-            pasty.Language = pasty.Language switch
+            pasty.Language = V2LanguageMapper.MapLanguage(pasty.Language);
+
+            // Validate the language is known to v3; fall back to Text if not
+            try
             {
-                "Vue.js Component" => "Vue",
-                "TypeScript-JSX" => "TSX",
-                "Asterisk" => "Text",
-                "GitHub Flavored Markdown" => "Markdown",
-                "JSON-LD" => "JSON",
-                "SQLite" => "SQL",
-                "Properties files" => "INI",
-                "Z80" => "Assembly",
-                "Solr" => "Text",
-                "Spreadsheet" => "Text",
-                "mscgen" => "Text",
-                "MS SQL" => "SQL",
-                _ => pasty.Language
-            };
+                languageProvider.FindByName(pasty.Language);
+            }
+            catch (LanguageNotFoundException)
+            {
+                unmappedLanguages.TryGetValue(pasty.Language, out var existingCount);
+                unmappedLanguages[pasty.Language] = existingCount + 1;
+                pasty.Language = "Text";
+            }
         }
 
         var starsFilter = Builders<UserV2>.Filter.ElemMatch(u => u.Stars, p => p == pasteV2.Id);
@@ -258,6 +261,13 @@ async Task MigrateUnencryptedPastes()
         await actionLogsV3.InsertOneAsync(actionLog);
 
         progressBar.Tick();
+    }
+
+    if (unmappedLanguages.Count > 0)
+    {
+        Console.WriteLine("\nWarning: the following language names were not recognised and fell back to \"Text\":");
+        foreach (var (lang, count) in unmappedLanguages.OrderByDescending(x => x.Value))
+            Console.WriteLine($"  {lang} ({count} pasties)");
     }
 }
 

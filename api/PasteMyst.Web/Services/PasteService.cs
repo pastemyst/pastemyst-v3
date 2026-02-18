@@ -801,12 +801,17 @@ public class PasteService(
 
         var decryptedPasteData = new DecryptedPasteData
         {
-            Pasties = [..decryptedPasteDataV2.Pasties.Select(p => new Pasty
+            Pasties = [..decryptedPasteDataV2.Pasties.Select(p =>
             {
-                Id = p.Id,
-                Title = p.Title,
-                Content = p.Code,
-                Language = p.Language
+                var lang = V2LanguageMapper.MapLanguage(p.Language);
+                try { languageProvider.FindByName(lang); } catch (LanguageNotFoundException) { lang = "Text"; }
+                return new Pasty
+                {
+                    Id = p.Id,
+                    Title = p.Title,
+                    Content = p.Code,
+                    Language = lang
+                };
             })]
         };
 
