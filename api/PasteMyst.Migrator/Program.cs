@@ -43,7 +43,14 @@ if (process.ExitCode != 0)
 
 Console.WriteLine("Migrating the database...");
 
-var connectionString = "mongodb://127.0.0.1:27017";
+var connectionArg = Array.FindIndex(args, a => a == "--connection");
+if (connectionArg == -1 || connectionArg + 1 >= args.Length)
+{
+    Console.Error.WriteLine("Usage: dotnet run -- --connection <mongodb-connection-string>");
+    return;
+}
+
+var connectionString = args[connectionArg + 1];
 
 BsonSerializer.TryRegisterSerializer(new CustomEnumStringSerializer<ExpiresIn>());
 
