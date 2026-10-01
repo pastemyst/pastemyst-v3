@@ -28,14 +28,19 @@ public class MongoService
 
     private readonly MongoClient mongoClient;
 
-    public MongoService(IConfiguration configuration)
+    // BSON serializers and conventions are process-wide, and registering a second serializer
+    // instance for the same type throws, so do it once regardless of how many instances get built.
+    static MongoService()
     {
         BsonSerializer.TryRegisterSerializer(new CustomEnumStringSerializer<ExpiresIn>());
         BsonSerializer.TryRegisterSerializer(new CustomEnumStringSerializer<Scope>());
 
         var camelCaseConvention = new ConventionPack { new CamelCaseElementNameConvention() };
         ConventionRegistry.Register("CamelCase", camelCaseConvention, type => true);
+    }
 
+    public MongoService(IConfiguration configuration)
+    {
         mongoClient = new MongoClient(configuration.GetConnectionString("DefaultDb"));
 
         var databaseName = "pastemyst";
