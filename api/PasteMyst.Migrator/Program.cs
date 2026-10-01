@@ -15,37 +15,6 @@ using PasteMyst.Web.Utils;
 using PasteMyst.Migrator;
 using ShellProgressBar;
 
-Console.WriteLine("Preprocessing the database...");
-
-var process = new System.Diagnostics.Process
-{
-    StartInfo = new System.Diagnostics.ProcessStartInfo
-    {
-        FileName = "dub",
-        Arguments = "preprocess.d",
-        RedirectStandardOutput = true,
-        RedirectStandardError = true,
-        UseShellExecute = false,
-        CreateNoWindow = true
-    }
-};
-
-process.OutputDataReceived += (sender, args) => {};
-process.ErrorDataReceived += (sender, args) => {};
-
-process.Start();
-process.BeginOutputReadLine();
-process.BeginErrorReadLine();
-process.WaitForExit();
-
-if (process.ExitCode != 0)
-{
-    Console.WriteLine("Preprocessing failed.");
-    return;
-}
-
-Console.WriteLine("Migrating the database...");
-
 var connectionArg = Array.FindIndex(args, a => a == "--connection");
 if (connectionArg == -1 || connectionArg + 1 >= args.Length)
 {
@@ -55,6 +24,21 @@ if (connectionArg == -1 || connectionArg + 1 >= args.Length)
 
 var connectionString = args[connectionArg + 1];
 var dropExisting = Array.IndexOf(args, "--drop-existing") != -1;
+
+Console.WriteLine("Preprocessing the database...");
+
+// preprocess.d runs in docker with a pinned D toolchain (see preprocess.Dockerfile), on the host
+// network so it reaches Mongo at the same address as the migrator.
+const string preprocessImage = "pastemyst-migrator-preprocess";
+
+if (RunDocker("build", "-t", preprocessImage, "-f", "preprocess.Dockerfile", ".") != 0 ||
+    RunDocker("run", "--rm", "--network", "host", preprocessImage, connectionString) != 0)
+{
+    Console.Error.WriteLine("Preprocessing failed.");
+    return;
+}
+
+Console.WriteLine("Migrating the database...");
 
 BsonSerializer.TryRegisterSerializer(new CustomEnumStringSerializer<ExpiresIn>());
 BsonSerializer.TryRegisterSerializer(new CustomEnumStringSerializer<Scope>());
@@ -307,4 +291,11 @@ async Task MigrateApiKeys()
 
         progressBar.Tick();
     }
+}
+
+int RunDocker(params string[] arguments)
+{
+    using var docker = System.Diagnostics.Process.Start("docker", arguments);
+    docker.WaitForExit();
+    return docker.ExitCode;
 }
