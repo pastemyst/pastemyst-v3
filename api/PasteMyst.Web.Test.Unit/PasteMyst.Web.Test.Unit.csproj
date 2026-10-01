@@ -21,7 +21,9 @@
     </ItemGroup>
 
     <ItemGroup>
+      <FrameworkReference Include="Microsoft.AspNetCore.App" />
       <ProjectReference Include="..\PasteMyst.Web\PasteMyst.Web.csproj" />
+      <ProjectReference Include="..\PasteMyst.Migrator\PasteMyst.Migrator.csproj" />
     </ItemGroup>
 
 </Project>

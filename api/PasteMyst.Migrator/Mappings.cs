@@ -1,0 +1,97 @@
+using System.Security.Cryptography;
+using System.Text;
+using PasteMyst.Web.Models;
+using PasteMyst.Web.Models.Auth;
+using PasteMyst.Web.Models.V2;
+
+namespace PasteMyst.Migrator;
+
+/// <summary>
+/// Pure v2 -> v3 record mappers, extracted from the migration driver so the (risky) field
+/// translations can be unit-tested without a database. I/O-derived values (downloaded avatar id,
+/// resolved language, computed star list, generated token id) are passed in by the caller.
+/// </summary>
+public static class Mappings
+{
+    public static User MapUser(UserV2 v2, string avatarId) => new()
+    {
+        Id = v2.Id,
+        Username = v2.Username,
+        AvatarId = avatarId,
+        IsContributor = v2.Contributor,
+        IsSupporter = v2.SupporterLength > 0,
+        // Only CodeMyst is promoted to admin during migration; everyone else must be set manually.
+        IsAdmin = v2.Username == "CodeMyst",
+        // v2 supported multiple OAuth providers; v3 keeps only the first.
+        ProviderName = v2.ServiceIds.FirstOrDefault().Key,
+        ProviderId = v2.ServiceIds.FirstOrDefault().Value,
+        UserSettings = new UserSettings { ShowAllPastesOnProfile = v2.PublicProfile },
+        Settings = new Settings()
+    };
+
+    public static Pasty MapPasty(PastyV2 v2) => new()
+    {
+        Id = v2.Id,
+        Title = v2.Title == "" ? "untitled" : v2.Title,
+        Language = v2.Language,
+        Content = v2.Code
+    };
+
+    public static Paste MapUnencryptedPaste(PasteV2 v2, List<Pasty> pasties, List<string> stars) => new()
+    {
+        Id = v2.Id,
+        Title = v2.Title,
+        CreatedAt = DateTimeOffset.FromUnixTimeSeconds(v2.CreatedAt).UtcDateTime,
+        ExpiresIn = v2.ExpiresIn,
+        DeletesAt = v2.DeletesAt == 0 ? null : DateTimeOffset.FromUnixTimeSeconds(v2.DeletesAt).UtcDateTime,
+        OwnerId = v2.OwnerId == "" ? null : v2.OwnerId,
+        Private = v2.IsPrivate,
+        Pinned = v2.IsPublic,
+        Tags = v2.Tags,
+        Stars = stars,
+        Pasties = pasties
+    };
+
+    public static EncryptedPaste MapEncryptedPaste(EncryptedPasteV2 v2, List<string> stars) => new()
+    {
+        Id = v2.Id,
+        Title = "untitled",
+        CreatedAt = DateTimeOffset.FromUnixTimeSeconds(v2.CreatedAt).UtcDateTime,
+        ExpiresIn = v2.ExpiresIn,
+        DeletesAt = v2.DeletesAt == 0 ? null : DateTimeOffset.FromUnixTimeSeconds(v2.DeletesAt).UtcDateTime,
+        OwnerId = v2.OwnerId == "" ? null : v2.OwnerId,
+        Private = v2.IsPrivate,
+        Pinned = v2.IsPublic,
+        Tags = v2.Tags,
+        Stars = stars,
+        EncryptedData = v2.EncryptedData,
+        Iv = v2.EncryptedKey,
+        Salt = v2.Salt,
+        // Marks the paste as v2-encrypted so v3 lazily re-encrypts it to version 3 on first access.
+        EncryptionVersion = 2
+    };
+
+    public static AccessToken MapApiKey(ApiKeyV2 v2, string id) => new()
+    {
+        Id = id,
+        Description = "v2 api key",
+        Hidden = false,
+        CreatedAt = DateTime.UtcNow,
+        ExpiresAt = null,
+        Token = HashToken(v2.Key),
+        // v2 keys carry no scopes, so they get full [Paste, User] access for compatibility.
+        OwnerId = v2.Id,
+        Scopes = [Scope.Paste, Scope.User]
+    };
+
+    /// <summary>
+    /// SHA512 -> lowercase hex, matching AuthService's token hashing so migrated keys validate.
+    /// </summary>
+    public static string HashToken(string token)
+    {
+        var hashed = SHA512.HashData(Encoding.UTF8.GetBytes(token));
+        var sb = new StringBuilder();
+        foreach (var b in hashed) sb.Append(b.ToString("x2"));
+        return sb.ToString();
+    }
+}

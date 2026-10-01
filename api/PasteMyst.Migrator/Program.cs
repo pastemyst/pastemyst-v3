@@ -12,6 +12,7 @@ using PasteMyst.Web.Models.V2;
 using PasteMyst.Web.Serializers;
 using PasteMyst.Web.Services;
 using PasteMyst.Web.Utils;
+using PasteMyst.Migrator;
 using ShellProgressBar;
 
 Console.WriteLine("Preprocessing the database...");
@@ -166,21 +167,7 @@ async Task MigrateUsers(ObjectId defaultAvatarId)
         }
         catch {}
 
-        var userV3 = new User
-        {
-            Id = userV2.Id,
-            Username = userV2.Username,
-            AvatarId = avatarId.ToString(),
-            IsContributor = userV2.Contributor,
-            IsSupporter = userV2.SupporterLength > 0,
-            IsAdmin = userV2.Username == "CodeMyst",
-            ProviderName = userV2.ServiceIds.FirstOrDefault().Key,
-            ProviderId = userV2.ServiceIds.FirstOrDefault().Value,
-            UserSettings = new() {
-                ShowAllPastesOnProfile = userV2.PublicProfile
-            },
-            Settings = new() {}
-        };
+        var userV3 = Mappings.MapUser(userV2, avatarId.ToString());
 
         await usersV3.InsertOneAsync(userV3);
 
@@ -234,28 +221,9 @@ async Task MigrateUnencryptedPastes()
         var starsFilter = Builders<UserV2>.Filter.ElemMatch(u => u.Stars, p => p == pasteV2.Id);
         var stars = (await usersV2.Find(starsFilter).ToListAsync()).Select(u => u.Id).ToList();
 
-        var pasties = pasteV2.Pasties.Select(p => new Pasty
-        {
-            Id = p.Id,
-            Title = p.Title == "" ? "untitled" : p.Title,
-            Language = p.Language,
-            Content = p.Code
-        }).ToList();
+        var pasties = pasteV2.Pasties.Select(Mappings.MapPasty).ToList();
 
-        var paste = new Paste
-        {
-            Id = pasteV2.Id,
-            Title = pasteV2.Title,
-            CreatedAt = DateTimeOffset.FromUnixTimeSeconds(pasteV2.CreatedAt).UtcDateTime,
-            ExpiresIn = pasteV2.ExpiresIn,
-            DeletesAt = pasteV2.DeletesAt == 0 ? null : DateTimeOffset.FromUnixTimeSeconds(pasteV2.DeletesAt).UtcDateTime,
-            OwnerId = pasteV2.OwnerId == "" ? null : pasteV2.OwnerId,
-            Private = pasteV2.IsPrivate,
-            Pinned = pasteV2.IsPublic,
-            Tags = pasteV2.Tags,
-            Stars = stars,
-            Pasties = pasties
-        };
+        var paste = Mappings.MapUnencryptedPaste(pasteV2, pasties, stars);
 
         await pastesV3.InsertOneAsync(paste);
 
@@ -296,23 +264,7 @@ async Task MigrateEncryptedPastes()
         var starsFilter = Builders<UserV2>.Filter.ElemMatch(u => u.Stars, p => p == pasteV2.Id);
         var stars = (await usersV2.Find(starsFilter).ToListAsync()).Select(u => u.Id).ToList();
 
-        var paste = new EncryptedPaste
-        {
-            Id = pasteV2.Id,
-            Title = "untitled",
-            CreatedAt = DateTimeOffset.FromUnixTimeSeconds(pasteV2.CreatedAt).UtcDateTime,
-            ExpiresIn = pasteV2.ExpiresIn,
-            DeletesAt = pasteV2.DeletesAt == 0 ? null : DateTimeOffset.FromUnixTimeSeconds(pasteV2.DeletesAt).UtcDateTime,
-            OwnerId = pasteV2.OwnerId == "" ? null : pasteV2.OwnerId,
-            Private = pasteV2.IsPrivate,
-            Pinned = pasteV2.IsPublic,
-            Tags = pasteV2.Tags,
-            Stars = stars,
-            EncryptedData = pasteV2.EncryptedData,
-            Iv = pasteV2.EncryptedKey,
-            Salt = pasteV2.Salt,
-            EncryptionVersion = 2
-        };
+        var paste = Mappings.MapEncryptedPaste(pasteV2, stars);
 
         await encryptedPastesV3.InsertOneAsync(paste);
 
@@ -347,25 +299,9 @@ async Task MigrateApiKeys()
 
     foreach (var apiKeyV2 in allApiKeysV2)
     {
-        var hashedToken = SHA512.HashData(Encoding.UTF8.GetBytes(apiKeyV2.Key));
+        var id = await idProvider.GenerateId(async id => await accessTokensV3.Find(a => a.Id == id).FirstOrDefaultAsync() is not null);
 
-        var hashStringBuilder = new StringBuilder();
-        foreach (var b in hashedToken)
-        {
-            hashStringBuilder.Append(b.ToString("x2"));
-        }
-
-        var apiKey = new AccessToken
-        {
-            Id = await idProvider.GenerateId(async id => await accessTokensV3.Find(a => a.Id == id).FirstOrDefaultAsync() is not null),
-            Description = "v2 api key",
-            Hidden = false,
-            CreatedAt = DateTime.UtcNow,
-            ExpiresAt = null,
-            Token = hashStringBuilder.ToString(),
-            OwnerId = apiKeyV2.Id,
-            Scopes = [Scope.Paste, Scope.User]
-        };
+        var apiKey = Mappings.MapApiKey(apiKeyV2, id);
 
         await accessTokensV3.InsertOneAsync(apiKey);
 
