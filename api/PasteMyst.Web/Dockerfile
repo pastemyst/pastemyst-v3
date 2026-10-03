@@ -51,4 +51,10 @@ RUN chmod +x /bin/guesslang-bun
 COPY --from=pastemyst-decryptor-build /pastemyst-decryptor/pastemyst-decryptor /bin/pastemyst-decryptor
 RUN chmod +x /bin/pastemyst-decryptor
 
+# The decryptor is built on Ubuntu (glibc) and links libscrypt, neither of which this Alpine (musl)
+# image has, so without these it fails to start and v2-encrypted pastes can't be opened.
+# Alpine has no libscrypt package, so it's copied from the build stage.
+RUN apk add --no-cache gcompat
+COPY --from=pastemyst-decryptor-build /usr/lib/libscrypt.so.0 /usr/lib/libscrypt.so.0
+
 ENTRYPOINT [ "dotnet", "PasteMyst.Web.dll" ]
