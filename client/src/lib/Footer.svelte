@@ -19,7 +19,11 @@
 
     <span><a href="/changelog" class="no-dec">v{$versionStore}</a></span>
 
-    <span><a href="/stats" class="no-dec">{$activePastesStores} active pastes</a></span>
+    <span
+        ><a href="/stats" class="no-dec"
+            >{$activePastesStores.toLocaleString("en-US")} active pastes</a
+        ></span
+    >
 </footer>
 
 <style lang="scss">
