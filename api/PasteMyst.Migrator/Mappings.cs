@@ -116,6 +116,57 @@ public static class Mappings
     };
 
     /// <summary>
+    /// pasteId -> ids of the users who starred it, in user order. Built once instead of querying
+    /// all users for every paste.
+    /// </summary>
+    public static Dictionary<string, List<string>> BuildStarsByPaste(IEnumerable<UserV2> users)
+    {
+        var starsByPaste = new Dictionary<string, List<string>>();
+
+        foreach (var user in users)
+        {
+            foreach (var pasteId in (user.Stars ?? []).Distinct())
+            {
+                if (!starsByPaste.TryGetValue(pasteId, out var starredBy))
+                    starsByPaste[pasteId] = starredBy = [];
+
+                starredBy.Add(user.Id);
+            }
+        }
+
+        return starsByPaste;
+    }
+
+    /// <summary>
+    /// File name of an avatar uploaded to v2 itself ({host}/static/assets/avatars/{file}), or null for
+    /// avatars hosted elsewhere (GitHub, GitLab, Gravatar).
+    /// </summary>
+    public static string? GetV2HostedAvatarFileName(string? avatarUrl)
+    {
+        const string v2AvatarsPath = "/static/assets/avatars/";
+
+        if (!Uri.TryCreate(avatarUrl, UriKind.Absolute, out var uri) ||
+            !uri.AbsolutePath.StartsWith(v2AvatarsPath, StringComparison.Ordinal))
+            return null;
+
+        var fileName = Path.GetFileName(uri.AbsolutePath);
+        return fileName == "" ? null : fileName;
+    }
+
+    /// <summary>
+    /// Image content type from the file's magic bytes, or null if it isn't a format browsers show.
+    /// </summary>
+    public static string? DetectImageContentType(ReadOnlySpan<byte> data)
+    {
+        if (data.StartsWith((ReadOnlySpan<byte>)[0x89, (byte)'P', (byte)'N', (byte)'G'])) return "image/png";
+        if (data.StartsWith((ReadOnlySpan<byte>)[0xFF, 0xD8, 0xFF])) return "image/jpeg";
+        if (data.StartsWith("GIF8"u8)) return "image/gif";
+        if (data.Length >= 12 && data.StartsWith("RIFF"u8) && data[8..12].SequenceEqual("WEBP"u8)) return "image/webp";
+        if (data.StartsWith("BM"u8)) return "image/bmp";
+        return null;
+    }
+
+    /// <summary>
     /// SHA512 -> lowercase hex, matching AuthService's token hashing so migrated keys validate.
     /// </summary>
     public static string HashToken(string token)

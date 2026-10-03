@@ -89,6 +89,51 @@ public sealed class MigratorMappingTests
     }
 
     [Test]
+    public void BuildStarsByPaste_MapsPasteToStarringUsers_InUserOrder_WithoutDuplicates()
+    {
+        var users = new[]
+        {
+            new UserV2 { Id = "u1", Stars = ["p1", "p2", "p1"] },
+            new UserV2 { Id = "u2", Stars = ["p1"] },
+            new UserV2 { Id = "u3", Stars = null! }
+        };
+
+        var stars = Mappings.BuildStarsByPaste(users);
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(stars["p1"], Is.EqualTo(new[] { "u1", "u2" }));
+            Assert.That(stars["p2"], Is.EqualTo(new[] { "u1" }));
+            Assert.That(stars.ContainsKey("p3"), Is.False);
+        });
+    }
+
+    [TestCase("https://paste.myst.rs/static/assets/avatars/2l4fh07m.jpg", "2l4fh07m.jpg")]
+    [TestCase("http://localhost:5000/static/assets/avatars/abc.PNG", "abc.PNG")]
+    [TestCase("https://avatars.githubusercontent.com/u/1129769?v=4", null)]
+    [TestCase("https://secure.gravatar.com/avatar/abc?s=80", null)]
+    [TestCase("https://paste.myst.rs/static/assets/avatars/", null)]
+    [TestCase("https://paste.myst.rs/static/assets/avatars/../../config.yaml", null)] // normalised away by Uri
+    [TestCase("not a url", null)]
+    [TestCase(null, null)]
+    public void GetV2HostedAvatarFileName_OnlyMatchesV2Uploads(string? url, string? expected)
+    {
+        Assert.That(Mappings.GetV2HostedAvatarFileName(url), Is.EqualTo(expected));
+    }
+
+    [TestCase(new byte[] { 0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A }, "image/png")]
+    [TestCase(new byte[] { 0xFF, 0xD8, 0xFF, 0xE0 }, "image/jpeg")]
+    [TestCase(new byte[] { 0x47, 0x49, 0x46, 0x38, 0x39, 0x61 }, "image/gif")]
+    [TestCase(new byte[] { 0x52, 0x49, 0x46, 0x46, 0, 0, 0, 0, 0x57, 0x45, 0x42, 0x50 }, "image/webp")]
+    [TestCase(new byte[] { 0x42, 0x4D, 0, 0 }, "image/bmp")]
+    [TestCase(new byte[] { 0x3C, 0x21, 0x44, 0x4F, 0x43 }, null)] // "<!DOC": an HTML error page
+    [TestCase(new byte[0], null)]
+    public void DetectImageContentType_UsesMagicBytes(byte[] data, string? expected)
+    {
+        Assert.That(Mappings.DetectImageContentType(data), Is.EqualTo(expected));
+    }
+
+    [Test]
     public void MapPasty_EmptyTitleBecomesUntitled_AndCodeBecomesContent()
     {
         var pasty = Mappings.MapPasty(new PastyV2 { Id = "p", Title = "", Language = "C#", Code = "int x;" });

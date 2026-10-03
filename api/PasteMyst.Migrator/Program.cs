@@ -16,15 +16,26 @@ using PasteMyst.Migrator;
 using ShellProgressBar;
 
 var connectionArg = Array.FindIndex(args, a => a == "--connection");
-if (connectionArg == -1 || connectionArg + 1 >= args.Length)
+var avatarsArg = Array.FindIndex(args, a => a == "--v2-avatars");
+if (connectionArg == -1 || connectionArg + 1 >= args.Length || avatarsArg == -1 || avatarsArg + 1 >= args.Length)
 {
-    Console.Error.WriteLine("Usage: dotnet run -- --connection <mongodb-connection-string> [--drop-existing]");
+    Console.Error.WriteLine("Usage: dotnet run -- --connection <mongodb-connection-string> --v2-avatars <v2 public/assets/avatars dir> [--drop-existing]");
     Environment.ExitCode = 1;
     return;
 }
 
 var connectionString = args[connectionArg + 1];
 var dropExisting = Array.IndexOf(args, "--drop-existing") != -1;
+
+// v2 serves uploaded avatars from this directory, and v2 is down during the migration, so they're
+// read from disk instead of over HTTP.
+var v2AvatarsDir = args[avatarsArg + 1];
+if (!Directory.Exists(v2AvatarsDir))
+{
+    Console.Error.WriteLine($"v2 avatars directory not found: {v2AvatarsDir}");
+    Environment.ExitCode = 1;
+    return;
+}
 
 Console.WriteLine("Preprocessing the database...");
 
@@ -64,8 +75,13 @@ if (dropExisting)
 }
 
 var usersV2 = v2Db.GetCollection<UserV2>("users");
-var pastesV2 = v2Db.GetCollection<PasteV2>("pastes").Find(Builders<PasteV2>.Filter.Eq(p => p.Encrypted, false)).ToList();
-var encryptedPastesV2 = v2Db.GetCollection<EncryptedPasteV2>("pastes").Find(Builders<EncryptedPasteV2>.Filter.Eq(p => p.Encrypted, true)).ToList();
+var pastesV2 = v2Db.GetCollection<PasteV2>("pastes");
+var encryptedPastesV2 = v2Db.GetCollection<EncryptedPasteV2>("pastes");
+var unencryptedFilter = Builders<PasteV2>.Filter.Eq(p => p.Encrypted, false);
+var encryptedFilter = Builders<EncryptedPasteV2>.Filter.Eq(p => p.Encrypted, true);
+
+// Pastes are streamed and inserted in batches: loading them all at once took ~10 GB on prod data.
+const int batchSize = 1000;
 var apiKeysV2 = v2Db.GetCollection<ApiKeyV2>("api-keys");
 
 var usersV3 = v3Db.GetCollection<User>("users");
@@ -90,6 +106,7 @@ usersV3.Indexes.CreateOne(new CreateIndexModel<User>(usernameIndex, new()
 
 var defaultAvatarId = await UploadDefaultAvatar();
 await MigrateUsers(defaultAvatarId);
+var starsByPaste = Mappings.BuildStarsByPaste(await usersV2.Find(FilterDefinition<UserV2>.Empty).ToListAsync());
 await MigrateUnencryptedPastes();
 await MigrateEncryptedPastes();
 await MigrateApiKeys();
@@ -136,37 +153,46 @@ async Task MigrateUsers(ObjectId defaultAvatarId)
     using var progressBar = new ProgressBar(allUsersV2.Count, "Migrating users", progressBarOptions);
 
     var unmappedDefaultLanguages = new Dictionary<string, int>();
+    var avatarFallbacks = new List<string>();
 
-    // v2 has no join date for users, so the oldest paste they own stands in for it.
-    var oldestPasteByOwner = pastesV2.Cast<BasePasteV2>().Concat(encryptedPastesV2)
-        .Where(p => p.OwnerId != "" && p.CreatedAt > 0)
-        .GroupBy(p => p.OwnerId)
-        .ToDictionary(g => g.Key, g => g.Min(p => p.CreatedAt));
+    // v2 has no join date for users, so the oldest paste they own stands in for it. Computed in Mongo
+    // so the pastes don't have to be loaded.
+    var oldestPasteByOwner = (await v2Db.GetCollection<BsonDocument>("pastes").Aggregate()
+            .Match(new BsonDocument
+            {
+                { "ownerId", new BsonDocument("$nin", new BsonArray { "", BsonNull.Value }) },
+                { "createdAt", new BsonDocument("$gt", 0) }
+            })
+            .Group(new BsonDocument
+            {
+                { "_id", "$ownerId" },
+                { "oldest", new BsonDocument("$min", "$createdAt") }
+            })
+            .ToListAsync())
+        .ToDictionary(d => d["_id"].AsString, d => d["oldest"].ToInt64());
 
     foreach (var userV2 in allUsersV2)
     {
         ObjectId avatarId = defaultAvatarId;
 
-        try {
-            var avatarResponse = await httpClient.GetAsync(userV2.AvatarUrl);
-            if (avatarResponse.IsSuccessStatusCode)
+        var (avatar, avatarContentType, avatarProblem) = await LoadAvatar(userV2.AvatarUrl);
+        if (avatar is not null)
+        {
+            using var stream = new MemoryStream(avatar);
+            var uploadOptions = new GridFSUploadOptions
             {
-                var contentType = avatarResponse.Content.Headers.ContentType?.MediaType ?? "image/png";
-                var buffer = await avatarResponse.Content.ReadAsByteArrayAsync();
-
-                using var stream = new MemoryStream(buffer);
-                var uploadOptions = new GridFSUploadOptions
+                Metadata = new BsonDocument
                 {
-                    Metadata = new BsonDocument
-                    {
-                        { "Content-Type", contentType }
-                    }
-                };
+                    { "Content-Type", avatarContentType }
+                }
+            };
 
-                avatarId = await imagesV3.UploadFromStreamAsync(userV2.Username, stream, uploadOptions);
-            }
+            avatarId = await imagesV3.UploadFromStreamAsync(userV2.Username, stream, uploadOptions);
         }
-        catch {}
+        else
+        {
+            avatarFallbacks.Add($"{userV2.Username}: {avatarProblem}");
+        }
 
         var defaultLanguage = Mappings.MapDefaultLanguage(userV2.DefaultLang, ResolveLanguage);
         if (defaultLanguage == Mappings.AutodetectLanguage && !string.IsNullOrEmpty(userV2.DefaultLang) &&
@@ -192,8 +218,6 @@ async Task MigrateUsers(ObjectId defaultAvatarId)
         await actionLogsV3.InsertOneAsync(actionLog);
 
         progressBar.Tick();
-
-        await Task.Delay(250);
     }
 
     if (unmappedDefaultLanguages.Count > 0)
@@ -201,6 +225,52 @@ async Task MigrateUsers(ObjectId defaultAvatarId)
         progressBar.WriteLine("\nWarning: the following default languages were not recognised and fell back to \"Autodetect\":");
         foreach (var (lang, count) in unmappedDefaultLanguages.OrderByDescending(x => x.Value))
             progressBar.WriteLine($"  {lang} ({count} users)");
+    }
+
+    if (avatarFallbacks.Count > 0)
+    {
+        progressBar.WriteLine($"\nWarning: {avatarFallbacks.Count} users got the default avatar:");
+        foreach (var fallback in avatarFallbacks)
+            progressBar.WriteLine($"  {fallback}");
+    }
+
+    // Returns the avatar and its content type, or why it couldn't be used.
+    async Task<(byte[]? Avatar, string? ContentType, string? Problem)> LoadAvatar(string avatarUrl)
+    {
+        byte[] avatar;
+
+        var v2FileName = Mappings.GetV2HostedAvatarFileName(avatarUrl);
+        if (v2FileName is not null)
+        {
+            var path = Path.Combine(v2AvatarsDir, v2FileName);
+            if (!File.Exists(path)) return (null, null, $"{v2FileName} not found in {v2AvatarsDir}");
+
+            avatar = await File.ReadAllBytesAsync(path);
+        }
+        else
+        {
+            try
+            {
+                var response = await httpClient.GetAsync(avatarUrl);
+                if (!response.IsSuccessStatusCode) return (null, null, $"HTTP {(int)response.StatusCode} from {avatarUrl}");
+
+                avatar = await response.Content.ReadAsByteArrayAsync();
+            }
+            catch (Exception e)
+            {
+                return (null, null, $"{e.GetType().Name} fetching {avatarUrl}");
+            }
+            finally
+            {
+                // Go easy on GitHub / GitLab / Gravatar.
+                await Task.Delay(250);
+            }
+        }
+
+        // Don't trust file extensions or response headers: an error page served with 200 would
+        // otherwise end up as someone's avatar.
+        var contentType = Mappings.DetectImageContentType(avatar);
+        return contentType is null ? (null, null, "not a recognised image") : (avatar, contentType, null);
     }
 }
 
@@ -217,7 +287,8 @@ string? ResolveLanguage(string name)
 }
 
 async Task MigrateUnencryptedPastes()
-{    var progressBarOptions = new ProgressBarOptions
+{
+    var progressBarOptions = new ProgressBarOptions
     {
         ForegroundColor = ConsoleColor.Yellow,
         ForegroundColorDone = ConsoleColor.DarkGreen,
@@ -225,48 +296,46 @@ async Task MigrateUnencryptedPastes()
         ProgressCharacter = '─'
     };
 
-    using var progressBar = new ProgressBar(pastesV2.Count, "Migrating unencrypted pastes", progressBarOptions);
+    var total = await pastesV2.CountDocumentsAsync(unencryptedFilter);
+    using var progressBar = new ProgressBar((int)total, "Migrating unencrypted pastes", progressBarOptions);
 
     var unmappedLanguages = new Dictionary<string, int>();
 
-    foreach (var pasteV2 in pastesV2)
+    using var cursor = await pastesV2.Find(unencryptedFilter, new FindOptions { BatchSize = batchSize }).ToCursorAsync();
+    while (await cursor.MoveNextAsync())
     {
-        foreach (var pasty in pasteV2.Pasties)
-        {
-            pasty.Language = V2LanguageMapper.MapLanguage(pasty.Language);
+        var pastes = new List<Paste>();
 
-            // Validate the language is known to v3; fall back to Text if not
-            try
+        foreach (var pasteV2 in cursor.Current)
+        {
+            foreach (var pasty in pasteV2.Pasties)
             {
-                languageProvider.FindByName(pasty.Language);
+                pasty.Language = V2LanguageMapper.MapLanguage(pasty.Language);
+
+                // Validate the language is known to v3; fall back to Text if not
+                try
+                {
+                    languageProvider.FindByName(pasty.Language);
+                }
+                catch (LanguageNotFoundException)
+                {
+                    unmappedLanguages.TryGetValue(pasty.Language, out var existingCount);
+                    unmappedLanguages[pasty.Language] = existingCount + 1;
+                    pasty.Language = "Text";
+                }
             }
-            catch (LanguageNotFoundException)
-            {
-                unmappedLanguages.TryGetValue(pasty.Language, out var existingCount);
-                unmappedLanguages[pasty.Language] = existingCount + 1;
-                pasty.Language = "Text";
-            }
+
+            var pasties = pasteV2.Pasties.Select(Mappings.MapPasty).ToList();
+
+            pastes.Add(Mappings.MapUnencryptedPaste(pasteV2, pasties, StarsOf(pasteV2.Id)));
         }
 
-        var starsFilter = Builders<UserV2>.Filter.ElemMatch(u => u.Stars, p => p == pasteV2.Id);
-        var stars = (await usersV2.Find(starsFilter).ToListAsync()).Select(u => u.Id).ToList();
+        if (pastes.Count == 0) continue;
 
-        var pasties = pasteV2.Pasties.Select(Mappings.MapPasty).ToList();
+        await pastesV3.InsertManyAsync(pastes);
+        await actionLogsV3.InsertManyAsync(pastes.Select(PasteCreatedLog));
 
-        var paste = Mappings.MapUnencryptedPaste(pasteV2, pasties, stars);
-
-        await pastesV3.InsertOneAsync(paste);
-
-        var actionLog = new ActionLog
-        {
-            CreatedAt = paste.CreatedAt,
-            Type = ActionLogType.PasteCreated,
-            ObjectId = paste.Id
-        };
-
-        await actionLogsV3.InsertOneAsync(actionLog);
-
-        progressBar.Tick();
+        progressBar.Tick(progressBar.CurrentTick + pastes.Count);
     }
 
     if (unmappedLanguages.Count > 0)
@@ -287,29 +356,32 @@ async Task MigrateEncryptedPastes()
         ProgressCharacter = '─'
     };
 
-    using var progressBar = new ProgressBar(encryptedPastesV2.Count, "Migrating encrypted pastes", progressBarOptions);
+    var total = await encryptedPastesV2.CountDocumentsAsync(encryptedFilter);
+    using var progressBar = new ProgressBar((int)total, "Migrating encrypted pastes", progressBarOptions);
 
-    foreach (var pasteV2 in encryptedPastesV2)
+    using var cursor = await encryptedPastesV2.Find(encryptedFilter, new FindOptions { BatchSize = batchSize }).ToCursorAsync();
+    while (await cursor.MoveNextAsync())
     {
-        var starsFilter = Builders<UserV2>.Filter.ElemMatch(u => u.Stars, p => p == pasteV2.Id);
-        var stars = (await usersV2.Find(starsFilter).ToListAsync()).Select(u => u.Id).ToList();
+        var pastes = cursor.Current.Select(p => Mappings.MapEncryptedPaste(p, StarsOf(p.Id))).ToList();
 
-        var paste = Mappings.MapEncryptedPaste(pasteV2, stars);
+        if (pastes.Count == 0) continue;
 
-        await encryptedPastesV3.InsertOneAsync(paste);
+        await encryptedPastesV3.InsertManyAsync(pastes);
+        await actionLogsV3.InsertManyAsync(pastes.Select(PasteCreatedLog));
 
-        var actionLog = new ActionLog
-        {
-            CreatedAt = paste.CreatedAt,
-            Type = ActionLogType.PasteCreated,
-            ObjectId = paste.Id
-        };
-
-        await actionLogsV3.InsertOneAsync(actionLog);
-
-        progressBar.Tick();
+        progressBar.Tick(progressBar.CurrentTick + pastes.Count);
     }
 }
+
+// A fresh list per paste, so pastes never share one.
+List<string> StarsOf(string pasteId) => starsByPaste.TryGetValue(pasteId, out var users) ? [..users] : [];
+
+ActionLog PasteCreatedLog(BasePaste paste) => new()
+{
+    CreatedAt = paste.CreatedAt,
+    Type = ActionLogType.PasteCreated,
+    ObjectId = paste.Id
+};
 
 async Task MigrateApiKeys()
 {
@@ -345,13 +417,19 @@ async Task<bool> Verify()
 {
     Console.WriteLine("Verifying...");
 
-    var pastiesV3 = await v3Db.GetCollection<BsonDocument>("pastes").Aggregate()
-        .Group(new BsonDocument
-        {
-            { "_id", BsonNull.Value },
-            { "count", new BsonDocument("$sum", new BsonDocument("$size", new BsonDocument("$ifNull", new BsonArray { "$pasties", new BsonArray() }))) }
-        })
-        .FirstOrDefaultAsync();
+    async Task<long> CountPasties(IMongoDatabase db, BsonDocument filter)
+    {
+        var result = await db.GetCollection<BsonDocument>("pastes").Aggregate()
+            .Match(filter)
+            .Group(new BsonDocument
+            {
+                { "_id", BsonNull.Value },
+                { "count", new BsonDocument("$sum", new BsonDocument("$size", new BsonDocument("$ifNull", new BsonArray { "$pasties", new BsonArray() }))) }
+            })
+            .FirstOrDefaultAsync();
+
+        return result?["count"].ToInt64() ?? 0;
+    }
 
     long CountLogs(ActionLogType type) => actionLogsV3.CountDocuments(l => l.Type == type);
 
@@ -362,9 +440,9 @@ async Task<bool> Verify()
     {
         ("users", allUsersV2, await usersV3.CountDocumentsAsync(FilterDefinition<User>.Empty)),
         ("pastes (all)", allPastesV2, await basePastesV3.CountDocumentsAsync(FilterDefinition<BasePaste>.Empty)),
-        ("unencrypted pastes", pastesV2.Count, await pastesV3.CountDocumentsAsync(FilterDefinition<Paste>.Empty)),
-        ("encrypted pastes", encryptedPastesV2.Count, await encryptedPastesV3.CountDocumentsAsync(FilterDefinition<EncryptedPaste>.Empty)),
-        ("pasties", pastesV2.Sum(p => p.Pasties.Count), pastiesV3?["count"].ToInt64() ?? 0),
+        ("unencrypted pastes", await pastesV2.CountDocumentsAsync(unencryptedFilter), await pastesV3.CountDocumentsAsync(FilterDefinition<Paste>.Empty)),
+        ("encrypted pastes", await encryptedPastesV2.CountDocumentsAsync(encryptedFilter), await encryptedPastesV3.CountDocumentsAsync(FilterDefinition<EncryptedPaste>.Empty)),
+        ("pasties", await CountPasties(v2Db, new BsonDocument("encrypted", false)), await CountPasties(v3Db, new BsonDocument())),
         ("api keys", await apiKeysV2.CountDocumentsAsync(FilterDefinition<ApiKeyV2>.Empty), await accessTokensV3.CountDocumentsAsync(FilterDefinition<AccessToken>.Empty)),
         ("UserCreated logs", allUsersV2, CountLogs(ActionLogType.UserCreated)),
         ("PasteCreated logs", allPastesV2, CountLogs(ActionLogType.PasteCreated))
