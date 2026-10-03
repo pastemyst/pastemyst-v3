@@ -126,6 +126,8 @@ async Task MigrateUsers(ObjectId defaultAvatarId)
 
     using var progressBar = new ProgressBar(allUsersV2.Count, "Migrating users", progressBarOptions);
 
+    var unmappedDefaultLanguages = new Dictionary<string, int>();
+
     foreach (var userV2 in allUsersV2)
     {
         ObjectId avatarId = defaultAvatarId;
@@ -151,7 +153,15 @@ async Task MigrateUsers(ObjectId defaultAvatarId)
         }
         catch {}
 
-        var userV3 = Mappings.MapUser(userV2, avatarId.ToString());
+        var defaultLanguage = Mappings.MapDefaultLanguage(userV2.DefaultLang, ResolveLanguage);
+        if (defaultLanguage == Mappings.AutodetectLanguage && !string.IsNullOrEmpty(userV2.DefaultLang) &&
+            userV2.DefaultLang != Mappings.AutodetectLanguage)
+        {
+            unmappedDefaultLanguages.TryGetValue(userV2.DefaultLang, out var existingCount);
+            unmappedDefaultLanguages[userV2.DefaultLang] = existingCount + 1;
+        }
+
+        var userV3 = Mappings.MapUser(userV2, avatarId.ToString(), defaultLanguage);
 
         await usersV3.InsertOneAsync(userV3);
 
@@ -167,6 +177,25 @@ async Task MigrateUsers(ObjectId defaultAvatarId)
         progressBar.Tick();
 
         await Task.Delay(250);
+    }
+
+    if (unmappedDefaultLanguages.Count > 0)
+    {
+        progressBar.WriteLine("\nWarning: the following default languages were not recognised and fell back to \"Autodetect\":");
+        foreach (var (lang, count) in unmappedDefaultLanguages.OrderByDescending(x => x.Value))
+            progressBar.WriteLine($"  {lang} ({count} users)");
+    }
+}
+
+string? ResolveLanguage(string name)
+{
+    try
+    {
+        return languageProvider.FindByName(name).Name;
+    }
+    catch (LanguageNotFoundException)
+    {
+        return null;
     }
 }
 

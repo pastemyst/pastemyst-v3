@@ -24,7 +24,7 @@ public sealed class MigratorMappingTests
             PublicProfile = true
         };
 
-        var user = Mappings.MapUser(v2, "avatar-id");
+        var user = Mappings.MapUser(v2, "avatar-id", "C#");
 
         Assert.Multiple(() =>
         {
@@ -37,6 +37,7 @@ public sealed class MigratorMappingTests
             Assert.That(user.ProviderName, Is.EqualTo("github"));
             Assert.That(user.ProviderId, Is.EqualTo("123"));
             Assert.That(user.UserSettings.ShowAllPastesOnProfile, Is.True);
+            Assert.That(user.Settings.DefaultLanguage, Is.EqualTo("C#"));
         });
     }
 
@@ -44,14 +45,31 @@ public sealed class MigratorMappingTests
     public void MapUser_SupporterLengthZero_IsNotSupporter()
     {
         var v2 = new UserV2 { Id = "u", Username = "x", ServiceIds = new(), SupporterLength = 0 };
-        Assert.That(Mappings.MapUser(v2, "a").IsSupporter, Is.False);
+        Assert.That(Mappings.MapUser(v2, "a", "Autodetect").IsSupporter, Is.False);
     }
 
     [Test]
     public void MapUser_CodeMyst_IsAdmin()
     {
         var v2 = new UserV2 { Id = "u", Username = "CodeMyst", ServiceIds = new() };
-        Assert.That(Mappings.MapUser(v2, "a").IsAdmin, Is.True);
+        Assert.That(Mappings.MapUser(v2, "a", "Autodetect").IsAdmin, Is.True);
+    }
+
+    // Stands in for LanguageProvider: knows a few v3 names, case-insensitively, and returns the canonical name.
+    private static string? Resolve(string name) =>
+        new[] { "C#", "Vue", "Text", "Markdown" }.FirstOrDefault(l => l.Equals(name, StringComparison.OrdinalIgnoreCase));
+
+    [TestCase("Autodetect", "Autodetect")]
+    [TestCase(null, "Autodetect")]
+    [TestCase("", "Autodetect")]
+    [TestCase("C#", "C#")]
+    [TestCase("c#", "C#")]                  // stored with v3's canonical casing
+    [TestCase("Vue.js Component", "Vue")]   // goes through V2LanguageMapper like pasty languages
+    [TestCase("Plain Text", "Text")]
+    [TestCase("NotALanguage", "Autodetect")] // unknown to v3 falls back to the v3 default
+    public void MapDefaultLanguage_MapsV2NameToV3(string? v2Language, string expected)
+    {
+        Assert.That(Mappings.MapDefaultLanguage(v2Language, Resolve), Is.EqualTo(expected));
     }
 
     [Test]

@@ -3,6 +3,7 @@ using System.Text;
 using PasteMyst.Web.Models;
 using PasteMyst.Web.Models.Auth;
 using PasteMyst.Web.Models.V2;
+using PasteMyst.Web.Utils;
 
 namespace PasteMyst.Migrator;
 
@@ -13,7 +14,7 @@ namespace PasteMyst.Migrator;
 /// </summary>
 public static class Mappings
 {
-    public static User MapUser(UserV2 v2, string avatarId) => new()
+    public static User MapUser(UserV2 v2, string avatarId, string defaultLanguage) => new()
     {
         Id = v2.Id,
         Username = v2.Username,
@@ -26,8 +27,23 @@ public static class Mappings
         ProviderName = v2.ServiceIds.FirstOrDefault().Key,
         ProviderId = v2.ServiceIds.FirstOrDefault().Value,
         UserSettings = new UserSettings { ShowAllPastesOnProfile = v2.PublicProfile },
-        Settings = new Settings()
+        Settings = new Settings { DefaultLanguage = defaultLanguage }
     };
+
+    /// <summary>
+    /// Maps a v2 default language to its v3 name. <paramref name="resolveLanguage"/> returns the v3
+    /// language name for a given name, or null if v3 doesn't know it. Autodetect, missing and unknown
+    /// languages all become Autodetect, the v3 default.
+    /// </summary>
+    public static string MapDefaultLanguage(string? v2Language, Func<string, string?> resolveLanguage)
+    {
+        // V2LanguageMapper turns Autodetect into Text, which is right for a pasty but not for this setting.
+        if (string.IsNullOrEmpty(v2Language) || v2Language == AutodetectLanguage) return AutodetectLanguage;
+
+        return resolveLanguage(V2LanguageMapper.MapLanguage(v2Language)) ?? AutodetectLanguage;
+    }
+
+    public const string AutodetectLanguage = "Autodetect";
 
     public static Pasty MapPasty(PastyV2 v2) => new()
     {
