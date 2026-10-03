@@ -1,4 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
+using PasteMyst.Web.Extensions;
 using PasteMyst.Web.Models;
 using PasteMyst.Web.Models.V2;
 using PasteMyst.Web.Services;
@@ -40,6 +42,7 @@ public class PasteControllerV2(PasteService pasteService) : ControllerBase
     }
 
     [HttpPost]
+    [EnableRateLimiting(RateLimitingExtensions.PasteCreatePolicy)]
     public async Task<PasteV2> CreatePaste([FromBody] PasteCreateInfoV2 createInfoV2, CancellationToken cancellationToken)
     {
         var createInfo = new PasteCreateInfo

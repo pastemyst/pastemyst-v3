@@ -47,6 +47,12 @@ services:
       - PUBLIC_DOCS_URL=${DOCS_URL}
       - PUBLIC_ALPHA_RELEASE=${ALPHA_RELEASE}
       - PUBLIC_USE_HTTPS=${USE_HTTPS}
+      # Client IP comes from nginx's X-Forwarded-For (passed on to the API for rate limiting)
+      - ADDRESS_HEADER=X-Forwarded-For
+      - XFF_DEPTH=1
+      # Per-IP limit for /internal/highlight (the API rate-limits everything else)
+      - HIGHLIGHT_RATE_LIMIT_BURST=20
+      - HIGHLIGHT_RATE_LIMIT_PER_SECOND=2
     depends_on:
       - api
 

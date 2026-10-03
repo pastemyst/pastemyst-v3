@@ -1,6 +1,7 @@
 using System.Net;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.DependencyInjection.Extensions;
+using PasteMyst.Web.Extensions;
 using PasteMyst.Web.Jobs;
 using PasteMyst.Web.Middleware;
 using PasteMyst.Web.Services;
@@ -95,6 +96,8 @@ builder.Services.AddQuartzServer(options =>
     options.WaitForJobsToComplete = true;
 });
 
+builder.Services.AddPasteMystRateLimiting(builder.Configuration);
+
 builder.Services.AddCors(options =>
 {
     options.AddDefaultPolicy(policy =>
@@ -128,6 +131,9 @@ builder.Services.Configure<ApiBehaviorOptions>(options =>
 
 var app = builder.Build();
 
+// Before anything that looks at the client IP (logging, rate limiting)
+app.UseForwardedHeaders();
+
 app.UseHttpLogging();
 
 app.UseMiddleware<ExceptionMiddleware>();
@@ -146,6 +152,9 @@ app.UseSession();
 
 app.UseCors("client");
 app.UseCors();
+
+// After CORS, so preflights aren't counted and 429s still carry CORS headers
+app.UseRateLimiter();
 
 app.MapControllers();
 
