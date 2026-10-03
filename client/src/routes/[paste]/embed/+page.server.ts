@@ -25,7 +25,8 @@ export const load: PageServerLoad = async ({ fetch, params, request }) => {
                 content: pasty.content,
                 language: pasty.language,
                 wrap: true,
-                theme: "myst"
+                theme: "myst",
+                showLineNumbers: true
             })
         });
 

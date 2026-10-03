@@ -84,7 +84,7 @@
     const onCopyEmbed = async () => {
         const host = location.protocol + "//" + location.host;
         // eslint-disable-next-line no-useless-escape
-        const embedScript = `<iframe src='${host}/${paste.id}/embed' scrolling='no' style='border:none;'></iframe><script src='${host}/static/scripts/iframeResizer.js'><\/script><script>iFrameResize();<\/script>`;
+        const embedScript = `<iframe src='${host}/${paste.id}/embed' scrolling='no' style='border:none;'></iframe><script src='${host}/scripts/iframeResizer.js'><\/script><script>iFrameResize();<\/script>`;
 
         await navigator.clipboard.writeText(embedScript);
 

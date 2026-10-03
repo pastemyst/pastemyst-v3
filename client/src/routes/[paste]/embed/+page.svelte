@@ -11,15 +11,19 @@
     const getLangColor = (lang: string): string | undefined => {
         return data.langStats.find((l) => l.language.name === lang)?.language.color;
     };
+
+    // Same width the highlighter gives the line numbers, used to indent wrapped lines past them
+    const lineNumberDigits = (content: string): number =>
+        content.split("\n").length.toString().length;
 </script>
 
 <svelte:head>
-    <script src="/static/scripts/iframeResizer.contentWindow.js"></script>
+    <script src="/scripts/iframeResizer.contentWindow.js"></script>
 </svelte:head>
 
 <div id="pastemyst-{data.paste.id}" class="pastemyst-embed">
     <div class="pastemyst-title">
-        <a href="/{data.paste.id}" target="_blank">{data.paste.title}</a>
+        <a href="/{data.paste.id}" target="_blank">{data.paste.title || "untitled"}</a>
         <p class="pastemyst-powered-by">powered by <a href="/" target="_blank">pastemyst</a></p>
     </div>
 
@@ -35,7 +39,10 @@
                     {pasty.language}
                 </p>
             </div>
-            <div class="pastemyst-pasty-content">
+            <div
+                class="pastemyst-pasty-content"
+                style="--line-number-width: {lineNumberDigits(pasty.content)}ch"
+            >
                 <!-- eslint-disable-next-line svelte/no-at-html-tags -->
                 {@html data.highlightedCode[i]}
             </div>
@@ -91,22 +98,6 @@
                 padding: 0 0.25rem;
             }
 
-            :global(.shiki code) {
-                counter-reset: step;
-                counter-increment: step 0;
-            }
-
-            :global(.shiki code .line::before) {
-                content: counter(step);
-                counter-increment: step;
-                width: 1rem;
-                margin-right: 1rem;
-                display: inline-block;
-                text-align: right;
-                color: var(--color-bg3);
-                font-size: $fs-normal;
-            }
-
             .pastemyst-pasty-content :global(pre) {
                 margin: 0;
                 padding: 0;
@@ -117,12 +108,35 @@
                 border-bottom-right-radius: $border-radius;
                 font-size: $fs-medium;
                 line-height: 1.1rem;
+                tab-size: 4;
             }
 
             .pastemyst-pasty-content :global(code) {
                 border: none;
                 background-color: var(--color-bg1) !important;
                 padding: 0;
+                // one row per line, the highlighter doesn't put newlines between them
+                display: flex;
+                flex-direction: column;
+            }
+
+            .pastemyst-pasty-content {
+                --line-number-gap: 0.75rem;
+            }
+
+            // hanging indent: wrapped lines continue under the code, not under the line number
+            .pastemyst-pasty-content :global(.line) {
+                padding-left: calc(var(--line-number-width) + var(--line-number-gap));
+                text-indent: calc(-1 * (var(--line-number-width) + var(--line-number-gap)));
+            }
+
+            .pastemyst-pasty-content :global(.line-number) {
+                display: inline-block;
+                text-indent: 0;
+                margin-right: var(--line-number-gap);
+                text-align: right;
+                color: var(--color-bg3);
+                user-select: none;
             }
         }
     }
