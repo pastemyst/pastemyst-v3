@@ -40,8 +40,9 @@ export const load: PageServerLoad = async ({ params, fetch, request }) => {
 
     const history = await getPasteHistoryCompact(fetch, params.paste, cookieHeader);
 
+    // nothing to show (never edited, or migrated from v2 whose history wasn't carried over)
     if (history.length === 0) {
-        error(404);
+        redirect(302, `/${params.paste}`);
     }
 
     return {

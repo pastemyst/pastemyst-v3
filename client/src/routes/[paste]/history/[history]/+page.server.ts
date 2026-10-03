@@ -25,8 +25,9 @@ export const load: PageServerLoad = async ({ params, fetch, parent, request }) =
         if (isEncrypted) {
             redirect(302, `/${params.paste}/decrypt`);
         } else {
-            // TODO: error handling
-            error(404);
+            // unknown history id (e.g. a v2 edit link, v2 history wasn't migrated): show the paste,
+            // which 404s itself if the paste doesn't exist
+            redirect(302, `/${params.paste}`);
         }
     }
 
