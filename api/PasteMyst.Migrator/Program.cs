@@ -19,6 +19,7 @@ var connectionArg = Array.FindIndex(args, a => a == "--connection");
 if (connectionArg == -1 || connectionArg + 1 >= args.Length)
 {
     Console.Error.WriteLine("Usage: dotnet run -- --connection <mongodb-connection-string> [--drop-existing]");
+    Environment.ExitCode = 1;
     return;
 }
 
@@ -35,6 +36,7 @@ if (RunDocker("build", "-t", preprocessImage, "-f", "preprocess.Dockerfile", "."
     RunDocker("run", "--rm", "--network", "host", preprocessImage, connectionString) != 0)
 {
     Console.Error.WriteLine("Preprocessing failed.");
+    Environment.ExitCode = 1;
     return;
 }
 
@@ -91,6 +93,13 @@ await MigrateUsers(defaultAvatarId);
 await MigrateUnencryptedPastes();
 await MigrateEncryptedPastes();
 await MigrateApiKeys();
+
+if (!await Verify())
+{
+    Console.Error.WriteLine("Migration finished, but verification FAILED. Do not open traffic to v3.");
+    Environment.ExitCode = 1;
+    return;
+}
 
 Console.WriteLine("Migration completed successfully.");
 
@@ -328,6 +337,44 @@ async Task MigrateApiKeys()
 
         progressBar.Tick();
     }
+}
+
+// Compares v2 and v3 counts after the migration. Also catches v2 pastes that neither the
+// encrypted nor the unencrypted filter picked up, and leftovers in a v3 DB that wasn't empty.
+async Task<bool> Verify()
+{
+    Console.WriteLine("Verifying...");
+
+    var pastiesV3 = await v3Db.GetCollection<BsonDocument>("pastes").Aggregate()
+        .Group(new BsonDocument
+        {
+            { "_id", BsonNull.Value },
+            { "count", new BsonDocument("$sum", new BsonDocument("$size", new BsonDocument("$ifNull", new BsonArray { "$pasties", new BsonArray() }))) }
+        })
+        .FirstOrDefaultAsync();
+
+    long CountLogs(ActionLogType type) => actionLogsV3.CountDocuments(l => l.Type == type);
+
+    var allPastesV2 = await v2Db.GetCollection<BsonDocument>("pastes").CountDocumentsAsync(FilterDefinition<BsonDocument>.Empty);
+    var allUsersV2 = await usersV2.CountDocumentsAsync(FilterDefinition<UserV2>.Empty);
+
+    var checks = new List<(string Name, long V2, long V3)>
+    {
+        ("users", allUsersV2, await usersV3.CountDocumentsAsync(FilterDefinition<User>.Empty)),
+        ("pastes (all)", allPastesV2, await basePastesV3.CountDocumentsAsync(FilterDefinition<BasePaste>.Empty)),
+        ("unencrypted pastes", pastesV2.Count, await pastesV3.CountDocumentsAsync(FilterDefinition<Paste>.Empty)),
+        ("encrypted pastes", encryptedPastesV2.Count, await encryptedPastesV3.CountDocumentsAsync(FilterDefinition<EncryptedPaste>.Empty)),
+        ("pasties", pastesV2.Sum(p => p.Pasties.Count), pastiesV3?["count"].ToInt64() ?? 0),
+        ("api keys", await apiKeysV2.CountDocumentsAsync(FilterDefinition<ApiKeyV2>.Empty), await accessTokensV3.CountDocumentsAsync(FilterDefinition<AccessToken>.Empty)),
+        ("UserCreated logs", allUsersV2, CountLogs(ActionLogType.UserCreated)),
+        ("PasteCreated logs", allPastesV2, CountLogs(ActionLogType.PasteCreated))
+    };
+
+    Console.WriteLine($"  {"",-20} {"v2",10} {"v3",10}");
+    foreach (var (name, v2, v3) in checks)
+        Console.WriteLine($"  {name,-20} {v2,10} {v3,10}{(v2 == v3 ? "" : "   MISMATCH")}");
+
+    return checks.All(c => c.V2 == c.V3);
 }
 
 int RunDocker(params string[] arguments)
