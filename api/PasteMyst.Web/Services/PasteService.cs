@@ -232,7 +232,8 @@ public class PasteService(
 
     public async Task<long> GetActiveCountAsync(CancellationToken cancellationToken)
     {
-        return await mongo.Pastes.CountDocumentsAsync(new BsonDocument(), cancellationToken: cancellationToken);
+        // BasePastes, so encrypted pastes are counted too
+        return await mongo.BasePastes.CountDocumentsAsync(new BsonDocument(), cancellationToken: cancellationToken);
     }
 
     public async Task DeleteAsync(string id)

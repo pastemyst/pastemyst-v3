@@ -125,6 +125,25 @@ public sealed class V2ControllerTests
     }
 
     [Test]
+    public async Task DataController_NumPastes_CountsEncryptedPastes()
+    {
+        var before = (await _dataController.GetNumPastes(CancellationToken.None)).NumPastes;
+
+        await _fixture.MongoService.EncryptedPastes.InsertOneAsync(new EncryptedPaste
+        {
+            Id = "numenc01",
+            CreatedAt = DateTime.UtcNow,
+            EncryptedData = "",
+            Iv = "",
+            Salt = ""
+        });
+
+        var after = (await _dataController.GetNumPastes(CancellationToken.None)).NumPastes;
+
+        Assert.That(after, Is.EqualTo(before + 1));
+    }
+
+    [Test]
     public void TimeController_Never_ReturnsZero()
     {
         var controller = new TimeControllerV2();
