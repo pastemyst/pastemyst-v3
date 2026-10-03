@@ -45,8 +45,6 @@ public class StatsService(MongoService mongo)
         var userCounts = userCountsTask.Result;
         var weeklyStats = weeklyStatsTask.Result;
 
-        Console.WriteLine(pasteCounts[0]);
-
         long GetCount(BsonValue type, List<BsonDocument> counts) =>
             counts.FirstOrDefault(d => d["_id"] == type)?.GetValue("count", 0).ToInt64() ?? 0;
 
