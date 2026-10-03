@@ -24,7 +24,7 @@ public sealed class MigratorMappingTests
             PublicProfile = true
         };
 
-        var user = Mappings.MapUser(v2, "avatar-id", "C#");
+        var user = Mappings.MapUser(v2, "avatar-id", "C#", new DateTime(2021, 1, 2, 0, 0, 0, DateTimeKind.Utc));
 
         Assert.Multiple(() =>
         {
@@ -38,6 +38,7 @@ public sealed class MigratorMappingTests
             Assert.That(user.ProviderId, Is.EqualTo("123"));
             Assert.That(user.UserSettings.ShowAllPastesOnProfile, Is.True);
             Assert.That(user.Settings.DefaultLanguage, Is.EqualTo("C#"));
+            Assert.That(user.CreatedAt, Is.EqualTo(new DateTime(2021, 1, 2, 0, 0, 0, DateTimeKind.Utc)));
         });
     }
 
@@ -45,14 +46,14 @@ public sealed class MigratorMappingTests
     public void MapUser_SupporterLengthZero_IsNotSupporter()
     {
         var v2 = new UserV2 { Id = "u", Username = "x", ServiceIds = new(), SupporterLength = 0 };
-        Assert.That(Mappings.MapUser(v2, "a", "Autodetect").IsSupporter, Is.False);
+        Assert.That(Mappings.MapUser(v2, "a", "Autodetect", Mappings.V2AccountsLaunch).IsSupporter, Is.False);
     }
 
     [Test]
     public void MapUser_CodeMyst_IsAdmin()
     {
         var v2 = new UserV2 { Id = "u", Username = "CodeMyst", ServiceIds = new() };
-        Assert.That(Mappings.MapUser(v2, "a", "Autodetect").IsAdmin, Is.True);
+        Assert.That(Mappings.MapUser(v2, "a", "Autodetect", Mappings.V2AccountsLaunch).IsAdmin, Is.True);
     }
 
     // Stands in for LanguageProvider: knows a few v3 names, case-insensitively, and returns the canonical name.
@@ -70,6 +71,21 @@ public sealed class MigratorMappingTests
     public void MapDefaultLanguage_MapsV2NameToV3(string? v2Language, string expected)
     {
         Assert.That(Mappings.MapDefaultLanguage(v2Language, Resolve), Is.EqualTo(expected));
+    }
+
+    [Test]
+    public void MapUserCreatedAt_UsesOldestPaste()
+    {
+        Assert.That(Mappings.MapUserCreatedAt(1609459200),
+            Is.EqualTo(new DateTime(2021, 1, 1, 0, 0, 0, DateTimeKind.Utc)));
+    }
+
+    [TestCase(null)]
+    [TestCase(0L)]   // a few hand-made v2 pastes have createdAt = 0
+    [TestCase(-1L)]
+    public void MapUserCreatedAt_NoValidPaste_FallsBackToV2AccountsLaunch(long? oldestPasteCreatedAt)
+    {
+        Assert.That(Mappings.MapUserCreatedAt(oldestPasteCreatedAt), Is.EqualTo(Mappings.V2AccountsLaunch));
     }
 
     [Test]

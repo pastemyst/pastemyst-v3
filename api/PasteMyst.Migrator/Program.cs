@@ -128,6 +128,12 @@ async Task MigrateUsers(ObjectId defaultAvatarId)
 
     var unmappedDefaultLanguages = new Dictionary<string, int>();
 
+    // v2 has no join date for users, so the oldest paste they own stands in for it.
+    var oldestPasteByOwner = pastesV2.Cast<BasePasteV2>().Concat(encryptedPastesV2)
+        .Where(p => p.OwnerId != "" && p.CreatedAt > 0)
+        .GroupBy(p => p.OwnerId)
+        .ToDictionary(g => g.Key, g => g.Min(p => p.CreatedAt));
+
     foreach (var userV2 in allUsersV2)
     {
         ObjectId avatarId = defaultAvatarId;
@@ -161,13 +167,15 @@ async Task MigrateUsers(ObjectId defaultAvatarId)
             unmappedDefaultLanguages[userV2.DefaultLang] = existingCount + 1;
         }
 
-        var userV3 = Mappings.MapUser(userV2, avatarId.ToString(), defaultLanguage);
+        var createdAt = Mappings.MapUserCreatedAt(oldestPasteByOwner.TryGetValue(userV2.Id, out var oldest) ? oldest : null);
+
+        var userV3 = Mappings.MapUser(userV2, avatarId.ToString(), defaultLanguage, createdAt);
 
         await usersV3.InsertOneAsync(userV3);
 
         var actionLog = new ActionLog
         {
-            CreatedAt = DateTime.UtcNow,
+            CreatedAt = userV3.CreatedAt,
             Type = ActionLogType.UserCreated,
             ObjectId = userV3.Id
         };

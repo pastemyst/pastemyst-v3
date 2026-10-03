@@ -14,9 +14,10 @@ namespace PasteMyst.Migrator;
 /// </summary>
 public static class Mappings
 {
-    public static User MapUser(UserV2 v2, string avatarId, string defaultLanguage) => new()
+    public static User MapUser(UserV2 v2, string avatarId, string defaultLanguage, DateTime createdAt) => new()
     {
         Id = v2.Id,
+        CreatedAt = createdAt,
         Username = v2.Username,
         AvatarId = avatarId,
         IsContributor = v2.Contributor,
@@ -44,6 +45,20 @@ public static class Mappings
     }
 
     public const string AutodetectLanguage = "Autodetect";
+
+    /// <summary>
+    /// v2.0.0 release, which introduced accounts, so no v2 user can be older than this.
+    /// </summary>
+    public static readonly DateTime V2AccountsLaunch = new(2020, 11, 3, 0, 0, 0, DateTimeKind.Utc);
+
+    /// <summary>
+    /// v2 never stored when a user joined, so use their oldest paste (unix seconds) as the join date.
+    /// Users without pastes (or only with invalid timestamps) get <see cref="V2AccountsLaunch"/>.
+    /// </summary>
+    public static DateTime MapUserCreatedAt(long? oldestPasteCreatedAt) =>
+        oldestPasteCreatedAt is > 0
+            ? DateTimeOffset.FromUnixTimeSeconds(oldestPasteCreatedAt.Value).UtcDateTime
+            : V2AccountsLaunch;
 
     public static Pasty MapPasty(PastyV2 v2) => new()
     {
