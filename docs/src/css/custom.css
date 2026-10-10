@@ -27,3 +27,178 @@
   --ifm-color-primary-lightest: #f59b51;
   --ifm-background-color: #141414;
 }
+
+/* PasteMyst palette, matching the app (cards, borders, muted text) */
+:root {
+  --pm-card-bg: #ffffff;
+  --pm-border: #d6d6d6;
+  --pm-muted: #6f716d;
+}
+
+[data-theme='dark'] {
+  --pm-card-bg: #1c1c1c;
+  --pm-border: #2c2c2c;
+  --pm-muted: #8f8f8f;
+}
+
+/* Dark scrollbars and form controls in dark mode (otherwise e.g. code block scrollbars are white) */
+[data-theme='dark'] {
+  color-scheme: dark;
+  scrollbar-color: #3a3a3a transparent;
+}
+
+[data-theme='dark'] pre {
+  scrollbar-color: #3a3a3a transparent;
+}
+
+/* The logo is white; make it visible on the light navbar */
+[data-theme='light'] .navbar__logo img {
+  filter: invert(1);
+}
+
+/* Footer in the site's own colours instead of Infima's blue-grey */
+.footer--dark {
+  --ifm-footer-background-color: var(--pm-card-bg);
+  --ifm-footer-color: var(--ifm-font-color-base);
+  --ifm-footer-link-color: var(--ifm-font-color-base);
+  --ifm-footer-title-color: var(--ifm-heading-color);
+  border-top: 1px solid var(--pm-border);
+}
+
+.footer__copyright {
+  color: var(--pm-muted);
+  font-size: 0.875rem;
+}
+
+/* ---------- Blog ---------- */
+
+/* Post list (also tag and author pages): each post is a card */
+:is(.blog-list-page, .blog-tags-post-list-page, .blog-authors-posts-page) main article {
+  background: var(--pm-card-bg);
+  border: 1px solid var(--pm-border);
+  border-radius: 8px;
+  padding: 1.5rem 1.75rem 1.25rem;
+  margin-bottom: 1.5rem !important;
+}
+
+:is(.blog-list-page, .blog-tags-post-list-page, .blog-authors-posts-page) main article header h2 {
+  font-size: 1.6rem;
+  line-height: 1.3;
+  margin-bottom: 0.25rem;
+}
+
+:is(.blog-list-page, .blog-tags-post-list-page, .blog-authors-posts-page) main article header h2 a {
+  color: var(--ifm-heading-color);
+}
+
+:is(.blog-list-page, .blog-tags-post-list-page, .blog-authors-posts-page) main article header h2 a:hover {
+  color: var(--ifm-color-primary);
+  text-decoration: none;
+}
+
+/* In the list just the author's avatar and name; the full author block is on the post page */
+:is(.blog-list-page, .blog-tags-post-list-page) main article header [class*='authorTitle_'],
+:is(.blog-list-page, .blog-tags-post-list-page) main article header [class*='authorSocials_'] {
+  display: none;
+}
+
+:is(.blog-list-page, .blog-tags-post-list-page) main article header .avatar {
+  align-items: center;
+  margin-bottom: 0 !important;
+}
+
+/* "Read more" sits under the excerpt, inside the card */
+:is(.blog-list-page, .blog-tags-post-list-page, .blog-authors-posts-page) main article footer {
+  margin-top: 0.75rem !important;
+}
+
+:is(.blog-list-page, .blog-tags-post-list-page, .blog-authors-posts-page) main article footer .col {
+  text-align: left !important;
+}
+
+:is(.blog-list-page, .blog-tags-post-list-page, .blog-authors-posts-page) main article footer a::after {
+  content: ' →';
+}
+
+:is(.blog-list-page, .blog-tags-post-list-page, .blog-authors-posts-page) main article .markdown > :last-child {
+  margin-bottom: 0;
+}
+
+/* Single post: a readable title size */
+.blog-post-page main article header h1 {
+  font-size: 2.25rem;
+  line-height: 1.25;
+  margin-bottom: 0.5rem;
+}
+
+/* Date and reading time: small and muted */
+.blog-wrapper main article header [class*='container_'] {
+  color: var(--pm-muted);
+  font-size: 0.875rem;
+  margin: 0.25rem 0 0.75rem !important;
+}
+
+/* Author: compact, on one line with the post meta */
+.blog-wrapper main article header .avatar__photo {
+  width: 2rem;
+  height: 2rem;
+}
+
+.blog-wrapper main article header .avatar__name {
+  font-size: 0.9rem;
+}
+
+.blog-wrapper main article header [class*='authorTitle_'] {
+  color: var(--pm-muted);
+}
+
+.blog-wrapper main article header .row {
+  margin-top: 0 !important;
+  margin-bottom: 0.75rem !important;
+}
+
+/* Single post: separate the header from the content, and the "edit" link from the end */
+.blog-post-page main article header {
+  border-bottom: 1px solid var(--pm-border);
+  margin-bottom: 1.5rem;
+}
+
+.blog-post-page main article footer {
+  border-top: 1px solid var(--pm-border);
+  padding-top: 1rem;
+  margin-top: 2rem !important;
+}
+
+.blog-post-page main article footer a {
+  color: var(--pm-muted);
+  font-size: 0.875rem;
+}
+
+/* Sidebar: quiet year headings, the current post highlighted */
+.blog-wrapper [class*='sidebarItemTitle_'] {
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--pm-muted);
+}
+
+.blog-wrapper [class*='yearGroupHeading_'] {
+  font-size: 0.8rem;
+  color: var(--pm-muted);
+  margin: 1rem 0 0.5rem;
+}
+
+.blog-wrapper [class*='sidebarItemLink_'] {
+  color: var(--ifm-font-color-base);
+  font-size: 0.9rem;
+}
+
+.blog-wrapper [class*='sidebarItemLinkActive_'] {
+  color: var(--ifm-color-primary) !important;
+}
+
+/* Previous/next post links as cards */
+.blog-wrapper .pagination-nav__link {
+  background: var(--pm-card-bg);
+  border-color: var(--pm-border);
+}
