@@ -10,7 +10,6 @@ using PasteMyst.Web.Exceptions;
 using PasteMyst.Web.Models;
 using PasteMyst.Web.Models.Auth;
 using PasteMyst.Web.Utils;
-using System.Diagnostics;
 using PasteMyst.Web.Models.V2;
 
 namespace PasteMyst.Web.Services;
@@ -774,31 +773,23 @@ public class PasteService(
 
     private async Task<Paste> DecryptPasteV2(EncryptedPaste encryptedPaste, string encryptionKey)
     {
-        var processStartInfo = new ProcessStartInfo
+        DecryptedPasteDataV2 decryptedPasteDataV2;
+
+        try
         {
-            FileName = "pastemyst-decryptor",
-            Arguments = $"{encryptedPaste.EncryptedData} {encryptedPaste.Iv} {encryptedPaste.Salt} {encryptionKey}",
-            RedirectStandardOutput = true,
-            UseShellExecute = false,
-            CreateNoWindow = true
-        };
+            // scrypt with v2's parameters takes a while and ~512 MB, keep it off the request thread
+            var json = await Task.Run(() => V2Decryptor.Decrypt(encryptedPaste.EncryptedData, encryptedPaste.Iv,
+                encryptedPaste.Salt, encryptionKey));
 
-        using var process = new Process { StartInfo = processStartInfo };
-        process.Start();
-
-        using var reader = process.StandardOutput;
-        var output = await reader.ReadToEndAsync();
-        process.WaitForExit();
-
-        if (process.ExitCode != 0)
+            decryptedPasteDataV2 = JsonSerializer.Deserialize<DecryptedPasteDataV2>(json, new JsonSerializerOptions
+            {
+                PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+            });
+        }
+        catch (Exception e) when (e is CryptographicException or JsonException)
         {
             throw new HttpException(HttpStatusCode.BadRequest, "Invalid encryption key.");
         }
-
-        var decryptedPasteDataV2 = JsonSerializer.Deserialize<DecryptedPasteDataV2>(output.Trim(), new JsonSerializerOptions
-        {
-            PropertyNamingPolicy = JsonNamingPolicy.CamelCase
-        });
 
         var decryptedPasteData = new DecryptedPasteData
         {

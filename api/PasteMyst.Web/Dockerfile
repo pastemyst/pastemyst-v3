@@ -22,19 +22,6 @@ RUN cp node_modules/@vscode/vscode-languagedetection/model/model.json .
 RUN cp node_modules/@vscode/vscode-languagedetection/model/group1-shard1of1.bin .
 RUN bun build index.ts --compile --outfile dist/guesslang-bun --assets model.json group1-shard1of1.bin
 
-# Build pastemyst-decryptor
-FROM dlang2/dmd-ubuntu:2.096.1 AS pastemyst-decryptor-build
-
-RUN apt-get update && apt-get install -y git libscrypt-dev
-
-WORKDIR /pastemyst-decryptor
-
-RUN git clone --recurse-submodules https://github.com/pastemyst/pastemyst-decryptor.git .
-
-ENV DC=dmd
-
-RUN dub build --build=release
-
 FROM mcr.microsoft.com/dotnet/aspnet:8.0-alpine AS runtime
 WORKDIR /publish
 
@@ -46,15 +33,5 @@ EXPOSE 8080
 # Copy guesslang-bun binary from build stage, and make it executable
 COPY --from=guesslang-build /guesslang-bun/dist/guesslang-bun /bin/guesslang-bun
 RUN chmod +x /bin/guesslang-bun
-
-# Copy pastemyst-decryptor binary from build stage, and make it executable
-COPY --from=pastemyst-decryptor-build /pastemyst-decryptor/pastemyst-decryptor /bin/pastemyst-decryptor
-RUN chmod +x /bin/pastemyst-decryptor
-
-# The decryptor is built on Ubuntu (glibc) and links libscrypt, neither of which this Alpine (musl)
-# image has, so without these it fails to start and v2-encrypted pastes can't be opened.
-# Alpine has no libscrypt package, so it's copied from the build stage.
-RUN apk add --no-cache gcompat
-COPY --from=pastemyst-decryptor-build /usr/lib/libscrypt.so.0 /usr/lib/libscrypt.so.0
 
 ENTRYPOINT [ "dotnet", "PasteMyst.Web.dll" ]
