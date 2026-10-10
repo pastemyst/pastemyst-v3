@@ -6,28 +6,21 @@ import type * as Preset from '@docusaurus/preset-classic';
 
 const config: Config = {
   title: 'PasteMyst Docs',
-  tagline: 'API documentation for PasteMyst',
+  tagline: 'Documentation for PasteMyst',
   favicon: 'img/favicon.ico',
 
-  // Set the production url of your site here
-  url: 'https://pastemyst.github.io/',
-  // Set the /<baseUrl>/ pathname under which your site is served
-  // For GitHub pages deployment, it is often '/<projectName>/'
+  url: 'https://docs.paste.myst.rs',
   baseUrl: '/',
 
   trailingSlash: false,
 
-  // GitHub pages deployment config.
-  // If you aren't using GitHub pages, you don't need these.
-  organizationName: 'pastemyst', // Usually your GitHub org/user name.
-  projectName: 'pastemyst-v3', // Usually your repo name.
+  // Only used by `npm run deploy` (docusaurus deploy); CI deploys via .github/workflows/deploy-docs.yml.
+  organizationName: 'pastemyst',
+  projectName: 'pastemyst-v3',
 
   onBrokenLinks: 'throw',
   onBrokenMarkdownLinks: 'warn',
 
-  // Even if you don't use internationalization, you can use this field to set
-  // useful metadata like html lang. For example, if your site is Chinese, you
-  // may want to replace "en" with "zh-Hans".
   i18n: {
     defaultLocale: 'en',
     locales: ['en'],
@@ -39,8 +32,6 @@ const config: Config = {
       {
         docs: {
           sidebarPath: './sidebars.ts',
-          // Please change this to your repo.
-          // Remove this to remove the "edit this page" links.
           editUrl:
             'https://github.com/pastemyst/pastemyst-v3/tree/main/docs',
           routeBasePath: '/'
@@ -51,11 +42,8 @@ const config: Config = {
             type: ['rss', 'atom'],
             xslt: true,
           },
-          // Please change this to your repo.
-          // Remove this to remove the "edit this page" links.
           editUrl:
             'https://github.com/pastemyst/pastemyst-v3/tree/main/docs',
-          // Useful options to enforce blogging best practices
           onInlineTags: 'warn',
           onInlineAuthors: 'warn',
           onUntruncatedBlogPosts: 'warn',
@@ -72,8 +60,7 @@ const config: Config = {
       defaultMode: 'dark',
       respectPrefersColorScheme: true
     },
-    // Replace with your project's social card
-    image: 'img/docusaurus-social-card.jpg',
+    image: 'img/pastemyst.png',
     navbar: {
       title: 'PasteMyst Docs',
       logo: {

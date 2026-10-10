@@ -147,7 +147,7 @@ Lists the names of only the popular (most commonly used) languages.
 
 ## Get a language by name
 
-Finds a language by name. For the name it will accept any of the following: name, alias, extension. A name match has the highest priority.
+Finds a language by name. For the name it will accept any of the following: name, alias, extension (without the leading dot). The matching is case-insensitive. A name match has the highest priority, otherwise the first language with a matching alias or extension is returned (in the order of the list returned by `GET /api/v3/langs`).
 
 <details>
     <summary><code>GET /api/v3/langs/<b>:name</b></code></summary>
@@ -175,6 +175,15 @@ Finds a language by name. For the name it will accept any of the following: name
         "wrap": false
     }
     ```
+
+    If no language matches, it returns `404 Not Found`:
+
+    ```json
+    {
+        "statusCode": 404,
+        "message": "The language was not found."
+    }
+    ```
 </details>
 
 ## Autodetect the language
@@ -183,6 +192,10 @@ Tries to autodetect the language of the provided content.
 
 <details>
     <summary><code>POST /api/v3/langs/autodetect</code></summary>
+
+    The request body is the content to detect, sent as a JSON string (with `Content-Type: application/json`).
+
+    If the detection fails, the `Text` language is returned.
 
     ##### Request
 

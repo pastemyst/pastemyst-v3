@@ -1,5 +1,5 @@
 ---
-sidebar_position: 8
+sidebar_position: 9
 slug: /announcements
 ---
 
@@ -14,35 +14,44 @@ Returns the most recent announcement.
 <details>
     <summary><code>GET /api/v3/announcements/latest</code></summary>
 
-    The content is actually markdown text.
+    The content is markdown text.
 
     ##### Response
 
     ```json
     {
-        "id": "hguyfnvh",
+        "id": "67c4ad25b1e8a4f5c2d3e4f6",
         "createdAt": "2025-03-02T19:06:29.538Z",
         "title": "new pastemyst release",
         "content": "a **new** pastemyst version has just been released!"
+    }
+    ```
+
+    If there are no announcements, it returns `404 Not Found`:
+
+    ```json
+    {
+        "statusCode": 404,
+        "message": "No announcements found."
     }
     ```
 </details>
 
 ## Get all announcements
 
-Returns all of the announcements.
+Returns all of the announcements, sorted from newest to oldest.
 
 <details>
     <summary><code>GET /api/v3/announcements</code></summary>
 
-    The content is actually markdown text.
+    The content is markdown text.
 
     ##### Response
 
     ```json
     [
         {
-            "id": "hguyfnvh",
+            "id": "67c4ad25b1e8a4f5c2d3e4f6",
             "createdAt": "2025-03-02T19:06:29.538Z",
             "title": "new pastemyst release",
             "content": "a **new** pastemyst version has just been released!"
@@ -58,7 +67,7 @@ Creates a new announcement to be shown on the front page. You must be logged in 
 <details>
     <summary><code>POST /api/v3/announcements</code></summary>
 
-    The content is actually markdown text.
+    The content is markdown text. Both `title` and `content` are required.
 
     ##### Request
 
@@ -66,18 +75,31 @@ Creates a new announcement to be shown on the front page. You must be logged in 
     {
         "title": "new pastemyst release",
         "content": "a **new** pastemyst version has just been released!"
+    }
+    ```
+
+    ##### Response
+
+    Status `200 OK` with an empty body.
+
+    If you're not logged in as an admin, it returns `401 Unauthorized`:
+
+    ```json
+    {
+        "statusCode": 401,
+        "message": "Only admins can create new announcements."
     }
     ```
 </details>
 
 ## Edit an announcement
 
-Edits a specific announcement. You must be logged in as an admin user to create announcements.
+Edits a specific announcement. You must be logged in as an admin user to edit announcements.
 
 <details>
     <summary><code>PATCH /api/v3/announcements/<b>:id</b></code></summary>
 
-    The content is actually markdown text.
+    The content is markdown text. Both `title` and `content` are required, and both are replaced.
 
     ##### Request
 
@@ -87,15 +109,38 @@ Edits a specific announcement. You must be logged in as an admin user to create 
         "content": "a **new** pastemyst version has just been released!"
     }
     ```
-</details>
 
+    ##### Response
+
+    Status `200 OK` with an empty body.
+
+    If you're not logged in as an admin, it returns `401 Unauthorized`:
+
+    ```json
+    {
+        "statusCode": 401,
+        "message": "Only admins can edit announcements."
+    }
+    ```
+</details>
 
 ## Delete an announcement
 
-Deletes a single announcement. You must be logged in as an admin user to create announcements.
+Deletes a single announcement. You must be logged in as an admin user to delete announcements.
 
 <details>
-    <summary><code>DELET /api/v3/announcements/<b>:id</b></code></summary>
+    <summary><code>DELETE /api/v3/announcements/<b>:id</b></code></summary>
 
-    The content is actually markdown text.
+    ##### Response
+
+    Status `200 OK` with an empty body.
+
+    If you're not logged in as an admin, it returns `401 Unauthorized`:
+
+    ```json
+    {
+        "statusCode": 401,
+        "message": "Only admins can delete announcements."
+    }
+    ```
 </details>

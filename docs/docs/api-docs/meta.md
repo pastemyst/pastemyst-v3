@@ -82,47 +82,56 @@ Returns the list of all releases ever released on PasteMyst, along with their ow
 
 ## Get the PasteMyst stats
 
-Returns the stats of active/total pastes and active/total users on PasteMyst over time.
+Returns the number of active/total pastes and active/total users, along with weekly paste stats.
 
 <details>
     <summary><code>GET /api/v3/meta/stats</code></summary>
+
+    The stats are calculated from the action log (paste created/deleted/expired and user created/deleted events), so `activePastes` can differ slightly from the count returned by `/api/v3/meta/active_pastes`, which counts the paste documents currently stored (including encrypted pastes).
+
+    `weeklyPasteStats` contains one entry per ISO week that had any paste activity, sorted from oldest to newest. Weeks without any activity are left out. Each entry contains:
+
+    - `date` - the Monday of the ISO week
+    - `created` - number of pastes created that week
+    - `deleted` - number of pastes deleted that week
+    - `expired` - number of pastes that expired that week
+    - `total` - cumulative number of pastes created up to and including that week
+    - `active` - cumulative number of active pastes (created minus deleted minus expired) up to and including that week
 
     ##### Response
 
     ```json
     {
-        "activePastes": 12,
-        "activePastesOverTime": {
-            "2025-03-02T19:05:22.577Z": 1,
-            "2025-03-02T19:06:09.023Z": 2,
-            "2025-03-02T19:06:20.357Z": 3,
-            "2025-03-17T19:31:19.782Z": 4,
-            "2025-03-17T19:45:12.127Z": 5,
-            "2025-03-18T16:14:33.872Z": 6,
-            "2025-03-24T10:39:40.183Z": 7,
-            "2025-03-24T10:45:09.287Z": 8,
-            "2025-03-26T18:04:32.714Z": 9,
-            "2025-03-26T18:23:18.942Z": 10,
-            "2025-03-31T08:56:34.635Z": 11,
-            "2025-04-22T21:22:32.762Z": 12
-        },
-        "activeUsers": 1,
+        "activePastes": 10,
         "totalPastes": 12,
-        "totalPastesOverTime": {
-            "2025-03-02T19:05:22.577Z": 1,
-            "2025-03-02T19:06:09.023Z": 2,
-            "2025-03-02T19:06:20.357Z": 3,
-            "2025-03-17T19:31:19.782Z": 4,
-            "2025-03-17T19:45:12.127Z": 5,
-            "2025-03-18T16:14:33.872Z": 6,
-            "2025-03-24T10:39:40.183Z": 7,
-            "2025-03-24T10:45:09.287Z": 8,
-            "2025-03-26T18:04:32.714Z": 9,
-            "2025-03-26T18:23:18.942Z": 10,
-            "2025-03-31T08:56:34.635Z": 11,
-            "2025-04-22T21:22:32.762Z": 12
-        },
-        "totalUsers": 1
+        "activeUsers": 1,
+        "totalUsers": 1,
+        "weeklyPasteStats": [
+            {
+                "date": "2025-02-24T00:00:00Z",
+                "created": 3,
+                "deleted": 0,
+                "expired": 0,
+                "total": 3,
+                "active": 3
+            },
+            {
+                "date": "2025-03-17T00:00:00Z",
+                "created": 3,
+                "deleted": 1,
+                "expired": 0,
+                "total": 6,
+                "active": 5
+            },
+            {
+                "date": "2025-03-24T00:00:00Z",
+                "created": 6,
+                "deleted": 0,
+                "expired": 1,
+                "total": 12,
+                "active": 10
+            }
+        ]
     }
     ```
 </details>

@@ -1,5 +1,5 @@
 ---
-sidebar_position: 7
+sidebar_position: 8
 slug: /images
 ---
 
@@ -16,5 +16,14 @@ Returns an image based on its ID. To get the user's avatar, use the `avatarId` f
 
     ##### Response
 
-    The image.
+    The raw image bytes. The `Content-Type` header is set to the stored image's type (e.g. `image/png`).
+
+    If the image doesn't exist (or the ID is malformed), it returns `404 Not Found`:
+
+    ```json
+    {
+        "statusCode": 404,
+        "message": "Image not found."
+    }
+    ```
 </details>

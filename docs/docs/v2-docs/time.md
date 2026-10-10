@@ -16,6 +16,8 @@ Converts an `expiresIn` value to a specific time when a paste should expire.
 
     List of possible `expiresIn` value: `never`, `1h`, `2h`, `10h`, `1d`, `2d`, `1w`, `1m`, `1y`.
 
+    If `expiresIn` is `never` the result is `0`.
+
     Example request: `GET /api/v2/time/expiresInToUnixTime?createdAt=1588441258&expiresIn=1w`
 
     ##### Response
@@ -25,4 +27,8 @@ Converts an `expiresIn` value to a specific time when a paste should expire.
         "result": 1589046058
     }
     ```
+
+    ##### Errors
+
+    - `400` with `"invalid expiresIn value."` if `expiresIn` isn't one of the values above
 </details>
