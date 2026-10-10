@@ -22,6 +22,12 @@ public class PasteService(
     ActionLogger actionLogger,
     MongoService mongo)
 {
+    // A v2 decryption takes ~512 MB and ~1 s (v2's scrypt parameters), wrong passwords included, so only
+    // a few may run at once server-wide. Requests wait briefly for a slot instead of piling up memory.
+    private const int MaxConcurrentV2Decryptions = 2;
+    private static readonly TimeSpan V2DecryptionSlotWait = TimeSpan.FromSeconds(10);
+    private static readonly SemaphoreSlim V2DecryptionSlots = new(MaxConcurrentV2Decryptions, MaxConcurrentV2Decryptions);
+
     public async Task<Paste> CreateAsync(PasteCreateInfo createInfo, CancellationToken cancellationToken)
     {
         switch (createInfo.Pinned)
@@ -775,6 +781,12 @@ public class PasteService(
     {
         DecryptedPasteDataV2 decryptedPasteDataV2;
 
+        if (!await V2DecryptionSlots.WaitAsync(V2DecryptionSlotWait))
+        {
+            throw new HttpException(HttpStatusCode.ServiceUnavailable,
+                "Too many encrypted pastes are being opened right now, please try again in a moment.");
+        }
+
         try
         {
             // scrypt with v2's parameters takes a while and ~512 MB, keep it off the request thread
@@ -789,6 +801,13 @@ public class PasteService(
         catch (Exception e) when (e is CryptographicException or JsonException)
         {
             throw new HttpException(HttpStatusCode.BadRequest, "Invalid encryption key.");
+        }
+        finally
+        {
+            // scrypt's 512 MB buffer is garbage now, but the GC is slow to reclaim large objects, so
+            // without this memory grows with every decryption. Collect before the next one starts.
+            GC.Collect();
+            V2DecryptionSlots.Release();
         }
 
         var decryptedPasteData = new DecryptedPasteData
