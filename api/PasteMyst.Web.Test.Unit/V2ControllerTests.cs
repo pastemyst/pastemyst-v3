@@ -1,3 +1,4 @@
+using System.Net;
 using Microsoft.Extensions.Configuration;
 using PasteMyst.Web.Controllers.V2;
 using PasteMyst.Web.Exceptions;
@@ -37,7 +38,7 @@ public sealed class V2ControllerTests
 
         Task.Run(() => _languageProvider.StartAsync(CancellationToken.None)).Wait();
 
-        _pasteController = new PasteControllerV2(_pasteService);
+        _pasteController = new PasteControllerV2(_pasteService, _userContext);
         _dataController = new DataControllerV2(_languageProvider, _pasteService);
     }
 
@@ -195,5 +196,176 @@ public sealed class V2ControllerTests
         var result = await controller.GetUser("avataruser", CancellationToken.None);
 
         Assert.That(result.AvatarUrl, Is.EqualTo("https://paste.myst.rs/api/v3/images/avatar123"));
+    }
+
+    // --- v2 parity: behaviour the v2 API had that clients may rely on ---
+
+    private async Task<PasteV2> CreateOwnedPaste(string ownerId, bool isPrivate = false, string tags = "")
+    {
+        _userContext.LoginUser(new User { Id = ownerId }, DefaultScopes);
+        var info = SimpleCreateInfo(tags);
+        return await _pasteController.CreatePaste(new PasteCreateInfoV2
+        {
+            Title = info.Title,
+            ExpiresIn = info.ExpiresIn,
+            Tags = info.Tags,
+            IsPrivate = isPrivate,
+            Pasties =
+            [
+                new PastyCreateInfoV2 { Title = "one", Language = "Text", Code = "first" },
+                new PastyCreateInfoV2 { Title = "two", Language = "Text", Code = "second" }
+            ]
+        }, CancellationToken.None);
+    }
+
+    [Test]
+    public async Task EditPaste_TitleOnly_LeavesEverythingElseUnchanged()
+    {
+        var created = await CreateOwnedPaste("editor1", isPrivate: true, tags: "a, b");
+
+        var edited = await _pasteController.EditPaste(created.Id, new PasteEditInfoV2 { Title = "renamed" }, CancellationToken.None);
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(edited.Title, Is.EqualTo("renamed"));
+            Assert.That(edited.IsPrivate, Is.True);
+            Assert.That(edited.Tags, Is.EqualTo(new[] { "a", "b" }));
+            Assert.That(edited.Pasties.Select(p => p.Code), Is.EqualTo(new[] { "first", "second" }));
+        });
+    }
+
+    [Test]
+    public async Task EditPaste_PrivacyOnly_LeavesTitleAndTagsUnchanged()
+    {
+        var created = await CreateOwnedPaste("editor2", isPrivate: true, tags: "keep");
+
+        var edited = await _pasteController.EditPaste(created.Id, new PasteEditInfoV2 { IsPrivate = false }, CancellationToken.None);
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(edited.IsPrivate, Is.False);
+            Assert.That(edited.Title, Is.EqualTo("my title"));
+            Assert.That(edited.Tags, Is.EqualTo(new[] { "keep" }));
+        });
+    }
+
+    [Test]
+    public async Task EditPaste_Pasties_EditsKeptRemovesMissingAddsEmptyId()
+    {
+        var created = await CreateOwnedPaste("editor3");
+        var first = created.Pasties[0];
+
+        var edited = await _pasteController.EditPaste(created.Id, new PasteEditInfoV2
+        {
+            Pasties =
+            [
+                new PastyEditInfoV2 { Id = first.Id, Title = first.Title, Language = "Text", Code = "edited" },
+                new PastyEditInfoV2 { Id = "", Title = "new", Language = "Text", Code = "added" }
+            ]
+        }, CancellationToken.None);
+
+        Assert.That(edited.Pasties.Select(p => p.Code), Is.EqualTo(new[] { "edited", "added" }));
+    }
+
+    [Test]
+    public async Task EditPaste_PrivateAndPublic_Returns400()
+    {
+        var created = await CreateOwnedPaste("editor4");
+
+        var e = Assert.ThrowsAsync<HttpException>(async () =>
+            await _pasteController.EditPaste(created.Id, new PasteEditInfoV2 { IsPrivate = true, IsPublic = true }, CancellationToken.None));
+
+        Assert.That(e!.Status, Is.EqualTo(HttpStatusCode.BadRequest));
+    }
+
+    [Test]
+    public async Task EditAndDelete_SomeoneElsesPaste_Return404()
+    {
+        var created = await CreateOwnedPaste("owner5");
+        _userContext.LoginUser(new User { Id = "intruder5" }, DefaultScopes);
+
+        var edit = Assert.ThrowsAsync<HttpException>(async () =>
+            await _pasteController.EditPaste(created.Id, new PasteEditInfoV2 { Title = "x" }, CancellationToken.None));
+        var delete = Assert.ThrowsAsync<HttpException>(async () => await _pasteController.DeletePaste(created.Id));
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(edit!.Status, Is.EqualTo(HttpStatusCode.NotFound));
+            Assert.That(delete!.Status, Is.EqualTo(HttpStatusCode.NotFound));
+        });
+    }
+
+    [Test]
+    public async Task EditAndDelete_NotLoggedIn_Return404()
+    {
+        var created = await CreateOwnedPaste("owner6");
+        _userContext.LogoutUser();
+
+        var edit = Assert.ThrowsAsync<HttpException>(async () =>
+            await _pasteController.EditPaste(created.Id, new PasteEditInfoV2 { Title = "x" }, CancellationToken.None));
+        var delete = Assert.ThrowsAsync<HttpException>(async () => await _pasteController.DeletePaste(created.Id));
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(edit!.Status, Is.EqualTo(HttpStatusCode.NotFound));
+            Assert.That(delete!.Status, Is.EqualTo(HttpStatusCode.NotFound));
+        });
+    }
+
+    [TestCase("Vue.js Component", "Vue")]
+    [TestCase("Plain Text", "Text")]
+    [TestCase("C#", "C#")]
+    public async Task CreatePaste_MapsV2LanguageNames(string v2Language, string expected)
+    {
+        var created = await _pasteController.CreatePaste(new PasteCreateInfoV2
+        {
+            Pasties = [new PastyCreateInfoV2 { Title = "", Language = v2Language, Code = "x" }]
+        }, CancellationToken.None);
+
+        Assert.That(created.Pasties[0].Language, Is.EqualTo(expected));
+    }
+
+    [Test]
+    public void CreatePaste_UnknownLanguage_Returns400()
+    {
+        var e = Assert.ThrowsAsync<HttpException>(async () => await _pasteController.CreatePaste(new PasteCreateInfoV2
+        {
+            Pasties = [new PastyCreateInfoV2 { Title = "", Language = "NotALanguage", Code = "x" }]
+        }, CancellationToken.None));
+
+        Assert.That(e!.Status, Is.EqualTo(HttpStatusCode.BadRequest));
+    }
+
+    [Test]
+    public void CreatePaste_AccountFeaturesWithoutAuth_Returns403()
+    {
+        var e = Assert.ThrowsAsync<HttpException>(async () =>
+            await _pasteController.CreatePaste(SimpleCreateInfo(tags: "a"), CancellationToken.None));
+
+        Assert.That(e!.Status, Is.EqualTo(HttpStatusCode.Forbidden));
+    }
+
+    [Test]
+    public void TimeController_InvalidExpiresIn_Returns400()
+    {
+        var e = Assert.Throws<HttpException>(() => new TimeControllerV2().ExpiresInToUnixTime(createdAt: 0, expiresIn: "bogus"));
+
+        Assert.That(e!.Status, Is.EqualTo(HttpStatusCode.BadRequest));
+    }
+
+    [Test]
+    public void UserController_SelfWithoutKey_Returns400()
+    {
+        var userProvider = new UserProvider(_userContext, _pasteService, _fixture.MongoService, actionLogger: null, imageService: null);
+        var controller = new UserControllerV2(userProvider, new ConfigurationBuilder().Build(), _userContext);
+
+        var self = Assert.ThrowsAsync<HttpException>(async () => await controller.GetSelf());
+        var pastes = Assert.ThrowsAsync<HttpException>(async () => await controller.GetSelfPastes());
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(self!.Status, Is.EqualTo(HttpStatusCode.BadRequest));
+            Assert.That(pastes!.Status, Is.EqualTo(HttpStatusCode.BadRequest));
+        });
     }
 }

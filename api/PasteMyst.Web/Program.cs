@@ -4,6 +4,7 @@ using Microsoft.Extensions.DependencyInjection.Extensions;
 using PasteMyst.Web.Extensions;
 using PasteMyst.Web.Jobs;
 using PasteMyst.Web.Middleware;
+using PasteMyst.Web.Models.V2;
 using PasteMyst.Web.Services;
 using Quartz;
 using Quartz.AspNetCore;
@@ -120,7 +121,11 @@ builder.Services.Configure<ApiBehaviorOptions>(options =>
     {
         var errors = context.ModelState.Values.SelectMany(x => x.Errors.Select(e => e.ErrorMessage)).ToList();
 
-        var errorResponse = new { StatusCode = HttpStatusCode.BadRequest, Message = string.Join(" ", errors) };
+        var message = string.Join(" ", errors);
+
+        object errorResponse = context.HttpContext.Request.Path.StartsWithSegments("/api/v2")
+            ? new ErrorResponseV2(message)
+            : new { StatusCode = HttpStatusCode.BadRequest, Message = message };
 
         return new ObjectResult(errorResponse)
         {

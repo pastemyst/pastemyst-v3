@@ -14,7 +14,7 @@ public class TimeControllerV2 : ControllerBase
     [HttpGet("expiresInToUnixTime")]
     public ExpiresInToUnixTimeResultV2 ExpiresInToUnixTime([FromQuery] long createdAt, [FromQuery] string expiresIn)
     {
-        ExpiresIn? expiresInEnum = ExpiresInUtils.Parse(expiresIn) ?? throw new HttpException(HttpStatusCode.NotFound, "Invalid expiresIn value.");
+        ExpiresIn? expiresInEnum = ExpiresInUtils.Parse(expiresIn) ?? throw new HttpException(HttpStatusCode.BadRequest, "invalid expiresIn value.");
 
         if (expiresInEnum == ExpiresIn.Never)
         {

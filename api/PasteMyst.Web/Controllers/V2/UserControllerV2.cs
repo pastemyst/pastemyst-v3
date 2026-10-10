@@ -42,9 +42,10 @@ public class UserControllerV2(UserProvider userProvider, IConfiguration configur
     [HttpGet("self")]
     public async Task<UserV2> GetSelf()
     {
+        // v2 answered a missing or invalid key with 400
         if (!userContext.IsLoggedIn())
         {
-            throw new HttpException(HttpStatusCode.Unauthorized, "You must be authorized to get self.");
+            throw new HttpException(HttpStatusCode.BadRequest, "invalid token.");
         }
 
         if (!userContext.HasScope(Scope.User, Scope.UserRead))
@@ -72,6 +73,11 @@ public class UserControllerV2(UserProvider userProvider, IConfiguration configur
     [HttpGet("self/pastes")]
     public async Task<List<string>> GetSelfPastes()
     {
+        if (!userContext.IsLoggedIn())
+        {
+            throw new HttpException(HttpStatusCode.BadRequest, "invalid token.");
+        }
+
         return [..(await userProvider.GetSelfOwnedPastesAsync()).OrderByDescending(p => p.CreatedAt).Select(p => p.Id)];
     }
 }
