@@ -177,13 +177,14 @@ public class UserProvider(UserContext userContext, PasteService pasteService, Mo
 
         await imageService.DeleteAsync(user.AvatarId);
 
-        await mongo.Pastes.DeleteManyAsync(p => p.OwnerId == user.Id, cancellationToken: cancellationToken);
+        // BasePastes, so encrypted pastes go too
+        await mongo.BasePastes.DeleteManyAsync(p => p.OwnerId == user.Id, cancellationToken: cancellationToken);
         await mongo.Users.DeleteOneAsync(u => u.Id == user.Id, cancellationToken: cancellationToken);
 
         // Delete all stars of this user
-        var starsFilter = Builders<Paste>.Filter.AnyEq(p => p.Stars, user.Id);
-        var starsUpdate = Builders<Paste>.Update.Pull(p => p.Stars, user.Id);
-        await mongo.Pastes.UpdateManyAsync(starsFilter, starsUpdate, cancellationToken: cancellationToken);
+        var starsFilter = Builders<BasePaste>.Filter.AnyEq(p => p.Stars, user.Id);
+        var starsUpdate = Builders<BasePaste>.Update.Pull(p => p.Stars, user.Id);
+        await mongo.BasePastes.UpdateManyAsync(starsFilter, starsUpdate, cancellationToken: cancellationToken);
 
         await actionLogger.LogActionAsync(ActionLogType.UserDeleted, user.Id);
     }
