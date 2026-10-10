@@ -46,4 +46,27 @@ public sealed class UserDeletionTests
             Assert.That(otherPaste.Stars, Is.Empty, "stars on encrypted pastes are removed");
         });
     }
+
+    [Test]
+    public async Task UnknownUsername_Returns404_ForTagsExportAndDelete()
+    {
+        var mongo = _fixture.MongoService;
+        var pasteService = new PasteService(new IdProvider(), new LanguageProvider(), _userContext, new EncryptionContext(), new ActionLogger(mongo), mongo);
+        var userProvider = new UserProvider(_userContext, pasteService, mongo, new ActionLogger(mongo), new ImageService(mongo));
+
+        var admin = new User { Id = "admin404", Username = "admin404", IsAdmin = true, UserSettings = new UserSettings(), Settings = new Settings() };
+        _userContext.LoginUser(admin, [Scope.User, Scope.Paste]);
+
+        var tags = Assert.ThrowsAsync<PasteMyst.Web.Exceptions.HttpException>(async () => await userProvider.GetTagsAsync("nobody-at-all", CancellationToken.None));
+        var export = Assert.ThrowsAsync<PasteMyst.Web.Exceptions.HttpException>(async () => await userProvider.DownloadUserData("nobody-at-all", CancellationToken.None));
+        var delete = Assert.ThrowsAsync<PasteMyst.Web.Exceptions.HttpException>(async () => await userProvider.DeleteUserAsync("nobody-at-all", CancellationToken.None));
+        _userContext.LogoutUser();
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(tags!.Status, Is.EqualTo(System.Net.HttpStatusCode.NotFound));
+            Assert.That(export!.Status, Is.EqualTo(System.Net.HttpStatusCode.NotFound));
+            Assert.That(delete!.Status, Is.EqualTo(System.Net.HttpStatusCode.NotFound));
+        });
+    }
 }

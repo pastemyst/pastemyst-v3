@@ -146,7 +146,8 @@ public class UserProvider(UserContext userContext, PasteService pasteService, Mo
         if (!userContext.IsLoggedIn())
             throw new HttpException(HttpStatusCode.Unauthorized, "You must be authorized to get your own tags.");
 
-        var user = await GetByUsernameAsync(username, cancellationToken);
+        var user = await GetByUsernameAsync(username, cancellationToken)
+            ?? throw new HttpException(HttpStatusCode.NotFound, "User not found.");
 
         if (!userContext.UserIsSelf(user))
             throw new HttpException(HttpStatusCode.Unauthorized, "You can only fetch your own tags.");
@@ -170,7 +171,8 @@ public class UserProvider(UserContext userContext, PasteService pasteService, Mo
         if (!userContext.HasScope(Scope.User))
             throw new HttpException(HttpStatusCode.Forbidden, $"Missing required scope {Scope.User.ToEnumString()}.");
 
-        var user = await GetByUsernameAsync(username, cancellationToken);
+        var user = await GetByUsernameAsync(username, cancellationToken)
+            ?? throw new HttpException(HttpStatusCode.NotFound, "User not found.");
 
         if (!userContext.UserIsSelf(user) && !userContext.Self.IsAdmin)
             throw new HttpException(HttpStatusCode.Unauthorized, "You can delete only your account.");
@@ -197,7 +199,8 @@ public class UserProvider(UserContext userContext, PasteService pasteService, Mo
         if (!userContext.HasScope(Scope.User))
             throw new HttpException(HttpStatusCode.Forbidden, $"Missing required scope {Scope.User.ToEnumString()}.");
 
-        var user = await GetByUsernameAsync(username, cancellationToken);
+        var user = await GetByUsernameAsync(username, cancellationToken)
+            ?? throw new HttpException(HttpStatusCode.NotFound, "User not found.");
 
         if (!userContext.UserIsSelf(user))
             throw new HttpException(HttpStatusCode.Unauthorized, "You can download user data only for your account.");
