@@ -1,3 +1,4 @@
+using MongoDB.Driver;
 using System.Net;
 using Microsoft.Extensions.Configuration;
 using PasteMyst.Web.Controllers.V2;
@@ -383,6 +384,27 @@ public sealed class V2ControllerTests
             Assert.That(result.ContentType, Is.EqualTo("application/octet-stream"));
             Assert.That(result.Content, Is.Empty);
         });
+    }
+
+    [TestCase("lookupuser.one", true)]   // exact
+    [TestCase("LOOKUPUSER.ONE", true)]   // case-insensitive
+    [TestCase("lookupuser", false)]      // a prefix used to match
+    [TestCase("ookupuser.on", false)]    // so did a substring
+    [TestCase("lookupuserXone", false)]  // "." used to be a wildcard
+    [TestCase("lookupuser.*", false)]
+    public async Task UserLookup_MatchesWholeNameOnly(string query, bool found)
+    {
+        if (!await _fixture.MongoService.Users.Find(u => u.Id == "lookupuser1").AnyAsync())
+        {
+            await _fixture.MongoService.Users.InsertOneAsync(new User
+            {
+                Id = "lookupuser1", Username = "lookupuser.one", UserSettings = new UserSettings(), Settings = new Settings()
+            });
+        }
+
+        var userProvider = new UserProvider(_userContext, _pasteService, _fixture.MongoService, actionLogger: null, imageService: null);
+
+        Assert.That(await userProvider.ExistsByUsernameAsync(query, CancellationToken.None), Is.EqualTo(found));
     }
 
     [Test]

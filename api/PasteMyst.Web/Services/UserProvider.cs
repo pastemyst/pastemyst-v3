@@ -1,3 +1,4 @@
+using System.Text.RegularExpressions;
 using System.Net;
 using MongoDB.Driver;
 using PasteMyst.Web.Extensions;
@@ -30,7 +31,9 @@ public class UserProvider(UserContext userContext, PasteService pasteService, Mo
 
     public async Task<User> GetByUsernameAsync(string username, CancellationToken cancellationToken)
     {
-        var filter = Builders<User>.Filter.Regex(u => u.Username, new BsonRegularExpression(username, "i"));
+        // Case-insensitive, but the whole name and literally: "Code" mustn't find "CodeMyst", "." isn't a wildcard
+        var filter = Builders<User>.Filter.Regex(u => u.Username,
+            new BsonRegularExpression($"^{Regex.Escape(username)}$", "i"));
         return await mongo.Users.Find(filter).FirstOrDefaultAsync(cancellationToken: cancellationToken);
     }
 
