@@ -1,3 +1,4 @@
+using PasteMyst.Web.Exceptions;
 using System.Security.Cryptography;
 using System.Text;
 using Microsoft.AspNetCore.Http;
@@ -17,6 +18,7 @@ namespace PasteMyst.Web.Test.Unit;
 public sealed class AuthTokenTests
 {
     private readonly DatabaseFixture _databaseFixture = new();
+    private readonly UserContext _userContext = new();
     private AuthService _authService;
 
     [OneTimeSetUp]
@@ -31,7 +33,7 @@ public sealed class AuthTokenTests
             httpClientFactory: null,
             imageService: null,
             actionLogger: null,
-            userContext: new UserContext(),
+            userContext: _userContext,
             mongo: _databaseFixture.MongoService);
     }
 
@@ -165,6 +167,33 @@ public sealed class AuthTokenTests
             Assert.That(ctx.HasScope(Scope.User), Is.False);
             Assert.That(ctx.HasScope(Scope.UserAccessTokens), Is.False);
             Assert.That(ctx.HasScope(Scope.Paste, Scope.User), Is.True, "any-match semantics");
+        });
+    }
+
+    [Test]
+    public async Task DeleteAccessToken_SomeoneElsesToken_IsNotFound_AndKept()
+    {
+        var owner = await SeedUser("tokenowner");
+        var other = await SeedUser("tokenthief");
+        await _databaseFixture.MongoService.AccessTokens.InsertOneAsync(new AccessToken
+        {
+            Id = "victim01", Token = Sha512Hex("secret"), OwnerId = owner.Id, Scopes = [Scope.Paste]
+        });
+
+        _userContext.LoginUser(other, [Scope.UserAccessTokens]);
+        var e = Assert.ThrowsAsync<HttpException>(async () => await _authService.DeleteAccessTokenForSelf("victim01", CancellationToken.None));
+
+        _userContext.LoginUser(owner, [Scope.UserAccessTokens]);
+        var stillThere = await _databaseFixture.MongoService.AccessTokens.Find(a => a.Id == "victim01").AnyAsync();
+        await _authService.DeleteAccessTokenForSelf("victim01", CancellationToken.None);
+        var deleted = !await _databaseFixture.MongoService.AccessTokens.Find(a => a.Id == "victim01").AnyAsync();
+        _userContext.LogoutUser();
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(e!.Status, Is.EqualTo(System.Net.HttpStatusCode.NotFound));
+            Assert.That(stillThere, Is.True, "another user must not be able to delete it");
+            Assert.That(deleted, Is.True, "the owner can delete it");
         });
     }
 }

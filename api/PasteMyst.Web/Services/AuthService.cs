@@ -311,14 +311,16 @@ public class AuthService(
             throw new HttpException(HttpStatusCode.Forbidden, $"Missing required scope {Scope.UserAccessTokens.ToEnumString()}.");
         }
 
-        var accessToken = await mongo.AccessTokens.Find(a => a.Id == accessTokenId).FirstOrDefaultAsync(cancellationToken: cancellationToken);
+        // Only the caller's own tokens. Someone else's token is "not found" too, so ids can't be probed.
+        var ownTokenFilter = Builders<AccessToken>.Filter.Eq(a => a.Id, accessTokenId) &
+                             Builders<AccessToken>.Filter.Eq(a => a.OwnerId, userContext.Self.Id);
 
-        if (accessToken is null)
+        var result = await mongo.AccessTokens.DeleteOneAsync(ownTokenFilter, cancellationToken);
+
+        if (result.DeletedCount == 0)
         {
             throw new HttpException(HttpStatusCode.NotFound, "Access token not found.");
         }
-
-        await mongo.AccessTokens.DeleteOneAsync(a => a.Id == accessTokenId, cancellationToken: cancellationToken);
     }
 
     private async Task<(bool, string, string, Scope[])> AccessTokenValid(string accessToken)
