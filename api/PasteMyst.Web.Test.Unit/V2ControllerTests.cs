@@ -268,6 +268,18 @@ public sealed class V2ControllerTests
     }
 
     [Test]
+    public void EditInfo_BindsPastyIdFromUnderscoreId()
+    {
+        // what ASP.NET uses for request bodies; v2 clients send "_id"
+        var json = """{"pasties":[{"_id":"keepme12","title":"t","code":"c","language":"Text"}]}""";
+
+        var info = System.Text.Json.JsonSerializer.Deserialize<PasteEditInfoV2>(json,
+            new System.Text.Json.JsonSerializerOptions(System.Text.Json.JsonSerializerDefaults.Web));
+
+        Assert.That(info!.Pasties[0].Id, Is.EqualTo("keepme12"));
+    }
+
+    [Test]
     public async Task EditPaste_PrivateAndPublic_Returns400()
     {
         var created = await CreateOwnedPaste("editor4");
