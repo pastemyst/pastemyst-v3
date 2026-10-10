@@ -75,4 +75,19 @@ public sealed class UserDeletionTests
             Assert.That(delete!.Status, Is.EqualTo(System.Net.HttpStatusCode.NotFound));
         });
     }
+
+    [TestCase("nobody-here", null)]
+    [TestCase(null, "nosuchid")]
+    [TestCase(null, null)]
+    public void UserController_GetUser_Unknown_Returns404WithUsualBody(string? username, string? id)
+    {
+        var mongo = _fixture.MongoService;
+        var pasteService = new PasteService(new IdProvider(), new LanguageProvider(), _userContext, new EncryptionContext(), new ActionLogger(mongo), mongo);
+        var controller = new PasteMyst.Web.Controllers.UserController(new UserProvider(_userContext, pasteService, mongo, new ActionLogger(mongo), new ImageService(mongo)));
+
+        // an HttpException is turned into {statusCode, message} by ExceptionMiddleware
+        var e = Assert.ThrowsAsync<PasteMyst.Web.Exceptions.HttpException>(async () => await controller.GetUser(username!, id!, CancellationToken.None));
+
+        Assert.That(e!.Status, Is.EqualTo(System.Net.HttpStatusCode.NotFound));
+    }
 }

@@ -1,3 +1,5 @@
+using PasteMyst.Web.Exceptions;
+using System.Net;
 using Microsoft.AspNetCore.Mvc;
 using PasteMyst.Web.Models;
 using PasteMyst.Web.Services;
@@ -15,7 +17,7 @@ public class UserController(UserProvider userProvider) : ControllerBase
     {
         var user = await userProvider.GetByUsernameOrIdAsync(username, id, cancellationToken);
 
-        return user is not null ? Ok(user) : NotFound();
+        return user is not null ? Ok(user) : throw new HttpException(HttpStatusCode.NotFound, "User not found.");
     }
 
     [HttpDelete("{username}")]

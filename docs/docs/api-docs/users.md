@@ -42,7 +42,7 @@ Returns a single user by username or ID.
 
     ##### Errors
 
-    - `404 Not Found` if the user doesn't exist, or if neither a username nor an `id` was given. This response doesn't use the usual v3 error body, it has ASP.NET's default "problem details" body instead (with `status`, `title`, `type` and `traceId` fields).
+    - `404 Not Found` with `User not found.` if the user doesn't exist, or if neither a username nor an `id` was given.
 </details>
 
 ## Get pastes of a user
