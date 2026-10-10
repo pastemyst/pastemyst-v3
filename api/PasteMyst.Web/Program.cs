@@ -37,7 +37,9 @@ builder.Services.AddDistributedMemoryCache();
 
 builder.Services.AddSession(options =>
 {
-    options.IdleTimeout = TimeSpan.FromSeconds(10);
+    // Only holds the OAuth state between the login redirect and the provider's callback. The user
+    // can spend a while on GitHub/GitLab (password, 2FA, approving the app) without any request here.
+    options.IdleTimeout = TimeSpan.FromMinutes(10);
     options.Cookie.HttpOnly = true;
     options.Cookie.IsEssential = true;
     options.Cookie.Name = "pastemyst-session";

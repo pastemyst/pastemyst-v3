@@ -50,9 +50,10 @@ public class AuthService(
         // Get the state string to validate the request
         var sessionState = httpContext.Session.GetString("state");
 
+        // Expired (idle timeout, API restart) or the session cookie never made it back
         if (sessionState is null)
         {
-            throw new HttpException(HttpStatusCode.InternalServerError, "Missing state session.");
+            throw new HttpException(HttpStatusCode.BadRequest, "Your login session expired, please try logging in again.");
         }
 
         httpContext.Session.Clear();
@@ -60,7 +61,7 @@ public class AuthService(
 
         if (state != sessionState)
         {
-            throw new HttpException(HttpStatusCode.BadRequest, "The OAuth states don't match.");
+            throw new HttpException(HttpStatusCode.BadRequest, "The login request didn't match, please try logging in again.");
         }
 
         var oAuthProvider = oAuthService.OAuthProviders[provider];
