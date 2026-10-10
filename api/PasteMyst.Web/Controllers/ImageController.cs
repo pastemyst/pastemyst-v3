@@ -1,3 +1,5 @@
+using PasteMyst.Web.Exceptions;
+using System.Net;
 using Microsoft.AspNetCore.Mvc;
 using PasteMyst.Web.Services;
 
@@ -10,10 +12,11 @@ public sealed class ImageController(ImageService imageService) : ControllerBase
     [HttpGet("{imageId}")]
     public async Task<IActionResult> GetImage(string imageId, CancellationToken cancellationToken)
     {
-        var imageMeta = await imageService.FindByIdAsync(imageId, cancellationToken);
-        var imageBytes = await imageService.DownloadByIdAsync(imageId, cancellationToken);
+        // Check before downloading: downloading a missing image throws
+        var imageMeta = await imageService.FindByIdAsync(imageId, cancellationToken)
+            ?? throw new HttpException(HttpStatusCode.NotFound, "Image not found.");
 
-        if (imageMeta is null || imageBytes is null) return NotFound();
+        var imageBytes = await imageService.DownloadByIdAsync(imageId, cancellationToken);
 
         return File(imageBytes, imageMeta.Metadata["Content-Type"].ToString()!);
     }

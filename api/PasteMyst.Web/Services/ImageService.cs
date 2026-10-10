@@ -21,7 +21,10 @@ public class ImageService(MongoService mongo)
 
     public async Task<GridFSFileInfo<ObjectId>> FindByIdAsync(string id, CancellationToken cancellationToken)
     {
-        var filter = Builders<GridFSFileInfo<ObjectId>>.Filter.Eq(fs => fs.Id, ObjectId.Parse(id));
+        // A malformed id simply doesn't exist
+        if (!ObjectId.TryParse(id, out var objectId)) return null;
+
+        var filter = Builders<GridFSFileInfo<ObjectId>>.Filter.Eq(fs => fs.Id, objectId);
         return await (await mongo.Images.FindAsync(filter, cancellationToken: cancellationToken)).FirstOrDefaultAsync(cancellationToken: cancellationToken);
     }
 
