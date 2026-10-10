@@ -31,7 +31,7 @@ Authorization: Bearer <token>
 
 V3 access tokens look like `<8 character id>-<secret>`.
 
-Sending just the token without `Bearer` also works (that's needed for API keys migrated from V2). Note that `Bearer` is matched case-sensitively, so `bearer <token>` won't work.
+Sending just the token without `Bearer` also works (that's needed for API keys migrated from V2). `Bearer` isn't case-sensitive, and an empty `Authorization` header is ignored.
 
 An invalid or expired token doesn't return an error, the request is just treated as if you're not logged in. So if you get an unexpected `401` or `404`, double check your token.
 

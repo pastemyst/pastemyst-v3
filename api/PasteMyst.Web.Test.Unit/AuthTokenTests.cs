@@ -196,4 +196,41 @@ public sealed class AuthTokenTests
             Assert.That(deleted, Is.True, "the owner can delete it");
         });
     }
+
+    // A missing, empty or token-less Authorization header means anonymous, never an error
+    [TestCase("")]
+    [TestCase(" ")]
+    [TestCase("Bearer")]
+    [TestCase("Bearer ")]
+    public async Task GetSelf_EmptyOrIncompleteAuthorizationHeader_IsAnonymous(string header)
+    {
+        var (user, scopes) = await _authService.GetSelfWithScopesAsync(ContextWithAuthHeader(header), CancellationToken.None);
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(user, Is.Null);
+            Assert.That(scopes, Is.Empty);
+        });
+    }
+
+    // The scheme is case-insensitive (RFC 7235), and a V2 key starting with "Bearer" is still a bare key
+    [TestCase("bearer ", "casetok1-", "lowercasesecret", "caseowner1")]
+    [TestCase("BEARER  ", "casetok2-", "uppercasesecret", "caseowner2")]
+    [TestCase("", "", "BearerLooksLikeASchemeButIsAV2Key", "caseowner3")]
+    public async Task GetSelf_BearerSchemeCaseInsensitive_AndV2KeysStartingWithBearer(string prefix, string idPart, string secret, string ownerId)
+    {
+        await SeedUser(ownerId);
+        await _databaseFixture.MongoService.AccessTokens.InsertOneAsync(new AccessToken
+        {
+            // v3 tokens are hashed by their secret, v2 keys by the whole key
+            Id = idPart == "" ? ownerId + "v2" : idPart.TrimEnd('-'),
+            Token = Sha512Hex(secret),
+            OwnerId = ownerId,
+            Scopes = [Scope.Paste]
+        });
+
+        var (self, _) = await _authService.GetSelfWithScopesAsync(ContextWithAuthHeader(prefix + idPart + secret), CancellationToken.None);
+
+        Assert.That(self?.Id, Is.EqualTo(ownerId));
+    }
 }

@@ -186,20 +186,20 @@ public class AuthService(
 
         if (accessToken is null)
         {
-            string authHeader = httpContext.Request.Headers.Authorization;
+            var authHeader = httpContext.Request.Headers.Authorization.ToString().Trim();
 
-            if (authHeader is null) return (null, []);
-
-            // Need to support V3 API Bearer auth, and V2 API (which doesn't require the Bearer string to be provided)
-            if (authHeader.Contains("Bearer"))
-            {
-                accessToken = authHeader["Bearer ".Length..];
-            }
-            else if (authHeader.Length > 0)
-            {
+            // V3 uses "Bearer <token>" (the scheme is case-insensitive, RFC 7235), V2 keys are sent
+            // without a scheme. An empty header or a scheme without a token means anonymous.
+            // (only "Bearer " with a space, so a V2 key that happens to start with "Bearer" stays intact)
+            if (authHeader.Equals("Bearer", StringComparison.OrdinalIgnoreCase))
+                accessToken = "";
+            else if (authHeader.StartsWith("Bearer ", StringComparison.OrdinalIgnoreCase))
+                accessToken = authHeader["Bearer ".Length..].Trim();
+            else
                 accessToken = authHeader;
-            }
         }
+
+        if (string.IsNullOrEmpty(accessToken)) return (null, []);
 
         var (valid, _, userId, scopes) = await AccessTokenValid(accessToken);
 
