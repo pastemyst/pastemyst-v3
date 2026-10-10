@@ -182,6 +182,7 @@ public class UserProvider(UserContext userContext, PasteService pasteService, Mo
         // BasePastes, so encrypted pastes go too
         await mongo.BasePastes.DeleteManyAsync(p => p.OwnerId == user.Id, cancellationToken: cancellationToken);
         await mongo.Users.DeleteOneAsync(u => u.Id == user.Id, cancellationToken: cancellationToken);
+        await mongo.AccessTokens.DeleteManyAsync(t => t.OwnerId == user.Id, cancellationToken);
 
         // Delete all stars of this user
         var starsFilter = Builders<BasePaste>.Filter.AnyEq(p => p.Stars, user.Id);

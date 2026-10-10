@@ -320,7 +320,7 @@ Deletes a single user. You must be logged in as your own user, or as an admin.
 <details>
     <summary><code>DELETE /api/v3/users/<b>:username</b></code></summary>
 
-    This will also delete the user's avatar and all of their pastes (including encrypted ones), and remove all of the stars they gave to other pastes.
+    This will also delete the user's avatar, all of their pastes (including encrypted ones) and access tokens, and remove all of the stars they gave to other pastes.
 
     ##### Required scope
 

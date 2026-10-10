@@ -27,6 +27,8 @@ public sealed class UserDeletionTests
 
         await mongo.Pastes.InsertOneAsync(new Paste { Id = "leaverp1", OwnerId = user.Id, Pasties = [] });
         await mongo.EncryptedPastes.InsertOneAsync(new EncryptedPaste { Id = "leavere1", OwnerId = user.Id, EncryptedData = "", Iv = "", Salt = "" });
+        await mongo.AccessTokens.InsertOneAsync(new AccessToken { Id = "leavtok1", Token = "x", OwnerId = user.Id, Scopes = [Scope.Paste] });
+        await mongo.AccessTokens.InsertOneAsync(new AccessToken { Id = "keeptok1", Token = "y", OwnerId = "someone", Scopes = [Scope.Paste] });
         // someone else's encrypted paste, starred by the user
         await mongo.EncryptedPastes.InsertOneAsync(new EncryptedPaste { Id = "otherse1", OwnerId = "someone", Stars = [user.Id], EncryptedData = "", Iv = "", Salt = "" });
 
@@ -39,11 +41,15 @@ public sealed class UserDeletionTests
 
         var ownPastesLeft = await mongo.BasePastes.CountDocumentsAsync(p => p.OwnerId == user.Id);
         var otherPaste = await mongo.BasePastes.Find(p => p.Id == "otherse1").FirstAsync();
+        var ownTokensLeft = await mongo.AccessTokens.CountDocumentsAsync(t => t.OwnerId == user.Id);
+        var otherTokenKept = await mongo.AccessTokens.Find(t => t.Id == "keeptok1").AnyAsync();
 
         Assert.Multiple(() =>
         {
             Assert.That(ownPastesLeft, Is.Zero, "unencrypted and encrypted pastes are deleted");
             Assert.That(otherPaste.Stars, Is.Empty, "stars on encrypted pastes are removed");
+            Assert.That(ownTokensLeft, Is.Zero, "the user's access tokens are deleted");
+            Assert.That(otherTokenKept, Is.True, "other users' tokens stay");
         });
     }
 
