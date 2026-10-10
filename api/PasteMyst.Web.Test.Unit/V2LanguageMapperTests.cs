@@ -74,4 +74,27 @@ public sealed class V2LanguageMapperTests
             }
         });
     }
+
+    [TestCase("Text", "Plain Text")]
+    [TestCase("Vue", "Vue.js Component")]
+    [TestCase("TSX", "TypeScript-JSX")]
+    [TestCase("INI", "Properties files")]
+    [TestCase("Public Key", "PGP")]
+    [TestCase("Assembly", "Assembly")]   // its only v2 source was Z80, wrong for other pastes
+    [TestCase("C#", "C#")]
+    [TestCase("MQL5", "MQL5")]           // unknown to v2, nothing to map to
+    public void ToV2Name_MapsV3OnlyNamesBack(string v3Name, string expected)
+    {
+        Assert.That(V2LanguageMapper.ToV2Name(v3Name), Is.EqualTo(expected));
+    }
+
+    [TestCase("Text")]
+    [TestCase("Vue")]
+    [TestCase("TSX")]
+    [TestCase("INI")]
+    [TestCase("Public Key")]
+    public void ToV2Name_RoundTripsThroughMapLanguage(string v3Name)
+    {
+        Assert.That(V2LanguageMapper.MapLanguage(V2LanguageMapper.ToV2Name(v3Name)), Is.EqualTo(v3Name));
+    }
 }

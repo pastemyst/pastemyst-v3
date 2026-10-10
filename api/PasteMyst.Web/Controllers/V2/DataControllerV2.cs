@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using PasteMyst.Web.Models.V2;
 using PasteMyst.Web.Services;
+using PasteMyst.Web.Utils;
 
 namespace PasteMyst.Web.Controllers.V2;
 
@@ -11,12 +12,14 @@ public class DataControllerV2(LanguageProvider languageProvider, PasteService pa
     [HttpGet("language")]
     public LanguageV2 GetLanguageByName([FromQuery] string name)
     {
-        var lang = languageProvider.FindByName(name);
+        // accepts v2 names too (Plain Text, Vue.js Component, ...)
+        var lang = languageProvider.FindByName(
+            name.Equals("autodetect", StringComparison.OrdinalIgnoreCase) ? name : V2LanguageMapper.MapLanguage(name));
 
         return new LanguageV2
         {
             Color = lang.Color,
-            Name = lang.Name,
+            Name = V2LanguageMapper.ToV2Name(lang.Name),
             Ext = [..lang.Extensions.Select(ext => ext[1..])],
             Mimes = [lang.CodemirrorMimeType],
             Mode = lang.CodemirrorMode
@@ -31,7 +34,7 @@ public class DataControllerV2(LanguageProvider languageProvider, PasteService pa
         return new LanguageV2
         {
             Color = lang.Color,
-            Name = lang.Name,
+            Name = V2LanguageMapper.ToV2Name(lang.Name),
             Ext = [..lang.Extensions.Select(ext => ext[1..])],
             Mimes = [lang.CodemirrorMimeType],
             Mode = lang.CodemirrorMode

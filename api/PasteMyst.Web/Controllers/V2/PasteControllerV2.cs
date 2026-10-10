@@ -136,7 +136,7 @@ public class PasteControllerV2(PasteService pasteService, UserContext userContex
     }
 
     [HttpDelete("{id}")]
-    public async Task DeletePaste(string id)
+    public async Task<ContentResult> DeletePaste(string id)
     {
         if (!userContext.IsLoggedIn()) throw new HttpException(HttpStatusCode.NotFound, "Not Found");
 
@@ -148,6 +148,10 @@ public class PasteControllerV2(PasteService pasteService, UserContext userContex
         {
             throw new HttpException(HttpStatusCode.NotFound, "Not Found");
         }
+
+        // What v2 (vibe.d) sent for a void method: 200, empty body, application/octet-stream.
+        // Some clients read the Content-Type of every response and fail without one.
+        return new ContentResult { StatusCode = StatusCodes.Status200OK, ContentType = "application/octet-stream", Content = "" };
     }
 
     private static List<string> ParseTags(string tags) =>
@@ -180,7 +184,7 @@ public class PasteControllerV2(PasteService pasteService, UserContext userContex
         {
             Id = pasty.Id,
             Title = pasty.Title,
-            Language = pasty.Language,
+            Language = V2LanguageMapper.ToV2Name(pasty.Language),
             Code = pasty.Content
         })],
         Edits = []

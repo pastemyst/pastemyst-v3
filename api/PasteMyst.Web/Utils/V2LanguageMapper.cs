@@ -28,4 +28,19 @@ public static class V2LanguageMapper
         "PGP" => "Public Key",
         _ => language
     };
+
+    /// <summary>
+    /// Maps a v3 language name back to its v2 name, for v2 API responses. Only for v3 names that
+    /// didn't exist in v2, where v2 clients (e.g. ones parsing names into an enum) would choke.
+    /// Assembly stays Assembly: its only v2 source was Z80, which would be wrong for other pastes.
+    /// </summary>
+    public static string ToV2Name(string language) => language switch
+    {
+        "Text" => "Plain Text",
+        "Vue" => "Vue.js Component",
+        "TSX" => "TypeScript-JSX",
+        "INI" => "Properties files",
+        "Public Key" => "PGP",
+        _ => language
+    };
 }

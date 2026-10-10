@@ -5,6 +5,7 @@ using PasteMyst.Web.Extensions;
 using PasteMyst.Web.Models.Auth;
 using PasteMyst.Web.Models.V2;
 using PasteMyst.Web.Services;
+using PasteMyst.Web.Utils;
 
 namespace PasteMyst.Web.Controllers.V2;
 
@@ -13,11 +14,14 @@ namespace PasteMyst.Web.Controllers.V2;
 public class UserControllerV2(UserProvider userProvider, IConfiguration configuration, UserContext userContext) : ControllerBase
 {
     [HttpGet("{username}/exists")]
-    public async Task GetUserExists(string username, CancellationToken cancellationToken)
+    public async Task<JsonResult> GetUserExists(string username, CancellationToken cancellationToken)
     {
         var res = await userProvider.ExistsByUsernameAsync(username, cancellationToken);
 
         if (!res) throw new HttpException(HttpStatusCode.NotFound, "Not Found");
+
+        // v2 answered with the JSON string "", clients read the JSON content type
+        return new JsonResult("");
     }
 
     [HttpGet("{username}")]
@@ -33,7 +37,7 @@ public class UserControllerV2(UserProvider userProvider, IConfiguration configur
             Username = user.Username,
             AvatarUrl = $"{configuration["Host"]}/api/v3/images/{user.AvatarId}",
             PublicProfile = user.UserSettings.ShowAllPastesOnProfile,
-            DefaultLang = user.Settings.DefaultLanguage,
+            DefaultLang = V2LanguageMapper.ToV2Name(user.Settings.DefaultLanguage),
             SupporterLength = user.IsSupporter ? 1 : 0,
             Contributor = user.IsContributor
         };
@@ -65,7 +69,7 @@ public class UserControllerV2(UserProvider userProvider, IConfiguration configur
             Stars = [..(await userProvider.GetSelfStarredPastesAsync()).Select(p => p.Id)],
             AvatarUrl = $"{configuration["Host"]}/api/v3/images/{userContext.Self.AvatarId}",
             PublicProfile = userContext.Self.UserSettings.ShowAllPastesOnProfile,
-            DefaultLang = userContext.Self.Settings.DefaultLanguage,
+            DefaultLang = V2LanguageMapper.ToV2Name(userContext.Self.Settings.DefaultLanguage),
             SupporterLength = userContext.Self.IsSupporter ? 1 : 0
         };
     }

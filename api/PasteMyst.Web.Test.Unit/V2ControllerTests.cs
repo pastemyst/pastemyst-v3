@@ -312,17 +312,65 @@ public sealed class V2ControllerTests
         });
     }
 
-    [TestCase("Vue.js Component", "Vue")]
-    [TestCase("Plain Text", "Text")]
-    [TestCase("C#", "C#")]
-    public async Task CreatePaste_MapsV2LanguageNames(string v2Language, string expected)
+    // v3 stores its own name, the v2 response shows v2's (strict v2 clients parse names into an enum)
+    [TestCase("Vue.js Component", "Vue", "Vue.js Component")]
+    [TestCase("Plain Text", "Text", "Plain Text")]
+    [TestCase("C#", "C#", "C#")]
+    public async Task CreatePaste_MapsV2LanguageNamesBothWays(string v2Language, string storedV3, string returnedV2)
     {
         var created = await _pasteController.CreatePaste(new PasteCreateInfoV2
         {
             Pasties = [new PastyCreateInfoV2 { Title = "", Language = v2Language, Code = "x" }]
         }, CancellationToken.None);
 
-        Assert.That(created.Pasties[0].Language, Is.EqualTo(expected));
+        var stored = await _pasteService.GetAsync(created.Id);
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(stored.Pasties[0].Language, Is.EqualTo(storedV3));
+            Assert.That(created.Pasties[0].Language, Is.EqualTo(returnedV2));
+        });
+    }
+
+    [Test]
+    public void DataController_GetLanguageByName_AcceptsAndReturnsV2Names()
+    {
+        Assert.That(_dataController.GetLanguageByName("Plain Text").Name, Is.EqualTo("Plain Text"));
+    }
+
+    [Test]
+    public async Task UserController_Exists_ReturnsJsonEmptyString()
+    {
+        await _fixture.MongoService.Users.InsertOneAsync(new User
+        {
+            Id = "existsuser",
+            Username = "existsuser",
+            UserSettings = new UserSettings(),
+            Settings = new Settings()
+        });
+
+        var userProvider = new UserProvider(_userContext, _pasteService, _fixture.MongoService, actionLogger: null, imageService: null);
+        var controller = new UserControllerV2(userProvider, new ConfigurationBuilder().Build(), _userContext);
+
+        var result = await controller.GetUserExists("existsuser", CancellationToken.None);
+
+        // v2 answered with the JSON string "", which clients read as JSON
+        Assert.That(result.Value, Is.EqualTo(""));
+    }
+
+    [Test]
+    public async Task DeletePaste_RespondsLikeV2()
+    {
+        var created = await CreateOwnedPaste("deleter7");
+
+        var result = await _pasteController.DeletePaste(created.Id);
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(result.StatusCode, Is.EqualTo(200));
+            Assert.That(result.ContentType, Is.EqualTo("application/octet-stream"));
+            Assert.That(result.Content, Is.Empty);
+        });
     }
 
     [Test]
