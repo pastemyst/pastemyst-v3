@@ -353,6 +353,10 @@ Checks if you starred a paste. You must be logged in. All rules apply as getting
 <details>
     <summary><code>GET /api/v3/pastes/<b>:pasteId</b>/star</code></summary>
 
+    ##### Required scope
+
+    `user:read` (stars belong to your user)
+
     ##### Response
 
     A JSON boolean: `true` or `false`
@@ -360,6 +364,7 @@ Checks if you starred a paste. You must be logged in. All rules apply as getting
     ##### Errors
 
     - `401` `You must be authorized to star pastes.` - logged out
+    - `403` `Missing required scope user:read.` - the token doesn't have `user` or `user:read`
 </details>
 
 ## Star a paste
@@ -369,9 +374,14 @@ Stars a paste. If you already starred the paste, you will unstar it. You must be
 <details>
     <summary><code>POST /api/v3/pastes/<b>:pasteId</b>/star</code></summary>
 
+    ##### Required scope
+
+    `user` (stars belong to your user)
+
     ##### Errors
 
     - `401` `You must be authorized to star pastes.` - logged out
+    - `403` `Missing required scope user.` - the token doesn't have the `user` scope
 </details>
 
 ## Pin a paste

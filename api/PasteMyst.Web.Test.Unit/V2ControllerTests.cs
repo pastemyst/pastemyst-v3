@@ -484,4 +484,31 @@ public sealed class V2ControllerTests
             Assert.That(self.Stars, Does.Contain(created.Id), "stars include encrypted pastes");
         });
     }
+
+    [Test]
+    public async Task Starring_RequiresUserScope()
+    {
+        _userContext.LoginUser(new User { Id = "starscope1" }, [Scope.Paste]);
+        var created = await _pasteController.CreatePaste(SimpleCreateInfo(), CancellationToken.None);
+
+        var toggle = Assert.ThrowsAsync<HttpException>(async () => await _pasteService.ToggleStarAsync(created.Id));
+        var check = Assert.ThrowsAsync<HttpException>(async () => await _pasteService.IsStarredAsync(created.Id));
+
+        _userContext.LoginUser(new User { Id = "starscope1" }, [Scope.UserRead]);
+        var checkWithRead = await _pasteService.IsStarredAsync(created.Id);
+        var toggleWithRead = Assert.ThrowsAsync<HttpException>(async () => await _pasteService.ToggleStarAsync(created.Id));
+
+        _userContext.LoginUser(new User { Id = "starscope1" }, [Scope.User]);
+        await _pasteService.ToggleStarAsync(created.Id);
+        var starred = await _pasteService.IsStarredAsync(created.Id);
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(toggle!.Status, Is.EqualTo(HttpStatusCode.Forbidden), "paste scope alone can't star");
+            Assert.That(check!.Status, Is.EqualTo(HttpStatusCode.Forbidden), "paste scope alone can't check");
+            Assert.That(checkWithRead, Is.False, "user:read can check");
+            Assert.That(toggleWithRead!.Status, Is.EqualTo(HttpStatusCode.Forbidden), "user:read can't star");
+            Assert.That(starred, Is.True, "user scope can star");
+        });
+    }
 }

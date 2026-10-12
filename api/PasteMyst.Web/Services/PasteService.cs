@@ -281,6 +281,10 @@ public class PasteService(
         if (!userContext.IsLoggedIn())
             throw new HttpException(HttpStatusCode.Unauthorized, "You must be authorized to star pastes.");
 
+        // Stars belong to the user, not to the paste
+        if (!userContext.HasScope(Scope.User, Scope.UserRead))
+            throw new HttpException(HttpStatusCode.Forbidden, $"Missing required scope {Scope.UserRead.ToEnumString()}.");
+
         var paste = await GetAsync(id);
 
         if (paste.OwnerId is not null && paste.OwnerId == userContext.Self.Id)
@@ -298,6 +302,12 @@ public class PasteService(
         if (!userContext.IsLoggedIn())
         {
             throw new HttpException(HttpStatusCode.Unauthorized, "You must be authorized to star pastes.");
+        }
+
+        // Stars belong to the user, not to the paste
+        if (!userContext.HasScope(Scope.User))
+        {
+            throw new HttpException(HttpStatusCode.Forbidden, $"Missing required scope {Scope.User.ToEnumString()}.");
         }
 
         var paste = await GetAsync(id);
