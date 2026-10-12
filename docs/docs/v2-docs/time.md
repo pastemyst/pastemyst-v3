@@ -1,4 +1,5 @@
 ---
+description: "PasteMyst v2 API docs for time endpoints: convert an expiresIn value to a unix timestamp."
 sidebar_position: 3
 slug: /v2/time
 ---

@@ -1,4 +1,5 @@
 ---
+description: "PasteMyst v2 API docs for users: check if a user exists, get a user, and get the current user and their pastes."
 sidebar_position: 5
 slug: /v2/users
 ---

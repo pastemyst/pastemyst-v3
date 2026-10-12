@@ -1,4 +1,5 @@
 ---
+description: "PasteMyst v3 API docs for settings: browser and user settings, changing the username and the avatar."
 sidebar_position: 5
 slug: /settings
 ---

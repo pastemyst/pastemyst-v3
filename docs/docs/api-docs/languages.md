@@ -1,4 +1,5 @@
 ---
+description: "PasteMyst v3 API docs for languages: list all or popular languages, get a language by name, and autodetect a language."
 sidebar_position: 6
 slug: /languages
 ---

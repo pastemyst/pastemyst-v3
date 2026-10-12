@@ -37,9 +37,13 @@ const config: Config = {
           routeBasePath: '/'
         },
         blog: {
+          blogTitle: 'Blog',
+          blogDescription: 'News and release notes for PasteMyst, the open source pastebin.',
           showReadingTime: true,
           feedOptions: {
             type: ['rss', 'atom'],
+            title: 'PasteMyst blog',
+            description: 'News and release notes for PasteMyst, the open source pastebin.',
             xslt: true,
           },
           editUrl:
@@ -51,6 +55,10 @@ const config: Config = {
         theme: {
           customCss: './src/css/custom.css',
         },
+        sitemap: {
+          // Listing pages with nothing of their own
+          ignorePatterns: ['/blog/archive', '/blog/authors', '/blog/authors/**', '/blog/tags', '/blog/tags/**', '/blog/page/**'],
+        },
       } satisfies Preset.Options,
     ],
   ],
@@ -60,7 +68,7 @@ const config: Config = {
       defaultMode: 'dark',
       respectPrefersColorScheme: true
     },
-    image: 'img/pastemyst.png',
+    image: 'img/social-card.png',
     navbar: {
       title: 'PasteMyst Docs',
       logo: {

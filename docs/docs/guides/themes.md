@@ -1,4 +1,5 @@
 ---
+description: "How to add a new theme to PasteMyst: the site theme, the CodeMirror editor theme and the Shiki highlighting theme."
 sidebar_position: 1
 slug: /themes
 ---

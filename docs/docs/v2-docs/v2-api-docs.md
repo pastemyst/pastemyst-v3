@@ -1,4 +1,5 @@
 ---
+description: "Docs for the deprecated PasteMyst v2 API, still available through a compatibility layer, and how it differs from the original v2."
 sidebar_position: 1
 slug: /v2/api-docs
 ---

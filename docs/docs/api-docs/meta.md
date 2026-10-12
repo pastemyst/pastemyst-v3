@@ -1,4 +1,5 @@
 ---
+description: "PasteMyst v3 API docs for meta endpoints: active paste count, version, releases and stats."
 sidebar_position: 7
 slug: /meta
 ---

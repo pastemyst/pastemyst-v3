@@ -1,4 +1,5 @@
 ---
+description: "PasteMyst v3 API docs for pastes: create, get, edit, delete, star, pin and make pastes private, plus stats, history, diffs and zip downloads."
 sidebar_position: 2
 slug: /pastes
 ---

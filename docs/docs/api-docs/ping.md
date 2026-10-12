@@ -1,4 +1,5 @@
 ---
+description: "PasteMyst v3 API docs for the ping endpoint, to check if PasteMyst is up."
 sidebar_position: 10
 slug: /ping
 ---

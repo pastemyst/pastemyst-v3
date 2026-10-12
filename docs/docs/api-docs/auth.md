@@ -1,4 +1,5 @@
 ---
+description: "PasteMyst v3 API docs for authentication: get the logged in user and manage access tokens."
 sidebar_position: 4
 slug: /auth
 ---

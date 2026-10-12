@@ -1,4 +1,5 @@
 ---
+description: "PasteMyst v3 API docs for announcements: get the latest or all announcements, and manage them as an admin."
 sidebar_position: 9
 slug: /announcements
 ---

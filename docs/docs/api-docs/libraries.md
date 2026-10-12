@@ -1,4 +1,5 @@
 ---
+description: "Unofficial PasteMyst API libraries for different languages, made by the community."
 sidebar_position: 1
 slug: /libraries
 ---

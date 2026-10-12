@@ -1,4 +1,5 @@
 ---
+description: "Pastry, the command line tool for creating pastes on PasteMyst: download, setup and usage."
 sidebar_position: 2
 slug: /cli
 ---

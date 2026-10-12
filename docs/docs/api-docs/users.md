@@ -1,4 +1,5 @@
 ---
+description: "PasteMyst v3 API docs for users: get a user, their pastes, pinned pastes and tags, download user data and delete an account."
 sidebar_position: 3
 slug: /users
 ---

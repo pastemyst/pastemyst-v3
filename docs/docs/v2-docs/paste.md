@@ -1,4 +1,5 @@
 ---
+description: "PasteMyst v2 API docs for pastes: create, get, edit and delete pastes."
 sidebar_position: 4
 slug: /v2/pastes
 ---

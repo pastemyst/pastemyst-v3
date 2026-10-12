@@ -1,4 +1,5 @@
 ---
+description: "PasteMyst v3 API docs for images, like user avatars."
 sidebar_position: 8
 slug: /images
 ---

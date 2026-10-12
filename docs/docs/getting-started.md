@@ -1,4 +1,5 @@
 ---
+description: "Getting started with the PasteMyst v3 API: base URL, authorization with access tokens, scopes, errors, rate limits and encrypted pastes."
 sidebar_position: 1
 slug: /
 ---

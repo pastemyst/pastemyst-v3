@@ -1,4 +1,5 @@
 ---
+description: "PasteMyst v2 API docs for data endpoints: get a language by name or extension, and the active paste count."
 sidebar_position: 2
 slug: /v2/data
 ---
