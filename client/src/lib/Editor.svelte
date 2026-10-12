@@ -7,7 +7,7 @@
     import { Compartment, EditorState } from "@codemirror/state";
     import { getLangs, getPopularLangNames, autodetectLanguage, type Language } from "./api/lang";
     import { Close, setPreselectedCommand, setTempCommands, type Command } from "./command";
-    import { cmdPalOpen, cmdPalTitle, themeStore } from "./stores.svelte";
+    import { cmdPalOpen, cmdPalTitle, settingsStore, themeStore } from "./stores.svelte";
     import { isLanguageMarkdown } from "./utils/markdown";
     import type { IndentUnit } from "./indentation";
     import type { Settings } from "./api/settings";
@@ -55,6 +55,17 @@
     let themeCompartment = new Compartment();
 
     let shikiCompartment = new Compartment();
+    let textWrapCompartment = new Compartment();
+
+    // Text wrap can be toggled from the command palette while editing
+    $effect(() => {
+        const textWrap = settingsStore.settings?.textWrap;
+        if (textWrap === undefined || !editorView) return;
+
+        editorView.dispatch({
+            effects: textWrapCompartment.reconfigure(textWrap ? [EditorView.lineWrapping] : [])
+        });
+    });
 
     let previewEnabled = $state(false);
     let currentPreviewContent: string = $state("");
@@ -110,7 +121,7 @@
                         indentUnit.of(selectedIndentUnit === "spaces" ? " " : "\t")
                     ),
                     indentWidthCompartment.of(EditorState.tabSize.of(selectedIndentWidth)),
-                    settings.textWrap ? [EditorView.lineWrapping] : [],
+                    textWrapCompartment.of(settings.textWrap ? [EditorView.lineWrapping] : []),
                     autodetectLanguageOnPasteExtension,
                     shikiCompartment.of([])
                 ]

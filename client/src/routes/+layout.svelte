@@ -112,6 +112,16 @@
 
                     return Close.no;
                 }
+            },
+            {
+                name: "toggle text wrap",
+                action: () => {
+                    data.settings.textWrap = !data.settings.textWrap;
+
+                    updateSettings(fetch, data.settings);
+
+                    return Close.yes;
+                }
             }
         ];
 

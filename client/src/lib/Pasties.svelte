@@ -7,8 +7,8 @@
     import { isLanguageMarkdown } from "./utils/markdown";
     import { browser } from "$app/environment";
     import type { Action } from "svelte/action";
-    import { onMount, tick } from "svelte";
-    import { themeStore } from "./stores.svelte";
+    import { onMount, tick, untrack } from "svelte";
+    import { settingsStore, themeStore } from "./stores.svelte";
 
     interface Props {
         paste: Paste;
@@ -60,6 +60,23 @@
         }
 
         highlightedCode = [...highlightedCode];
+    });
+
+    // Text wrap can be toggled from the command palette; it's only a class on shiki's <pre>
+    const setTextWrapClass = (html: string, textWrap: boolean) =>
+        html.replace(/<pre class="shiki[^"]*"/g, `<pre class="shiki${textWrap ? " wrap" : ""}"`);
+
+    $effect(() => {
+        const textWrap = settingsStore.settings?.textWrap;
+        if (textWrap === undefined) return;
+
+        untrack(() => {
+            highlightedCode = highlightedCode.map((html) => setTextWrapClass(html, textWrap));
+            renderedMarkdown = renderedMarkdown.map((pasty) => ({
+                ...pasty,
+                renderedMarkdown: setTextWrapClass(pasty.renderedMarkdown, textWrap)
+            }));
+        });
     });
 
     let previewMarkdown: boolean[] = $state(paste.pasties.map(() => true));
