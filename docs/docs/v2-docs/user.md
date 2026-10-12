@@ -54,8 +54,6 @@ Returns the currently logged in user as identified by the token.
 
     `serviceIds` contains the one provider the account is linked to. Accounts migrated from V2 keep the V2 provider name (like `github`), accounts created on V3 use `GitHub` or `GitLab`.
 
-    `stars` only contains unencrypted pastes.
-
     ##### Required scope
 
     `user:read` and `paste:read` (`user` and `paste` work too, the paste scope is needed for the `stars` list)
@@ -86,7 +84,7 @@ Returns the currently logged in user as identified by the token.
 
 ## Get the current user's pastes
 
-Returns the IDs of the currently logged in user's pastes, newest first. Encrypted pastes aren't included.
+Returns the IDs of the currently logged in user's pastes (including encrypted ones), newest first.
 
 <details>
     <summary><code>GET /api/v2/user/self/pastes</code></summary>

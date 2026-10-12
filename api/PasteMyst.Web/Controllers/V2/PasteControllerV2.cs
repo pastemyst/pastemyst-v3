@@ -21,7 +21,7 @@ public class PasteControllerV2(PasteService pasteService, UserContext userContex
     [HttpGet("{id}")]
     public async Task<PasteV2> GetPaste(string id)
     {
-        return ToV2(await pasteService.GetAsync(id));
+        return ToV2(await pasteService.GetAsync(id), await pasteService.IsEncryptedAsync(id));
     }
 
     [HttpPost]
@@ -56,7 +56,8 @@ public class PasteControllerV2(PasteService pasteService, UserContext userContex
 
         try
         {
-            return ToV2(await pasteService.CreateAsync(createInfo, cancellationToken));
+            // v2 can't create encrypted pastes
+            return ToV2(await pasteService.CreateAsync(createInfo, cancellationToken), encrypted: false);
         }
         catch (LanguageNotFoundException)
         {
@@ -132,7 +133,7 @@ public class PasteControllerV2(PasteService pasteService, UserContext userContex
         if (isPrivate != paste.Private) await pasteService.TogglePrivateAsync(id);
         if (isPublic && !paste.Pinned) await pasteService.TogglePinnedAsync(id);
 
-        return ToV2(await pasteService.GetAsync(id));
+        return ToV2(await pasteService.GetAsync(id), await pasteService.IsEncryptedAsync(id));
     }
 
     [HttpDelete("{id}")]
@@ -168,8 +169,9 @@ public class PasteControllerV2(PasteService pasteService, UserContext userContex
         return V2LanguageMapper.MapLanguage(language);
     }
 
-    private static PasteV2 ToV2(Paste paste) => new()
+    private static PasteV2 ToV2(Paste paste, bool encrypted) => new()
     {
+        Encrypted = encrypted,
         Id = paste.Id,
         OwnerId = paste.OwnerId ?? "",
         Title = paste.Title,

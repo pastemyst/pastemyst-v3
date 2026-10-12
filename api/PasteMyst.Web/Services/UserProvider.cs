@@ -115,7 +115,8 @@ public class UserProvider(UserContext userContext, PasteService pasteService, Mo
         };
     }
 
-    public async Task<List<Paste>> GetSelfOwnedPastesAsync()
+    // BasePastes: encrypted pastes included (only ids and dates are used)
+    public async Task<List<BasePaste>> GetSelfOwnedPastesAsync()
     {
         if (!userContext.IsLoggedIn())
             throw new HttpException(HttpStatusCode.Unauthorized, "You must be authorized to get your own pastes.");
@@ -123,12 +124,12 @@ public class UserProvider(UserContext userContext, PasteService pasteService, Mo
         if (!userContext.HasScope(Scope.Paste, Scope.PasteRead))
             throw new HttpException(HttpStatusCode.Forbidden, $"Missing required scope {Scope.PasteRead.ToEnumString()}.");
 
-        var filter = Builders<Paste>.Filter.Eq(p => p.OwnerId, userContext.Self.Id);
+        var filter = Builders<BasePaste>.Filter.Eq(p => p.OwnerId, userContext.Self.Id);
 
-        return await mongo.Pastes.Find(filter).ToListAsync();
+        return await mongo.BasePastes.Find(filter).ToListAsync();
     }
 
-    public async Task<List<Paste>> GetSelfStarredPastesAsync()
+    public async Task<List<BasePaste>> GetSelfStarredPastesAsync()
     {
         if (!userContext.IsLoggedIn())
             throw new HttpException(HttpStatusCode.Unauthorized, "You must be authorized to get your own starred pastes.");
@@ -136,9 +137,9 @@ public class UserProvider(UserContext userContext, PasteService pasteService, Mo
         if (!userContext.HasScope(Scope.Paste, Scope.PasteRead))
             throw new HttpException(HttpStatusCode.Forbidden, $"Missing required scope {Scope.PasteRead.ToEnumString()}.");
 
-        var filter = Builders<Paste>.Filter.AnyEq(p => p.Stars, userContext.Self.Id);
+        var filter = Builders<BasePaste>.Filter.AnyEq(p => p.Stars, userContext.Self.Id);
 
-        return await mongo.Pastes.Find(filter).ToListAsync();
+        return await mongo.BasePastes.Find(filter).ToListAsync();
     }
 
     public async Task<List<string>> GetTagsAsync(string username, CancellationToken cancellationToken)

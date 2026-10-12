@@ -61,10 +61,9 @@ public class UserControllerV2(UserProvider userProvider, IConfiguration configur
         {
             Id = userContext.Self.Id,
             Username = userContext.Self.Username,
-            ServiceIds = new Dictionary<string, string>
-            {
-                { userContext.Self.ProviderName, userContext.Self.ProviderId }
-            },
+            ServiceIds = userContext.Self.ProviderName is null
+                ? []
+                : new Dictionary<string, string> { { userContext.Self.ProviderName, userContext.Self.ProviderId } },
             Contributor = userContext.Self.IsContributor,
             Stars = [..(await userProvider.GetSelfStarredPastesAsync()).Select(p => p.Id)],
             AvatarUrl = $"{configuration["Host"]}/api/v3/images/{userContext.Self.AvatarId}",

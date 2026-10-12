@@ -450,4 +450,38 @@ public sealed class V2ControllerTests
             Assert.That(pastes!.Status, Is.EqualTo(HttpStatusCode.BadRequest));
         });
     }
+
+    [Test]
+    public async Task EncryptedPaste_V2_ReportsEncrypted_AndAppearsInSelfPastesAndStars()
+    {
+        var owner = new User { Id = "encowner1", Username = "encowner1", UserSettings = new UserSettings(), Settings = new Settings() };
+        await _fixture.MongoService.Users.InsertOneAsync(owner);
+        _userContext.LoginUser(owner, DefaultScopes);
+
+        _encryptionContext.EncryptionKey = "v2-encrypted-key";
+        var created = await _pasteService.CreateAsync(new PasteCreateInfo
+        {
+            Title = "secret",
+            Encrypted = true,
+            Pasties = [new PastyCreateInfo { Title = "", Content = "hidden", Language = "Text" }]
+        }, CancellationToken.None);
+        await _pasteService.ToggleStarAsync(created.Id);
+
+        var fetched = await _pasteController.GetPaste(created.Id);
+        var plain = await _pasteController.CreatePaste(SimpleCreateInfo(), CancellationToken.None);
+        _encryptionContext.EncryptionKey = null;
+
+        var userProvider = new UserProvider(_userContext, _pasteService, _fixture.MongoService, actionLogger: null, imageService: null);
+        var userController = new UserControllerV2(userProvider, new ConfigurationBuilder().Build(), _userContext);
+        var selfPastes = await userController.GetSelfPastes();
+        var self = await userController.GetSelf();
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(fetched.Encrypted, Is.True, "an encrypted paste says so");
+            Assert.That(plain.Encrypted, Is.False);
+            Assert.That(selfPastes, Does.Contain(created.Id), "self/pastes includes encrypted pastes");
+            Assert.That(self.Stars, Does.Contain(created.Id), "stars include encrypted pastes");
+        });
+    }
 }

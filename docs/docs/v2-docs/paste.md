@@ -20,7 +20,7 @@ Returns a single paste.
 
     If you are not logged in or not logged in as the author of the paste the returned tags array will be empty.
 
-    To fetch an encrypted paste provide the encryption key in the `Encryption-Key` header. The paste is returned decrypted. The `encrypted` field in the response is always `false`.
+    To fetch an encrypted paste provide the encryption key in the `Encryption-Key` header. The paste is returned decrypted, with `encrypted` set to `true`.
 
     The `edits` array is always empty: the edit history from V2 wasn't carried over to V3, and the V3 edit history isn't exposed through the V2 API.
 
