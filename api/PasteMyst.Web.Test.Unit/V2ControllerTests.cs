@@ -531,4 +531,37 @@ public sealed class V2ControllerTests
             Assert.That(stored.Title, Is.EqualTo(""), "stored");
         });
     }
+
+    [Test]
+    public async Task V3Create_OnlyBlankTags_IsNotATaggedPaste()
+    {
+        _userContext.LogoutUser();
+
+        var created = await _pasteService.CreateAsync(new PasteCreateInfo
+        {
+            Title = "blank tags",
+            Tags = ["", "  "],
+            Pasties = [new PastyCreateInfo { Title = "", Content = "x", Language = "Text" }]
+        }, CancellationToken.None);
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(created.OwnerId, Is.Null);
+            Assert.That(created.Tags, Is.Empty);
+        });
+    }
+
+    [Test]
+    public void V3Create_RealTagWhileLoggedOut_IsStillRejected()
+    {
+        _userContext.LogoutUser();
+
+        var e = Assert.ThrowsAsync<HttpException>(async () => await _pasteService.CreateAsync(new PasteCreateInfo
+        {
+            Tags = ["", "real"],
+            Pasties = [new PastyCreateInfo { Title = "", Content = "x", Language = "Text" }]
+        }, CancellationToken.None));
+
+        Assert.That(e!.Status, Is.EqualTo(HttpStatusCode.Unauthorized));
+    }
 }

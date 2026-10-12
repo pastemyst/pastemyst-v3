@@ -50,7 +50,8 @@ public class PasteService(
                     "Can't create a private anonymous paste.");
         }
 
-        switch (createInfo.Tags.Count != 0)
+        // Blank tags are dropped when the paste is stored, so they don't make it a tagged paste
+        switch (createInfo.Tags.Any(t => !string.IsNullOrWhiteSpace(t)))
         {
             case true when !userContext.IsLoggedIn():
                 throw new HttpException(HttpStatusCode.Unauthorized,
