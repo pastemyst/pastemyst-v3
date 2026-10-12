@@ -57,7 +57,7 @@ Returns the currently logged in user as identified by the token.
 
     ##### Required scope
 
-    `user:read` and `paste:read` (`user` and `paste` work too, the paste scope is needed for the `stars` list)
+    `user:read` (`user` works too)
 
     ##### Response
 
@@ -80,7 +80,7 @@ Returns the currently logged in user as identified by the token.
     ##### Errors
 
     - `400` with `"invalid token."` if no valid token is provided
-    - `403` with `"Missing required scope user:read."` or `"Missing required scope paste:read."` if your token doesn't have the required scopes
+    - `403` with `"Missing required scope user:read."` if your token doesn't have the `user` or `user:read` scope
 </details>
 
 ## Get the current user's pastes

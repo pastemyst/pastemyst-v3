@@ -564,4 +564,20 @@ public sealed class V2ControllerTests
 
         Assert.That(e!.Status, Is.EqualTo(HttpStatusCode.Unauthorized));
     }
+
+    [Test]
+    public async Task V2Self_WithOnlyUserReadScope_IncludesStars()
+    {
+        var user = new User { Id = "selfread1", Username = "selfread1", UserSettings = new UserSettings(), Settings = new Settings() };
+        await _fixture.MongoService.Users.InsertOneAsync(user);
+        _userContext.LoginUser(user, DefaultScopes);
+        var created = await _pasteController.CreatePaste(SimpleCreateInfo(), CancellationToken.None);
+        await _pasteService.ToggleStarAsync(created.Id);
+
+        _userContext.LoginUser(user, [Scope.UserRead]);
+        var userProvider = new UserProvider(_userContext, _pasteService, _fixture.MongoService, actionLogger: null, imageService: null);
+        var self = await new UserControllerV2(userProvider, new ConfigurationBuilder().Build(), _userContext).GetSelf();
+
+        Assert.That(self.Stars, Is.EqualTo(new[] { created.Id }));
+    }
 }

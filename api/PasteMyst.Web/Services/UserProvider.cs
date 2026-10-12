@@ -137,7 +137,15 @@ public class UserProvider(UserContext userContext, PasteService pasteService, Mo
         if (!userContext.HasScope(Scope.Paste, Scope.PasteRead))
             throw new HttpException(HttpStatusCode.Forbidden, $"Missing required scope {Scope.PasteRead.ToEnumString()}.");
 
-        var filter = Builders<BasePaste>.Filter.AnyEq(p => p.Stars, userContext.Self.Id);
+        return await GetStarredPastesAsync(userContext.Self.Id);
+    }
+
+    /// <summary>
+    /// No auth or scope checks, the caller does those.
+    /// </summary>
+    public async Task<List<BasePaste>> GetStarredPastesAsync(string userId)
+    {
+        var filter = Builders<BasePaste>.Filter.AnyEq(p => p.Stars, userId);
 
         return await mongo.BasePastes.Find(filter).ToListAsync();
     }

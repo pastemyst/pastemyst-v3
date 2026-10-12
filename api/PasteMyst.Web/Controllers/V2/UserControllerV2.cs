@@ -65,7 +65,8 @@ public class UserControllerV2(UserProvider userProvider, IConfiguration configur
                 ? []
                 : new Dictionary<string, string> { { userContext.Self.ProviderName, userContext.Self.ProviderId } },
             Contributor = userContext.Self.IsContributor,
-            Stars = [..(await userProvider.GetSelfStarredPastesAsync()).Select(p => p.Id)],
+            // Stars were part of the user in v2, so user:read is enough for them
+            Stars = [..(await userProvider.GetStarredPastesAsync(userContext.Self.Id)).Select(p => p.Id)],
             AvatarUrl = $"{configuration["Host"]}/api/v3/images/{userContext.Self.AvatarId}",
             PublicProfile = userContext.Self.UserSettings.ShowAllPastesOnProfile,
             DefaultLang = V2LanguageMapper.ToV2Name(userContext.Self.Settings.DefaultLanguage),
