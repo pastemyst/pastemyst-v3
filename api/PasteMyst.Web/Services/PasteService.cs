@@ -495,7 +495,8 @@ public class PasteService(
             Pasties = [..paste.Pasties]
         };
 
-        paste.Title = editInfo.Title;
+        // An omitted title means no title, stored and returned the same way
+        paste.Title = editInfo.Title ?? "";
         paste.Pasties = [];
 
         foreach (var pasty in editInfo.Pasties)

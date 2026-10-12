@@ -511,4 +511,24 @@ public sealed class V2ControllerTests
             Assert.That(starred, Is.True, "user scope can star");
         });
     }
+
+    [Test]
+    public async Task V3Edit_WithoutTitle_StoresAndReturnsEmptyTitle()
+    {
+        _userContext.LoginUser(new User { Id = "titleless1" }, DefaultScopes);
+        var created = await _pasteController.CreatePaste(SimpleCreateInfo(), CancellationToken.None);
+
+        var edited = await _pasteService.EditAsync(created.Id, new PasteEditInfo
+        {
+            Title = null,
+            Pasties = [new PastyEditInfo { Id = created.Pasties[0].Id, Title = "pasty", Content = "x", Language = "Text" }]
+        }, CancellationToken.None);
+        var stored = await _pasteService.GetAsync(created.Id);
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(edited.Title, Is.EqualTo(""), "returned");
+            Assert.That(stored.Title, Is.EqualTo(""), "stored");
+        });
+    }
 }
