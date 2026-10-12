@@ -27,6 +27,7 @@
     import { onMount } from "svelte";
     import type { PageData } from "./$types";
     import { addToast } from "$lib/toasts.svelte";
+    import { nanoid } from "nanoid";
 
     interface Props {
         data: PageData;
@@ -37,7 +38,24 @@
 
     let selectedExpiresIn = $state(ExpiresIn.never);
 
-    let title: string = $state("");
+    // svelte-ignore state_referenced_locally
+    let title: string = $state(data.clonedPaste?.title ?? "");
+
+    // Going from one clone to another (or to the plain home page) reuses this component
+    // svelte-ignore state_referenced_locally
+    let lastCloneId = data.clonedPaste?.id;
+    $effect(() => {
+        const cloneId = data.clonedPaste?.id;
+        if (cloneId !== lastCloneId) {
+            lastCloneId = cloneId;
+            title = data.clonedPaste?.title ?? "";
+        }
+    });
+
+    // New tab ids, so the copy doesn't share ids with the original
+    let clonedPasties = $derived(
+        data.clonedPaste?.pasties.map((pasty) => ({ ...pasty, id: nanoid() })) ?? []
+    );
 
     let tags: string[] = $state([]);
 
@@ -48,7 +66,7 @@
     let encryptionKey: string = $state("");
     let creatingPaste: boolean = $state(false);
 
-    let editor: TabbedEditor;
+    let editor = $state<TabbedEditor>()!;
 
     $effect(() => {
         if (anonymous) tags = [];
@@ -199,7 +217,9 @@
     <TagInput bind:tags existingTags={data.userTags} anonymousPaste={anonymous} readonly={false} />
 {/if}
 
-<TabbedEditor settings={data.settings} bind:this={editor} />
+{#key data.clonedPaste?.id}
+    <TabbedEditor settings={data.settings} existingPasties={clonedPasties} bind:this={editor} />
+{/key}
 
 <div class="paste-options">
     <PasteOptions
