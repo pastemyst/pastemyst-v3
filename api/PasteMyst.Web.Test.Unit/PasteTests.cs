@@ -114,7 +114,8 @@ public sealed class PasteTests
 
         _userContext.LoginUser(new User { Id = "1" }, _defaultScopes);
 
-        Assert.ThrowsAsync<HttpException>(async () => await _pasteService.CreateAsync(createInfo, CancellationToken.None));
+        var e = Assert.ThrowsAsync<HttpException>(async () => await _pasteService.CreateAsync(createInfo, CancellationToken.None));
+        Assert.That(e!.Status, Is.EqualTo(HttpStatusCode.BadRequest));
 
         _userContext.LogoutUser();
     }
@@ -137,7 +138,8 @@ public sealed class PasteTests
 
         _userContext.LoginUser(new User { Id = "1" }, _defaultScopes);
 
-        Assert.ThrowsAsync<HttpException>(async () => await _pasteService.CreateAsync(createInfo, CancellationToken.None));
+        var e = Assert.ThrowsAsync<HttpException>(async () => await _pasteService.CreateAsync(createInfo, CancellationToken.None));
+        Assert.That(e!.Status, Is.EqualTo(HttpStatusCode.BadRequest));
 
         _userContext.LogoutUser();
     }

@@ -36,7 +36,7 @@ public class PasteService(
                 throw new HttpException(HttpStatusCode.Unauthorized,
                     "Can't create a pinned paste while unauthorized.");
             case true when createInfo.Private || createInfo.Anonymous:
-                throw new HttpException(HttpStatusCode.Unauthorized,
+                throw new HttpException(HttpStatusCode.BadRequest,
                     "Can't create a private or anonymous pinned paste.");
         }
 

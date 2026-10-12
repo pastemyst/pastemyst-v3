@@ -155,7 +155,7 @@ Creates a new paste.
     These are checked in this order:
 
     - `401` `Can't create a pinned paste while unauthorized.` - pinned while logged out
-    - `401` `Can't create a private or anonymous pinned paste.` - pinned and private or anonymous
+    - `400` `Can't create a private or anonymous pinned paste.` - pinned and private or anonymous
     - `401` `Can't create a private paste while unauthorized.` - private while logged out
     - `400` `Can't create a private anonymous paste.` - private and anonymous
     - `401` `Can't create a tagged paste while unauthorized.` - tags while logged out
