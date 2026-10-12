@@ -193,6 +193,15 @@
     };
 </script>
 
+<svelte:head>
+    <!-- og:url and og:image have to be absolute -->
+    <link rel="canonical" href="{page.url.origin}{page.url.pathname}" />
+    <meta property="og:url" content="{page.url.origin}{page.url.pathname}" />
+    <meta property="twitter:url" content="{page.url.origin}{page.url.pathname}" />
+    <meta property="og:image" content="{page.url.origin}/images/pastemyst.png" />
+    <meta name="twitter:image" content="{page.url.origin}/images/pastemyst.png" />
+</svelte:head>
+
 {#if page.route.id?.includes("embed")}
     {@render children()}
 {:else}

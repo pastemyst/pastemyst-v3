@@ -18,6 +18,7 @@
 </script>
 
 <svelte:head>
+    <title>pastemyst | {data.paste.title || "untitled"}</title>
     <script src="/scripts/iframeResizer.contentWindow.js"></script>
 </svelte:head>
 

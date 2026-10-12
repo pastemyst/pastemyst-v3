@@ -58,6 +58,12 @@
     };
 </script>
 
+<svelte:head>
+    <title>pastemyst | create account</title>
+    <meta property="og:title" content="pastemyst | create account" />
+    <meta property="twitter:title" content="pastemyst | create account" />
+</svelte:head>
+
 <section>
     <h2>create a new account</h2>
 

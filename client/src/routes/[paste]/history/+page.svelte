@@ -13,6 +13,15 @@
     let { data = $bindable() }: Props = $props();
 </script>
 
+<svelte:head>
+    <title>pastemyst | history of {data.paste.title || "untitled"}</title>
+    <meta property="og:title" content="pastemyst | history of {data.paste.title || 'untitled'}" />
+    <meta
+        property="twitter:title"
+        content="pastemyst | history of {data.paste.title || 'untitled'}"
+    />
+</svelte:head>
+
 <PasteHeader
     paste={data.paste}
     owner={data.owner || undefined}

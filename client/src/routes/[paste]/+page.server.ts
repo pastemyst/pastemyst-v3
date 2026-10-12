@@ -16,7 +16,7 @@ import { markedHeadingAnchorExtension } from "$lib/marked-heading-anchor";
 import { markedShikiExtension } from "$lib/marked-shiki-extension";
 import { env } from "$env/dynamic/public";
 
-export const load: PageServerLoad = async ({ params, fetch, parent, request }) => {
+export const load: PageServerLoad = async ({ params, fetch, parent, request, setHeaders }) => {
     // v2 served paste downloads at /{id}.zip, v3 serves them from the API
     if (params.paste.endsWith(".zip")) {
         redirect(301, `${env.PUBLIC_API_CLIENT_BASE}/pastes/${params.paste}`);
@@ -35,6 +35,11 @@ export const load: PageServerLoad = async ({ params, fetch, parent, request }) =
             // TODO: error handling
             error(pasteStatus);
         }
+    }
+
+    // Only the owner can see a private paste, but keep it out of search results either way
+    if (paste.private) {
+        setHeaders({ "X-Robots-Tag": "noindex" });
     }
 
     const relativeCreatedAt = formatDistanceToNow(new Date(paste.createdAt), { addSuffix: true });

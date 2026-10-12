@@ -2,6 +2,10 @@
     import { page } from "$app/state";
 </script>
 
+<svelte:head>
+    <title>pastemyst | {page.status === 404 ? "not found" : `error ${page.status}`}</title>
+</svelte:head>
+
 <section class="markdown">
     <h1>error {page.status}</h1>
 

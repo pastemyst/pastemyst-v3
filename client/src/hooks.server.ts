@@ -19,7 +19,26 @@ const highlightLimiter = new RateLimiter(
     Number(privateEnv.HIGHLIGHT_RATE_LIMIT_PER_SECOND ?? 2)
 );
 
+// Pages that shouldn't show up in search results: user-only pages, duplicates of a paste (embed,
+// history, raw) and encrypted pastes. Private pastes are handled in the paste's load function.
+const noIndexRoutes = [
+    "/settings",
+    "/login",
+    "/create-account",
+    "/internal",
+    "/raw",
+    "/[paste]/edit",
+    "/[paste]/embed",
+    "/[paste]/decrypt",
+    "/[paste]/history"
+];
+
 export const handle: Handle = async ({ event, resolve }) => {
+    const routeId = event.route.id;
+    if (routeId && noIndexRoutes.some((r) => routeId === r || routeId.startsWith(r + "/"))) {
+        event.setHeaders({ "X-Robots-Tag": "noindex" });
+    }
+
     // Sub-requests come from this server's own page loads, which the API already limits.
     if (event.url.pathname === "/internal/highlight" && !event.isSubRequest) {
         const clientAddress = getClientAddress(event);
