@@ -414,11 +414,19 @@ public class PasteService(
 
         using (var zipArchive = new ZipArchive(memoryStream, ZipArchiveMode.Create, true))
         {
+            // Pasties can share a title and language; duplicate entry names would overwrite each other
+            // when extracted. Case-insensitive because of Windows file systems.
+            var usedNames = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+
             foreach (var pasty in paste.Pasties)
             {
                 var lang = languageProvider.FindByName(pasty.Language);
+                var extension = lang.Extensions.First();
 
-                var zipEntry = zipArchive.CreateEntry(pasty.Title + lang.Extensions.First());
+                var name = pasty.Title + extension;
+                for (var i = 2; !usedNames.Add(name); i++) name = $"{pasty.Title} ({i}){extension}";
+
+                var zipEntry = zipArchive.CreateEntry(name);
 
                 await using var entryStream = zipEntry.Open();
                 await using var writer = new StreamWriter(entryStream, Encoding.UTF8);

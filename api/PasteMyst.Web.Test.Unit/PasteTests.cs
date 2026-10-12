@@ -1684,4 +1684,26 @@ public sealed class PasteTests
 
         _userContext.LogoutUser();
     }
+
+    [Test]
+    public async Task TestZip_ShouldGiveUniqueNames_WhenPastiesShareTitleAndLanguage()
+    {
+        var paste = await _pasteService.CreateAsync(new PasteCreateInfo
+        {
+            Pasties =
+            [
+                new PastyCreateInfo { Title = "a", Content = "1", Language = "Text" },
+                new PastyCreateInfo { Title = "a", Content = "2", Language = "Text" },
+                new PastyCreateInfo { Title = "A", Content = "3", Language = "Text" },
+                new PastyCreateInfo { Title = "a (2)", Content = "4", Language = "Text" }
+            ]
+        }, CancellationToken.None);
+
+        var (zip, _) = await _pasteService.GetPasteAsZip(paste.Id, CancellationToken.None);
+
+        using var archive = new System.IO.Compression.ZipArchive(new MemoryStream(zip));
+        var names = archive.Entries.Select(e => e.FullName).ToList();
+
+        Assert.That(names, Is.EqualTo(new[] { "a.txt", "a (2).txt", "A (3).txt", "a (2) (2).txt" }));
+    }
 }
